@@ -5,6 +5,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/pypi/v/domino-py?color=%231BA331&label=PyPI&logo=python&logoColor=%23F7F991%20">
+  <img alt="Helm release" src="https://img.shields.io/github/v/release/Tauffer-Consulting/domino?label=Helm&logo=Helm&logoColor=white">
   <img alt="Read the Docs" src="https://img.shields.io/readthedocs/domino-py?label=Docs&logo=Read%20the%20Docs&logoColor=white">
 </p>
 
