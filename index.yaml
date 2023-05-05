@@ -2,6 +2,23 @@ apiVersion: v1
 entries:
   domino:
   - apiVersion: v2
+    appVersion: 0.1.1
+    created: "2023-05-05T10:23:54.055019576Z"
+    dependencies:
+    - name: airflow
+      repository: https://airflow.apache.org/
+      version: 1.9.0
+    description: A Helm chart for Domino
+    digest: 977c9990eee8a3619649a16825bc987de336838ea5dfe45f9bd4095478ded340
+    home: https://github.com/Tauffer-Consulting/domino
+    name: domino
+    sources:
+    - https://github.com/Tauffer-Consulting/domino
+    type: application
+    urls:
+    - https://github.com/Tauffer-Consulting/domino/releases/download/domino-0.1.1/domino-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
     appVersion: 0.1.0
     created: "2023-05-05T09:17:48.500670242Z"
     dependencies:
@@ -18,4 +35,4 @@ entries:
     urls:
     - https://github.com/Tauffer-Consulting/domino/releases/download/domino-0.1.0/domino-0.1.0.tgz
     version: 0.1.0
-generated: "2023-05-05T09:17:48.500679342Z"
+generated: "2023-05-05T10:23:54.055029376Z"
