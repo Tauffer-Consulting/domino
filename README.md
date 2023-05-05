@@ -4,9 +4,15 @@
   <img src="./media/logo.png" width="450" title="Domino">
 </p>
 <p align="center">
-  <img src="https://img.shields.io/pypi/v/domino-py?color=%231BA331&label=PyPI&logo=python&logoColor=%23F7F991%20">
-  <img alt="Helm release" src="https://img.shields.io/github/v/release/Tauffer-Consulting/domino?label=Helm&logo=Helm&logoColor=white">
-  <img alt="Read the Docs" src="https://img.shields.io/readthedocs/domino-py?label=Docs&logo=Read%20the%20Docs&logoColor=white">
+  <a href="https://pypi.org/project/domino-py">
+    <img src="https://img.shields.io/pypi/v/domino-py?color=%231BA331&label=PyPI&logo=python&logoColor=%23F7F991%20">
+  </a>
+  <a href="https://artifacthub.io/packages/helm/domino/domino">
+    <img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/domino">
+  </a>
+  <a href="https://domino-py.readthedocs.io/en/latest/">
+    <img alt="Read the Docs" src="https://img.shields.io/readthedocs/domino-py?label=Docs&logo=Read%20the%20Docs&logoColor=white">
+  </a>
 </p>
 
 
