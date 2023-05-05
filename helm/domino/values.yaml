@@ -27,6 +27,7 @@ github_access_token_workflows: default-substitute-this-for-your-own-token
 # Airflow services override
 airflow:
   enabled: true
+  env: [{ "name": DOMINO_DEPLOY_MODE, "value": prod }]
   images:
     useDefaultImageForMigration: false
     airflow:
