@@ -1,2 +1,2 @@
-Domino backend
+Domino REST API
 ===================

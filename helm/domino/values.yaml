@@ -1,0 +1,53 @@
+# Default values for installing Domino in a K8s cluster
+
+# Frontend service
+frontend:
+  enabled: true
+  image: ghcr.io/tauffer-consulting/domino-frontend
+  tag: latest
+
+# REST service
+rest:
+  enabled: true
+  image: ghcr.io/tauffer-consulting/domino-rest
+  tag: latest
+  # Github workflows repository name - Same one used in airflow gitSync ssh
+  workflowsRepository: ~
+
+# Change this if using external Database
+database:
+  image: postgres
+  name: postgres
+  user: postgres
+  password: postgres
+
+# Airflow services override
+airflow:
+  enabled: true
+  images:
+    useDefaultImageForMigration: false
+    airflow:
+      repository: ghcr.io/tauffer-consulting/domino-airflow-base
+      tag: latest
+      pullPolicy: IfNotPresent
+
+  extraSecrets:
+    airflow-ssh-secret:
+      # github ssh private deploy key for workflow repository
+      data: |
+        gitSshKey: ~
+
+  config:
+    api:
+      auth_backends: airflow.api.auth.backend.basic_auth
+
+  # Git sync
+  dags:
+    gitSync:
+      enabled: true
+      wait: 60 # interval between git sync attempts in seconds
+      # Github workflows reposiory ssh path
+      repo: ~
+      branch: main
+      subPath: "workflows"
+      sshKeySecret: airflow-ssh-secret

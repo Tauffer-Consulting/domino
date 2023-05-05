@@ -224,7 +224,7 @@ Then we must set the github repository we want to sync.
 Environment Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Domino backend service needs access to github to be able to fetch the Pieces Repositories.
+The Domino REST API service needs access to github to be able to fetch the Pieces Repositories.
 In order to do this, we need to set the `DOMINO_GITHUB_ACCESS_TOKEN_PIECES`` (with read permission) as an environment variable:
 
 .. code-block::

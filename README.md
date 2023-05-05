@@ -5,7 +5,7 @@
 </p>
 <p align="center">
   <img src="https://img.shields.io/pypi/v/domino-py?color=%231BA331&label=PyPI&logo=python&logoColor=%23F7F991%20">
-  <img src="https://img.shields.io/readthedocs/flowui?color=%23799194&label=Docs&logo=Read%20the%20Docs&logoColor=white" >
+  <img src="https://img.shields.io/readthedocs/domino?color=%23799194&label=Docs&logo=Read%20the%20Docs&logoColor=white" >
   <img src='https://readthedocs.org/projects/domino-py/badge/?version=latest' alt='Documentation Status' />
 </p>
 

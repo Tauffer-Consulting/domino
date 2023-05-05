@@ -1,0 +1,55 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: {{ .Release.Name }}-frontend
+  labels:
+    app: {{ .Release.Name }}-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-frontend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-frontend
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-frontend
+          image: {{ .Values.frontend.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          {{- if .Values.frontend.entrypointCommand }}
+          command:
+            {{ toYaml .Values.frontend.entrypointCommand | indent 12 }}
+          args:
+            ["-c","yarn start:local"]
+          {{- end }}
+          env:
+            - name: REACT_APP_API_URL
+              value: http://domino-rest-service:8000
+          # resources:
+          #   limits:
+          #     memory: {{ .Values.frontend.memoryLimit }}
+          #     cpu: {{ .Values.frontend.cpuLimit }}
+          #   requests:
+          #     memory: {{ .Values.frontend.memoryRequest }}
+          #     cpu: {{ .Values.frontend.cpuRequest }}
+
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend-service
+spec:
+  selector:
+    app: {{ .Release.Name }}-frontend
+  ports:
+  - port: 80
+    #targetPort: 3000
+    #nodePort: 30030
+  #type: NodePort
+{{- end}}

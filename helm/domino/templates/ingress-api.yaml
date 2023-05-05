@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: domino-api-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: /api(/|$)(.*)
+        backend:
+          service:
+            name: {{ .Release.Name }}-rest-service
+            port:
+              number: 8000
+
+
