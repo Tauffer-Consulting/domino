@@ -21,6 +21,9 @@ database:
   user: postgres
   password: postgres
 
+github_access_token_pieces: default-substitute-this-for-your-own-token
+github_access_token_workflows: default-substitute-this-for-your-own-token
+
 # Airflow services override
 airflow:
   enabled: true
@@ -35,7 +38,7 @@ airflow:
     airflow-ssh-secret:
       # github ssh private deploy key for workflow repository
       data: |
-        gitSshKey: ~
+        gitSshKey: default-substitute-this-for-your-own-key
 
   config:
     api:
