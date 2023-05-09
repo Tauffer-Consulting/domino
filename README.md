@@ -18,6 +18,7 @@
 
 # Table of contents
 - [About](#about)
+- [Quick start](#quick-start)
 - [GUI](#gui)
 - [REST](#rest)
 - [Pieces](#pieces)
@@ -37,6 +38,33 @@ Creating Workflows in the GUI is as simple as dragging and dropping Pieces to th
 Every Domino Workflow corresponds to an Apache Airflow DAG, and each Piece corresponds to an Airflow task. Domino controls an Airflow instance, which is responsible for executing, scheduling and monitoring the Workflows (DAGs).
 
 Pieces are functional units that can be reused in multiple Workflows. Pieces can execute anything that can be written in Python, and can be easily distributed and installed directly from Github repositories to be used in Domino Workflows.
+
+<br>
+
+# Quick start
+
+The Domino Python package can be installed via pip. We reccommend you install Domino in a separate Python environment.
+
+```bash
+pip install domino-py
+```
+
+You can then use Domino command line interface to easily run the Domino platform locally. Go to a new, empty directory and run the following command:
+
+```bash
+domino platform run-compose
+```
+
+This is a convenience command that will:
+- Create the necessary folder structure for Domino and Airflow processes
+- Create a docker-compose.yaml file
+- Run the docker compose up command
+
+This command might take up to a few minutes to execute, since it will download and run all the necessary docker images. If everything worked as expected, after all processes started successfully you should be able to navigate to `localhost:3000` to access the Domino frontend service.
+
+Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you install Domino in a Kubernetes cluster:
+- Running Domino in a [local Kubernetes cluster with Kind](https://domino-py.readthedocs.io/en/latest/pages/platform.html)
+- Running Domino in a [remote Kubernetes cluster](https://domino-py.readthedocs.io/en/latest/pages/deployment_cloud.html)
 
 <br>
 
