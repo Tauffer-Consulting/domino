@@ -62,10 +62,9 @@ Here's a list of the main resources for Domino:
 
 |
 
-Table of contents
-~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Run Domino
 
@@ -75,6 +74,7 @@ Table of contents
 
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Pieces
 
@@ -84,6 +84,7 @@ Table of contents
 
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Domino components
 
@@ -94,6 +95,7 @@ Table of contents
 
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: API Reference
 
