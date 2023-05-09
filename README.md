@@ -96,8 +96,6 @@ The Domino frontend service is a React application that provides the GUI for eas
     <strong>Edit Pieces</strong>
   </summary>
   Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system. <br></br>
-  
-  <br></br>
 
   ![add gif]()
 
@@ -110,7 +108,6 @@ The Domino frontend service is a React application that provides the GUI for eas
   Schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
 
   ![add gif]()
-
 </details>
 
 <details>
@@ -118,8 +115,6 @@ The Domino frontend service is a React application that provides the GUI for eas
     <strong>Monitor Workflows</strong>
   </summary>
   Monitor Workflows in real time, including the status of each Piece, the logs and results of each run. <br></br>
-  
-  <br></br>
 
   ![add gif]()
 

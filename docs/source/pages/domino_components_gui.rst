@@ -3,3 +3,79 @@
 Domino GUI
 ======================
 
+The Domino frontend service is a React application that provides the GUI for easily creating, editing and monitoring Workflows. Here are some of its features:
+
+
+.. raw:: html
+
+    <details>
+        <summary>
+            <strong>Sign up and login</strong>
+        </summary>
+        <br>
+        Sign up and login to use the Domino platform. 
+        <br>
+        <img src="/_static/media/gif1.gif">
+    </details>
+    
+    <br>
+
+    <details>
+        <summary>
+            <strong>Install Pieces repositories</strong>
+        </summary>
+        <br>
+        Install bundles of Pieces to your Domino Workspaces direclty from Github repositories, and use them in your Workflows. 
+        <br>
+        <img src="/_static/media/gif1.gif">
+    </details>
+
+    <br>
+    
+    <details>
+        <summary>
+            <strong>Create Workflows</strong>
+        </summary>
+        <br>
+        Create Workflows by dragging and dropping Pieces to the canvas, and connecting them. 
+        <br>
+        <img src="/_static/media/gif1.gif">
+    </details>
+
+    <br>
+    
+    <details>
+        <summary>
+            <strong>Edit Pieces</strong>
+        </summary>
+        <br>
+        Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system.
+        <br>
+        <img src="/_static/media/gif1.gif">
+    </details>
+
+    <br>
+    
+    <details>
+        <summary>
+            <strong>Schedule Workflows</strong>
+        </summary>
+        <br>
+        Schedule Workflows to run periodically, at a specific date/time, or trigger them manually.
+        <br>
+        <img src="/_static/media/gif1.gif">
+    </details>
+
+    <br>
+    
+    <details>
+        <summary>
+            <strong>Monitor Workflows</strong>
+        </summary>
+        <br>
+        Monitor Workflows in real time, including the status of each Piece, the logs and results of each run.
+        <br>
+        <img src="/_static/media/gif1.gif">
+    </details>
+
+    <br>
