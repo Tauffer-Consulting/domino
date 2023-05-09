@@ -32,7 +32,7 @@ Domino is an open source workflow management platform, with:
 - a standard way of writing and publishing functional [Pieces](#pieces), which follows good practices for data modeling, documentation and distribution
 
 
-Creating a Workflow in the GUI is as simple as dragging and dropping Pieces to the canvas, and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
+Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas, and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
 
 Every Domino Workflow corresponds to an Apache Airflow DAG, and each Piece corresponds to an Airflow task. Domino controls an Airflow instance, which is responsible for executing, scheduling and monitoring the Workflows (DAGs).
 
@@ -65,9 +65,11 @@ The Domino frontend service is a React application that provides the GUI for eas
 
 <details>
   <summary>
-    <strong>Schedule Workflows</strong>
+    <strong>Edit Pieces</strong>
   </summary>
-  Schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
+  Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system. <br></br>
+  
+  <br></br>
 
   ![add gif]()
 
@@ -75,11 +77,9 @@ The Domino frontend service is a React application that provides the GUI for eas
 
 <details>
   <summary>
-    <strong>Edit Pieces</strong>
+    <strong>Schedule Workflows</strong>
   </summary>
-  Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system. <br></br>
-  
-  <br></br>
+  Schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
 
   ![add gif]()
 
@@ -113,7 +113,7 @@ The REST service is written in Python, using the FastAPI framework. Read more ab
 # Pieces
 Pieces are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
 
-- can execute anything that can be written in Python
+- can execute anything written in Python, heavy-weight (e.g. Machine Learning) as well as light-weight (e.g. sending emails) tasks
 - have well defined data models for inputs, outputs and secrets
 - run in isolated execution environments (Docker containers)
 - are organized in repositories, for easy distribution and installation

@@ -1,3 +1,5 @@
+.. _domino-rest-page:
+
 Domino REST API
 ===================
 

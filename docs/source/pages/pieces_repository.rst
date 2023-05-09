@@ -1,9 +1,11 @@
+.. _domino-pieces-repo-page:
+
 Pieces repository
 ================================
 
-
 .. tip:: The easiest way to start your Pieces repository is to use our `Template for Pieces repository <https://github.com/Tauffer-Consulting/domino_pieces_repository_template>`_
 
+A Pieces repository is a Git repository that contains multiple Pieces available to be used in Domino Workflows.
 A Domino Pieces repository should contain:
 
 - a :code:`dependencies` folder with all :code:`Dockerfile` and :code:`requirements.txt` files defined as Pieces dependencies
@@ -114,7 +116,8 @@ When using Domino convenience CLI functions to prepare your code repository to r
 - A :code:`dependencies_map.json` file will be created at 
 - A :code:`compiled_metadata.json` file will be created at :code:`/.domino/`
 
-.. tip:: Using our `Template for Pieces repository <https://github.com/Tauffer-Consulting/domino_pieces_repository_template>`_ will automatically run :code:`domino organize` (with Github actions) for every commit to :code:`main` branch. See more blow.
+.. tip:: Using our `Template for Pieces repository <https://github.com/Tauffer-Consulting/domino_pieces_repository_template>`_ will automatically run :code:`domino organize` (with Github actions) for every commit to :code:`main` branch. See more below.
+
 
 Github actions
 ----------------------

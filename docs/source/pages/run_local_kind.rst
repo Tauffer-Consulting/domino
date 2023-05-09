@@ -1,3 +1,5 @@
+.. _domino-run-kind:
+
 Run locally with Kind
 =============================
 
