@@ -31,8 +31,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     "sphinx_copybutton",
-    'myst_parser',
     'sphinx-pydantic',
+    # 'myst_parser',
 ]
 
 source_suffix = {

@@ -45,7 +45,6 @@ The `piece.py` file should contain your custom code inside the `piece_function` 
     from domino.base_piece import BasePiece
     from .models import InputModel, OutputModel
 
-
     class MyNewPiece(BasePiece):
 
         def piece_function(self, input_model: InputModel):

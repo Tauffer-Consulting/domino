@@ -16,7 +16,6 @@ Creating Workflows in the GUI is as simple as dragging and dropping Pieces to th
 
 [TODO - IMAGE, GIF OR VIDEO]
 
-|
 
 Domino vs Apache Airflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,15 +24,16 @@ Every Domino Workflow corresponds to an Apache Airflow DAG, and each Piece corre
 
 You can think of Domino as Airflow with superpowers, where users can:
 
-- create highly complex Workflows with point-and-click and drag-and-drop operations in an user-friendly UI
-- make use of Pieces developed by other people, share and reuse their own Pieces
+- create highly complex Workflows with simple point-and-click and drag-and-drop operations, in an user-friendly GUI
+- make use of Pieces developed by other people, share and reuse your own Pieces
 - collaborate in groups to edit and monitor Workflows
-- experience a cleaner and more intuitive UI for viewing Workflows results, including logs and richer reports with images and tables
+- experience a cleaner and more intuitive GUI for viewing Workflows results, including logs and richer reports with images and tables
 
-|
 
 Development
 ~~~~~~~~~~~~~
+
+The source code of the project is available `here <https://github.com/Tauffer-Consulting/domino>`_.
 
 Domino is a modular and open source software, which allows for contributions from a large spectrum of expertises, from DevOps to frontend developers:
 
@@ -46,19 +46,19 @@ Domino is a modular and open source software, which allows for contributions fro
 - Domino runs on Kubernetes, both in the cloud or locally (using Kind)
 - Domino is distributed as a pip installable package and a Helm chart
 
-|
 
-Docker images
+Resources
 ~~~~~~~~~~~~~~~~
 
-We maintain the updated Docker images for the necessary Domino components in Github Container Registry:
+Here's a list of the main resources for Domino:
 
-- `REST API component <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-rest>`_
-- `Frontend component <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-frontend>`_
-- `Airflow components with Domino extension <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-airflow-base>`_
+- `Python package <https://pypi.org/project/domino-py/>`_
+- `Helm chart <https://artifacthub.io/packages/helm/domino/domino>`_
+- `REST API image <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-rest>`_
+- `Frontend image <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-frontend>`_
+- `Airflow image with Domino extension <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-airflow-base>`_
 - `Base Piece image <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-airflow-pod>`_
 
-The base Piece image comes already with many popular Python packages installed (Numpy, Scipy, ...) and should be sufficient for many simple Pieces. If you need more complex images to run your custom Pieces, check [THIS SESSION]() to see how you can declare extra dependencies or even pre-built images in your pieces repository.
 
 |
 
@@ -80,7 +80,7 @@ Table of contents
 
    pages/pieces.rst
    pages/pieces_repository.rst
-   pages/testing_pieces_locally.md
+   pages/pieces_unit_testing.md
 
 
 .. toctree::
