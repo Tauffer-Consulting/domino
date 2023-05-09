@@ -63,9 +63,11 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 html_logo = '_static/media/logo.png'
+html_favicon = '_static/media/favicon.ico'
 html_theme_options = {
     'logo_only': True,
     'display_version': False,
+    "style_nav_header_background": "#4e5a5b"
 }
 
 # Custom CSS and JS static files

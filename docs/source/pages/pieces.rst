@@ -3,13 +3,27 @@
 Pieces
 ======================
 
-A **Piece** is a way to bring useful Python functions into modular components reusable by any Workflow. It is very easy to turn your Python code into a Domino Piece, in this session we'll guide you through it, step by step.
+**Pieces** are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
+
+- can execute anything written in Python, heavy-weight (e.g. Machine Learning) as well as light-weight (e.g. sending emails) tasks
+- have well defined data models for inputs, outputs and secrets (using Pydantic)
+- run in isolated execution environments (Docker containers)
+- are organized in git repositories, for easy distribution and installation
+
+It is very easy to turn your Python code into a Domino Piece, in this session we'll guide you through it, step by step. 
+
+|
+
+Create your own Pieces
+-------------------------
+
+Domino defines standards for writing and distributing modular Pieces, which guarantees their reusability and consistency across Workflows. Those Pieces can be included in any Workflow by drag-and-drop, and Domino will take care of running them according to user defined schedules.
 
 Let's define a new Piece, named `MyNewPiece`. The Piece's folder should have the same as the Piece (in this case `MyNewPiece`) and follow a standard organization, consisting in three files: 
 
-- A :code:`piece.py` file with the source code to be executed
-- A :code:`models.py` file containing the Pydantic models that define the input, output and secrets of the Piece
-- A :code:`metadata.json` file containing the Piece's metadata, including dependencies and GUI style
+- A :ref:`piece.py<domino-pieces-piecepy>` file with the source code to be executed
+- A :ref:`models.py<domino-pieces-models>` file containing the Pydantic models that define the input, output and secrets of the Piece
+- A :ref:`metadata.json<domino-pieces-metadata>` file containing the Piece's metadata, including dependencies and GUI style
 
 .. code-block:: bash
     :caption: Example MyNewPiece folder and files structure
@@ -19,6 +33,8 @@ Let's define a new Piece, named `MyNewPiece`. The Piece's folder should have the
     ..../models.py
     ..../piece.py
 
+
+.. _domino-pieces-piecepy:
 
 piece.py
 ~~~~~~~~~~~~~
@@ -41,6 +57,7 @@ The `piece.py` file should contain your custom code inside the `piece_function` 
             # Return the output model
             return OutputModel(out_argument_1="a string result")
 
+.. _domino-pieces-models:
 
 models.py
 ~~~~~~~~~~~~~
@@ -79,6 +96,7 @@ The `models.py` file contains the data models for the Input, Output and Secrets 
 
 Pydantic models are very powerful and rich in features. Using them properly will guarantee that your Piece will always be called with the correct input data types and that we can be sure of the output data types as well. We can easily add informative descriptions, validation rules (e.g. regex for string type, min/max for numeric types) and make arguments required/optional using Pydantic models.
 
+.. _domino-pieces-metadata:
 
 metadata.json
 ~~~~~~~~~~~~~~~~
@@ -141,7 +159,6 @@ Optionally, you can also include in the metadata:
     }
 
 
-| 
 
 Add the Piece to Pieces repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -3,8 +3,8 @@
 
 |
 
-About
-~~~~~~~~~~
+Domino
+=================
 
 Domino is an open source workflow management platform, with:
 
@@ -15,16 +15,6 @@ Domino is an open source workflow management platform, with:
 Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
 
 [TODO - IMAGE, GIF OR VIDEO]
-
-|
-
-Domino Pieces
-~~~~~~~~~~~~~~~
-
-Pieces are functional units that can be reused in multiple Workflows. Pieces can execute anything that can be written in Python, both heavy-weight (e.g. Machine Learning) or light-weight (e.g. sending emails) tasks, and are easily distributed and installed directly from Github repositories.
-
-Domino defines standards for writing and distributing modular Pieces, which guarantees their reusability and consistency across Workflows.
-Those Pieces can be included in any Workflow by drag-and-drop, and Domino will take care of running them according to user defined schedules.
 
 |
 
