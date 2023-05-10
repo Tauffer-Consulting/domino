@@ -1,7 +1,7 @@
 
 
 <p align="center">
-  <img src="./media/logo.png" width="450" title="Domino">
+  <img src="https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/media/logo.png" width="450" title="Domino">
 </p>
 <p align="center">
   <a href="https://pypi.org/project/domino-py">
