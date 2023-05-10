@@ -1,23 +1,26 @@
 import re
 import sys
 import os
-from distutils.version import StrictVersion
+from packaging import version
 from domino.version import __version__
 from domino.client.github_rest_client import GithubRestClient
+
 
 class Actions(object):
     github_client = GithubRestClient(token=os.environ.get("GITHUB_TOKEN"))
     repo_name = os.environ.get("GITHUB_REPOSITORY")
+    new_tag = f"domino-py-{__version__}"
 
     @classmethod
     def _validate_package_version(cls):
         """
         Check if the version number is in the correct format.
         """
-        matched = re.match(r'(\d+\.)?(\d+\.)?(\*|\d+)$', __version__)
+        pattern = r"^domino-py-\d+\.\d+\.\d+$"
+        matched = re.match(pattern, cls.new_tag)
         if matched:
-            return __version__
-        raise Exception("Invalid version number.")
+            return cls.new_tag
+        raise Exception(f"Invalid tag format: {cls.new_tag}")
     
     @classmethod
     def _check_github_releases_versions(cls):
@@ -27,14 +30,13 @@ class Actions(object):
         releases = cls.github_client.get_releases(repo_name=cls.repo_name)
         if not releases:
             return
-        for release in releases:
-            if release.tag_name == __version__:
+        releases_py = [release for release in releases if "domino-py-" in release.tag_name]
+        for release in releases_py:
+            if release.tag_name == cls.new_tag:
                 raise Exception("Version already exists.")
-        
-        last_release = releases[0]
-        last_release_title = last_release.title
-        if StrictVersion(last_release_title) > StrictVersion(__version__):
-            raise Exception("Version number is smaller than the last release.")
+            release_tag_version = release.tag_name.split("-")[-1]
+            if version.parse(release_tag_version) > version.parse(__version__):
+                raise Exception("Version number is smaller than the last release.")
         return
 
     @classmethod
@@ -50,9 +52,9 @@ class Actions(object):
         last_commit_sha = last_commit.sha
         release = cls.github_client.create_release(
             repo_name=cls.repo_name,
-            version=__version__,
-            tag_message=f"Release {__version__}",
-            release_message=f"Release {__version__}",
+            version=cls.new_tag,
+            tag_message=f"Release {cls.new_tag}",
+            release_message=f"Release {cls.new_tag}",
             target_commitish=last_commit_sha
         )
         return release
