@@ -53,8 +53,8 @@ class Actions(object):
         release = cls.github_client.create_release(
             repo_name=cls.repo_name,
             version=cls.new_tag,
-            tag_message=f"Release {cls.new_tag}",
-            release_message=f"Release {cls.new_tag}",
+            tag_message=f"Release {cls.new_tag} Python package",
+            release_message=f"Release {cls.new_tag} Python package",
             target_commitish=last_commit_sha
         )
         return release
