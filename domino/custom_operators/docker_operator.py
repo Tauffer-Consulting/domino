@@ -37,11 +37,11 @@ class DominoDockerOperator(DockerOperator):
         shared_storage_host_path = os.environ.get('LOCAL_DOMINO_SHARED_DATA_PATH', '')
         shared_storage_container_path = '/home/shared_storage'
         mounts = []
-        # TODO remove
-        mounts=[
-            # TODO remove
-            Mount(source='/home/vinicius/Documents/work/tauffer/flowui/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
-        ]
+        # # TODO remove
+        # mounts=[
+        #     # TODO remove
+        #     Mount(source='/home/vinicius/Documents/work/tauffer/flowui/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
+        # ]
         if self.workflow_shared_storage and str(self.workflow_shared_storage.source.value).lower() == str(getattr(StorageSource, 'local').value).lower():
             mounts.append(
                 Mount(source=shared_storage_host_path, target=shared_storage_container_path, type='bind', read_only=False),
