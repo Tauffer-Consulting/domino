@@ -15,9 +15,21 @@ The Domino frontend service is a React application that provides the GUI for eas
         <br>
         Sign up and login to use the Domino platform. 
         <br>
-        <img src="/_static/media/gif1.gif">
+        <img src="../_static/media/1_sign_up.gif" style="margin-top: 20px;">
     </details>
     
+    <br>
+
+    <details>
+        <summary>
+            <strong>Create your workspace</strong>
+        </summary>
+        <br>
+        Create a new workspace and add your github access token.
+        <br>
+        <img src="../_static/media/2_create_workspace_and_token.gif" style="margin-top: 20px;">
+    </details>
+
     <br>
 
     <details>
@@ -27,7 +39,7 @@ The Domino frontend service is a React application that provides the GUI for eas
         <br>
         Install bundles of Pieces to your Domino Workspaces direclty from Github repositories, and use them in your Workflows. 
         <br>
-        <img src="/_static/media/gif1.gif">
+        <img src="../_static/media/3_install_pieces.gif" style="margin-top: 20px;">
     </details>
 
     <br>
@@ -39,7 +51,7 @@ The Domino frontend service is a React application that provides the GUI for eas
         <br>
         Create Workflows by dragging and dropping Pieces to the canvas, and connecting them. 
         <br>
-        <img src="/_static/media/gif1.gif">
+        <img src="../_static/media/4_create_workflow.gif" style="margin-top: 20px;">
     </details>
 
     <br>
@@ -51,19 +63,19 @@ The Domino frontend service is a React application that provides the GUI for eas
         <br>
         Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system.
         <br>
-        <img src="/_static/media/gif1.gif">
+        <img src="../_static/media/5_edit_pieces.gif" style="margin-top: 20px;">
     </details>
 
     <br>
     
     <details>
         <summary>
-            <strong>Schedule Workflows</strong>
+            <strong>Edit and schedule Workflows</strong>
         </summary>
         <br>
-        Schedule Workflows to run periodically, at a specific date/time, or trigger them manually.
+        Schedule Workflows to run periodically, at a specific date/time, or trigger them manually, and select the the best storage for you.
         <br>
-        <img src="/_static/media/gif1.gif">
+        <img src="../_static/media/6_edit_workflow.gif" style="margin-top: 20px;">
     </details>
 
     <br>
@@ -75,7 +87,7 @@ The Domino frontend service is a React application that provides the GUI for eas
         <br>
         Monitor Workflows in real time, including the status of each Piece, the logs and results of each run.
         <br>
-        <img src="/_static/media/gif1.gif">
+        <img src="../_static/media/7_monitor_workflow.gif" style="margin-top: 20px;">
     </details>
 
     <br>
