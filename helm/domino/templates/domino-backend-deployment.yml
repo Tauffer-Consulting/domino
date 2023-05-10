@@ -44,7 +44,7 @@ spec:
               value: {{ .Values.database.password }}
             - name: DOMINO_DB_PORT
               value: "5432"
-            - name: "DOMINO_GITHUB_ACCESS_TOKEN_PIECES"
+            - name: "DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"
               valueFrom:
                 secretKeyRef:
                   key:  github_access_token_pieces
