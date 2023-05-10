@@ -1,0 +1,35 @@
+FROM python:3.8-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update
+RUN apt-get install nano -y
+RUN /usr/local/bin/python -m pip install --upgrade pip
+
+# Create folders to store source code
+RUN mkdir -p /home/domino/pieces_repository
+
+# Create folder to store run data results
+RUN mkdir -p /home/run_data
+WORKDIR /home/run_data
+RUN chmod -R 777 .
+
+# Create folder for sidecar pod mount to read xcom data
+RUN mkdir -p /airflow/xcom/
+RUN echo "{}" > /airflow/xcom/return.json
+WORKDIR /airflow/xcom
+RUN chmod -R 777 .
+
+# Editable pip install for Domino from local folder
+RUN mkdir -p /home/domino/domino_py
+COPY setup.py /home/domino/domino_py/
+COPY requirements.txt /home/domino/domino_py/
+COPY requirements-airflow.txt /home/domino/domino_py/
+COPY README.md /home/domino/domino_py/
+COPY domino /home/domino/domino_py/domino
+WORKDIR /home/domino/domino_py
+RUN chmod -R 777 .
+RUN pip install --no-cache -e .
+
+WORKDIR /home

@@ -1,0 +1,31 @@
+FROM node:14-alpine as build
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the package.json and yarn.lock files
+COPY package.json yarn.lock ./
+
+# Install dependencies
+RUN yarn install
+
+# Copy the rest of the source code
+COPY . .
+
+# Build the app for production
+RUN yarn build
+
+# Use nginx as the web server
+FROM nginx:1.19-alpine
+
+# Copy the build output from the previous stage
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Configure nginx to serve the app
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Run nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]

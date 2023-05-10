@@ -1,0 +1,30 @@
+import enum
+
+
+class RepositorySource(str, enum.Enum):
+    github = 'github'
+    default = 'default'
+
+    class Config:
+        use_enum_values = True
+
+
+class Permission(str, enum.Enum):
+    owner = 'owner'
+    read = 'read'
+
+    class Config:
+        use_enum_values = True
+
+
+class WorkflowScheduleInterval(str, enum.Enum):
+    none = 'none'
+    once = 'once'
+    hourly = 'hourly'
+    daily = 'daily'
+    weekly = 'weekly'
+    monthly = 'monthly'
+    yearly = 'yearly'
+
+    class Config:
+        use_enum_values = True

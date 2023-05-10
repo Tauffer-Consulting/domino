@@ -1,0 +1,25 @@
+FROM custom/custom-image
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Here you can install any systems level dependencies, e.g.:
+USER root
+RUN apt-get update
+RUN apt-get install nano -y
+RUN apt-get install ffmpeg libsm6 libxext6  -y
+
+USER airflow
+
+# Need to create basic directories for Domino operations
+RUN mkdir -p domino/pieces_repository/
+RUN mkdir -p domino/xcom
+RUN mkdir -p domino/run_data
+
+# Need to copy operators source code
+COPY config.toml domino/pieces_repository/
+COPY pieces domino/pieces_repository/pieces
+COPY .domini domino/pieces_repository/.domino
+
+# Install specific python dependencies
+RUN pip install --no-cache-dir opencv-python scipy boto3

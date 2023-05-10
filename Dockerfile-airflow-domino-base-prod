@@ -1,0 +1,10 @@
+FROM apache/airflow:2.5.3-python3.9
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+USER root
+RUN apt-get update
+
+USER airflow
+RUN pip install domino-py

@@ -1,0 +1,30 @@
+body {
+  font-family: sans-serif;
+  color: #111;
+  background-color: rgb(223, 227, 233);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: fit-content;
+}
+
+.sidebar-jsonforms-grid * {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.sidebar-jsonforms-grid .MuiCardHeader-root {
+  padding: 0 !important;
+  margin-bottom: 15px;
+}
+
+.sidebar-jsonforms-grid .MuiCardContent-root {
+  padding: 0 !important;
+}
+
+.sidebar-jsonforms-grid .MuiGrid-root .MuiGrid-container {
+  row-gap: 6px;
+}

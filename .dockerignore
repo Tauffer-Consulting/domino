@@ -1,0 +1,6 @@
+docs/*
+frontend/*
+helm/*
+k8s/*
+misc_files/*
+rest/*
