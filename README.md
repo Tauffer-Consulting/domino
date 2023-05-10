@@ -77,7 +77,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Install bundles of Pieces to your Domino Workspaces direclty from Github repositories, and use them in your Workflows. <br></br>
 
-  ![add gif]()
+  ![install pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/media/3_install_pieces.gif)
 
 </details>
 
