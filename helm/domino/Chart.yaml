@@ -11,3 +11,4 @@ dependencies:
   - name: airflow
     version: 1.9.0
     repository: https://airflow.apache.org/
+    condition: airflow.enabled

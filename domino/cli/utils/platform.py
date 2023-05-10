@@ -290,7 +290,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     airflow_values_override_config = {
         **domino_values_override_config,
         "airflow": {
-            "enabled": True,
+            "enabled": True if run_airflow else False,
             "env": [
                 {
                     "name": "DOMINO_DEPLOY_MODE",
@@ -341,17 +341,19 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
             "-d",
             tmp_dir
         ])
-        console.print("Installing dependencies...")
-        subprocess.run(["helm", "dependency", "build"], cwd=f"{tmp_dir}/domino")
+        if run_airflow:
+            console.print("Installing dependencies...")
+            subprocess.run(["helm", "dependency", "build"], cwd=f"{tmp_dir}/domino")
         with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
             yaml.dump(airflow_values_override_config, fp)
             console.print('Installing Domino...')
-            subprocess.run([
+            commands = [
                 "helm", "install",
                 "-f", str(fp.name),
                 "domino",
-                f"{tmp_dir}/domino"
-            ])
+                f"{tmp_dir}/domino",
+            ]
+            subprocess.run(commands)
 
     # For each path create a pv and pvc
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
