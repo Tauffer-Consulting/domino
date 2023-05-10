@@ -7,9 +7,9 @@ DEFAULT_STORAGE_PIECES = [
         "model": AWSS3DefaultPiece,
         "secrets_model": AWSS3SecretsModel
     },
-    {
-        "model": GCPStorageDefaultPiece,
-        "secrets_model": GoogleStorageSecretsModel
-    }
+    # {
+    #     "model": GCPStorageDefaultPiece,
+    #     "secrets_model": GoogleStorageSecretsModel
+    # }
     
 ]
