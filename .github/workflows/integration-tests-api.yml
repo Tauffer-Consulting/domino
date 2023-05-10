@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - dev
-      #- test/*
+      - test/*
 
 jobs:
   api-tests:
