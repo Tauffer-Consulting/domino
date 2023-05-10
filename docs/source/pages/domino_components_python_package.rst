@@ -14,13 +14,13 @@ The Domino python package brings a collection of convenience classes and functio
 Task (Domino class)
 ~~~~~~~~~~~~~~~~~~~~
 
-This class defines the objects for each task in the AirfLow dag. Once instantiated it returns a `DominoKubernetesPodPiece` object properly configured with the target Piece arguments, secrets and volume mounts.
+This class defines the objects for each task in the AirfLow dag. Once instantiated it will return either a `DominoKubernetesPodOperator` or a `DominoDockerOperator` object, properly configured with the target Piece arguments, secrets and volume mounts.
 
 
-DominoKubernetesPodPiece (Domino class)
+DominoKubernetesPodOperator (Domino class)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This class is an extension of the Airflow's `KubernetesPodPiece` class. It adds some useful information such as secrets and upstream task ids as ENV variable into the container running the target Piece.
+This class is an extension of the Airflow's `KubernetesPodOperator` class. It adds Domino specific functionalities and information. Runtime information is passed as ENV variables to the container running the target Piece.
 
 
 BasePiece (Domino class)
