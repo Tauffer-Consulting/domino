@@ -73,7 +73,7 @@ The Domino frontend service is a React application that provides the GUI for eas
             <strong>Edit and schedule Workflows</strong>
         </summary>
         <br>
-        Schedule Workflows to run periodically, at a specific date/time, or trigger them manually, and select the the best storage for you.
+        Schedule Workflows to run periodically, at a specific date/time, or trigger them manually, and select the the shared storage service.
         <br>
         <img src="../_static/media/6_edit_workflow.gif" style="margin-top: 20px;">
     </details>
