@@ -176,6 +176,12 @@ class WorkflowService(object):
             dag_data = workflow_uuid_map[dag_uuid]
             response = dag_info['response']
 
+            schedule_interval = 'creating'
+            if response:
+                schedule_interval = response.get("schedule_interval")
+                if isinstance(schedule_interval, dict):
+                    schedule_interval = schedule_interval.get("value")
+
             data.append(
                 GetWorkflowsResponseData(
                     id=dag_data.id,
@@ -187,7 +193,7 @@ class WorkflowService(object):
                     workspace_id=dag_data.workspace_id,
                     is_paused='creating' if not response else response.get('is_paused'),
                     is_active='creating' if not response else response.get('is_active'),
-                    schedule_interval='creating' if not response else response.get('schedule_interval'),
+                    schedule_interval=schedule_interval#'creating' if not response else response.get('schedule_interval').replace("@", ""),
                 )
             )
 
