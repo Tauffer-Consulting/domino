@@ -77,6 +77,9 @@ The :code:`domino platform prepare` command will ask you for the following infor
 - **Github ssh private for Workflows repository**: The private ssh deploy key of the github workflows repository you just created **(optional)**. If not provided, it will generate a ssh key pair to be used as described in `Configure Workflows Repository GitSync`_
 - **Github token for Pieces repository**: The Github access token with read access to public Pieces repositories **(required)**.
 - **Github token for Workflows repository**: The Github access token with read and write access to the workflows repository **(required)**.
+- **Deploy Mode**: The platform deploy mode. It should be set to **local-k8s** **(optional)**.
+- **Local pieces repository path**: Local paths for domino pieces repositories **(optional)**. Only used for local development , see `Local deployment for development`_.
+- **Local domino path**: Local path for domino package **(optional)**. Only used for local development , see `Local deployment for development`_.
 
 After that, it will create a configuration file :code:`config-domino-local.yaml` with values based on existing environment variables or the user input in the CLI steps.
 This file contains the variables necessary to run the Domino platform locally. 
@@ -168,102 +171,20 @@ This is the content of the configuration file and the description of each of its
 
 |
 
-.. Local deployment for development
-.. -----------------------------------
 
-.. For development, you must configure some variables in the file :code:`kind-cluster-config.yaml` and in the Helm Charts.
+Local deployment for development
+-----------------------------------
 
+For development, you can configure hot reloading for the **Domino package** and for **local Pieces Repositories**.
+In order to do that you can run :code:`domino platform prepare` and you will be asked for the same configuration as described in `Prepare the platform with Domino CLI`_,
+but now you must set :code:`deploy_mode=local-k8s-dev` and provide the local paths for the Domino package and for the local Pieces Repositories for hot reloading purposes.
 
-.. Configuring Kind
-.. ~~~~~~~~~~~~~~~~~~~
+- **Deploy Mode**: The platform deploy mode. It should be set to **local-k8s-dev** **(required)**.
+- **Local pieces repository path**: Local paths for domino pieces repositories **(optional)**. Only used for hot reloading on pieces code. You can provide multiple paths as a list of strings, example:
+  :code:`["path/to/pieces/repository1", "path/to/pieces/repository2"]`. It will allow you to change the code in the local pieces repositories and the changes will be reflected in the Domino platform without the need to rebuild the docker images.
+- **Local domino path**: Local path for domino package **(optional)**. Only used for hot reloading of domino package code, example: :code:`/path/to/local/domino`
 
-.. In the platform working directory, open the file :code:`kind-cluster-config.yaml`, where you can edit the following lines:
+It can be also configured directly in the :code:`config-domino-local.yaml` file in :code:`dev` section.
+The final configuration file should look like this:
 
-.. .. code-block::
-
-..   # LOCAL DEV DOMINO - Change it to the path of your local domino package
-..   - hostPath: /path/to/local_domino_package
-
-..   # LOCAL DEV OPERATORS - Change it to the path of your local pieces repository. 
-..   # Note, when using this you will not be able to include remote repositories
-..   - hostPath: /path/to/local_pieces_package 
-
-..   # SHARED JOBS VOLUME - Change it to the path of your shared jobs volume. 
-..   # This is where the jobs will be stored when running locally.
-..   - hostPath: /path/to/shared_jobs_volume 
-
-..   # DAGs SYNC VOLUME - Change it to the path of your dags sync volume. 
-..   # This is where the dags will be stored when running locally.
-..   - hostPath: /path/to/dags_sync_volume 
-
-
-.. Configuring Helm Charts
-.. ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. After configuring the Kind cluster, we must configure the Helm Charts. We must configure the **gitSync** so we can sync our remote dags with the local Airflow Webserver.  
-
-.. In the project root directory, open the file `k8s/airflow_helm_chart/values-dev.yaml`.  In the `values-dev.yaml` we should first add the github access token with access to the dags repository we want to sync.  
-
-.. .. code-block::
-
-..   extraSecrets:
-..     airflow-ssh-secret:
-..       data: |
-..         gitSshKey: 'VERY-LONG-BASE-64-ENCODED-PRIVATE-KEY' # Add your private key here (base64 encoded)
-
-.. Then we must set the github repository we want to sync.
-
-.. .. code-block::
-
-..   dags:
-..     gitSync:
-..       enabled: true
-..       repo: ssh://git@github.com/GITHUB_ACCOUNT/WORKFLOWS_REPOSITORY.git # Add your repository here
-..       branch: main
-..       subPath: "dags"
-..       sshKeySecret: airflow-ssh-secret
-
-
-.. Environment Variables
-.. ~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. The Domino REST API service needs access to github to be able to fetch the Pieces Repositories.
-.. In order to do this, we need to set the `DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN`` (with read permission) as an environment variable:
-
-.. .. code-block::
-
-..   export DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN=<YOUR_GITHUB_OPERATORS_REPOSITORIES_ACCESS_TOKEN>
-
-
-.. Also, it needs the name of the repository where the workflows are stored and another access token with read/write privilegies. This is the same repository we configured in the Helm Chart in the gitSync section.  
-
-.. .. code-block::
-
-..   export DOMINO_GITHUB_WORKFLOWS_REPOSITORY=<GITHUB_ACCOUNT/WORKFLOWS_REPOSITORY>
-..   export DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS=<YOUR_GITHUB_WORKFLOWS_REPOSITORY_ACCESS_TOKEN>
-
-  
-.. If you are using a remote database you must also set the following environment variables:
-
-.. .. code-block::
-
-..   export DOMINO_DB_HOST=<your-db-host>
-..   export DOMINO_DB_PORT=<your-db-port>
-..   export DOMINO_DB_USER=<your-db-user>
-..   export DOMINO_DB_PASSWORD=<your-db-password>
-..   export DOMINO_DB_NAME=<your-db-name>
-
-
-.. Running Domino
-.. ~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. After configuring the Kind Config, Helm Charts and the environment variables, we can run Domino.
-.. In the k8s directory, run the following command:
-
-.. .. code-block::
-
-..   bash run_in_cluster.sh
-
-.. **Note**: You must have the Docker daemon running in order to run the Domino using this script.  
-.. **Note**: It can take a while for the Domino be ready since it will download and install all the necessary dependencies.
-
+.. image:: /_static/media/configtoml_example.png
