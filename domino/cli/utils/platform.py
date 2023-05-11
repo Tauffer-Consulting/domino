@@ -523,7 +523,14 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     console.print("and the Backend API at: http://localhost/api/")
 
 
-def run_platform_compose(detached: bool = False):
+def run_platform_compose(detached: bool = False, use_config_file: bool = False) -> None:
+    if use_config_file:
+        console.print("Using config file...")
+        with open("config-domino-local.toml", "rb") as f:
+            platform_config = tomli.load(f)
+        token_pieces = platform_config["github"].get("DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN")
+        os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = token_pieces
+
     # Create local directories
     local_path = Path(".").resolve()
     domino_dir = local_path / "domino_data"
