@@ -152,118 +152,118 @@ This is the content of the configuration file and the description of each of its
 
 
 
-* ```DOMINO_LOCAL_RUNNING_PATH``` **[Automatic]** - The path where the Domino platform is being created.
-* ```DOMINO_KIND_CLUSTER_NAME``` **[Optional]** - The name of the Kind cluster.
-* ```DOMINO_DEPLOY_MODE``` **[Automatic]** - The deploy mode. It should be set to **local-k8s**.
-* ```DOMINO_GITHUB_WORKFLOWS_REPOSITORY``` **[Required]** - The Github repository where the workflows will be stored.
-* ```DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN``` **[Required]** - The Github access token with read access to public Pieces repositories.
-* ```DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS``` **[Required]** - The Github access token with read and write access to the workflows repository.
-* ```DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY``` **[Optional]** - The private key of the Github deploy key pair used to access the workflows repository. If not provided, it will generate a ssh key pair to be used as described in `Workflows repository and Github tokens`_.
-* ```DOMINO_GITHUB_WORKFLOWS_SSH_PUBLIC_KEY``` **[Automatic]** - The public key of the Github deploy key pair used to access the workflows repository. If **ssh private key** was not provided, it will generate a ssh key pair to be used and this value should be pasted in the Github repository deploy keys section as describe in `Workflows repository and Github tokens`_.
-* ```DOMINO_DB_HOST``` **[Automatic]** - The database host. You can change it if you want to use an external database.
-* ```DOMINO_DB_PORT``` **[Automatic]** - The database port. You can change it if you want to use an external database.
-* ```DOMINO_DB_NAME``` **[Automatic]** - The database name. You can change it if you want to use an external database.
-* ```DOMINO_DB_USER``` **[Automatic]** - The database user. You can change it if you want to use an external database.
-* ```DOMINO_DB_PASSWORD``` **[Automatic]** - The database password. You can change it if you want to use an external database.
+* ``DOMINO_LOCAL_RUNNING_PATH`` **[Automatic]** - The path where the Domino platform is being created.
+* ``DOMINO_KIND_CLUSTER_NAME`` **[Optional]** - The name of the Kind cluster.
+* ``DOMINO_DEPLOY_MODE`` **[Automatic]** - The deploy mode. It should be set to **local-k8s**.
+* ``DOMINO_GITHUB_WORKFLOWS_REPOSITORY`` **[Required]** - The Github repository where the workflows will be stored.
+* ``DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN`` **[Required]** - The Github access token with read access to public Pieces repositories.
+* ``DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS`` **[Required]** - The Github access token with read and write access to the workflows repository.
+* ``DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY`` **[Optional]** - The private key of the Github deploy key pair used to access the workflows repository. If not provided, it will generate a ssh key pair to be used as described in `Workflows repository and Github tokens`_.
+* ``DOMINO_GITHUB_WORKFLOWS_SSH_PUBLIC_KEY`` **[Automatic]** - The public key of the Github deploy key pair used to access the workflows repository. If **ssh private key** was not provided, it will generate a ssh key pair to be used and this value should be pasted in the Github repository deploy keys section as describe in `Workflows repository and Github tokens`_.
+* ``DOMINO_DB_HOST`` **[Automatic]** - The database host. You can change it if you want to use an external database.
+* ``DOMINO_DB_PORT`` **[Automatic]** - The database port. You can change it if you want to use an external database.
+* ``DOMINO_DB_NAME`` **[Automatic]** - The database name. You can change it if you want to use an external database.
+* ``DOMINO_DB_USER`` **[Automatic]** - The database user. You can change it if you want to use an external database.
+* ``DOMINO_DB_PASSWORD`` **[Automatic]** - The database password. You can change it if you want to use an external database.
 
 |
 
-Local deployment for development
------------------------------------
+.. Local deployment for development
+.. -----------------------------------
 
-For development, you must configure some variables in the file :code:`kind-cluster-config.yaml` and in the Helm Charts.
-
-
-Configuring Kind
-~~~~~~~~~~~~~~~~~~~
-
-In the platform working directory, open the file :code:`kind-cluster-config.yaml`, where you can edit the following lines:
-
-.. code-block::
-
-  # LOCAL DEV DOMINO - Change it to the path of your local domino package
-  - hostPath: /path/to/local_domino_package
-
-  # LOCAL DEV OPERATORS - Change it to the path of your local pieces repository. 
-  # Note, when using this you will not be able to include remote repositories
-  - hostPath: /path/to/local_pieces_package 
-
-  # SHARED JOBS VOLUME - Change it to the path of your shared jobs volume. 
-  # This is where the jobs will be stored when running locally.
-  - hostPath: /path/to/shared_jobs_volume 
-
-  # DAGs SYNC VOLUME - Change it to the path of your dags sync volume. 
-  # This is where the dags will be stored when running locally.
-  - hostPath: /path/to/dags_sync_volume 
+.. For development, you must configure some variables in the file :code:`kind-cluster-config.yaml` and in the Helm Charts.
 
 
-Configuring Helm Charts
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. Configuring Kind
+.. ~~~~~~~~~~~~~~~~~~~
 
-After configuring the Kind cluster, we must configure the Helm Charts. We must configure the **gitSync** so we can sync our remote dags with the local Airflow Webserver.  
+.. In the platform working directory, open the file :code:`kind-cluster-config.yaml`, where you can edit the following lines:
 
-In the project root directory, open the file `k8s/airflow_helm_chart/values-dev.yaml`.  In the `values-dev.yaml` we should first add the github access token with access to the dags repository we want to sync.  
+.. .. code-block::
 
-.. code-block::
+..   # LOCAL DEV DOMINO - Change it to the path of your local domino package
+..   - hostPath: /path/to/local_domino_package
 
-  extraSecrets:
-    airflow-ssh-secret:
-      data: |
-        gitSshKey: 'VERY-LONG-BASE-64-ENCODED-PRIVATE-KEY' # Add your private key here (base64 encoded)
+..   # LOCAL DEV OPERATORS - Change it to the path of your local pieces repository. 
+..   # Note, when using this you will not be able to include remote repositories
+..   - hostPath: /path/to/local_pieces_package 
 
-Then we must set the github repository we want to sync.
+..   # SHARED JOBS VOLUME - Change it to the path of your shared jobs volume. 
+..   # This is where the jobs will be stored when running locally.
+..   - hostPath: /path/to/shared_jobs_volume 
 
-.. code-block::
-
-  dags:
-    gitSync:
-      enabled: true
-      repo: ssh://git@github.com/GITHUB_ACCOUNT/WORKFLOWS_REPOSITORY.git # Add your repository here
-      branch: main
-      subPath: "dags"
-      sshKeySecret: airflow-ssh-secret
+..   # DAGs SYNC VOLUME - Change it to the path of your dags sync volume. 
+..   # This is where the dags will be stored when running locally.
+..   - hostPath: /path/to/dags_sync_volume 
 
 
-Environment Variables
-~~~~~~~~~~~~~~~~~~~~~~~~
+.. Configuring Helm Charts
+.. ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Domino REST API service needs access to github to be able to fetch the Pieces Repositories.
-In order to do this, we need to set the `DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN`` (with read permission) as an environment variable:
+.. After configuring the Kind cluster, we must configure the Helm Charts. We must configure the **gitSync** so we can sync our remote dags with the local Airflow Webserver.  
 
-.. code-block::
+.. In the project root directory, open the file `k8s/airflow_helm_chart/values-dev.yaml`.  In the `values-dev.yaml` we should first add the github access token with access to the dags repository we want to sync.  
 
-  export DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN=<YOUR_GITHUB_OPERATORS_REPOSITORIES_ACCESS_TOKEN>
+.. .. code-block::
+
+..   extraSecrets:
+..     airflow-ssh-secret:
+..       data: |
+..         gitSshKey: 'VERY-LONG-BASE-64-ENCODED-PRIVATE-KEY' # Add your private key here (base64 encoded)
+
+.. Then we must set the github repository we want to sync.
+
+.. .. code-block::
+
+..   dags:
+..     gitSync:
+..       enabled: true
+..       repo: ssh://git@github.com/GITHUB_ACCOUNT/WORKFLOWS_REPOSITORY.git # Add your repository here
+..       branch: main
+..       subPath: "dags"
+..       sshKeySecret: airflow-ssh-secret
 
 
-Also, it needs the name of the repository where the workflows are stored and another access token with read/write privilegies. This is the same repository we configured in the Helm Chart in the gitSync section.  
+.. Environment Variables
+.. ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block::
+.. The Domino REST API service needs access to github to be able to fetch the Pieces Repositories.
+.. In order to do this, we need to set the `DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN`` (with read permission) as an environment variable:
 
-  export DOMINO_GITHUB_WORKFLOWS_REPOSITORY=<GITHUB_ACCOUNT/WORKFLOWS_REPOSITORY>
-  export DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS=<YOUR_GITHUB_WORKFLOWS_REPOSITORY_ACCESS_TOKEN>
+.. .. code-block::
+
+..   export DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN=<YOUR_GITHUB_OPERATORS_REPOSITORIES_ACCESS_TOKEN>
+
+
+.. Also, it needs the name of the repository where the workflows are stored and another access token with read/write privilegies. This is the same repository we configured in the Helm Chart in the gitSync section.  
+
+.. .. code-block::
+
+..   export DOMINO_GITHUB_WORKFLOWS_REPOSITORY=<GITHUB_ACCOUNT/WORKFLOWS_REPOSITORY>
+..   export DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS=<YOUR_GITHUB_WORKFLOWS_REPOSITORY_ACCESS_TOKEN>
 
   
-If you are using a remote database you must also set the following environment variables:
+.. If you are using a remote database you must also set the following environment variables:
 
-.. code-block::
+.. .. code-block::
 
-  export DOMINO_DB_HOST=<your-db-host>
-  export DOMINO_DB_PORT=<your-db-port>
-  export DOMINO_DB_USER=<your-db-user>
-  export DOMINO_DB_PASSWORD=<your-db-password>
-  export DOMINO_DB_NAME=<your-db-name>
+..   export DOMINO_DB_HOST=<your-db-host>
+..   export DOMINO_DB_PORT=<your-db-port>
+..   export DOMINO_DB_USER=<your-db-user>
+..   export DOMINO_DB_PASSWORD=<your-db-password>
+..   export DOMINO_DB_NAME=<your-db-name>
 
 
-Running Domino
-~~~~~~~~~~~~~~~~~~~~~~~~
+.. Running Domino
+.. ~~~~~~~~~~~~~~~~~~~~~~~~
 
-After configuring the Kind Config, Helm Charts and the environment variables, we can run Domino.
-In the k8s directory, run the following command:
+.. After configuring the Kind Config, Helm Charts and the environment variables, we can run Domino.
+.. In the k8s directory, run the following command:
 
-.. code-block::
+.. .. code-block::
 
-  bash run_in_cluster.sh
+..   bash run_in_cluster.sh
 
-**Note**: You must have the Docker daemon running in order to run the Domino using this script.  
-**Note**: It can take a while for the Domino be ready since it will download and install all the necessary dependencies.
+.. **Note**: You must have the Docker daemon running in order to run the Domino using this script.  
+.. **Note**: It can take a while for the Domino be ready since it will download and install all the necessary dependencies.
 
