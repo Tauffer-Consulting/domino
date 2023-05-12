@@ -51,7 +51,7 @@ const WorkflowEditorPanelComponent = () => {
     setEdges,
     nodes,
     setNodes,
-    fetchForageOperatorById,
+    fetchForagePieceById,
     setFormsForageData,
     removeFormsForageDataById,
     fetchForageWorkflowNodes,
@@ -70,13 +70,13 @@ const WorkflowEditorPanelComponent = () => {
 
   // Node double click open drawer with forms
   const onNodeDoubleClick = useCallback(async (event: any, node: any) => {
-    const operatorNode = await fetchForageOperatorById(node.id.split('_')[0])
+    const operatorNode = await fetchForagePieceById(node.id.split('_')[0])
 
     setFormSchema(operatorNode?.input_schema)
     setFormId(node.id)
     setFormTitle(() => { return operatorNode?.name ? operatorNode?.name : "" })
     setDrawerState(true)
-  }, [fetchForageOperatorById])
+  }, [fetchForagePieceById])
 
   const onLoad = useCallback(async (_reactFlowInstance: any) => {
     setReactFlowInstance(_reactFlowInstance)
@@ -128,7 +128,7 @@ const WorkflowEditorPanelComponent = () => {
     }
 
     setNodes((ns: Node[]) => ns.concat(newNode))
-    const operator = await fetchForageOperatorById(data.id)
+    const operator = await fetchForagePieceById(data.id)
     const inputSchema = operator?.input_schema
     const defaultData: any = extractDefaultValues(inputSchema)
     const containerResourcesDefaultData: unknown = extractDefaultValues(containerResourcesSchema)
@@ -154,7 +154,7 @@ const WorkflowEditorPanelComponent = () => {
     defaultData['containerResources'] = containerResourcesDefaultData
     // Set default data for the node form - used in json-forms
     await setFormsForageData(newNode.id, defaultData)
-  }, [fetchForageOperatorById, nodeDirection, setFormsForageData, setForageUpstreamMap, getForageUpstreamMap, reactFlowInstance, setNodes])
+  }, [fetchForagePieceById, nodeDirection, setFormsForageData, setForageUpstreamMap, getForageUpstreamMap, reactFlowInstance, setNodes])
 
   // Left drawer controls
   // @ts-ignore: Unreachable code error

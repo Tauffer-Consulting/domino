@@ -49,7 +49,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     fetchForageWorkflowEdges,
     getForageUpstreamMap,
     setForageUpstreamMap,
-    fetchForageOperatorById,
+    fetchForagePieceById,
     getForageCheckboxStates,
     setForageCheckboxStates,
     setNameKeyUpstreamArgsMap,
@@ -218,7 +218,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
           const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
           if (e.target.checked) {
             // If checked add dropdown options from upstreams
-            const upstreamOperator = await fetchForageOperatorById(upstreamOperatorId)
+            const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
             const outputSchema = upstreamOperator?.output_schema
             Object.keys(outputSchema?.properties).forEach((key, index) => {
               const obj = outputSchema?.properties[key]
@@ -240,7 +240,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
           } else {
             // If unchecked remove dropdown options from upstreams and use operator inputs schemas
             const operatorId = parseInt(formId.split('_')[0])
-            const operator = await fetchForageOperatorById(operatorId)
+            const operator = await fetchForagePieceById(operatorId)
             const inputSchema = operator?.input_schema
             auxSchema.properties[formKeys[i]] = inputSchema?.properties[formKeys[i]]
             auxFormData[formKeys[i]] = inputSchema?.properties[formKeys[i]].default
@@ -270,7 +270,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     formJsonSchema, 
     formId, 
     fetchForageWorkflowEdges, 
-    fetchForageOperatorById, 
+    fetchForagePieceById, 
     setForageUpstreamMap, 
     getForageUpstreamMap, 
     formData,

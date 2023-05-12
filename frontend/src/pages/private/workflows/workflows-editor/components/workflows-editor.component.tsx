@@ -38,20 +38,18 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
     fetchForageDataById,
     setNodes,
     setEdges,
-    handleCreateWorkflow
+    handleCreateWorkflow,
+    fetchForagePieceById
   } = useWorkflowsEditor();
 
   const validateWorkflowForms = useCallback(async (payload: any) => {
     const workflowData = payload.workflow
     const workflowSchema: any = workflowFormSchema.properties.config
     const workflowSchemaRequireds = workflowSchema.required
-    const tasksData = payload.tasks
-    const storageSchema = workflowFormSchema.properties.storage
 
     if (!workflowData || workflowData === undefined){
       throw new Error('Please fill in the workflow settings.')
     }
-
     // iterate over config keys and validate workflow data
     for (const key in workflowSchema.properties) {
       if (workflowSchemaRequireds.includes(key)) {
@@ -61,6 +59,28 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
         }
       }
     }
+
+  }, [])
+
+  const validateTasksForms = useCallback(async (payload: any) => {
+    const tasksData: any = payload.tasks
+    const storageSchema = workflowFormSchema.properties.storage
+    for (const entry of Object.entries(tasksData)) {
+      const [taskId, taskData]: [string, any] = entry;
+      const taskPieceId = taskData.piece.id;
+      const pieceGroundTruth = await fetchForagePieceById(taskPieceId)
+      if (!pieceGroundTruth) {
+        throw new Error(`Task ${taskId} has an invalid piece.`)
+      }
+      const pieceInputSchema = pieceGroundTruth.input_schema
+      const taskPieceInputData = taskData.piece.piece_input_kwargs
+      console.log('schema', pieceInputSchema)
+      console.log('data', taskData)
+
+      
+
+    }
+
 
   }, [])
 
@@ -74,12 +94,11 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
       }
       try{
         await validateWorkflowForms(payload)
+        await validateTasksForms(payload)
       }
       catch (err: any) {
         setBackdropIsOpen(false)
-        console.log(err.message)
         return toast.error(err.message)
-        //return toast.error(err)
       }
     
       handleCreateWorkflow(payload)
