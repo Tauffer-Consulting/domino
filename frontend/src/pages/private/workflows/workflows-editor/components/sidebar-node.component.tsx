@@ -1,15 +1,31 @@
-import { Box, Typography } from '@mui/material'
-import { IOperator } from 'services/requests/piece'
+import React, { FC, useState } from 'react';
+import { Box, Typography, IconButton } from '@mui/material'
+import HelpIcon from '@mui/icons-material/Help';
 
-// @ts-ignore: Unreachable code error
-export const OperatorSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
+import { IOperator } from 'services/requests/piece';
+import PieceDocsPopover from './piece-docs-popover.component';
+
+
+const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
   // Drag and drop from sidebar to Workflow area
-  // @ts-ignore: Unreachable code error
-  const onDragStart = (event, nodeData) => {
+  const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeData: any) => {
     var data = JSON.stringify(nodeData.nodeData)
     event.dataTransfer.setData('application/reactflow', data)
     event.dataTransfer.effectAllowed = 'move'
   }
+
+  // Help popover
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setPopoverOpen(true);
+  };
+
+  const handlePopoverClose = (event: React.MouseEvent<HTMLButtonElement>, reason: any) => {
+    if (reason && reason === "backdropClick")
+      return;
+    setPopoverOpen(false);
+  };
 
   return (
     <Box
@@ -22,11 +38,23 @@ export const OperatorSidebarNode: FC<{ operator: IOperator }> = ({ operator }) =
       onDragStart={(event) => onDragStart(event, { nodeData: operator })}
       draggable
     >
-      <Typography variant='body1' sx={{ width: '100%', textOverflow: "ellipsis", overflow: "hidden", maxWidth: '180px'}}>
-        {operator?.name ?? '-'}
-      </Typography>
-    </Box>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Typography variant='body1' sx={{ width: '100%', textOverflow: "ellipsis", overflow: "hidden", maxWidth: '180px' }}>
+          {operator?.name ?? '-'}
+        </Typography>
+
+        <IconButton sx={{ padding: 0 }} onClick={handlePopoverOpen}>
+          <HelpIcon sx={{ height: "20px" }} />
+        </IconButton>
+      </div>
+
+      <PieceDocsPopover
+        operator={operator}
+        popoverOpen={popoverOpen}
+        handlePopoverClose={handlePopoverClose}
+      />
+    </Box >
   )
 }
 
-export default OperatorSidebarNode
+export default PiecesSidebarNode

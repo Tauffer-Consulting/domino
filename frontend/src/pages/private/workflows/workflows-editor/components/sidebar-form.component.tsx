@@ -77,7 +77,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
       for (const key in data) {
         const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
         const upstreamId = fromUpstream && upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].upstreamId : null
-        if (key !== 'storage'){
+        if (key !== 'storage') {
           upstreamMapFormInfo[key] = {
             fromUpstream: fromUpstream,
             upstreamId: upstreamId,
@@ -175,9 +175,9 @@ const SidebarForm = (props: ISidebarFormProps) => {
     }
 
     var auxFormData = formData ? JSON.parse(JSON.stringify(formData)) : {}
-    if (formId in auxCheckboxState){
+    if (formId in auxCheckboxState) {
       auxCheckboxState[formId][e.target.value] = e.target.checked
-    }else{
+    } else {
       auxCheckboxState[formId] = {
         [e.target.value]: e.target.checked
       }
@@ -301,7 +301,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
       }
       setCheckboxes(auxCheckboxes)
     }
-    if (formJsonSchema){
+    if (formJsonSchema) {
       loadCheckboxes()
     }
   }, [formJsonSchema, handleCheckbox, formId, getForageCheckboxStates])
@@ -311,12 +311,14 @@ const SidebarForm = (props: ISidebarFormProps) => {
       anchor='left'
       open={open}
       onClose={onClose}
-      sx={{ "& .MuiDrawer-paper": { marginTop: "4rem" } }}
+      sx={{
+        "& .MuiDrawer-paper": { marginTop: "4rem", width: "33%", maxWidth: '500px', minWidth: '300px' }
+      }}
       BackdropProps={{ style: { backgroundColor: "transparent" } }}
     >
-      <div style={{ width: '400px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <div style={{ width: '100%', maxWidth: '500px', minWidth: '300px', paddingLeft: '20px', paddingRight: '20px' }}>
         {
-          title ? <Typography variant='h5' component="h5" sx={{marginTop: '20px', marginBottom: "20px"}}>{title}</Typography >: <br/>
+          title ? <Typography variant='h5' component="h5" sx={{ marginTop: '20px', marginBottom: "20px" }}>{title}</Typography > : <br />
         }
         <Grid container>
           {
@@ -331,7 +333,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
               </Grid>
               : null
           }
-          <Grid container>
+          <Grid container sx={{ paddingBottom: "25px" }}>
             <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
               <JsonForms
                 schema={formJsonSchema}
@@ -356,7 +358,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
             isPieceForm ?
               <Grid container spacing={0}>
                 <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid", marginBottom: '20px', marginTop: '20px' }}>Storage</Typography>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%' }} className='sidebar-jsonforms-grid'>
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', paddingBottom: '25px' }} className='sidebar-jsonforms-grid'>
                   <JsonForms
                     data={storageFormData}
                     onChange={handleOnChangeStorage}
