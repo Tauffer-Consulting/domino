@@ -49,4 +49,11 @@ This is a convenience command that will:
 This command might take up to a few minutes to execute, since it will download and run all the necessary docker images.
 If everything worked as expected, after all processes started successfully you should be able to navigate to :code:`localhost:3000` to access the Domino frontend service.
 
+
+To run with compose using the configuration variables from an existing Domino project's :code:`config-domino-local.toml`` file you can use the :code:`--use-config-file` flag.
+Please ensure that the config-domino-local.toml file is located in the same directory you are running the command from.
+.. code-block::
+    
+    domino platform run-compose --use-config-file
+
 |

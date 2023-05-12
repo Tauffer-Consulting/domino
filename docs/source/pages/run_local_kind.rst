@@ -66,7 +66,7 @@ Prepare the platform with Domino CLI
 
 You can use Domino CLI to prepare the configuration file and environment variables necessary to run the Domino platform locally by running:
 
-.. code-block::
+.. code-block::..
   
   domino platform prepare
 
@@ -187,4 +187,31 @@ but now you must set :code:`deploy_mode=local-k8s-dev` and provide the local pat
 It can be also configured directly in the :code:`config-domino-local.yaml` file in :code:`dev` section.
 The final configuration file should look like this:
 
-.. image:: /_static/media/configtoml_example.png
+.. code-block:: toml
+
+  [path]
+  DOMINO_LOCAL_RUNNING_PATH = "/path/to/local/project"
+
+  [kind]
+  DOMINO_KIND_CLUSTER_NAME = "domino-cluster"
+  DOMINO_DEPLOY_MODE = "local-k8s-dev"
+
+  [github]
+  DOMINO_GITHUB_WORKFLOWS_REPOSITORY = "My-Organization/domino-workflows-repository"
+  DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN = "ghp_somerandomtoken"
+  DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS = "ghp_somerandomtoken"
+  DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY = "LS0..."
+  DOMINO_GITHUB_WORKFLOWS_SSH_PUBLIC_KEY = "ssh-rsa AAAAB..."
+
+  [domino_db]
+  DOMINO_DB_HOST = "postgres"
+  DOMINO_DB_PORT = "postgres"
+  DOMINO_DB_USER = "postgres"
+  DOMINO_DB_PASSWORD = "postgres"
+  DOMINO_DB_NAME = "postgres"
+
+  [dev]
+  DOMINO_LOCAL_DOMINO_PACKAGE = "/path/tolocal/domino"
+  some_local_pieces_repository_name = "/path/to/local/pieces/repository"
+
+|
