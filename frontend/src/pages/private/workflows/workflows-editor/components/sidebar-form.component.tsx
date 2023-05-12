@@ -254,6 +254,8 @@ const SidebarForm = (props: ISidebarFormProps) => {
           }
         }
         if (e.target.checked && !enums.length) {
+          auxCheckboxState[formId][e.target.value] = false
+          await setForageCheckboxStates(auxCheckboxState)
           toast.error('There are no upstream outputs with the same type as the selected field')
         }
         else if (e.target.checked) {
