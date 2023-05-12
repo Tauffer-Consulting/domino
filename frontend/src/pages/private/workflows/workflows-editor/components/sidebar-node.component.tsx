@@ -82,17 +82,17 @@ const OperatorSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
               paddingBottom: '0.5rem',
               overflow: 'hidden',
               '& .popover-handle': {
-                backgroundColor: '#f5f5f5',
+                backgroundColor: '#323C3D',
                 padding: '0.5rem',
                 '& .drag-handle': {
                   cursor: 'move',
                   '& svg': {
-                    color: '#000'
+                    color: '#f5f5f5'
                   }
                 },
                 '& .close-button': {
                   '& svg': {
-                    color: '#000'
+                    color: '#f5f5f5'
                   }
                 }
               },
@@ -100,48 +100,47 @@ const OperatorSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
                 maxHeight: '500px',
                 overflowY: 'auto',
                 '& .MuiTypography-root': {
-                  fontSize: '1rem',
-                  '& strong': { fontWeight: 500 }
+                  '& strong': { fontWeight: 450 }
                 }
               }
             }
           }}
         >
-          <div className="popover-handle" style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="popover-handle" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="drag-handle">
               <DragHandleIcon />
             </div>
+            <Typography sx={{ padding: '0rem', fontWeight: 500, fontSize: '1.4rem', color: "#f5f5f5", textAlign: "center" }}>{operator.name}</Typography>
             <div className="close-button">
               <IconButton size="small" onClick={(event) => handlePopoverClose(event, 'closeButtonClick')}>
                 <CloseIcon />
               </IconButton>
             </div>
           </div>
-          <Typography sx={{ padding: '0rem', fontWeight: 600, fontSize: '1.6rem', textAlign: "center" }}>{operator.name}</Typography>
           <div className="popover-content">
-            <Typography sx={{ padding: '1rem', fontWeight: 600, fontSize: '1.2rem', paddingBottom: 0 }}>Input</Typography>
+            <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Input</Typography>
             {Object.entries(operator.input_schema.properties).map(([key, value]) => {
               const argument = value as IIOProperty;
               return (
-                <Typography key={key} sx={{ padding: '0.5rem', paddingBottom: 0 }}>
+                <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
                   <strong>{argument.title}</strong> [<em>{argument.type}</em>] - {argument.description}
                 </Typography>
               );
             })}
-            <Typography sx={{ padding: '1rem', fontWeight: 600, fontSize: '1.2rem', paddingBottom: 0 }}>Output</Typography>
+            <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Output</Typography>
             {Object.entries(operator.output_schema.properties).map(([key, value]) => {
               const argument = value as IIOProperty;
               return (
-                <Typography key={key} sx={{ padding: '0.5rem', paddingBottom: 0 }}>
+                <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
                   <strong>{argument.title}</strong> [<em>{argument.type}</em>] - {argument.description}
                 </Typography>
               );
             })}
-            {operator.secrets_schema && <Typography sx={{ padding: '1rem', fontWeight: 600, fontSize: '1.2rem', paddingBottom: 0 }}>Secrets</Typography>}
+            {operator.secrets_schema && <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Secrets</Typography>}
             {operator.secrets_schema && Object.entries(operator.secrets_schema.properties).map(([key, value]) => {
               const argument = value as IIOProperty;
               return (
-                <Typography key={key} sx={{ padding: '0.5rem', paddingBottom: 0 }}>
+                <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
                   <strong>{argument.title}</strong> [<em>{argument.type}</em>] - {argument.description}
                 </Typography>
               );
