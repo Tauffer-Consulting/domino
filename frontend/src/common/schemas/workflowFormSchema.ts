@@ -53,11 +53,14 @@ export const workflowFormSchema = {
                 "source": {
                     "title": "Storage Source",
                     "type": "string",
-                    "enum": [
+                    "enum": process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local-compose" ? [
                         "None",
                         "Local",
-                        "AWS S3"
-                    ],
+                    ] :
+                        [
+                            "None",
+                            "AWS S3"
+                        ],
                     "default": "None"
                 },
                 "baseFolder": {
