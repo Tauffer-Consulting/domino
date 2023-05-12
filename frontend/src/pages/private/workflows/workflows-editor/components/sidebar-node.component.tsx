@@ -8,7 +8,7 @@ import Draggable from 'react-draggable';
 import { IOperator, IIOProperty } from 'services/requests/piece';
 
 
-const OperatorSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
+const PieceSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState<PopoverPosition | undefined>(undefined);
 
@@ -154,4 +154,4 @@ const OperatorSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
   )
 }
 
-export default OperatorSidebarNode
+export default PieceSidebarNode
