@@ -44,6 +44,7 @@ export interface IIOProperty {
   type: string
   description: string | null
   default: string | null
+  allOf: any[] | null
 }
 
 export interface IIOSchema {
@@ -51,6 +52,8 @@ export interface IIOSchema {
   description: string
   type: string
   properties: any
+  required: string[]
+  definitions: any
 }
 
 

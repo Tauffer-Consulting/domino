@@ -8,6 +8,34 @@ import Draggable from 'react-draggable';
 import { IOperator, IIOProperty } from 'services/requests/piece';
 
 
+function renderPieceProperties(operator: IOperator, key: 'input_schema' | 'output_schema' | 'secrets_schema') {
+  const schema = operator[key];
+  const properties = schema?.properties || {};
+  return Object.entries(properties).map(([key, value]) => {
+    const argument = value as IIOProperty;
+    let typeName: string = argument.type;
+    let valuesOptions: string[] = [];
+
+    if (argument.allOf && argument.allOf.length > 0) {
+      typeName = "enum";
+      const typeClass = argument.allOf[0]['$ref'].split("/").pop();
+      valuesOptions = schema?.definitions?.[typeClass].enum;
+    }
+
+    return (
+      <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
+        <strong>{key}</strong> [<em>{typeName}</em>] - {argument.description}.
+        {argument.allOf && argument.allOf.length > 0 && (
+          <>
+            {' Options: '}
+            {valuesOptions.join(", ")}
+          </>
+        )}
+      </Typography>
+    );
+  });
+}
+
 const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState<PopoverPosition | undefined>(undefined);
@@ -119,33 +147,11 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
           </div>
           <div className="popover-content">
             <Typography sx={{ padding: '1rem 1rem 0rem 1rem' }}>{operator.description}</Typography>
-            <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Input</Typography>
-            {Object.entries(operator.input_schema.properties).map(([key, value]) => {
-              const argument = value as IIOProperty;
-              return (
-                <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
-                  <strong>{key}</strong> [<em>{argument.type}</em>] - {argument.description}
-                </Typography>
-              );
-            })}
+            {renderPieceProperties(operator, 'input_schema')}
             <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Output</Typography>
-            {Object.entries(operator.output_schema.properties).map(([key, value]) => {
-              const argument = value as IIOProperty;
-              return (
-                <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
-                  <strong>{key}</strong> [<em>{argument.type}</em>] - {argument.description}
-                </Typography>
-              );
-            })}
+            {renderPieceProperties(operator, 'output_schema')}
             {operator.secrets_schema && <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Secrets</Typography>}
-            {operator.secrets_schema && Object.entries(operator.secrets_schema.properties).map(([key, value]) => {
-              const argument = value as IIOProperty;
-              return (
-                <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
-                  <strong>{key}</strong> [<em>{argument.type}</em>] - {argument.description}
-                </Typography>
-              );
-            })}
+            {operator.secrets_schema && renderPieceProperties(operator, 'secrets_schema')}
           </div>
 
         </Popover>
