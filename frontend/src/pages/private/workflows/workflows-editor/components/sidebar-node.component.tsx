@@ -124,7 +124,7 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
               const argument = value as IIOProperty;
               return (
                 <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
-                  <strong>{argument.title}</strong> [<em>{argument.type}</em>] - {argument.description}
+                  <strong>{key}</strong> [<em>{argument.type}</em>] - {argument.description}
                 </Typography>
               );
             })}
@@ -133,7 +133,7 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
               const argument = value as IIOProperty;
               return (
                 <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
-                  <strong>{argument.title}</strong> [<em>{argument.type}</em>] - {argument.description}
+                  <strong>{key}</strong> [<em>{argument.type}</em>] - {argument.description}
                 </Typography>
               );
             })}
@@ -142,7 +142,7 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
               const argument = value as IIOProperty;
               return (
                 <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
-                  <strong>{argument.title}</strong> [<em>{argument.type}</em>] - {argument.description}
+                  <strong>{key}</strong> [<em>{argument.type}</em>] - {argument.description}
                 </Typography>
               );
             })}
