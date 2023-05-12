@@ -35,11 +35,12 @@ export const WorkspacesPage: FC = () => {
 
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false)
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null)
-
+  
   const deleteWorkspace = useCallback(() => {
     if (deleteWorkspaceId){
       handleDeleteWorkspace(deleteWorkspaceId)
     }
+    setDeleteWorkspaceId(null)
     setIsOpenDeleteDialog(false)
   }, [handleDeleteWorkspace, deleteWorkspaceId])
 

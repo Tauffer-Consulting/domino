@@ -83,8 +83,8 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
 
   const handleDeleteWorkspace = useCallback((id: string)=>{
     deleteWorkspace({id}).then(() => {
-        const storageWorkspace = JSON.parse(localStorage.getItem('workspace')!)
-        if (storageWorkspace.id === id) {
+      const storageWorkspace = JSON.parse(localStorage.getItem('workspace')!)
+        if (storageWorkspace && storageWorkspace.id === id) {
           localStorage.removeItem('workspace')
           setWorkspace(null)
         }
