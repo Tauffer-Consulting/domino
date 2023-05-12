@@ -11,7 +11,7 @@ import {
   Typography,
   useTheme
 } from '@mui/material'
-import { FC, ReactNode } from 'react'
+import { FC, ReactNode, useState } from 'react'
 import {
   Drawer,
   DrawerHeader
@@ -30,6 +30,7 @@ export const PermanentDrawerRightWorkflows: FC<
   PermanentDrawerRightWorkflowsProps
 > = ({ isOpen, handleClose }) => {
   const theme = useTheme()
+  const [openDrawer, setOpenDrawer] = useState(true)
 
   return (
     <Box sx={{ overflow: 'auto' }}>
@@ -37,28 +38,34 @@ export const PermanentDrawerRightWorkflows: FC<
         position='fixed'
         sx={{ backgroundColor: theme.palette.background.paper }}
       >
-        <Drawer variant='permanent' anchor='right' open={true}>
+        <Drawer variant='permanent' anchor='right' open={openDrawer}>
           <DrawerHeader sx={{ marginTop: '4rem' }}>
-            <Typography
-              variant='h1'
-              sx={{ display: 'flex', flex: 1 }}
-            >
-              Pieces
-            </Typography>
-            <IconButton onClick={handleClose} edge='start'>
-              {theme.direction === 'rtl' ? (
+            {openDrawer && (
+              <Typography
+                variant='h1'
+                sx={{ display: 'flex', flex: 1 }}
+              >
+                Pieces
+              </Typography>
+            )}
+            <IconButton onClick={() => setOpenDrawer(!openDrawer)} edge='start'>
+              {openDrawer ? (
                 <ChevronRightIcon />
               ) : (
                 <ChevronLeftIcon />
               )}
             </IconButton>
           </DrawerHeader>
-          <Divider />
-          <ListItem>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <SidebarAddNode />
-            </Box>
-          </ListItem>
+          {openDrawer && (
+            <>
+              <Divider />
+              <ListItem>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <SidebarAddNode />
+                </Box>
+              </ListItem>
+            </>
+          )}
         </Drawer>
       </AppBar>
     </Box>

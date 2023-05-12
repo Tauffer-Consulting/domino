@@ -14,7 +14,7 @@ import {
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { IOperator } from 'services/requests/piece'
-import PieceSidebarNode from './sidebar-node.component'
+import PiecesSidebarNode from './sidebar-node.component'
 
 /**
  * @todo cleanup comments when no longer needed
@@ -146,7 +146,7 @@ const SidebarAddNode: FC = () => {
                 piecesMap[repo.id] &&
                 piecesMap[repo.id].length &&
                 piecesMap[repo.id].map((operator) => (
-                  <PieceSidebarNode operator={operator} key={operator.id} />
+                  <PiecesSidebarNode operator={operator} key={operator.id} />
                 ))}
             </AccordionDetails>
           </Accordion>
