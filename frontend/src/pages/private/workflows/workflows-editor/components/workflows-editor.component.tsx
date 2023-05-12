@@ -41,6 +41,29 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
     handleCreateWorkflow
   } = useWorkflowsEditor();
 
+  const validateWorkflowForms = useCallback(async (payload: any) => {
+    const workflowData = payload.workflow
+    const workflowSchema: any = workflowFormSchema.properties.config
+    const workflowSchemaRequireds = workflowSchema.required
+    const tasksData = payload.tasks
+    const storageSchema = workflowFormSchema.properties.storage
+
+    if (!workflowData || workflowData === undefined){
+      throw new Error('Please fill in the workflow settings.')
+    }
+
+    // iterate over config keys and validate workflow data
+    for (const key in workflowSchema.properties) {
+      if (workflowSchemaRequireds.includes(key)) {
+        if (!(key in workflowData) || !workflowData[key]) {
+          const title = workflowSchema.properties[key].title 
+          throw new Error(`Please fill in the ${title} field in Settings.`)
+        }
+      }
+    }
+
+  }, [])
+
   const handleSaveWorkflow = useCallback(async () => {
     try{
       setBackdropIsOpen(true)
@@ -49,7 +72,16 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
         setBackdropIsOpen(false)
         return toast.error('Please add tasks to the workflow')
       }
-      console.log('Payload', payload)
+      try{
+        await validateWorkflowForms(payload)
+      }
+      catch (err: any) {
+        setBackdropIsOpen(false)
+        console.log(err.message)
+        return toast.error(err.message)
+        //return toast.error(err)
+      }
+    
       handleCreateWorkflow(payload)
         .then((response) => {
           toast.success('Workflow created successfully.')

@@ -115,7 +115,6 @@ class WorkflowService(object):
                     content=workflow_code
                 )
             else:
-                # TODO handle errors when uploading to github
                 workflow_path_git = f'workflows/{workflow_id}.py'
                 self.github_rest_client.create_file(
                     repo_name=settings.DOMINO_GITHUB_WORKFLOWS_REPOSITORY,
