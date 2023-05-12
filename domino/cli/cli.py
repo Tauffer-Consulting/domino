@@ -170,9 +170,15 @@ def cli_create_platform(domino_frontend_image, domino_rest_image, run_airflow, u
     help="Run in detached mode.",
     default=False
 )
-def cli_run_platform_compose(d):
+@click.option(
+    '--use-config-file',
+    is_flag=True,
+    help="Use config file to run platform.",
+    default=False
+)
+def cli_run_platform_compose(d, use_config_file):
     """Run Domino platform locally with docker compose. Do NOT use this in production."""
-    platform.run_platform_compose(detached=d)
+    platform.run_platform_compose(detached=d, use_config_file=use_config_file)
 
 
 @click.group()

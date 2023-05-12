@@ -68,10 +68,8 @@ def prepare_platform(
     config_dict["kind"]["DOMINO_KIND_CLUSTER_NAME"] = cluster_name
     config_dict['kind']['DOMINO_DEPLOY_MODE'] = deploy_mode
 
-    config_dict['local_pieces_repositories'] = {}
-    config_dict['local_domino_package'] = {"DOMINO_LOCAL_DOMINO_PACKAGE": ""}
     if deploy_mode == 'local-k8s-dev':
-        config_dict['local_domino_package']['DOMINO_LOCAL_DOMINO_PACKAGE'] = local_domino_path
+        config_dict['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'] = local_domino_path
         for local_pieces_repository in local_pieces_repository_path:
             # Read repo config.toml to get repo name to map it to cluster path
             repo_config_file_path = Path(local_pieces_repository).resolve() / "config.toml"
@@ -79,7 +77,7 @@ def prepare_platform(
                 repo_toml = tomli.load(f)
             
             repo_name = repo_toml['repository']['REPOSITORY_NAME'] 
-            config_dict['local_pieces_repositories'][repo_name] = local_pieces_repository
+            config_dict['dev'][repo_name] = local_pieces_repository
 
     config_dict['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'] = workflows_repository.split("github.com/")[-1].strip('/')
 
@@ -118,8 +116,11 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
         )
     )
     extra_mounts_local_repositories = []
+
+    local_pieces_respositories = {key: value for key, value in platform_config['dev'].items() if key != "DOMINO_LOCAL_DOMINO_PACKAGE"}
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
-        for repo_name, repo_path in platform_config['local_pieces_repositories'].items():
+        #for repo_name, repo_path in platform_config['local_pieces_repositories'].items():
+        for repo_name, repo_path in local_pieces_respositories.items():
             extra_mounts_local_repositories.append(
                 dict(
                     hostPath=repo_path,
@@ -128,10 +129,10 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
                     propagation='HostToContainer'
                 )
             )
-        if platform_config['local_domino_package'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
+        if platform_config['dev'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
             extra_mounts_local_repositories.append(
                 dict(
-                    hostPath=platform_config['local_domino_package']['DOMINO_LOCAL_DOMINO_PACKAGE'],
+                    hostPath=platform_config['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'],
                     containerPath=f"/domino/domino_py",
                     readOnly=True,
                     propagation='HostToContainer'
@@ -245,7 +246,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     workers_extra_volumes_mounts = []
     workers = {}
     scheduler = {}
-    if platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev' and platform_config['local_domino_package'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
+    if platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev' and platform_config['dev'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
         workers_extra_volumes = [
             {
                 "name": "domino-dev-extra",
@@ -402,7 +403,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
         console.print('Creating RBAC Scheduler Authorization for local dev')
         v1.create_cluster_role_binding(cluster_role_binding_scheduler)
 
-        for project_name in platform_config["local_pieces_repositories"].keys():
+        for project_name in local_pieces_respositories.keys():
             console.log(f"Creating PV and PVC for {project_name}...")
             # Check if pv already exists
             persistent_volume_name = 'pv-{}'.format(str(project_name.lower().replace('_', '-')))
@@ -470,7 +471,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
                 )
                 k8s_client.create_persistent_volume(body=pv)
         
-        if platform_config['local_domino_package'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
+        if platform_config['dev'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
             console.print("Creating PV's and PVC's for Local Domino Package...")
             # Create pv and pvc for local dev domino
             pvc = client.V1PersistentVolumeClaim(
@@ -522,7 +523,14 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     console.print("and the Backend API at: http://localhost/api/")
 
 
-def run_platform_compose(detached: bool = False):
+def run_platform_compose(detached: bool = False, use_config_file: bool = False) -> None:
+    if use_config_file:
+        console.print("Using config file...")
+        with open("config-domino-local.toml", "rb") as f:
+            platform_config = tomli.load(f)
+        token_pieces = platform_config["github"].get("DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN")
+        os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = token_pieces
+
     # Create local directories
     local_path = Path(".").resolve()
     domino_dir = local_path / "domino_data"
