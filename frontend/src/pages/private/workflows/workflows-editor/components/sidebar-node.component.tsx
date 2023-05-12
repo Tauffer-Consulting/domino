@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Box, Typography, IconButton, PopoverPosition } from '@mui/material'
+import { Box, Typography, IconButton } from '@mui/material'
 import HelpIcon from '@mui/icons-material/Help';
 
 import { IOperator } from 'services/requests/piece';
@@ -8,7 +8,6 @@ import PieceDocsPopover from './piece-docs-popover.component';
 
 const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [anchorPosition, setAnchorPosition] = useState<PopoverPosition | undefined>(undefined);
 
   // Drag and drop from sidebar to Workflow area
   const onDragStart = (event: React.DragEvent<HTMLDivElement>, nodeData: any) => {
@@ -20,10 +19,6 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
   // Help popover
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setPopoverOpen(true);
-    const targetRect = event.currentTarget.getBoundingClientRect();
-    const top = window.innerHeight / 2 - targetRect.height / 2;
-    const left = window.innerWidth / 2 - targetRect.width / 2;
-    setAnchorPosition({ top, left });
   };
 
   const handlePopoverClose = (event: React.MouseEvent<HTMLButtonElement>, reason: any) => {
@@ -57,7 +52,6 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
         operator={operator}
         popoverOpen={popoverOpen}
         handlePopoverClose={handlePopoverClose}
-        anchorPosition={anchorPosition}
       />
     </Box >
   )

@@ -39,17 +39,16 @@ interface PieceDocsPopoverProps {
     operator: IOperator;
     popoverOpen: boolean;
     handlePopoverClose: (event: React.MouseEvent<HTMLButtonElement>, reason: any) => void;
-    anchorPosition: any;
 }
 
-const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({ operator, popoverOpen, handlePopoverClose, anchorPosition }) => (
+const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({ operator, popoverOpen, handlePopoverClose }) => (
     <Draggable handle=".popover-handle" cancel=".popover-content">
         <Popover
             disableEnforceFocus
             disableAutoFocus
             disableScrollLock
             open={popoverOpen}
-            anchorPosition={anchorPosition}
+            anchorPosition={{ top: window.innerHeight / 2, left: window.innerWidth / 2 }}
             anchorReference="anchorPosition"
             onClose={handlePopoverClose}
             anchorOrigin={{
