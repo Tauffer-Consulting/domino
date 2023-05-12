@@ -1,5 +1,15 @@
-import { FC } from 'react'
-import { Alert, Grid, Typography } from '@mui/material'
+import { FC, useCallback, useState } from 'react'
+import { 
+  Alert, 
+  Grid, 
+  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button
+} from '@mui/material'
 
 import { PrivateLayout } from 'modules/layout'
 import { useWorkspaces } from 'context/workspaces/workspaces.context'
@@ -23,8 +33,40 @@ export const WorkspacesPage: FC = () => {
     handleDeleteWorkspace
   } = useWorkspaces()
 
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false)
+  const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null)
+
+  const deleteWorkspace = useCallback(() => {
+    if (deleteWorkspaceId){
+      handleDeleteWorkspace(deleteWorkspaceId)
+    }
+    setIsOpenDeleteDialog(false)
+  }, [handleDeleteWorkspace, deleteWorkspaceId])
+
   return (
     <PrivateLayout>
+      <Dialog
+        open={isOpenDeleteDialog}
+        onClose={() => setIsOpenDeleteDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Confirm Workflow Deletion"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this workspace and all its contents?
+            This action <span style={{ fontWeight: 'bold' }}>cannot be undone</span>.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={deleteWorkspace} variant='outlined' color='error'>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Typography variant='h6' component='h1' sx={{ mt: 7, mb: 2 }}>
         My workspaces
       </Typography>
@@ -45,7 +87,10 @@ export const WorkspacesPage: FC = () => {
             workspace={ws}
             key={index}
             handleSelect={() => handleChangeWorkspace(ws.id)}
-            handleDelete={() => handleDeleteWorkspace(ws.id)}
+            handleDelete={()=> {
+              setDeleteWorkspaceId(ws.id)
+              setIsOpenDeleteDialog(true)
+            }}
             selectedWorkspaceId={workspace?.id}
           />
         ))}
