@@ -79,7 +79,7 @@ const OperatorSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
               boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.75)',
               backgroundColor: '#fff',
               color: '#000',
-              paddingBottom: '0.5rem',
+              paddingBottom: '2rem',
               overflow: 'hidden',
               '& .popover-handle': {
                 backgroundColor: '#323C3D',
