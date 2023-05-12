@@ -55,7 +55,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
       if (workflowSchemaRequireds.includes(key)) {
         if (!(key in workflowData) || !workflowData[key]) {
           const title = workflowSchema.properties[key].title 
-          throw new Error(`Please fill in the ${title} field in Settings.`)
+          throw new Error(`Please the ${title} field in Settings.`)
         }
       }
     }
@@ -64,25 +64,30 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
 
   const validateTasksForms = useCallback(async (payload: any) => {
     const tasksData: any = payload.tasks
-    const storageSchema = workflowFormSchema.properties.storage
+    //const storageSchema = workflowFormSchema.properties.storage
     for (const entry of Object.entries(tasksData)) {
       const [taskId, taskData]: [string, any] = entry;
       const taskPieceId = taskData.piece.id;
-      const pieceGroundTruth = await fetchForagePieceById(taskPieceId)
+      const pieceGroundTruth: any = await fetchForagePieceById(taskPieceId)
+      const pieceLabel = pieceGroundTruth?.style?.label ? pieceGroundTruth.style.label : pieceGroundTruth.name
       if (!pieceGroundTruth) {
         throw new Error(`Task ${taskId} has an invalid piece.`)
       }
-      const pieceInputSchema = pieceGroundTruth.input_schema
-      const taskPieceInputData = taskData.piece.piece_input_kwargs
-      console.log('schema', pieceInputSchema)
-      console.log('data', taskData)
+      const pieceInputSchema: any = pieceGroundTruth.input_schema
+      const taskPieceInputData = taskData.piece_input_kwargs
+      const requiredFields = pieceInputSchema.required ? pieceInputSchema.required : []
 
-      
-
+      for (const required of requiredFields) {
+        if (!(required in taskPieceInputData)){
+          throw new Error(`${pieceLabel} is missing required input fields.`)
+        }
+        
+      }
     }
+    return
 
 
-  }, [])
+  }, [fetchForagePieceById])
 
   const handleSaveWorkflow = useCallback(async () => {
     try{
