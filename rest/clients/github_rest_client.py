@@ -21,7 +21,7 @@ class GithubRestClient(Github):
         #     raise UnauthorizedException()
         else:
             self.logger.exception(_exception)
-            raise BaseException()
+            raise BaseException('Error connecting to github service.')
 
 
     def get_contents(self, repo_name: str, file_path: str, commit_sha: str = None):
