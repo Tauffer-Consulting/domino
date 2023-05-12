@@ -28,3 +28,7 @@ body,
 .sidebar-jsonforms-grid .MuiGrid-root .MuiGrid-container {
   row-gap: 6px;
 }
+
+.sidebar-jsonforms-grid .MuiTypography-h5 {
+  font-size: 1rem;
+}
