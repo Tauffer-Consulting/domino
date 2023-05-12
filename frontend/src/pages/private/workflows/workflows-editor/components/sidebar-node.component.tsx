@@ -118,6 +118,7 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
             </div>
           </div>
           <div className="popover-content">
+            <Typography sx={{ padding: '1rem 1rem 0rem 1rem' }}>{operator.description}</Typography>
             <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Input</Typography>
             {Object.entries(operator.input_schema.properties).map(([key, value]) => {
               const argument = value as IIOProperty;
