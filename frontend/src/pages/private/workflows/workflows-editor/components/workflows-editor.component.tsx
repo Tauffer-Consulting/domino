@@ -81,7 +81,6 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
         if (!(required in taskPieceInputData)){
           throw new Error(`${pieceLabel} is missing required input fields.`)
         }
-        
       }
     }
     return
@@ -114,6 +113,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
         .catch((err) => {
           if (err.response?.status === 422) {
             setBackdropIsOpen(false)
+            console.log('response', err.response)
             toast.error('Error while creating workflow, check your workflow settings and tasks.')
             return
           }
@@ -124,7 +124,15 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
       setBackdropIsOpen(false)
       console.log(err)
     }
-  }, [workflowsEditorBodyFromFlowchart, handleCreateWorkflow, setBackdropIsOpen])
+  }, 
+    [
+      workflowsEditorBodyFromFlowchart, 
+      handleCreateWorkflow, 
+      setBackdropIsOpen, 
+      validateTasksForms, 
+      validateWorkflowForms
+    ]
+  )
 
   // @ts-ignore: Unreachable code error
   const toggleDrawer = (open) => (event) => {
