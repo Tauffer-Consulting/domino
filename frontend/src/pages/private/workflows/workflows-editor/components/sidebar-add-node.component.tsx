@@ -116,12 +116,13 @@ const SidebarAddNode: FC = () => {
                   textOverflow: 'ellipsis',
                   WebkitLineClamp: '2',
                   WebkitBoxOrient: 'vertical',
-                  maxWidth: '180px'
+                  maxWidth: '180px',
+                  fontWeight: '450'
                 }}
               >
                 {repo.label}
               </Typography>
-              
+
             </AccordionSummary>
             <AccordionDetails
               sx={{
