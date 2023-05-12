@@ -245,7 +245,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
             handleClose={() => setMenuOpen(!menuOpen)}
           />
         </Grid>
-        <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} renderCheckboxes={false} />
+        <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} />
       </div>
     </>
   )
