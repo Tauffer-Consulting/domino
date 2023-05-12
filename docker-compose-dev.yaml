@@ -5,6 +5,7 @@ version: '3.8'
 x-airflow-common:
   &airflow-common
   image: apache/airflow:2.5.3-python3.9
+  # build: .
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -224,7 +225,10 @@ services:
   # Modified Airflow Scheduler with Domino
   airflow-scheduler:
     <<: *airflow-common
-    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
+    # image: airflow-domino-scheduler:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-airflow-domino-base-dev
     container_name: airflow-domino-scheduler
     command: scheduler
     healthcheck:
@@ -247,6 +251,7 @@ services:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
+      - ./domino/:/opt/airflow/domino/domino_py/domino # Hot reload d omino package - remove in production
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -255,7 +260,10 @@ services:
   # Modified Airflow Worker with Domino
   airflow-worker:
     <<: *airflow-common
-    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
+    # image: airflow-domino-worker:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-airflow-domino-base-dev
     container_name: airflow-domino-worker
     command: celery worker
     healthcheck:
@@ -280,6 +288,7 @@ services:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
       - ${PWD}/domino_data:/home/shared_storage
+      - ./domino/:/opt/airflow/domino/domino_py/domino # Enable hot reload for domino package - remove in production
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -287,7 +296,9 @@ services:
 
   # Domino REST Api
   domino_rest:
-    image: ghcr.io/tauffer-consulting/domino-rest:latest
+    build:
+      context: ./rest
+      dockerfile: Dockerfile
     container_name: domino-rest
     command: bash -c "alembic upgrade heads && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
     ports:
@@ -306,6 +317,7 @@ services:
       - domino-postgres-network
       - default
     volumes:
+      - ./rest/:/rest # Enable hot reload for backend
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
     depends_on:
       domino_postgres:
@@ -339,10 +351,17 @@ services:
 
   # Domino Frontend
   domino_frontend:
-    image: ghcr.io/tauffer-consulting/domino-frontend:compose
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: domino-frontend
+    command: yarn start:local
+    environment:
+      - DOMINO_DEPLOY_MODE=local-compose
     ports:
-      - "3000:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend:/usr/src/app # Enable hot reload for frontend
     depends_on:
       domino_rest:
         condition: service_started
@@ -353,4 +372,6 @@ volumes:
 
 networks:
   domino-postgres-network:
+    driver: bridge
+  domino-services-network:
     driver: bridge

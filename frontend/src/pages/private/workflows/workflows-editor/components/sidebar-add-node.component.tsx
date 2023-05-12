@@ -14,14 +14,12 @@ import {
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { IOperator } from 'services/requests/piece'
-import OperatorSidebarNode from './sidebar-node.component'
+import PiecesSidebarNode from './sidebar-node.component'
 
 /**
  * @todo cleanup comments when no longer needed
  * @todo move operators rules to create workflow context
  * @todo improve loading/error/empty states
- * @todo use (randomly generated?) colors to visually group operators from same repo
- * @todo apply these colors on workflow area as well
  */
 const SidebarAddNode: FC = () => {
   const {
@@ -32,9 +30,8 @@ const SidebarAddNode: FC = () => {
     toggleNodeDirection
   } = useWorkflowsEditor()
 
-  const [operators, setOperators] = useState<IOperator[]>([])
-  /** controls the selected accordion, if any */
-  const [expandedRepo, setExpandedRepo] = useState<string | false>(false)
+  const [piecesMap, setPiecesMap] = useState<{ [key: string]: IOperator[] }>({})
+  const [expandedRepos, setExpandedRepos] = useState<string[]>([])
 
   /** controls if an accordion is loading operators */
   const [loadingOperators, setLoadingOperators] = useState<string | false>(
@@ -92,19 +89,31 @@ const SidebarAddNode: FC = () => {
         repositories.map((repo) => (
           <Accordion
             TransitionProps={{ unmountOnExit: true }}
-            expanded={expandedRepo === repo.id}
+            expanded={expandedRepos.includes(repo.id)}
             key={repo.id}
             onChange={(event: SyntheticEvent, expanded: boolean) => {
               if (loadingOperators) return
-              if (expanded) {
-                // Load operators from state object
-                setLoadingOperators(repo.id)
-                setExpandedRepo(repo.id)
-                setOperators(repositoryOperators[repo.id])
-                setLoadingOperators(false)
-              } else {
-                setExpandedRepo(false)
+              setLoadingOperators(repo.id)
+
+              // Check if the repo is currently expanded
+              const isExpanded = expandedRepos.includes(repo.id)
+
+              // If the repo is already expanded, remove it from the expandedRepos array
+              // Otherwise, add it to the expandedRepos array
+              setExpandedRepos(isExpanded ?
+                prev => prev.filter(id => id !== repo.id) :
+                prev => [...prev, repo.id]
+              )
+
+              // If the repo is not currently expanded, load its pieces
+              if (!isExpanded) {
+                setPiecesMap(prev => ({
+                  ...prev,
+                  [repo.id]: repositoryOperators[repo.id],
+                }))
               }
+
+              setLoadingOperators(false)
             }}
           >
             <AccordionSummary
@@ -116,12 +125,13 @@ const SidebarAddNode: FC = () => {
                   textOverflow: 'ellipsis',
                   WebkitLineClamp: '2',
                   WebkitBoxOrient: 'vertical',
-                  maxWidth: '180px'
+                  maxWidth: '180px',
+                  fontWeight: '450'
                 }}
               >
                 {repo.label}
               </Typography>
-              
+
             </AccordionSummary>
             <AccordionDetails
               sx={{
@@ -132,10 +142,11 @@ const SidebarAddNode: FC = () => {
               {!!loadingOperators && loadingOperators === repo.id && (
                 <Alert severity='info'>Loading operators...</Alert>
               )}
-              {expandedRepo === repo.id &&
-                operators.length &&
-                operators.map((operator) => (
-                  <OperatorSidebarNode operator={operator} key={operator.id} />
+              {expandedRepos.includes(repo.id) &&
+                piecesMap[repo.id] &&
+                piecesMap[repo.id].length &&
+                piecesMap[repo.id].map((operator) => (
+                  <PiecesSidebarNode operator={operator} key={operator.id} />
                 ))}
             </AccordionDetails>
           </Accordion>

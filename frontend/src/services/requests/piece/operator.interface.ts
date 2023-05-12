@@ -15,7 +15,7 @@ export interface IOperator {
   docker_image: string
   input_schema: IIOSchema
   output_schema: IIOSchema
-  secrets_schema: any | null
+  secrets_schema: IIOSchema | null
   style?: {
     module?: string
     label?: string
@@ -39,11 +39,21 @@ export interface IRepositoryOperators {
 /**
  * Operator input/output schema
  */
-interface IIOSchema {
+export interface IIOProperty {
+  title: string
+  type: string
+  description: string | null
+  default: string | null
+  allOf: any[] | null
+}
+
+export interface IIOSchema {
   title: string
   description: string
   type: string
   properties: any
+  required: string[]
+  definitions: any
 }
 
 

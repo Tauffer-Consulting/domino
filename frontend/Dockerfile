@@ -4,7 +4,8 @@
 
 FROM node:19.2-bullseye-slim
 
-ENV NODE_ENV production
+ENV REACT_APP_API_ENV=local
+ENV DOMINO_DEPLOY_MODE=local-compose
 
 # ENV PATH /app/node_modules/.bin:$PATH
 WORKDIR /usr/src/app

@@ -42,7 +42,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
   } = useWorkflowsEditor();
 
   const handleSaveWorkflow = useCallback(async () => {
-    try{
+    try {
       setBackdropIsOpen(true)
       const payload = await workflowsEditorBodyFromFlowchart()
       if ((!payload.tasks)) {
@@ -105,8 +105,8 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
     <>
       <div className='reactflow-parent-div'>
         <Backdrop open={backgropIsOpen} sx={{ zIndex: 9999 }}>
-        <CircularProgress/>
-      </Backdrop>
+          <CircularProgress />
+        </Backdrop>
         <Grid
           container
           spacing={4}
