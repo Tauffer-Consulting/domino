@@ -106,7 +106,13 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({ operator, popoverOp
             </div>
             <div className="popover-content">
                 <Typography sx={{ padding: '1rem 1rem 0rem 1rem' }}>{operator.description}</Typography>
-                <Typography sx={{ padding: '1rem 1rem 0rem 1rem' }}>Source code: {operator.source_url}</Typography>
+                <Typography sx={{ padding: '0rem 1rem 0rem 1rem' }}>
+                    {operator.source_url ? (
+                        <a href={operator.source_url} target="_blank" rel="noopener noreferrer">source code</a>
+                    ) : (
+                        <span>No source code available</span>
+                    )}
+                </Typography>
                 <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Input</Typography>
                 {renderPieceProperties(operator, 'input_schema')}
                 <Typography sx={{ padding: '1rem 1rem 0rem 1rem', fontWeight: 500, fontSize: '1.3rem' }}>Output</Typography>
