@@ -14,5 +14,6 @@ class Piece(Base, BaseDatabaseModel):
     output_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb")) # Using server default empty JSON object for avoid null value in database
     secrets_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb"))
     style = Column(JSON, nullable=True)
+    source_url = Column(String, nullable=True)
     repository_id = Column(Integer, ForeignKey('piece_repository.id', ondelete='cascade'), nullable=False)
     piece_repository = relationship('PieceRepository', back_populates='pieces', lazy="subquery")

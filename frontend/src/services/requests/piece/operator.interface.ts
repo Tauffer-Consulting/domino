@@ -16,6 +16,7 @@ export interface IOperator {
   input_schema: IIOSchema
   output_schema: IIOSchema
   secrets_schema: IIOSchema | null
+  source_url: string | null
   style?: {
     module?: string
     label?: string
