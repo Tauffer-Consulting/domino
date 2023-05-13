@@ -244,12 +244,18 @@ def cli_create_piece_repository(name, container_registry):
     default=get_registry_token_from_env,
     help='Your Github Container Registry token with access to where the image will be published.'
 )
-def cli_organize_pieces_repository(build_images, publish_images, registry_token):
+@click.option(
+    '--source-url',
+    prompt='Url of source repository',
+    default="",
+    help='The base url for this Pieces repository.'
+)
+def cli_organize_pieces_repository(build_images, publish_images, registry_token, source_url):
     """Prepare local folder for running a Domino platform."""
     if registry_token:
         os.environ['GHCR_PASSWORD'] = registry_token
     console.print(f"Using registry token to publish images")
-    pieces_repository.organize_pieces_repository(build_images, publish_images)
+    pieces_repository.organize_pieces_repository(build_images, publish_images, source_url)
 
 
 @click.command()
