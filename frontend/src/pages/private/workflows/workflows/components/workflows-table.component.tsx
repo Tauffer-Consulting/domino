@@ -5,7 +5,13 @@ import { DataGrid, GridColumns, GridActionsCellItem, GridRowId } from '@mui/x-da
 import {
     Card,
     CircularProgress,
-    Tooltip
+    Tooltip,
+    Dialog,
+    DialogActions, 
+    DialogContent,
+    DialogContentText, 
+    DialogTitle,
+    Button
 } from '@mui/material';
 // Icons
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -14,6 +20,7 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import PlayCircleFilledWhiteOutlinedIcon from '@mui/icons-material/PlayCircleFilledWhiteOutlined';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
+
 // import { toast } from "react-toastify";
 
 // import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -45,17 +52,24 @@ export const WorkflowsTable = () => {
     } = useWorkflows()
 
     const [selectionModel, setSelectionModel] = useState<GridRowId[]>([]);
+    const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
+    const [deleteWorkflowId, setDeleteWorkflowId] = useState<string | number | null>(null);
 
-    const deleteWorkflow = useCallback((id: GridRowId) => async () => {
-        handleDeleteWorkflow(id as string).then(() => {
+    const deleteWorkflow = useCallback(async () => {
+        const id = deleteWorkflowId as string
+        handleDeleteWorkflow(id).then(() => {
             toast.success('Workflow deleted.')
             handleRefreshWorkflows()
+            setIsOpenDeleteDialog(false)
+            setDeleteWorkflowId(null)
         }).catch((error) => {
             console.log(error)
             toast.error('Error deleting workflow.')
+            setIsOpenDeleteDialog(false)
+            setDeleteWorkflowId(null)
         })
 
-    }, [handleDeleteWorkflow, handleRefreshWorkflows]);
+    }, [handleDeleteWorkflow, handleRefreshWorkflows, deleteWorkflowId]);
 
     const runWorkflow = useCallback((id: GridRowId) => async () => {
         // TODO handle run workflow
@@ -227,7 +241,7 @@ export const WorkflowsTable = () => {
                             </Tooltip>
                         }
                         label="Delete"
-                        onClick={deleteWorkflow(params.id)}
+                        onClick={() => {setDeleteWorkflowId(params.id) ; setIsOpenDeleteDialog(true)}}
                     />,
                     <GridActionsCellItem
                         icon={
@@ -245,7 +259,7 @@ export const WorkflowsTable = () => {
                     />,
                 ],
             },
-        ], [deleteWorkflow, runWorkflow, viewWorkflow]);
+        ], [runWorkflow, viewWorkflow,]);
 
     const { rowsData, totalRows } = useMemo(() => {
         const rowsData = Array.isArray(workflows.data) ? workflows.data.map((workflow) => {
@@ -262,12 +276,36 @@ export const WorkflowsTable = () => {
         const totalRows = workflows.metadata?.total || 0
         return { rowsData, totalRows }
     }, [workflows])
+    
 
     return (
         <>
             <Card
                 variant='elevation'
                 sx={{ height: 'fit-content', mt: 2, overflow: 'hidden' }}>
+                <Dialog
+                    open={isOpenDeleteDialog}
+                    onClose={() => setIsOpenDeleteDialog(false)}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        {"Confirm Workflow Deletion"}
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            
+                            Are you sure you want to delete this workflow? 
+                            This action <span style={{ fontWeight: 'bold' }}>cannot be undone</span>.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setIsOpenDeleteDialog(false)}>Cancel</Button>
+                        <Button onClick={deleteWorkflow} variant='outlined' color='error'>
+                            Delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
                 <DataGrid
                     autoHeight
                     rows={rowsData}

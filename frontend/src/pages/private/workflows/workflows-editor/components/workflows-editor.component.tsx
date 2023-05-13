@@ -38,8 +38,55 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
     fetchForageDataById,
     setNodes,
     setEdges,
-    handleCreateWorkflow
+    handleCreateWorkflow,
+    fetchForagePieceById
   } = useWorkflowsEditor();
+
+  const validateWorkflowForms = useCallback(async (payload: any) => {
+    const workflowData = payload.workflow
+    const workflowSchema: any = workflowFormSchema.properties.config
+    const workflowSchemaRequireds = workflowSchema.required
+
+    if (!workflowData || workflowData === undefined){
+      throw new Error('Please fill in the workflow settings.')
+    }
+    // iterate over config keys and validate workflow data
+    for (const key in workflowSchema.properties) {
+      if (workflowSchemaRequireds.includes(key)) {
+        if (!(key in workflowData) || !workflowData[key]) {
+          const title = workflowSchema.properties[key].title 
+          throw new Error(`Please the ${title} field in Settings.`)
+        }
+      }
+    }
+
+  }, [])
+
+  const validateTasksForms = useCallback(async (payload: any) => {
+    const tasksData: any = payload.tasks
+    //const storageSchema = workflowFormSchema.properties.storage
+    for (const entry of Object.entries(tasksData)) {
+      const [taskId, taskData]: [string, any] = entry;
+      const taskPieceId = taskData.piece.id;
+      const pieceGroundTruth: any = await fetchForagePieceById(taskPieceId)
+      const pieceLabel = pieceGroundTruth?.style?.label ? pieceGroundTruth.style.label : pieceGroundTruth.name
+      if (!pieceGroundTruth) {
+        throw new Error(`Task ${taskId} has an invalid piece.`)
+      }
+      const pieceInputSchema: any = pieceGroundTruth.input_schema
+      const taskPieceInputData = taskData.piece_input_kwargs
+      const requiredFields = pieceInputSchema.required ? pieceInputSchema.required : []
+
+      for (const required of requiredFields) {
+        if (!(required in taskPieceInputData)){
+          throw new Error(`${pieceLabel} is missing required input fields.`)
+        }
+      }
+    }
+    return
+
+
+  }, [fetchForagePieceById])
 
   const handleSaveWorkflow = useCallback(async () => {
     try {
@@ -49,7 +96,15 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
         setBackdropIsOpen(false)
         return toast.error('Please add tasks to the workflow')
       }
-      console.log('Payload', payload)
+      try{
+        await validateWorkflowForms(payload)
+        await validateTasksForms(payload)
+      }
+      catch (err: any) {
+        setBackdropIsOpen(false)
+        return toast.error(err.message)
+      }
+    
       handleCreateWorkflow(payload)
         .then((response) => {
           toast.success('Workflow created successfully.')
@@ -58,6 +113,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
         .catch((err) => {
           if (err.response?.status === 422) {
             setBackdropIsOpen(false)
+            console.log('response', err.response)
             toast.error('Error while creating workflow, check your workflow settings and tasks.')
             return
           }
@@ -68,7 +124,15 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
       setBackdropIsOpen(false)
       console.log(err)
     }
-  }, [workflowsEditorBodyFromFlowchart, handleCreateWorkflow, setBackdropIsOpen])
+  }, 
+    [
+      workflowsEditorBodyFromFlowchart, 
+      handleCreateWorkflow, 
+      setBackdropIsOpen, 
+      validateTasksForms, 
+      validateWorkflowForms
+    ]
+  )
 
   // @ts-ignore: Unreachable code error
   const toggleDrawer = (open) => (event) => {
@@ -181,7 +245,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
             handleClose={() => setMenuOpen(!menuOpen)}
           />
         </Grid>
-        <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} renderCheckboxes={false} />
+        <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} />
       </div>
     </>
   )

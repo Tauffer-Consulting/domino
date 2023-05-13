@@ -18,49 +18,6 @@ class ScheduleIntervalType(str, Enum):
     yearly = "yearly"
 
 
-# # TODO - complete with more relevant Airflow DAG arguments
-# class WorkflowConfig(BaseRequestModel):
-#     # TODO remove regex ?
-#     name: str = Field(
-#         description="Workflow name", 
-#         example="workflow_name", 
-#         regex=r"^[\w]*$",
-#     )
-#     start_date: str
-#     end_date: Optional[str] # TODO add end date to UI?
-#     schedule_interval: ScheduleIntervalType
-#     catchup: Optional[bool] = False # TODO add catchup to UI?
-#     generate_report: Optional[bool] = False
-#     description: Optional[str] # TODO add description to UI?
-    
-
-#     @validator('start_date')
-#     def start_date_validator(cls, v):
-#         try:
-#             converted_date =  datetime.fromisoformat(v).date()
-#             if converted_date < datetime.now().date():
-#                 raise ValueError("Start date must be in the future")
-#             return converted_date.isoformat()
-
-#         except ValueError:
-#             raise ValueError(f"Invalid start date: {v}")
-
-#     @validator('end_date')
-#     def end_date_validator(cls, v, values):
-#         try:
-#             if 'start_date' not in values:
-#                 raise ValueError("Start date must be provided")
-#             converted_start_date =  datetime.fromisoformat(values['start_date'])
-#             converted_end_date = datetime.fromisoformat(v)
-#             if converted_end_date <= converted_start_date:
-#                 raise ValueError("End date must greater than start date")
-#             return converted_end_date.isoformat()
-#         except ValueError:
-#             raise ValueError(f"Invalid end date: {v}")
-
-# TODO - regex to match pattern: taks_1, task_2, ...
-# TaskItemId = constr(regex=r"^[0-9]+$")  
-
 class UiSchema(BaseModel):
     nodes: Dict[
         str,

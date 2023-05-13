@@ -8,6 +8,7 @@ import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
 import { operatorStorageSchema } from 'common/schemas/storageSchemas'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
+import { toast } from 'react-toastify'
 
 const handleDefaultsAjv = createAjv({ useDefaults: true })
 
@@ -18,7 +19,7 @@ interface ISidebarFormProps {
   open: boolean,
   onClose: (event: any) => void,
   title?: string,
-  renderCheckboxes?: boolean,
+  isPieceForm?: boolean,
 }
 
 
@@ -32,7 +33,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     open,
     onClose,
     title,
-    renderCheckboxes = true
+    isPieceForm = true
   } = props
 
   //const [checkboxState, setCheckboxState] = useState<any>({})
@@ -49,7 +50,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     fetchForageWorkflowEdges,
     getForageUpstreamMap,
     setForageUpstreamMap,
-    fetchForageOperatorById,
+    fetchForagePieceById,
     getForageCheckboxStates,
     setForageCheckboxStates,
     setNameKeyUpstreamArgsMap,
@@ -61,8 +62,8 @@ const SidebarForm = (props: ISidebarFormProps) => {
   }, [formSchema])
 
   useEffect(() => {
-    setFormWidthSpace(renderCheckboxes ? 9 : 12)
-  }, [renderCheckboxes])
+    setFormWidthSpace(isPieceForm ? 9 : 12)
+  }, [isPieceForm])
 
 
   const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
@@ -71,6 +72,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
       var upstreamMap = await getForageUpstreamMap()
       const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
       var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
+
 
       for (const key in data) {
         const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
@@ -135,30 +137,30 @@ const SidebarForm = (props: ISidebarFormProps) => {
         const defaultData = extractDefaultValues(formJsonSchema)
         handleOnChange({ data: defaultData })
         const defaultStorageData = extractDefaultValues(operatorStorageSchema)
-        renderCheckboxes && handleOnChangeStorage({ data: defaultStorageData })
+        isPieceForm && handleOnChangeStorage({ data: defaultStorageData })
         setFormData(defaultData)
       } else {
         handleOnChange({ data: forageData })
         // If the form has checkboxes, we need to update the storage data
-        if (renderCheckboxes && !forageData.storage) {
+        if (isPieceForm && !forageData.storage){
           const defaultStorageData = extractDefaultValues(operatorStorageSchema)
           handleOnChangeStorage({ data: defaultStorageData })
-        } else if (renderCheckboxes) {
+        }else if (isPieceForm){
           handleOnChangeStorage({ data: forageData.storage })
         }
 
-        if (renderCheckboxes && !forageData.containerResources) {
+        if (isPieceForm && !forageData.containerResources){
           const defaultContainerResourcesData = extractDefaultValues(containerResourcesSchema)
-          handleOnChangeContainerResources({ data: defaultContainerResourcesData })
-        } else if (renderCheckboxes) {
-          handleOnChangeContainerResources({ data: forageData.containerResources })
+          handleOnChangeContainerResources({data: defaultContainerResourcesData})
+        } else if (isPieceForm){
+          handleOnChangeContainerResources({data: forageData.containerResources})
         }
         setFormData(forageData)
       }
     }
     if (open) { fetchForage() }
 
-  }, [formId, formJsonSchema, open, fetchForageDataById, setFormsForageData, handleOnChange, handleOnChangeStorage, renderCheckboxes, handleOnChangeContainerResources])
+  }, [formId, formJsonSchema, open, fetchForageDataById, setFormsForageData, handleOnChange, handleOnChangeStorage, isPieceForm, handleOnChangeContainerResources])
 
 
   const handleCheckbox = useCallback(async (e: any) => {
@@ -218,7 +220,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
           const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
           if (e.target.checked) {
             // If checked add dropdown options from upstreams
-            const upstreamOperator = await fetchForageOperatorById(upstreamOperatorId)
+            const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
             const outputSchema = upstreamOperator?.output_schema
             Object.keys(outputSchema?.properties).forEach((key, index) => {
               const obj = outputSchema?.properties[key]
@@ -230,7 +232,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
                 auxNameKeyUpstreamArgsMap[`${upstreamOperator?.name} - ${obj['title']}`] = key
               }
             });
-            // Set upstream map to operator if using upstream
+            // Set upstream map to piece if using upstream
             upstreamMap[formId][e.target.value] = {
               fromUpstream: true,
               upstreamId: upstreamId,
@@ -240,7 +242,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
           } else {
             // If unchecked remove dropdown options from upstreams and use operator inputs schemas
             const operatorId = parseInt(formId.split('_')[0])
-            const operator = await fetchForageOperatorById(operatorId)
+            const operator = await fetchForagePieceById(operatorId)
             const inputSchema = operator?.input_schema
             auxSchema.properties[formKeys[i]] = inputSchema?.properties[formKeys[i]]
             auxFormData[formKeys[i]] = inputSchema?.properties[formKeys[i]].default
@@ -251,7 +253,12 @@ const SidebarForm = (props: ISidebarFormProps) => {
             }
           }
         }
-        if (e.target.checked) {
+        if (e.target.checked && !enums.length) {
+          auxCheckboxState[formId][e.target.value] = false
+          await setForageCheckboxStates(auxCheckboxState)
+          toast.error('There are no upstream outputs with the same type as the selected field')
+        }
+        else if (e.target.checked) {
           dropdownSchema['enum'] = enums
           dropdownSchema['default'] = enums[0]
           auxSchema.properties[formKeys[i]] = dropdownSchema
@@ -266,19 +273,19 @@ const SidebarForm = (props: ISidebarFormProps) => {
     setFormData(auxFormData)
 
   },
-    [
-      formJsonSchema,
-      formId,
-      fetchForageWorkflowEdges,
-      fetchForageOperatorById,
-      setForageUpstreamMap,
-      getForageUpstreamMap,
-      formData,
-      getForageCheckboxStates,
-      setForageCheckboxStates,
-      setNameKeyUpstreamArgsMap,
-      getNameKeyUpstreamArgsMap
-    ])
+  [
+    formJsonSchema, 
+    formId, 
+    fetchForageWorkflowEdges, 
+    fetchForagePieceById, 
+    setForageUpstreamMap, 
+    getForageUpstreamMap, 
+    formData,
+    getForageCheckboxStates,
+    setForageCheckboxStates,
+    setNameKeyUpstreamArgsMap,
+    getNameKeyUpstreamArgsMap
+  ])
 
   useEffect(() => {
     // This is a hack because customizing jsonforms ui for accepting multi column would be harder than create a custom checkbox column
@@ -317,7 +324,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
         }
         <Grid container>
           {
-            renderCheckboxes ?
+            isPieceForm ?
               <Grid container spacing={2} sx={{ marginBottom: '20px' }}>
                 <Grid item xs={formWidthSpace}>
                   <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Input Argument</Typography>
@@ -341,7 +348,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
               />
             </Grid>
             {
-              renderCheckboxes ?
+              isPieceForm ?
                 <Grid item xs={3}>
                   <FormGroup sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', height: '100%' }}>
                     {checkboxes}
@@ -350,7 +357,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
             }
           </Grid>
           {
-            renderCheckboxes ?
+            isPieceForm ?
               <Grid container spacing={0}>
                 <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid", marginBottom: '20px', marginTop: '20px' }}>Storage</Typography>
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', paddingBottom: '25px' }} className='sidebar-jsonforms-grid'>

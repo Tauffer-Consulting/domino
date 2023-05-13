@@ -47,7 +47,7 @@ interface IWorkflowsEditorContext {
 
   search: string
   handleSearch: (word: string) => void
-  fetchForageOperatorById: (id: number) => Promise<IOperator | undefined>
+  fetchForagePieceById: (id: number) => Promise<IOperator | undefined>
   fetchForageDataById: (id: string) => Promise<any> // TODO add type
   setFormsForageData: (id: string, data: any) => Promise<void>
   removeFormsForageDataById: (id: string) => Promise<void>
@@ -185,7 +185,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
 
 
 
-  const fetchForageOperatorById = useCallback(async (id: number) => {
+  const fetchForagePieceById = useCallback(async (id: number) => {
     const pieces = await localForage.getItem<IOperatorForageSchema>("pieces")
     if (pieces !== null) {
       return pieces[id]
@@ -347,6 +347,14 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     dag_dict['workflow'] = workflowFormData?.config
     const storageWorkflowData = workflowFormData?.storage
 
+    for (let index=0; index < nodes.length; index++){
+      let element = nodes[index]
+      let taskIndex = 0
+      let taskName = `task_${element.data.name}_${taskIndex}`
+      nodeId2taskName[element.id] = taskName
+      taskName2nodeId[taskName] = element.id
+    }
+
     //var task_index = 1
     for (let index = 0; index < nodes.length; index++) {
       const element = nodes[index]
@@ -407,8 +415,6 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
 
         taskDict['piece_input_kwargs'] = pieceInputKwargs
 
-        nodeId2taskName[element.id] = taskName
-        taskName2nodeId[taskName] = element.id
         tasks_dict[taskName] = taskDict
         //task_index += 1
       } catch (err) {
@@ -456,7 +462,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       setNodes,
       handleSearch: (word: string) => setSearch(word),
       fetchRepoById,
-      fetchForageOperatorById,
+      fetchForagePieceById,
       setFormsForageData,
       fetchForageDataById,
       removeFormsForageDataById,
@@ -482,7 +488,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     }),
     [
       fetchRepoById,
-      fetchForageOperatorById,
+      fetchForagePieceById,
       setFormsForageData,
       fetchForageDataById,
       removeFormsForageDataById,

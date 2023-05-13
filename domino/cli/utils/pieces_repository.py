@@ -243,7 +243,7 @@ def create_pieces_repository(repository_name: str, container_registry: str) -> N
     console.print("")
 
 
-def create_compiled_pieces_metadata() -> None:  
+def create_compiled_pieces_metadata(source_url: str=None) -> None:  
     """
     Create compiled metadata from Pieces metadata.json files and include input_schema generated from models.py
     """
@@ -274,6 +274,11 @@ def create_compiled_pieces_metadata() -> None:
             metadata["input_schema"] = input_model_class.schema()
             metadata["output_schema"] = output_model_class.schema()
             metadata["secrets_schema"] = secrets_model_class.schema() if secrets_model_class else None
+
+            # Add source code url
+            metadata["source_url"] = None
+            if source_url and len(source_url) > 0:
+                metadata["source_url"] = source_url + f"/tree/main/pieces/{piece_name}"
 
             # Add to compiled metadata
             compiled_metadata[piece_name] = metadata
@@ -361,7 +366,7 @@ def validate_repo_name(repo_name: str) -> None:
         raise ValueError("Repository name should not contain special characters")
 
 
-def organize_pieces_repository(build_images: bool, publish_images: bool) -> None:
+def organize_pieces_repository(build_images: bool, publish_images: bool, source_url: str) -> None:
     """
     Organize Piece's repository for Domino. This will: 
     - validate the folder structure, and create the pieces compiled_metadata.json and dependencies_map.json files
@@ -381,7 +386,7 @@ def organize_pieces_repository(build_images: bool, publish_images: bool) -> None
     validate_repo_name(repo_name)
     
     # Create compiled metadata from Pieces metadata.json files and add data input schema
-    create_compiled_pieces_metadata()
+    create_compiled_pieces_metadata(source_url=source_url)
     
     # Generate dependencies_map.json file
     create_dependencies_map(save_map_as_file=True)

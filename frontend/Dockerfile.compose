@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 
 ENV REACT_APP_API_ENV=local
-ENV DOMINO_DEPLOY_MODE=local-compose
+ENV REACT_APP_DOMINO_DEPLOY_MODE=local-compose
 
 # Install dependencies
 RUN yarn install
