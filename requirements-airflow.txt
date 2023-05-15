@@ -1,5 +1,6 @@
 apache-airflow>=2.5.3
 apache-airflow-providers-cncf-kubernetes==5.0.0
+apache-airflow-providers-docker==3.6.0
 pydantic==1.9.1
 #docker>=5.0.3
 docker>=6.0.1
