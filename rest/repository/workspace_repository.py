@@ -44,6 +44,28 @@ class WorkspaceRepository(object):
                 session.expunge_all()
         return result
     
+    def find_pending_workspace_invite(self, user_id: int, workspace_id: int):
+        with session_scope() as session:
+            result = session.query(Workspace, UserWorkspaceAssociative)\
+                .join(UserWorkspaceAssociative, Workspace.id==UserWorkspaceAssociative.workspace_id)\
+                    .filter(and_(UserWorkspaceAssociative.user_id == user_id, UserWorkspaceAssociative.status == 'pending', Workspace.id == workspace_id))\
+                        .first()
+            if result:
+                session.expunge_all()
+        return result
+    
+    def update_user_workspace_associative(self, associative: UserWorkspaceAssociative):
+        with session_scope() as session:
+            result = session.query(Workspace, UserWorkspaceAssociative)\
+                .join(UserWorkspaceAssociative, Workspace.id==UserWorkspaceAssociative.workspace_id)\
+                    .filter(and_(UserWorkspaceAssociative.user_id == associative.user_id, UserWorkspaceAssociative.status == 'pending', Workspace.id == associative.workspace_id))\
+                        .first()
+            saved_associative = result.UserWorkspaceAssociative
+            saved_associative.status = associative.status
+            session.flush()
+            session.expunge_all()
+        return result
+
     def find_by_id_and_user(self, id: int, user_id: int) -> Workspace:
         with session_scope() as session:
             result = session.query(Workspace.id, Workspace.name, Workspace.github_access_token, UserWorkspaceAssociative.permission, UserWorkspaceAssociative.status)\

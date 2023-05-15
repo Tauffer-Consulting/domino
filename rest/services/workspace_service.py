@@ -91,7 +91,7 @@ class WorkspaceService(object):
             self.logger.exception(e)
             self.workspace_repository.delete(id=workspace.id)
             raise e
-    
+
     def patch_workspace(self, workspace_id: int, workspace_data: PatchWorkspaceRequest, auth_context: AuthorizationContextData):
         self.logger.info("Patch workspace")
         _workspace = self.workspace_repository.find_by_id_and_user(
@@ -213,3 +213,34 @@ class WorkspaceService(object):
         except Exception as e:
             self.logger.exception(e)
             self.workspace_repository.delete(id=workspace_id)
+
+    def handle_invite_action(self, workspace_id: int, auth_context: AuthorizationContextData, action: UserWorkspaceStatus):
+        _workspace = self.workspace_repository.find_pending_workspace_invite(
+            user_id=auth_context.user_id,
+            workspace_id=workspace_id
+        )
+        if not _workspace:
+            raise ResourceNotFoundException('Workspace invite not found.')
+ 
+        workspace = _workspace.Workspace
+        associative = _workspace.UserWorkspaceAssociative
+    
+        if action == UserWorkspaceStatus.accepted.value:
+            associative.status = UserWorkspaceStatus.accepted.value
+        elif action == UserWorkspaceStatus.rejected.value:
+            associative.status = UserWorkspaceStatus.rejected.value
+        else:
+            raise BaseException('Invalid action.')
+    
+        updated_workspace_data = self.workspace_repository.update_user_workspace_associative(associative)
+        workspace = updated_workspace_data.Workspace
+        associative = updated_workspace_data.UserWorkspaceAssociative
+
+        response = GetWorkspaceResponse(
+            id=workspace.id,
+            workspace_name=workspace.name,
+            user_permission=associative.permission,
+            status=associative.status,
+            github_access_token_filled=workspace.github_access_token is not None
+        )
+        return response

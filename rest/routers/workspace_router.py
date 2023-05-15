@@ -7,6 +7,7 @@ from schemas.requests.workspace import CreateWorkspaceRequest, AssignWorkspaceRe
 from schemas.responses.workspace import CreateWorkspaceResponse, ListUserWorkspacesResponse, AssignWorkspaceResponse, GetWorkspaceResponse, PatchWorkspaceResponse
 from schemas.exceptions.base import BaseException, ConflictException, ResourceNotFoundException, ForbiddenException, UnauthorizedException
 from schemas.errors.base import ConflictError, ForbiddenError, SomethingWrongError, ResourceNotFoundError, UnauthorizedError
+from database.models.enums import UserWorkspaceStatus
 from typing import List
 
 
@@ -87,7 +88,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
 
 
 @router.post(
-    "/{workspace_id}/assign",
+    "/{workspace_id}/invites",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {'model': AssignWorkspaceResponse},
@@ -107,6 +108,65 @@ def add_user_to_workspace(
         response = workspace_service.add_user_to_workspace(
             workspace_id=workspace_id,
             body=body
+        )
+        return response
+    except (BaseException, ResourceNotFoundException, ConflictException, ForbiddenException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    
+
+@router.post(
+    '/{workspace_id}/invites/accept',
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {'model': GetWorkspaceResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
+        status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
+        status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
+        status.HTTP_409_CONFLICT: {'model': ConflictError}
+    }
+)
+def accept_workspace_invite(
+    workspace_id: int,
+    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+) -> GetWorkspaceResponse:
+    """
+    Accept workspace invite.
+    Each user workspace pair can have only one pending invite.
+    """
+    try:
+        response = workspace_service.handle_invite_action(
+            workspace_id=workspace_id,
+            auth_context=auth_context,
+            action=UserWorkspaceStatus.accepted.value
+        )
+        return response
+    except (BaseException, ResourceNotFoundException, ConflictException, ForbiddenException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+
+@router.post(
+    '/{workspace_id}/invites/reject',
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {'model': GetWorkspaceResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
+        status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
+        status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
+        status.HTTP_409_CONFLICT: {'model': ConflictError}
+    }
+)
+def reject_workspace_invite(
+    workspace_id: int,
+    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+) -> GetWorkspaceResponse:
+    """
+    Reject workspace invite.
+    Each user workspace pair can have only one pending invite.
+    """
+    try:
+        response = workspace_service.handle_invite_action(
+            workspace_id=workspace_id,
+            auth_context=auth_context,
+            action=UserWorkspaceStatus.rejected.value
         )
         return response
     except (BaseException, ResourceNotFoundException, ConflictException, ForbiddenException) as e:
