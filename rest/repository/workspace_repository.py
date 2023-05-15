@@ -73,7 +73,7 @@ class WorkspaceRepository(object):
 
     def find_by_id_and_user_id(self, id: int, user_id: int) -> Tuple[Workspace, UserWorkspaceAssociative]:
         with session_scope() as session:
-            query = session.query(Workspace.id.label('workspace_id'), Workspace.name, Workspace.github_access_token, UserWorkspaceAssociative.permission.label('permission'))\
+            query = session.query(Workspace.id.label('workspace_id'), Workspace.name, Workspace.github_access_token, UserWorkspaceAssociative.permission.label('permission'), UserWorkspaceAssociative.status.label('status'))\
                 .outerjoin(UserWorkspaceAssociative, and_(UserWorkspaceAssociative.workspace_id==id, UserWorkspaceAssociative.user_id==user_id))\
                     .filter(Workspace.id==id)
             result = query.first()
