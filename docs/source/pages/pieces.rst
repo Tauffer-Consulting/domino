@@ -156,9 +156,11 @@ Additionally, the frontend will appropriately display input fields based on thei
             <strong>Enum</strong>
         </summary>
         You must create an Enum class with your key-values pairs in the models.py
-            <pre><code id="python_code">class EnumType(str, Enum):
+        <pre><code id="python_code">
+        class EnumType(str, Enum):
             key_1 = "value_1"
-            key_2 = "value_2"</code></pre>
+            key_2 = "value_2"
+        </code></pre>
         Now you can use the Enum class to create an input data.
             <pre><code id="python_code">enum_value: EnumType = Field(
                 default=EnumType.key_1,
@@ -166,6 +168,8 @@ Additionally, the frontend will appropriately display input fields based on thei
             )</code></pre>
             <img src="../_static/media/enum_field.gif" width=350px>
     </details>
+
+|
 
 .. _domino-pieces-metadata:
 
