@@ -28,7 +28,7 @@ const WorkspaceSecretsCard = () => {
     const { register, getValues, resetField } = useForm();
     const [currentEdittingToken, setCurrentEdittingToken] = useState<boolean>(false)
     const { handleUpdateWorkspace } = useWorkspaces()
-    const { workspaceData: workspace, handleRefreshWorkspaceData } = useWorkspaceSettings()
+    const { workspaceData: workspace } = useWorkspaceSettings()
     
     const patchWorkspace = useAuthenticatedPatchWorkspace()
 

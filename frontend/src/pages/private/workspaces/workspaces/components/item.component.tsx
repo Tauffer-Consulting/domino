@@ -54,12 +54,21 @@ export const WorkspaceListItem: FC<{
             titleTypographyProps={{ variant: 'body1' }}
             color={isSelected ? 'success' : 'primary'}
           />
-          <CardContent>
-            <Typography sx={{ fontSize: 14, my: 0 }} color='text.secondary'>
-              Permission:
-            </Typography>
-
-            <Typography>{workspace.user_permission}</Typography>
+          <CardContent sx={{ width: '100%' }}>
+            <Grid container>
+              <Grid item xs={12} md={3}>
+                <Typography sx={{ fontSize: 14, my: 0 }} color='text.secondary'>
+                  Permission:
+                </Typography>
+                <Typography>{workspace.user_permission}</Typography>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Typography sx={{ fontSize: 14, my: 0 }} color='text.secondary'>
+                  Status:
+                </Typography>
+                <Typography>{workspace.status === 'accepted' ? 'Collaborating' : 'Refused'}</Typography>
+              </Grid>
+            </Grid>
           </CardContent>
         </CardActionArea>
         <CardActions sx={{ width: '100%' }}>

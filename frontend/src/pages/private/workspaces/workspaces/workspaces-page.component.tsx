@@ -16,6 +16,7 @@ import { useWorkspaces } from 'context/workspaces/workspaces.context'
 
 import { AddWorkspace } from './components/add-workspace.component'
 import { WorkspaceListItem } from './components/item.component'
+import { WorkspacePendingListItem } from './components/pending-item.component'
 
 /**
  * Workspace list page
@@ -43,6 +44,8 @@ export const WorkspacesPage: FC = () => {
     setDeleteWorkspaceId(null)
     setIsOpenDeleteDialog(false)
   }, [handleDeleteWorkspace, deleteWorkspaceId])
+
+  console.log('Selectd workspace', workspace)
 
   return (
     <PrivateLayout>
@@ -84,16 +87,24 @@ export const WorkspacesPage: FC = () => {
         <AddWorkspace />
 
         {workspaces.map((ws, index) => (
-          <WorkspaceListItem
-            workspace={ws}
-            key={index}
-            handleSelect={() => handleChangeWorkspace(ws.id)}
-            handleDelete={()=> {
-              setDeleteWorkspaceId(ws.id)
-              setIsOpenDeleteDialog(true)
-            }}
-            selectedWorkspaceId={workspace?.id}
-          />
+          ws.status === 'rejected' ? null :
+          ws.status === 'pending' ? 
+            <WorkspacePendingListItem
+              workspace={ws}
+              key={index}
+              selectedWorkspaceId={workspace?.id}
+            />
+           :
+            <WorkspaceListItem
+              workspace={ws}
+              key={index}
+              handleSelect={() => handleChangeWorkspace(ws.id)}
+              handleDelete={()=> {
+                setDeleteWorkspaceId(ws.id)
+                setIsOpenDeleteDialog(true)
+              }}
+              selectedWorkspaceId={workspace?.id}
+            />
         ))}
       </Grid>
     </PrivateLayout>

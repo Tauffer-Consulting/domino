@@ -1,9 +1,17 @@
 import { ERepositorySource } from "common/interfaces/repository-source.enum"
 
+// Workspace status enum with values (pending, accepted and rejected)
+export enum EWorkspaceStatus {
+  PENDING = "pending",
+  ACCEPTED = "accepted",
+  REJECTED = "rejected",
+}
+
 export interface IWorkspaceSummary {
   id: string
   workspace_name: string
   user_permission: string
+  status: EWorkspaceStatus
   github_access_token_filled: boolean
 }
 
