@@ -46,7 +46,7 @@ class WorkspaceRepository(object):
     
     def find_by_id_and_user(self, id: int, user_id: int) -> Workspace:
         with session_scope() as session:
-            result = session.query(Workspace.id, Workspace.name, Workspace.github_access_token, UserWorkspaceAssociative.permission)\
+            result = session.query(Workspace.id, Workspace.name, Workspace.github_access_token, UserWorkspaceAssociative.permission, UserWorkspaceAssociative.status)\
                 .filter(Workspace.id == id)\
                     .filter(UserWorkspaceAssociative.user_id == user_id)\
                         .first()
@@ -56,7 +56,7 @@ class WorkspaceRepository(object):
 
     def find_by_user_id(self, user_id: int, page: int, page_size: int):
         with session_scope() as session:
-            result = session.query(Workspace, UserWorkspaceAssociative.permission)\
+            result = session.query(Workspace, UserWorkspaceAssociative.permission, UserWorkspaceAssociative.status)\
                 .join(UserWorkspaceAssociative)\
                     .filter(UserWorkspaceAssociative.user_id==user_id)\
                         .paginate(page, page_size)

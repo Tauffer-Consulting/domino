@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from typing import List
-from database.models.enums import Permission, RepositorySource
+from database.models.enums import Permission, RepositorySource, UserWorkspaceStatus
 
 
 class CreateWorkspaceResponse(BaseModel):
     id: int
     name: str
+    user_permission: Permission
 
 
 class WorkspaceBase(BaseModel):
@@ -38,6 +39,7 @@ class ListUserWorkspacesResponse(BaseModel):
     id: int
     workspace_name: str
     user_permission: Permission
+    status: UserWorkspaceStatus
     github_access_token_filled: bool
 
 
@@ -45,6 +47,7 @@ class GetWorkspaceResponse(BaseModel):
     id: int
     workspace_name: str
     user_permission: str
+    status: UserWorkspaceStatus
     github_access_token_filled: bool
 
 class PatchWorkspaceResponse(GetWorkspaceResponse):

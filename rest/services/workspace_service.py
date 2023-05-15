@@ -82,7 +82,11 @@ class WorkspaceService(object):
                 ),
                 auth_context=auth_context
             )
-            return CreateWorkspaceResponse(id=workspace.id, name=workspace.name)
+            return CreateWorkspaceResponse(
+                id=workspace.id, 
+                name=workspace.name, 
+                user_permission=associative.permission,
+            )
         except (BaseException, ForbiddenException, UnauthorizedException, ResourceNotFoundException) as e:
             self.logger.exception(e)
             self.workspace_repository.delete(id=workspace.id)
@@ -96,6 +100,7 @@ class WorkspaceService(object):
         )
         if not _workspace:
             raise ResourceNotFoundException()
+
         workspace = Workspace(
             id=_workspace.id,
             name=_workspace.name,
@@ -113,6 +118,7 @@ class WorkspaceService(object):
             id=workspace.id, 
             workspace_name=workspace.name,
             github_access_token_filled=workspace.github_access_token is not None,
+            status=_workspace.status,
             user_permission=_workspace.permission
         )
 
@@ -130,9 +136,10 @@ class WorkspaceService(object):
                 id=workspace.id,
                 workspace_name=workspace.name,
                 user_permission=permission,
+                status=status,
                 github_access_token_filled=workspace.github_access_token is not None
             )
-            for workspace, permission in workspaces
+            for workspace, permission, status in workspaces
         ]
         return response
 
@@ -148,6 +155,7 @@ class WorkspaceService(object):
             id=workspace.id,
             workspace_name=workspace.name,
             user_permission=workspace.permission.value,
+            status=workspace.status,
             github_access_token_filled=workspace.github_access_token is not None
         )
         return response
