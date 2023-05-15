@@ -60,6 +60,8 @@ class BasePiece(metaclass=abc.ABCMeta):
         # Logger
         self.logger = get_configured_logger(f"{self.__class__.__name__ }-{self.task_id}")
 
+        self.display_result = None
+
 
     def start_logger(self):
         """
@@ -172,9 +174,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         # TODO - this is a temporary solution. We should find a better way to do this
         output_schema = output_obj.schema()
         for k, v in output_schema["properties"].items():
-            if k == "display_result":
-                continue
-            elif "type" in v:
+            if "type" in v:
                 # Get file-path and directory-path types
                 if v["type"] == "string" and "format" in v:
                     v_type = v["format"]
@@ -186,19 +186,20 @@ class BasePiece(metaclass=abc.ABCMeta):
                     v_type = output_schema["definitions"][type_model]["type"]
             xcom_obj[f"{k}_type"] = v_type
 
-        # Serialize display_result_file
-        if "display_result" in xcom_obj:
-            if "base64_content" not in xcom_obj["display_result"]:
-                if "file_path" not in xcom_obj["display_result"]:
-                    raise Exception("display_result must have either 'file_path' or 'base64_content' keys")
-                if "file_type" not in xcom_obj["display_result"]:
-                    raise Exception("display_result must have 'file_type' key")
-                xcom_obj["display_result"]["base64_content"] = self.serialize_display_result_file(
-                    file_path=xcom_obj["display_result"]["file_path"],
-                    file_type=xcom_obj["display_result"]["file_type"]
-                )
-            if "file_type" not in xcom_obj["display_result"]:
+        # Serialize self.display_result and add it to XCOM
+        if isinstance(self.display_result, dict):
+            if "file_type" not in self.display_result:
                 raise Exception("display_result must have 'file_type' key")
+            if "base64_content" not in self.display_result:
+                if "file_path" not in self.display_result:
+                    raise Exception("self.display_result dict must have either 'file_path' or 'base64_content' keys")
+                self.display_result["base64_content"] = self.serialize_display_result_file(
+                    file_path=self.display_result["file_path"],
+                    file_type=self.display_result["file_type"]
+                )
+            self.display_result["file_path"] = str(self.display_result["file_path"])
+            self.display_result["file_type"] = str(self.display_result["file_type"])
+            xcom_obj["display_result"] = self.display_result
 
         # Update XCOM with extra metadata
         xcom_obj.update(
