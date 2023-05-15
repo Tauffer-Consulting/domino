@@ -16,6 +16,14 @@ class Permission(str, enum.Enum):
     class Config:
         use_enum_values = True
 
+class UserWorkspaceStatus(str, enum.Enum):
+    pending = 'pending'
+    accepted = 'accepted'
+    rejected = 'rejected'
+
+    class Config:
+        use_enum_values = True
+
 
 class WorkflowScheduleInterval(str, enum.Enum):
     none = 'none'
