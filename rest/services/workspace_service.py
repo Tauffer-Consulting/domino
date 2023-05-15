@@ -122,13 +122,14 @@ class WorkspaceService(object):
             user_permission=_workspace.permission
         )
 
-    def list_user_workspaces(self, page: int, page_size: int, auth_context: AuthorizationContextData) -> List[ListUserWorkspacesResponse]:
+    def list_active_pending_user_workspaces(self, page: int, page_size: int, auth_context: AuthorizationContextData) -> List[ListUserWorkspacesResponse]:
         """List user workspaces"""
         self.logger.info("Listing user workspaces")
         workspaces = self.workspace_repository.find_by_user_id(
             user_id=auth_context.user_id,
             page=page,
-            page_size=page_size
+            page_size=page_size,
+            return_rejected=False
         )
         # TODO add pagination metadata
         response = [

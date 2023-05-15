@@ -59,7 +59,7 @@ def list_user_workspaces(
 ) -> List[ListUserWorkspacesResponse]:
     """List user workspaces summary"""
     try:
-        response = workspace_service.list_user_workspaces(
+        response = workspace_service.list_active_pending_user_workspaces(
             page=page,
             page_size=page_size,
             auth_context=auth_context

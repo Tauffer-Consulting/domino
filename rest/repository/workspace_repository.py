@@ -1,5 +1,6 @@
 from database.interface import session_scope
 from database.models import Workspace, UserWorkspaceAssociative
+from database.models.enums import UserWorkspaceStatus
 from typing import Tuple, List
 from sqlalchemy import and_, func
 
@@ -76,12 +77,14 @@ class WorkspaceRepository(object):
                 session.expunge_all()
         return result
 
-    def find_by_user_id(self, user_id: int, page: int, page_size: int):
+    def find_by_user_id(self, user_id: int, page: int, page_size: int, return_rejected: bool = True):
         with session_scope() as session:
-            result = session.query(Workspace, UserWorkspaceAssociative.permission, UserWorkspaceAssociative.status)\
+            query = session.query(Workspace, UserWorkspaceAssociative.permission, UserWorkspaceAssociative.status)\
                 .join(UserWorkspaceAssociative)\
-                    .filter(UserWorkspaceAssociative.user_id==user_id)\
-                        .paginate(page, page_size)
+                    .filter(UserWorkspaceAssociative.user_id==user_id)
+            if not return_rejected:
+                query = query.filter(UserWorkspaceAssociative.status!=UserWorkspaceStatus.rejected.value)
+            result = query.paginate(page, page_size)
             if result:
                 session.expunge_all()
         return result
