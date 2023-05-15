@@ -173,8 +173,10 @@ class WorkspaceService(object):
             raise ResourceNotFoundException('User email not found.')
 
         for workspace_assoc in user.workspaces:
-            if workspace_assoc.workspace.id == workspace_id:
-                raise ConflictException()
+            if workspace_assoc.workspace.id == workspace_id and workspace_assoc.status == UserWorkspaceStatus.pending.value:
+                raise ConflictException('User already invited to this workspace.')
+            elif workspace_assoc.workspace.id == workspace_id and workspace_assoc.status == UserWorkspaceStatus.accepted.value:
+                raise ConflictException('User already in this workspace.')
 
         workspace = self.workspace_repository.find_by_id(id=workspace_id)
         updated_user = self.user_repository.add_workspace(
