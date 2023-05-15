@@ -5,7 +5,9 @@ import {
   IWorkspaceSummary,
   useAuthenticatedGetWorkspaces,
   useAuthenticatedPostWorkspaces,
-  useAuthenticatedDeleteWorkspaces
+  useAuthenticatedDeleteWorkspaces,
+  useAuthenticatedAcceptWorkspaceInvite,
+  useAuthenticatedRejectWorkspaceInvite
 } from 'services/requests/workspaces'
 
 import { createCustomContext } from 'utils'
@@ -21,6 +23,8 @@ interface IWorkspacesContext {
   handleCreateWorkspace: (name: string) => Promise<unknown>
   handleDeleteWorkspace: (id: string) => void
   handleUpdateWorkspace: (workspace: IWorkspaceSummary) => void
+  handleAcceptWorkspaceInvite: (id: string) => void
+  handleRejectWorkspaceInvite: (id: string) => void
 }
 
 export const [WorkspacesContext, useWorkspaces] =
@@ -48,10 +52,36 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
   const postWorkspace = useAuthenticatedPostWorkspaces()
   const deleteWorkspace = useAuthenticatedDeleteWorkspaces()
 
+  const acceptWorkspaceInvite = useAuthenticatedAcceptWorkspaceInvite()
+  const rejectWorkspaceInvite = useAuthenticatedRejectWorkspaceInvite()
+
   // Memoized data
   const workspaces: IWorkspaceSummary[] = useMemo(() => data ?? [], [data])
 
   // Handlers
+  const handleAcceptWorkspaceInvite = useCallback(async(id: string) => {
+    acceptWorkspaceInvite({workspaceId: id}).then(() => {
+      //toast.success(`Workspace invitation accepted successfully`)
+      workspacesRefresh()
+    }).catch((error) => {
+      // todo custom msg
+      console.log('Accepting workspace invitation error:', error)
+      toast.error('Error accepting workspace invitation, try again later')
+    })
+  }, [acceptWorkspaceInvite, workspacesRefresh])
+
+  const handleRejectWorkspaceInvite = useCallback(async(id: string) => {
+    rejectWorkspaceInvite({workspaceId: id}).then(() => {
+      toast.error(`You have rejected the workspace invitation.`)
+      workspacesRefresh()
+    }).catch((error) => {
+      // todo custom msg
+      console.log('Rejecting workspace invitation error:', error)
+      toast.error('Error rejecting workspace invitation, try again later')
+    })
+  },[])
+    
+
   const handleCreateWorkspace = useCallback(
     (name: string) =>
       postWorkspace({ name })
@@ -92,6 +122,11 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
       }
     ).catch((error) => {
       console.log('Deleting workspace error:', error)
+      if (error.response.status === 403) {
+        toast.error("You don't have permission to delete this workspace.")
+        return
+      }
+      toast.error('Error deleting workspace, try again later') 
     })
   }, [deleteWorkspace, workspacesRefresh])
 
@@ -106,7 +141,9 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
         handleChangeWorkspace,
         handleCreateWorkspace,
         handleDeleteWorkspace,
-        handleUpdateWorkspace
+        handleUpdateWorkspace,
+        handleAcceptWorkspaceInvite,
+        handleRejectWorkspaceInvite
       }}
     >
       {children}

@@ -45,8 +45,6 @@ export const WorkspacesPage: FC = () => {
     setIsOpenDeleteDialog(false)
   }, [handleDeleteWorkspace, deleteWorkspaceId])
 
-  console.log('Selectd workspace', workspace)
-
   return (
     <PrivateLayout>
       <Dialog

@@ -23,7 +23,6 @@ const patchWorkspaceUrl = (workspaceId: string) => `/workspaces/${workspaceId}`
 const patchWorkspace: (
     params: patchWorkspaceParams
 ) => Promise<AxiosResponse> = (params) => {
-    console.log('url', patchWorkspaceUrl(params.workspaceId))
     return dominoApiClient.patch(
         patchWorkspaceUrl(params.workspaceId), params.payload
     )

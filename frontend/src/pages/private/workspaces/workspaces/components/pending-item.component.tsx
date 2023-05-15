@@ -8,24 +8,16 @@ import {
     Button,
     Grid
 } from '@mui/material'
-import { FC, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { FC } from 'react'
+import { useWorkspaces } from 'context/workspaces/workspaces.context'
 import { IWorkspaceSummary } from 'services/requests/workspaces'
 
 export const WorkspacePendingListItem: FC<{
     workspace: IWorkspaceSummary
     selectedWorkspaceId: string | undefined
-}> = ({ workspace, selectedWorkspaceId }) => {
+}> = ({ workspace }) => {
 
-    // TODO accept / refuse
-
-    const handleAccept = useCallback(async()=>{
-        console.log('Accept invitation')
-    }, [])
-
-    const handleRefuse = useCallback(async()=>{
-        console.log('Refuse invitation')
-    }, [])
+    const { handleAcceptWorkspaceInvite, handleRejectWorkspaceInvite } = useWorkspaces()
 
     return (
         <Grid
@@ -78,14 +70,14 @@ export const WorkspacePendingListItem: FC<{
                     <Button
                         size='small'
                         color='success'
-                        onClick={handleAccept}
+                        onClick={() => handleAcceptWorkspaceInvite(workspace.id)}
                     >
                        Accept
                     </Button>
                     <Button
                         size='small'
                         color='error'
-                        onClick={handleRefuse}
+                        onClick={() => handleRejectWorkspaceInvite(workspace.id)}
                     >
                         Refuse
                     </Button>
