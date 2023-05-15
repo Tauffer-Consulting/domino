@@ -87,7 +87,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
 
 
 @router.post(
-    "/{user_id}/{workspace_id}",
+    "/{workspace_id}/assign",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {'model': AssignWorkspaceResponse},
@@ -97,17 +97,14 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
         status.HTTP_409_CONFLICT: {'model': ConflictError}
     }
 )
-@auth_service.authorize_workspace_owner_access
 def add_user_to_workspace(
-    user_id: int,
     workspace_id: int,
     body: AssignWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(auth_service.workspace_owner_access_authorizer)
 ) -> AssignWorkspaceResponse:
     """Assign workspace to user with permission"""
     try:
         response = workspace_service.add_user_to_workspace(
-            user_id=user_id,
             workspace_id=workspace_id,
             body=body
         )

@@ -18,7 +18,7 @@ from services.workflow_service import WorkflowService
 from services.piece_repository_service import PieceRepositoryService
 from repository.user_repository import UserRepository
 from database.models import Workspace, UserWorkspaceAssociative
-from database.models.enums import Permission
+from database.models.enums import Permission, UserWorkspaceStatus
 from cryptography.fernet import Fernet
 from core.settings import settings
 from typing import List
@@ -52,7 +52,10 @@ class WorkspaceService(object):
             github_access_token=None
         )
         workspace = self.workspace_repository.create(new_workspace)
-        associative = UserWorkspaceAssociative(permission=Permission.owner.value)
+        associative = UserWorkspaceAssociative(
+            permission=Permission.owner.value,
+            status=UserWorkspaceStatus.accepted.value
+        )
         self.user_repository.add_workspace(
             user_id=auth_context.user_id,
             workspace=workspace,
@@ -151,23 +154,28 @@ class WorkspaceService(object):
 
     def add_user_to_workspace(
         self,
-        user_id: int,
         workspace_id: int,
         body: AssignWorkspaceRequest
     ):
         """Assign workspace to user"""
-        self.logger.info(f"Assigning workspace {workspace_id} to user {user_id}")
+        self.logger.info(f"Assigning workspace {workspace_id} to user {body.user_email}")
 
-        user = self.user_repository.find_by_id(user_id)
+        user = self.user_repository.get_user_by_email(body.user_email)
+        if not user:
+            raise ResourceNotFoundException('User email not found.')
+
         for workspace_assoc in user.workspaces:
             if workspace_assoc.workspace.id == workspace_id:
                 raise ConflictException()
 
         workspace = self.workspace_repository.find_by_id(id=workspace_id)
         updated_user = self.user_repository.add_workspace(
-            user_id=user_id,
+            user_id=user.id,
             workspace=workspace,
-            associative=UserWorkspaceAssociative(permission=body.permission.value)
+            associative=UserWorkspaceAssociative(
+                permission=body.permission.value,
+                status=UserWorkspaceStatus.pending.value
+            )
         )
         response = AssignWorkspaceResponse(
             user_id=updated_user.id,
