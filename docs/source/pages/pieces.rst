@@ -167,63 +167,6 @@ Additionally, the frontend will appropriately display input fields based on thei
             <img src="../_static/media/enum_field.gif" width=350px>
     </details>
 
-
-.. **Integer**
-
-.. .. code-block:: python
-
-..     int_value: int = Field(
-..         default=2,
-..         description="Example of int input"
-..     )
-
-.. **Float**
-
-.. .. code-block:: python
-
-..     float_value: float = Field(
-..         default=1.3,
-..         description="Example of float input"
-..     )
-
-.. **Text**
-
-.. .. code-block:: python
-
-..     string_value: str = Field(
-..         default="text value",
-..         description="Example of string input"
-..     )
-
-.. **Boolean**
-
-.. .. code-block:: python
-
-..     boolean_value: bool = Field(
-..         default=True,
-..         description="Example of boolean input"
-..     )
-
-.. **Enum**
-
-.. You must create an Enum class with your key-values pairs in the models.py
-
-.. .. code-block:: python
-
-..     class EnumType(str, Enum):
-..         key_1 = "value_1"
-..         key_2 = "value_2"
-
-.. Now you can use the Enum class to create an input data.
-
-.. .. code-block:: python
-
-..     enum_value: EnumType = Field(
-..         default=EnumType.key_1,
-..         description="Example of enum input"
-..     )
-
-
 .. _domino-pieces-metadata:
 
 metadata.json
