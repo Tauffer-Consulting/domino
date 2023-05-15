@@ -188,10 +188,17 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Serialize display_result_file
         if "display_result" in xcom_obj:
-            xcom_obj["display_result"]["base64_content"] = self.serialize_display_result_file(
-                file_path=xcom_obj["display_result"]["file_path"],
-                file_type=xcom_obj["display_result"]["file_type"]
-            )
+            if "base64_content" not in xcom_obj["display_result"]:
+                if "file_path" not in xcom_obj["display_result"]:
+                    raise Exception("display_result must have either 'file_path' or 'base64_content' keys")
+                if "file_type" not in xcom_obj["display_result"]:
+                    raise Exception("display_result must have 'file_type' key")
+                xcom_obj["display_result"]["base64_content"] = self.serialize_display_result_file(
+                    file_path=xcom_obj["display_result"]["file_path"],
+                    file_type=xcom_obj["display_result"]["file_type"]
+                )
+            if "file_type" not in xcom_obj["display_result"]:
+                raise Exception("display_result must have 'file_type' key")
 
         # Update XCOM with extra metadata
         xcom_obj.update(
