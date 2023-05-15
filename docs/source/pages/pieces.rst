@@ -95,6 +95,135 @@ The `models.py` file contains the data models for the Input, Output and Secrets 
 
 Pydantic models are very powerful and rich in features. Using them properly will guarantee that your Piece will always be called with the correct input data types and that we can be sure of the output data types as well. We can easily add informative descriptions, validation rules (e.g. regex for string type, min/max for numeric types) and make arguments required/optional using Pydantic models.
 
+Additionally, the frontend will appropriately display input fields based on their respective data types.
+
+.. raw:: html
+
+    <details>
+        <summary>
+            <strong>Integer</strong>
+        </summary>
+            <pre><code id="python_code">int_value: int = Field(
+                default=2,
+                description="Example of int input"
+            )</code></pre>
+            <img src="../_static/media/int_field.gif" width=350px>
+    </details>
+
+    <br>
+
+    <details>
+        <summary>
+            <strong>Float</strong>
+        </summary>
+            <pre><code id="python_code">float_value: float = Field(
+                default=1.3,
+                description="Example of float input"
+            )</code></pre>
+            <img src="../_static/media/float_field.gif" width=350px>
+    </details>
+
+    <br>
+
+    <details>
+        <summary>
+            <strong>Text</strong>
+        </summary>
+            <pre><code id="python_code">string_value: str = Field(
+                default="text value",
+                description="Example of string input"
+            )</code></pre>
+            <img src="../_static/media/text_field.gif" width=350px>
+    </details>
+
+    <br>
+    
+    <details>
+        <summary>
+            <strong>Boolean</strong>
+        </summary>
+            <pre><code id="python_code">boolean_value: bool = Field(
+                default=True,
+                description="Example of boolean input"
+            )</code></pre>
+            <img src="../_static/media/boolean_field.gif" width=350px>
+    </details>
+
+        <br>
+
+    <details>
+        <summary>
+            <strong>Enum</strong>
+        </summary>
+        You must create an Enum class with your key-values pairs in the models.py
+            <pre><code id="python_code">class EnumType(str, Enum):
+            key_1 = "value_1"
+            key_2 = "value_2"</code></pre>
+        Now you can use the Enum class to create an input data.
+            <pre><code id="python_code">enum_value: EnumType = Field(
+                default=EnumType.key_1,
+                description="Example of enum input"
+            )</code></pre>
+            <img src="../_static/media/enum_field.gif" width=350px>
+    </details>
+
+
+.. **Integer**
+
+.. .. code-block:: python
+
+..     int_value: int = Field(
+..         default=2,
+..         description="Example of int input"
+..     )
+
+.. **Float**
+
+.. .. code-block:: python
+
+..     float_value: float = Field(
+..         default=1.3,
+..         description="Example of float input"
+..     )
+
+.. **Text**
+
+.. .. code-block:: python
+
+..     string_value: str = Field(
+..         default="text value",
+..         description="Example of string input"
+..     )
+
+.. **Boolean**
+
+.. .. code-block:: python
+
+..     boolean_value: bool = Field(
+..         default=True,
+..         description="Example of boolean input"
+..     )
+
+.. **Enum**
+
+.. You must create an Enum class with your key-values pairs in the models.py
+
+.. .. code-block:: python
+
+..     class EnumType(str, Enum):
+..         key_1 = "value_1"
+..         key_2 = "value_2"
+
+.. Now you can use the Enum class to create an input data.
+
+.. .. code-block:: python
+
+..     enum_value: EnumType = Field(
+..         default=EnumType.key_1,
+..         description="Example of enum input"
+..     )
+
+
 .. _domino-pieces-metadata:
 
 metadata.json
