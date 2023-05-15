@@ -13,8 +13,10 @@ class UserRepository(object):
             user = session.query(User).filter(User.id == user_id).first()
             if not user:
                 raise Exception(f"User {id} not found")
-            associative.workspace = workspace
-            user.workspaces.append(associative)
+
+            associative.user_id = user_id
+            associative.workspace_id = workspace.id
+            session.add(associative)
             session.flush()
             session.expunge_all()
         return user

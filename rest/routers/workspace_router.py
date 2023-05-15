@@ -91,7 +91,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
     "/{workspace_id}/invites",
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_200_OK: {'model': AssignWorkspaceResponse},
+        status.HTTP_204_NO_CONTENT: {},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
         status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},

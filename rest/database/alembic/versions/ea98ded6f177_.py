@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 851c49af162b
+Revision ID: ea98ded6f177
 Revises: 
-Create Date: 2023-04-04 16:14:05.246046
+Create Date: 2023-05-15 18:31:34.313028
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '851c49af162b'
+revision = 'ea98ded6f177'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,6 +36,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=True),
+    sa.Column('label', sa.String(length=50), nullable=True),
     sa.Column('source', sa.Enum('github', 'default', 'Config', name='repositorysource'), nullable=True),
     sa.Column('path', sa.String(length=250), nullable=True),
     sa.Column('version', sa.String(length=10), nullable=True),
@@ -46,12 +47,14 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_workspace_associative',
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('workspace_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('workspace_id', sa.Integer(), nullable=True),
     sa.Column('permission', sa.Enum('owner', 'read', 'Config', name='permission'), server_default='owner', nullable=False),
+    sa.Column('status', sa.Enum('pending', 'accepted', 'rejected', 'Config', name='userworkspacestatus'), server_default='pending', nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='cascade'),
     sa.ForeignKeyConstraint(['workspace_id'], ['workspace.id'], ondelete='cascade'),
-    sa.PrimaryKeyConstraint('user_id', 'workspace_id')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('workflow',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -83,6 +86,7 @@ def upgrade():
     sa.Column('output_schema', sa.JSON(), server_default=sa.text("'{}'::jsonb"), nullable=False),
     sa.Column('secrets_schema', sa.JSON(), server_default=sa.text("'{}'::jsonb"), nullable=False),
     sa.Column('style', sa.JSON(), nullable=True),
+    sa.Column('source_url', sa.String(), nullable=True),
     sa.Column('repository_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['repository_id'], ['piece_repository.id'], ondelete='cascade'),
     sa.PrimaryKeyConstraint('id')

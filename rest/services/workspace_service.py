@@ -180,7 +180,7 @@ class WorkspaceService(object):
                 raise ConflictException('User already in this workspace.')
 
         workspace = self.workspace_repository.find_by_id(id=workspace_id)
-        updated_user = self.user_repository.add_workspace(
+        self.user_repository.add_workspace(
             user_id=user.id,
             workspace=workspace,
             associative=UserWorkspaceAssociative(
@@ -188,18 +188,6 @@ class WorkspaceService(object):
                 status=UserWorkspaceStatus.pending.value
             )
         )
-        response = AssignWorkspaceResponse(
-            user_id=updated_user.id,
-            workspaces=[
-                WorkspaceBase(
-                    workspace_id=workspace_assoc.workspace.id,
-                    workspace_name=workspace_assoc.workspace.name,
-                    user_permission=workspace_assoc.permission
-                )
-                for workspace_assoc in updated_user.workspaces
-            ]
-        )
-        return response
     
     async def delete_workspace(self, workspace_id: int):
         workspace = self.workspace_repository.find_by_id(id=workspace_id)
@@ -233,15 +221,13 @@ class WorkspaceService(object):
         else:
             raise BaseException('Invalid action.')
     
-        updated_workspace_data = self.workspace_repository.update_user_workspace_associative(associative)
-        workspace = updated_workspace_data.Workspace
-        associative = updated_workspace_data.UserWorkspaceAssociative
+        updated_associative = self.workspace_repository.update_user_workspace_associative_by_id(associative)
 
         response = GetWorkspaceResponse(
             id=workspace.id,
             workspace_name=workspace.name,
-            user_permission=associative.permission,
-            status=associative.status,
+            user_permission=updated_associative.permission,
+            status=updated_associative.status,
             github_access_token_filled=workspace.github_access_token is not None
         )
         return response
