@@ -79,6 +79,7 @@ def get_piece_repository_releases(
     except (BaseException, ForbiddenException, ResourceNotFoundException, UnauthorizedException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
+
 @router.get(
     path="/releases/{version}",
     status_code=status.HTTP_200_OK,
@@ -108,7 +109,6 @@ def get_piece_repository_release_data(
         return response
     except (BaseException, ForbiddenException, ResourceNotFoundException, UnauthorizedException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-
 
 
 @router.get(
@@ -163,6 +163,7 @@ def delete_repository(
         return response
     except (BaseException, ResourceNotFoundException, ForbiddenException, ConflictException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
+
 
 @router.get(
     path="/{piece_repository_id}",

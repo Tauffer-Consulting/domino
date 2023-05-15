@@ -130,6 +130,7 @@ class PieceService(object):
             dependency=piece_metadata.get("dependency"),
             description=piece_metadata.get("description"),
             source_image=source_image,
+            source_url=piece_metadata.get("source_url"),
             input_schema=piece_metadata.get("input_schema", {}),
             output_schema=piece_metadata.get("output_schema", {}),
             secrets_schema=piece_metadata.get("secrets_schema", {}),
