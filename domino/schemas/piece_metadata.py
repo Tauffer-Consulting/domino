@@ -35,6 +35,13 @@ class OutputSchema(BaseModel):
     properties: Dict
 
 
+class SecretsSchema(BaseModel):
+    title: str
+    description: str
+    type: str
+    properties: Dict
+
+
 class PieceMetadata(BaseModel):
     name: str = Field(
         description="Piece name", 
@@ -51,3 +58,5 @@ class PieceMetadata(BaseModel):
     style: Dict = None # TODO - add model for the style dictionary
     input_schema: InputSchema = None
     output_schema: OutputSchema = None
+    secrets_schema: SecretsSchema = None
+    source_url: str = None
