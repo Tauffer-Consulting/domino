@@ -8,7 +8,8 @@ import {
   useAuthenticatedDeleteWorkspaces,
   useAuthenticatedAcceptWorkspaceInvite,
   useAuthenticatedRejectWorkspaceInvite,
-  useAuthenticatedWorkspaceInvite
+  useAuthenticatedWorkspaceInvite,
+  useAuthenticatedRemoveUserWorkspace
 } from 'services/requests/workspaces'
 
 import { createCustomContext } from 'utils'
@@ -27,6 +28,7 @@ interface IWorkspacesContext {
   handleAcceptWorkspaceInvite: (id: string) => void
   handleRejectWorkspaceInvite: (id: string) => void,
   handleInviteUserWorkspace: (id: string, userEmail: string, permission: string) => void
+  handleRemoveUserWorkspace: (workspaceId: string, userId: string) => void
 }
 
 export const [WorkspacesContext, useWorkspaces] =
@@ -57,11 +59,25 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
   const acceptWorkspaceInvite = useAuthenticatedAcceptWorkspaceInvite()
   const rejectWorkspaceInvite = useAuthenticatedRejectWorkspaceInvite()
   const inviteWorkspace = useAuthenticatedWorkspaceInvite()
+  const removeUserWorkspace = useAuthenticatedRemoveUserWorkspace()
 
   // Memoized data
   const workspaces: IWorkspaceSummary[] = useMemo(() => data ?? [], [data])
 
   // Handlers
+  const handleRemoveUserWorkspace = useCallback((workspaceId: string, userId: string) => {
+    if (!workspaceId || !userId) {
+      toast.error("Workspace and user must be defined to remove user from workspace.")
+    }
+    removeUserWorkspace({workspaceId: workspaceId, userId: userId}).then(() => {
+      toast.success(`User removed successfully from workspace.`)
+      workspacesRefresh()
+    }).catch((error) => {
+      console.log('Removing user error:', error.response.data.detail)
+      toast.error(error.response.data.detail)
+    })
+  }, [removeUserWorkspace, workspacesRefresh])
+
   const handleInviteUserWorkspace = useCallback((id: string, userEmail: string, permission: string) => {
     if (!id) {
       return false
@@ -159,7 +175,8 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
         handleUpdateWorkspace,
         handleAcceptWorkspaceInvite,
         handleRejectWorkspaceInvite,
-        handleInviteUserWorkspace
+        handleInviteUserWorkspace,
+        handleRemoveUserWorkspace
       }}
     >
       {children}

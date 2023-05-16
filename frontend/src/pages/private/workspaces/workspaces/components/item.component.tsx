@@ -16,8 +16,9 @@ export const WorkspaceListItem: FC<{
   workspace: IWorkspaceSummary
   handleSelect: () => void
   handleDelete: () => void
+  handleLeave: () => void
   selectedWorkspaceId: string | undefined
-}> = ({ workspace, handleSelect, handleDelete, selectedWorkspaceId }) => {
+}> = ({ workspace, handleSelect, handleDelete, handleLeave, selectedWorkspaceId }) => {
   const isSelected = workspace.id === selectedWorkspaceId
 
   const navigate = useNavigate()
@@ -89,6 +90,13 @@ export const WorkspaceListItem: FC<{
             }}
           >
             Config
+          </Button>
+          <Button
+            size='small'
+            color='warning'
+            onClick={handleLeave}
+          >
+            Leave
           </Button>
           <Button
             size='small'
