@@ -56,6 +56,10 @@ export const WorflowRunTaskFlowchart = () => {
     const [selectedNodeTaskData, setSelectedNodeTaskData] = useState<any>(null)
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
     const [logs, setLogs] = useState<any>([])
+    const [taskResult, setTaskResult] = useState<any>({
+        base64_content: "",
+        file_type: "",
+    })
     const updateTime = 5000 // in ms
 
     const {
@@ -136,7 +140,7 @@ export const WorflowRunTaskFlowchart = () => {
                         })
                         // Update result for the selected task
                         handleFetchWorkflowRunTaskResult(taskId, taskTryNumber).then((response) => {
-                            setLogs(response.data)
+                            setResult(response.data)
                         }).catch((error) => {
                             console.log('Error fetching logs', error)
                         })
