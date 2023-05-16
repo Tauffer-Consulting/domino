@@ -140,8 +140,7 @@ export const WorflowRunTaskFlowchart = () => {
                         })
                         // Update result for the selected task
                         handleFetchWorkflowRunTaskResult(taskId, taskTryNumber).then((response) => {
-                            console.log('########################')
-                            console.log('Result', response)
+                            console.log('task result', response.data)
                             setTaskResult(response.data)
                         }).catch((error) => {
                             console.log('Error fetching logs', error)
@@ -277,7 +276,10 @@ export const WorflowRunTaskFlowchart = () => {
                                         ) : selectedButton === 'logs' ? (
                                             <TaskLogs logs={logs} />
                                         ) : selectedButton === 'result' ? (
-                                            <TaskResult content={""} content_type={""} />
+                                            <TaskResult
+                                                base64_content={taskResult.base64_content}
+                                                file_type={taskResult.file_type}
+                                            />
                                         ) : ""
                                     }
                                 </Grid>
