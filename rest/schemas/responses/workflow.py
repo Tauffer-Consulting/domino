@@ -159,17 +159,25 @@ class GetWorkflowRunTasksResponseData(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
+
 class GetWorkflowRunTasksResponse(BaseModel):
     data: List[GetWorkflowRunTasksResponseData]
     metadata: PaginationSet
+
 
 class WorkflowSchemaBaseModel(BaseModel):
     workflow: Dict
     tasks: Dict
 
 
+class GetWorkflowRunTaskResultResponse(BaseModel):
+    base64_content: str
+    file_type: str
+
+
 class GetWorkflowRunTaskLogsResponse(BaseModel):
     data: List[str]
+
 
 class CreateWorkflowResponse(BaseModel):
     id: int
@@ -179,7 +187,6 @@ class CreateWorkflowResponse(BaseModel):
     created_by: int
     last_changed_at: datetime
     last_changed_by: int
-
 
 
 class DeleteWorkflowResponse(BaseModel):

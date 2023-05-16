@@ -23,7 +23,8 @@ from schemas.responses.workflow import (
     GetWorkflowRunsResponseData,
     GetWorkflowRunTasksResponseData,
     GetWorkflowRunTasksResponse,
-    GetWorkflowRunTaskLogsResponse
+    GetWorkflowRunTaskLogsResponse,
+    GetWorkflowRunTaskResultResponse
 )
 from schemas.responses.base import PaginationSet
 from schemas.exceptions.base import ConflictException, ForbiddenException, ResourceNotFoundException, BadRequestException
@@ -721,3 +722,16 @@ class WorkflowService(object):
         return GetWorkflowRunTaskLogsResponse(
             data=parsed_log
         )
+
+    def get_task_result(self, workflow_id=int, workflow_run_id=str, task_id=str, task_try_number=int):
+        workflow = self.workflow_repository.find_by_id(id=workflow_id)
+        if not workflow:
+            raise ResourceNotFoundException("Workflow not found")
+        airflow_workflow_id = workflow.uuid_name
+        result_dict = self.airflow_client.get_task_result(
+            dag_id=airflow_workflow_id,
+            dag_run_id=workflow_run_id,
+            task_id=task_id,
+            task_try_number=task_try_number
+        )
+        return GetWorkflowRunTaskResultResponse(**result_dict)
