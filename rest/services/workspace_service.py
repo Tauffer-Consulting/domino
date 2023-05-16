@@ -49,7 +49,8 @@ class WorkspaceService(object):
 
         new_workspace = Workspace(
             name=workspace_data.name,
-            github_access_token=None
+            github_access_token=None,
+            created_by=auth_context.user_id
         )
         workspace = self.workspace_repository.create(new_workspace)
         associative = UserWorkspaceAssociative(
