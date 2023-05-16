@@ -178,6 +178,10 @@ class WorkspaceService(object):
                 raise ConflictException('User already invited to this workspace.')
             elif workspace_assoc.workspace.id == workspace_id and workspace_assoc.status == UserWorkspaceStatus.accepted.value:
                 raise ConflictException('User already in this workspace.')
+            elif workspace_assoc.workspace.id == workspace_id and workspace_assoc.status == UserWorkspaceStatus.rejected.value:
+                workspace_assoc.status = UserWorkspaceStatus.pending.value
+                self.workspace_repository.update_user_workspace_associative_by_ids(workspace_assoc)
+                return
 
         workspace = self.workspace_repository.find_by_id(id=workspace_id)
         self.user_repository.add_workspace(
@@ -221,7 +225,9 @@ class WorkspaceService(object):
         else:
             raise BaseException('Invalid action.')
     
-        updated_associative = self.workspace_repository.update_user_workspace_associative_by_id(associative)
+        updated_associative = self.workspace_repository.update_user_workspace_associative_by_ids(associative)
+        if not updated_associative:
+            raise ResourceNotFoundException('Workspace invite not found.')
 
         response = GetWorkspaceResponse(
             id=workspace.id,

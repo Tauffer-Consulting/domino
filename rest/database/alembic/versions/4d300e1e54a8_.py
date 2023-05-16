@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ea98ded6f177
+Revision ID: 4d300e1e54a8
 Revises: 
-Create Date: 2023-05-15 18:31:34.313028
+Create Date: 2023-05-16 09:58:54.415057
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ea98ded6f177'
+revision = '4d300e1e54a8'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -47,14 +47,13 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_workspace_associative',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('workspace_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('workspace_id', sa.Integer(), nullable=False),
     sa.Column('permission', sa.Enum('owner', 'read', 'Config', name='permission'), server_default='owner', nullable=False),
     sa.Column('status', sa.Enum('pending', 'accepted', 'rejected', 'Config', name='userworkspacestatus'), server_default='pending', nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='cascade'),
     sa.ForeignKeyConstraint(['workspace_id'], ['workspace.id'], ondelete='cascade'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('user_id', 'workspace_id')
     )
     op.create_table('workflow',
     sa.Column('id', sa.Integer(), nullable=False),

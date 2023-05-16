@@ -55,9 +55,12 @@ class WorkspaceRepository(object):
                 session.expunge_all()
         return result
     
-    def update_user_workspace_associative_by_id(self, associative: UserWorkspaceAssociative):
+    def update_user_workspace_associative_by_ids(self, associative: UserWorkspaceAssociative):
         with session_scope() as session:
-            saved_associative = session.query(UserWorkspaceAssociative).filter(UserWorkspaceAssociative.id == associative.id).first()
+            saved_associative = session.query(UserWorkspaceAssociative)\
+                .filter(UserWorkspaceAssociative.user_id == associative.user_id)\
+                    .filter(UserWorkspaceAssociative.workspace_id == associative.workspace_id)\
+                        .first()
             if not saved_associative:
                 return None
             saved_associative.status = associative.status
