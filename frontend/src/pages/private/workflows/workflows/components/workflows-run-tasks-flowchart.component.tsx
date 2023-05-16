@@ -186,8 +186,14 @@ export const WorflowRunTaskFlowchart = () => {
             console.log('Error fetching logs', error)
             toast.error("Failed to fetch task logs")
         })
+        // Fetch result for the selected task
+        handleFetchWorkflowRunTaskResult(taskId, taskTryNumber).then((response) => {
+            setTaskResult(response.data)
+        }).catch((error) => {
+            console.log('Error fetching logs', error)
+        })
 
-    }, [nodeIdTaskMapping, nodes, handleFetchWorkflowRunTaskLogs])
+    }, [nodeIdTaskMapping, nodes, handleFetchWorkflowRunTaskLogs, handleFetchWorkflowRunTaskResult])
 
 
     const handleButtonClick = useCallback((event: any) => {

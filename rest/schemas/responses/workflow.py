@@ -171,8 +171,8 @@ class WorkflowSchemaBaseModel(BaseModel):
 
 
 class GetWorkflowRunTaskResultResponse(BaseModel):
-    base64_content: str
-    file_type: str
+    base64_content: Optional[str]
+    file_type: Optional[str]
 
 
 class GetWorkflowRunTaskLogsResponse(BaseModel):
