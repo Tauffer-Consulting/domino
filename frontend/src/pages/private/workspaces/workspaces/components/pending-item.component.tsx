@@ -33,7 +33,7 @@ export const WorkspacePendingListItem: FC<{
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    borderColor: 'darkgray'
+                    borderColor: '#f90'
                 }}
             >
                 <CardActionArea
@@ -61,7 +61,7 @@ export const WorkspacePendingListItem: FC<{
                                 <Typography sx={{ fontSize: 14, my: 0 }} color='text.secondary'>
                                     Status:
                                 </Typography>
-                                <Typography>Pending</Typography>
+                                <Typography color="#f90">Pending</Typography>
                             </Grid>
                         </Grid>
                     </CardContent>
