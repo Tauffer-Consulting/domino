@@ -423,13 +423,13 @@ class BasePiece(metaclass=abc.ABCMeta):
             print(f"Path {file_path} is not a file. Skipping serialization...")
             return None
         # Read file content as bytes and encode content into base64
-        with open(file_path, "r") as f:
-            content = f.read()
-        encoded_content = base64.b64encode(content).decode('utf-8')
+        with open(file_path, "rb") as f:
+            content_bytes = f.read()
+        encoded_content = base64.b64encode(content_bytes).decode('utf-8')
         return encoded_content
 
 
-    @abc.abstractmethod
-    def generate_report(self):
-        """This function carries the relevant code for the Piece report."""
-        raise NotImplementedError("This method must be implemented in the child class!")
+    # @abc.abstractmethod
+    # def generate_report(self):
+    #     """This function carries the relevant code for the Piece report."""
+    #     raise NotImplementedError("This method must be implemented in the child class!")
