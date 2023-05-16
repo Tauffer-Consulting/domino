@@ -140,11 +140,6 @@ class AirflowRestClient(requests.Session):
 
     def get_task_result(self, dag_id: str, dag_run_id: str, task_id: str, task_try_number: int):
         # ref: https://airflow.apache.org/docs/apache-airflow/stable/stable-rest-api-ref.html#operation/get_xcom_entries
-        resource = f"/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/xcomEntries"
-        response = self.request(
-            method='get',
-            resource=resource,
-        )
         # Get base64_content
         result_dict = dict()
         resource = f"/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/xcomEntries/base64_content"
