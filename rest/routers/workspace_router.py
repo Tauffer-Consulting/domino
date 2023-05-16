@@ -4,7 +4,14 @@ from services.auth_service import AuthService
 from services.workspace_service import WorkspaceService
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.workspace import CreateWorkspaceRequest, AssignWorkspaceRequest, PatchWorkspaceRequest
-from schemas.responses.workspace import CreateWorkspaceResponse, ListUserWorkspacesResponse, AssignWorkspaceResponse, GetWorkspaceResponse, PatchWorkspaceResponse
+from schemas.responses.workspace import (
+    CreateWorkspaceResponse, 
+    ListUserWorkspacesResponse, 
+    AssignWorkspaceResponse, 
+    GetWorkspaceResponse, 
+    PatchWorkspaceResponse, 
+    ListWorkspaceUsersResponse
+)
 from schemas.exceptions.base import BaseException, ConflictException, ResourceNotFoundException, ForbiddenException, UnauthorizedException
 from schemas.errors.base import ConflictError, ForbiddenError, SomethingWrongError, ResourceNotFoundError, UnauthorizedError
 from database.models.enums import UserWorkspaceStatus
@@ -226,7 +233,7 @@ def patch_workspace(
 
 @router.delete(
     path="/{workspace_id}/users/{user_id}",
-        responses={
+    responses={
         status.HTTP_204_NO_CONTENT: {},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
@@ -246,3 +253,29 @@ async def remove_user_from_workspace(
         )
     except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
+
+@router.get(
+    path="/{workspace_id}/users",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {'model': ListWorkspaceUsersResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
+        status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
+        status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
+    },
+)
+def list_workspace_users(
+    workspace_id: int,
+    page: int = 0,
+    page_size: int = 10,
+    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+) -> ListWorkspaceUsersResponse:
+    try:
+        return workspace_service.list_workspace_users(
+            workspace_id=workspace_id,
+            page=page,
+            page_size=page_size
+        )
+    except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+

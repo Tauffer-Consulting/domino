@@ -1,5 +1,5 @@
 from database.interface import session_scope
-from database.models import Workspace, UserWorkspaceAssociative
+from database.models import Workspace, UserWorkspaceAssociative, User
 from database.models.enums import UserWorkspaceStatus, Permission
 from typing import Tuple, List
 from sqlalchemy import and_, func
@@ -44,6 +44,37 @@ class WorkspaceRepository(object):
             if result:
                 session.expunge_all()
         return result
+    
+    def find_workspace_users(self, workspace_id: int, page: int, page_size: int):
+        """
+        SELECT user_workspace_associative.*, "user".*, total_count.count AS count
+        FROM user_workspace_associative
+        INNER JOIN "user" ON "user".id = user_workspace_associative.user_id
+        CROSS JOIN (
+            SELECT COUNT(*) AS count
+            FROM user_workspace_associative
+            WHERE workspace_id=9
+        ) AS count
+        WHERE workspace_id = 9
+        LIMIT 1;
+        """
+        with session_scope() as session:
+            subquery = (
+                session.query(func.count())
+                .select_from(UserWorkspaceAssociative)
+                .filter(UserWorkspaceAssociative.workspace_id == 9)
+                .scalar_subquery()
+            )
+            query = (
+                session.query(UserWorkspaceAssociative, User, subquery.label('count'))
+                .join(User, User.id == UserWorkspaceAssociative.user_id)
+                .filter(UserWorkspaceAssociative.workspace_id == workspace_id)
+            )
+            results = query.paginate(page, page_size)
+            if results:
+                session.expunge_all()
+        return results
+
     
     def find_pending_workspace_invite(self, user_id: int, workspace_id: int):
         with session_scope() as session:

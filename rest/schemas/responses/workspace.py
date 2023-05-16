@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from database.models.enums import Permission, RepositorySource, UserWorkspaceStatus
+from schemas.responses.base import PaginationSet
 
 
 class CreateWorkspaceResponse(BaseModel):
@@ -41,6 +42,17 @@ class ListUserWorkspacesResponse(BaseModel):
     user_permission: Permission
     status: UserWorkspaceStatus
     github_access_token_filled: bool
+
+
+class ListWorkspaceUsersResponseData(BaseModel):
+    user_id: int
+    user_email: str
+    user_permission: Permission
+    
+
+class ListWorkspaceUsersResponse(BaseModel):
+    data: List[ListWorkspaceUsersResponseData]
+    metadata: PaginationSet
 
 
 class GetWorkspaceResponse(BaseModel):

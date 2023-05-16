@@ -3,14 +3,14 @@ from core.logger import get_configured_logger
 from schemas.context.auth_context import AuthorizationContextData, WorkspaceAuthorizerData
 from schemas.requests.workspace import CreateWorkspaceRequest, AssignWorkspaceRequest, PatchWorkspaceRequest
 from schemas.responses.workspace import (
-    WorkspaceBase,
     CreateWorkspaceResponse,
-    AssignWorkspaceResponse,
-    WorkspaceBase,
     ListUserWorkspacesResponse,
     GetWorkspaceResponse,
-    PatchWorkspaceResponse
+    PatchWorkspaceResponse,
+    ListWorkspaceUsersResponseData,
+    ListWorkspaceUsersResponse
 )
+from schemas.responses.base import PaginationSet
 from schemas.requests.piece_repository import CreateRepositoryRequest
 from schemas.exceptions.base import ConflictException, ResourceNotFoundException, ForbiddenException, UnauthorizedException
 from repository.workspace_repository import WorkspaceRepository
@@ -22,6 +22,7 @@ from database.models.enums import Permission, UserWorkspaceStatus
 from cryptography.fernet import Fernet
 from core.settings import settings
 from typing import List
+from math import ceil
 
 class WorkspaceService(object):
 
@@ -267,6 +268,45 @@ class WorkspaceService(object):
             workspaces_ids=[workspace_id],
             user_id=user_id
         )
+
+    def list_workspace_users(self, workspace_id: int, page: int, page_size: int):
+        # List workspace users
+        self.logger.info(f"Listing workspace {workspace_id} users")
+
+        workspace = self.workspace_repository.find_by_id(id=workspace_id)
+        if not workspace:
+            raise ResourceNotFoundException("Workspace not found.")
+        
+        workspace_users_data = self.workspace_repository.find_workspace_users(
+            workspace_id=workspace_id,
+            page=page,
+            page_size=page_size
+        )
+        
+        count = workspace_users_data[0].count if workspace_users_data else 0
+        response_metadata = PaginationSet(
+            page=page,
+            records=len(workspace_users_data),
+            total=count,
+            last_page=max(0, ceil(count / page_size) - 1)
+        )
+
+        response_data = []
+        for workspace_user_data in workspace_users_data:
+            response_data.append(
+                ListWorkspaceUsersResponseData(
+                    user_id=workspace_user_data.User.id,
+                    user_email=workspace_user_data.User.email,
+                    user_permission=workspace_user_data.UserWorkspaceAssociative.permission
+                )
+            )
+            
+        return ListWorkspaceUsersResponse(
+            data=response_data,
+            metadata=response_metadata
+        )
+
+        
         
 
         
