@@ -7,7 +7,8 @@ import {
   useAuthenticatedPostWorkspaces,
   useAuthenticatedDeleteWorkspaces,
   useAuthenticatedAcceptWorkspaceInvite,
-  useAuthenticatedRejectWorkspaceInvite
+  useAuthenticatedRejectWorkspaceInvite,
+  useAuthenticatedWorkspaceInvite
 } from 'services/requests/workspaces'
 
 import { createCustomContext } from 'utils'
@@ -24,7 +25,8 @@ interface IWorkspacesContext {
   handleDeleteWorkspace: (id: string) => void
   handleUpdateWorkspace: (workspace: IWorkspaceSummary) => void
   handleAcceptWorkspaceInvite: (id: string) => void
-  handleRejectWorkspaceInvite: (id: string) => void
+  handleRejectWorkspaceInvite: (id: string) => void,
+  handleInviteUserWorkspace: (id: string, userEmail: string, permission: string) => void
 }
 
 export const [WorkspacesContext, useWorkspaces] =
@@ -54,11 +56,24 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
 
   const acceptWorkspaceInvite = useAuthenticatedAcceptWorkspaceInvite()
   const rejectWorkspaceInvite = useAuthenticatedRejectWorkspaceInvite()
+  const inviteWorkspace = useAuthenticatedWorkspaceInvite()
 
   // Memoized data
   const workspaces: IWorkspaceSummary[] = useMemo(() => data ?? [], [data])
 
   // Handlers
+  const handleInviteUserWorkspace = useCallback((id: string, userEmail: string, permission: string) => {
+    if (!id) {
+      return false
+    }
+    inviteWorkspace({workspaceId: id, userEmail: userEmail, permission: permission}).then(() => {
+      toast.success(`User invited successfully`)
+    }).catch((error) => {
+      console.log('Inviting user error:', error.response.data.detail)
+      toast.error(error.response.data.detail)
+    })
+  }, [inviteWorkspace])
+
   const handleAcceptWorkspaceInvite = useCallback(async(id: string) => {
     acceptWorkspaceInvite({workspaceId: id}).then(() => {
       //toast.success(`Workspace invitation accepted successfully`)
@@ -79,7 +94,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
       console.log('Rejecting workspace invitation error:', error)
       toast.error('Error rejecting workspace invitation, try again later')
     })
-  },[])
+  }, [rejectWorkspaceInvite, workspacesRefresh])
     
 
   const handleCreateWorkspace = useCallback(
@@ -143,7 +158,8 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
         handleDeleteWorkspace,
         handleUpdateWorkspace,
         handleAcceptWorkspaceInvite,
-        handleRejectWorkspaceInvite
+        handleRejectWorkspaceInvite,
+        handleInviteUserWorkspace
       }}
     >
       {children}

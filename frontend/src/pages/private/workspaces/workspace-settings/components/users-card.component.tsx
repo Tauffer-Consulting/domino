@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useCallback, useState } from 'react'
 
 import { PersonAdd } from '@mui/icons-material'
 import {
@@ -8,22 +8,49 @@ import {
   Box,
   Typography,
   Button,
-  Alert
+  Select,
+  MenuItem,
+  Grid,
+  InputLabel,
+  FormControl
 } from '@mui/material'
 import TextField from '@mui/material/TextField'
-
-// import { useWorkspaceSettings } from 'modules/workspaces/workspace-settings.context'
+import { useWorkspaces } from 'context/workspaces/workspaces.context'
+import { useWorkspaceSettings } from 'context/workspaces/workspace-settings.context'
+import { toast } from 'react-toastify'
 
 /**
  * @todo integrate with backend
  * @returns Users card component
  */
 export const UsersCard: FC = () => {
-  const [user, setUser] = useState('')
-  // const { workspaceData } = useWorkspaceSettings()
+  const [userEmail, setUserEmail] = useState<string>('')
+  const [permission, setPermission] = useState<string>('')
+  const { workspaceData } = useWorkspaceSettings()
+  const { handleInviteUserWorkspace } = useWorkspaces()
+  
+  const inviteUser = useCallback(() => {
+    // if not user email or not permission toastfail
+    if (!userEmail || !permission) {
+      toast.error('Email and permission are required.')
+      return;
+    }
+    if (!workspaceData) {
+      toast.error('Workspace not found.')
+      return;
+    }
+    handleInviteUserWorkspace(workspaceData.id, userEmail, permission)
+    setUserEmail('')
+    setPermission('')
+  
+  }, [permission, userEmail, handleInviteUserWorkspace, workspaceData])
 
+
+  if (!workspaceData) {
+    return null
+  }
   return (
-    <Card variant='outlined' sx={{ height: "100%" }} style={{opacity: 0.50, pointerEvents: "none" }}>
+    <Card variant='outlined' sx={{ height: "100%" }}>
       <CardHeader title='Users' titleTypographyProps={{ variant: 'h6' }}/>
       <CardContent>
         <Box>
@@ -37,26 +64,36 @@ export const UsersCard: FC = () => {
             }}
           >
             <TextField
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
               fullWidth
               variant='outlined'
               id='user'
               label='User e-mail'
               type='email'
               name='user'
-              disabled={true}
             />
-            {/* <Button disabled={!user} color='primary' variant='contained'> */}
-            <Button disabled={true} color='primary' variant='contained'>
+            <Button  color='primary' variant='contained' onClick={inviteUser}>
               <PersonAdd />
             </Button>
           </Box>
         </Box>
+        <Grid container mt={2}>
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Permission</InputLabel>
+            <Select
+              labelId="label-select-workspace-invite-permission"
+              id="select-workspace-invite-permission"
+              value={permission}
+              label="Permission"
+              onChange={(e) => setPermission(e.target.value as string)}
+            >
+              <MenuItem value={'read'}>Read</MenuItem>
+              <MenuItem value={'owner'}>Owner</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
 
-        <Alert severity='info' sx={{ mt: 1 }}>
-          Coming soon.
-        </Alert>
         {/* {!!workspaceData?.users?.length ? (
           <List>
             {workspaceData.users.map((user, index) => (
