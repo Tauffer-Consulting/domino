@@ -15,6 +15,7 @@ import {
   IGetWorkflowRunsResponseInterface,
   useAuthenticatedGetWorkflowRunTasks,
   useAuthenticatedGetWorkflowRunTaskLogs,
+  useAuthenticatedGetWorkflowRunTaskResult,
   IGetWorkflowRunTasksResponseInterface,
 } from 'services/requests/runs'
 
@@ -47,6 +48,7 @@ interface IWorkflowsContext {
   handleFetchWorkflowRunTasks: (page: number, pageSize: number) => Promise<IGetWorkflowRunTasksResponseInterface>
   handleRefreshWorkflowRuns: () => void
   handleFetchWorkflowRunTaskLogs: (taskId: string, taskTryNumber: string) => Promise<any>
+  handleFetchWorkflowRunTaskResult: (taskId: string, taskTryNumber: string) => Promise<any>
 
 }
 
@@ -63,7 +65,7 @@ export const WorkflowsProvider: FC<IWorkflowsProviderProps> = ({ children }) => 
   // Workflows table settings
   const [tablePage, setTablePage] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
-  
+
   // Workflow runs table settings
   const [runsTablePage, setRunsTablePage] = useState(0)
   const [runsTablePageSize, setRunsTablePageSize] = useState(10)
@@ -92,6 +94,7 @@ export const WorkflowsProvider: FC<IWorkflowsProviderProps> = ({ children }) => 
   const runWorkflowById = useAuthenticatedPostWorkflowRunId()
   const fetchWorkflowRunTasks = useAuthenticatedGetWorkflowRunTasks()
   const fetchWorkflowRunTaskLogs = useAuthenticatedGetWorkflowRunTaskLogs()
+  const fetchWorkflowRunTaskResult = useAuthenticatedGetWorkflowRunTaskResult()
 
   useEffect(() => {
     if (!!workflowsError) {
@@ -146,6 +149,12 @@ export const WorkflowsProvider: FC<IWorkflowsProviderProps> = ({ children }) => 
     return fetchWorkflowRunTaskLogs({ workflowId, runId, taskId, taskTryNumber })
   }, [fetchWorkflowRunTaskLogs, selectedWorkflow, selectedWorkflowRunId])
 
+  const handleFetchWorkflowRunTaskResult = useCallback(async (taskId: string, taskTryNumber: string) => {
+    const workflowId = selectedWorkflow?.id.toString() || ''
+    const runId = selectedWorkflowRunId || ''
+    return fetchWorkflowRunTaskResult({ workflowId, runId, taskId, taskTryNumber })
+  }, [fetchWorkflowRunTaskResult, selectedWorkflow, selectedWorkflowRunId])
+
 
   const value: IWorkflowsContext = useMemo(
     () => ({
@@ -157,6 +166,7 @@ export const WorkflowsProvider: FC<IWorkflowsProviderProps> = ({ children }) => 
       handleFetchWorkflow: (id: string) => fetchWorkflowById({ id }),
       handleRunWorkflow: (id: string) => runWorkflowById({ id }),
       handleFetchWorkflowRunTaskLogs: (taskId: string, taskTryNumber: string) => handleFetchWorkflowRunTaskLogs(taskId, taskTryNumber),
+      handleFetchWorkflowRunTaskResult: (taskId: string, taskTryNumber: string) => handleFetchWorkflowRunTaskResult(taskId, taskTryNumber),
       tablePage,
       setTablePage,
       tablePageSize,
@@ -196,7 +206,8 @@ export const WorkflowsProvider: FC<IWorkflowsProviderProps> = ({ children }) => 
       setSelectedWorkflowRunId,
       workflowRunsRefresh,
       handleFetchWorkflowRunTasks,
-      handleFetchWorkflowRunTaskLogs
+      handleFetchWorkflowRunTaskLogs,
+      handleFetchWorkflowRunTaskResult
     ]
   )
 

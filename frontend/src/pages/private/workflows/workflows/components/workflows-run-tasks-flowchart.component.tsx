@@ -6,13 +6,15 @@ import ReactFlow, {
     Controls,
     ReactFlowProvider,
 } from 'reactflow'
+import 'reactflow/dist/style.css';
+
 import { useWorkflows } from 'context/workflows/workflows.context';
 import CustomNode from '../../workflows-editor/components/custom-node.component'; // todo move to shared
 import { taskStatesColorMap } from '../../../../../constants';
 import { TaskDetails } from './workflow-task-details.component';
 import { TaskLogs } from './workflow-task-logs.component';
+import { TaskResult } from './workflow-task-result.component';
 
-import 'reactflow/dist/style.css';
 
 const nodeTypes = {
     CustomNode: CustomNode
@@ -61,7 +63,8 @@ export const WorflowRunTaskFlowchart = () => {
         handleFetchWorkflowRunTasks,
         selectedWorkflowRunId,
         workflowRuns,
-        handleFetchWorkflowRunTaskLogs
+        handleFetchWorkflowRunTaskLogs,
+        handleFetchWorkflowRunTaskResult,
     } = useWorkflows()
 
     const fetchTasks = useCallback(async () => {
@@ -131,6 +134,12 @@ export const WorflowRunTaskFlowchart = () => {
                         }).catch((error) => {
                             console.log('Error fetching logs', error)
                         })
+                        // Update result for the selected task
+                        handleFetchWorkflowRunTaskResult(taskId, taskTryNumber).then((response) => {
+                            setLogs(response.data)
+                        }).catch((error) => {
+                            console.log('Error fetching logs', error)
+                        })
                     }
                     // Check if the run is finished to avoid fetching tasks after the run is finished
                     if ((workflowRun?.state === 'success') || (workflowRun?.state === 'failed')) {
@@ -142,7 +151,7 @@ export const WorflowRunTaskFlowchart = () => {
             }, updateTime); // Update every X seconds
             return () => clearInterval(interval);
         }
-    }, [fetchTasks, selectedWorkflowRunId, workflowRuns, handleFetchWorkflowRunTaskLogs, selectedNodeId])
+    }, [fetchTasks, selectedWorkflowRunId, workflowRuns, handleFetchWorkflowRunTaskLogs, handleFetchWorkflowRunTaskResult, selectedNodeId])
 
 
     const onNodeDoubleClick = useCallback(async (event: any, node: any) => {
@@ -235,9 +244,8 @@ export const WorflowRunTaskFlowchart = () => {
                                             Logs
                                         </Button>
                                         <Button
-                                            value='report'
-                                            sx={selectedButton === "report" ? buttonSXActive : buttonSX}
-                                            disabled
+                                            value='result'
+                                            sx={selectedButton === "result" ? buttonSXActive : buttonSX}
                                             onClick={handleButtonClick}
                                             style={{
                                                 borderTopRightRadius: '8px',
@@ -246,7 +254,7 @@ export const WorflowRunTaskFlowchart = () => {
                                                 borderBottomLeftRadius: '8px',
                                             }}
                                         >
-                                            Report
+                                            Result
                                         </Button>
                                     </ButtonGroup>
                                 </Grid>
@@ -256,6 +264,8 @@ export const WorflowRunTaskFlowchart = () => {
                                             <TaskDetails taskData={selectedNodeTaskData} />
                                         ) : selectedButton === 'logs' ? (
                                             <TaskLogs logs={logs} />
+                                        ) : selectedButton === 'result' ? (
+                                            <TaskResult content={""} content_type={""} />
                                         ) : ""
                                     }
                                 </Grid>
