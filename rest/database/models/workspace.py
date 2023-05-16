@@ -11,7 +11,6 @@ class Workspace(Base, BaseDatabaseModel):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    created_by = Column(Integer, ForeignKey("user.id", ondelete='cascade'), nullable=False)
     github_access_token = Column(String, nullable=True)
     
 

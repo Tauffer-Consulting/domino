@@ -222,3 +222,27 @@ def patch_workspace(
         return response
     except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
+    
+
+@router.delete(
+    path="/{workspace_id}/users/{user_id}",
+        responses={
+        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
+        status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
+        status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
+    },
+)
+async def remove_user_from_workspace(
+    workspace_id: int,
+    user_id: int,
+    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+):
+    try:
+        await workspace_service.remove_user_from_workspace(
+            workspace_id=workspace_id,
+            user_id=user_id,
+            auth_context=auth_context
+        )
+    except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)

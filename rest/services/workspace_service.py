@@ -49,8 +49,7 @@ class WorkspaceService(object):
 
         new_workspace = Workspace(
             name=workspace_data.name,
-            github_access_token=None,
-            created_by=auth_context.user_id
+            github_access_token=None
         )
         workspace = self.workspace_repository.create(new_workspace)
         associative = UserWorkspaceAssociative(
@@ -238,3 +237,36 @@ class WorkspaceService(object):
             github_access_token_filled=workspace.github_access_token is not None
         )
         return response
+
+    async def remove_user_from_workspace(self, workspace_id: int, user_id: int, auth_context: AuthorizationContextData):
+        # Can't remove other users if not owner
+        if auth_context.user_id != user_id and auth_context.workspace.user_permission != Permission.owner.value:
+            raise ForbiddenException()
+        
+        workspace_infos = self.workspace_repository.find_user_workspaces_members_owners_count(
+            user_id=user_id,
+            workspaces_ids=[workspace_id]
+        )
+        if not workspace_infos:
+            raise ResourceNotFoundException('User not found in workspace.')
+
+        workspace_info = workspace_infos[0]
+        # If the workspace has only one member (the user) delete the workspace (even the user not being the owner).
+        if workspace_info.members_count == 1:
+            await self.delete_workspace(workspace_id=workspace_id)
+            return
+
+        # If the user is owner and the workspace has only one owner (the user) but has more than one member, delete the workspace. 
+        if workspace_info.owners_count == 1 and auth_context.workspace.user_permission == Permission.owner.value:
+            await self.delete_workspace(workspace_id=workspace_id)
+            return
+
+        # If user is read only and workspace has more than one member, just remove the user from workspace
+        # Or if workspace has more than one owner just remove the user from workspace
+        self.workspace_repository.remove_user_from_workspaces(
+            workspaces_ids=[workspace_id],
+            user_id=user_id
+        )
+        
+
+        
