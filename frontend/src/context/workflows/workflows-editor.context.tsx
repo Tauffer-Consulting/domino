@@ -347,10 +347,16 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     dag_dict['workflow'] = workflowFormData?.config
     const storageWorkflowData = workflowFormData?.storage
 
+    const auxTaskDict: any = {}
     for (let index=0; index < nodes.length; index++){
       let element = nodes[index]
       let taskIndex = 0
       let taskName = `task_${element.data.name}_${taskIndex}`
+      while (taskName in auxTaskDict) {
+        taskIndex += 1
+        taskName = `task_${element.data.name}_${taskIndex}`
+      }
+      auxTaskDict[taskName] = true
       nodeId2taskName[element.id] = taskName
       taskName2nodeId[taskName] = element.id
     }
