@@ -17,6 +17,19 @@ export const TaskResult = (props: ITaskResultProps) => {
         switch (file_type) {
             case 'txt':
                 return <pre>{window.atob(base64_content)}</pre>;
+            case 'json':
+                return (
+                    <pre
+                        style={{
+                            maxHeight: '100%',
+                            overflowY: 'auto',
+                            whiteSpace: 'pre-wrap',
+                            wordWrap: 'break-word',
+                        }}
+                    >
+                        {JSON.stringify(JSON.parse(window.atob(base64_content)), null, 2)}
+                    </pre>
+                );
             case 'jpeg':
             case 'png':
             case 'bmp':
@@ -33,7 +46,7 @@ export const TaskResult = (props: ITaskResultProps) => {
                         Your browser does not support SVG
                     </object>
                 );
-            case 'markdown':
+            case 'md':
                 return <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
             default:
                 return <div>Unsupported file type</div>;

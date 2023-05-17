@@ -11,5 +11,5 @@ class DisplayResultFileType(str, Enum):
     txt = "txt"
     json = "json"
     md = "md"
-    html = "html"
     pdf = "pdf"
+    html = "html"
