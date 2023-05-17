@@ -5,7 +5,7 @@ import { dominoApiClient } from 'services/clients/domino.client'
 import { IGetWorkspaceUsersResponse } from './workspaces.interface'
 import { useAuthentication } from 'context/authentication'
 
-interface IGetWorkspaceMemers {
+interface IGetWorkspaceMembers {
     workspaceId: string
     page: number
     pageSize: number
@@ -27,9 +27,9 @@ const getWorkspaceUsers: (
  * Get workspaces
  * @returns workspaces as swr response
  */
-export const useAuthenticatedGetWorkspaceUsers = (params: IGetWorkspaceMemers) => {
+export const useAuthenticatedGetWorkspaceUsers = (params: IGetWorkspaceMembers) => {
 
-    const fetcher = useCallback(async (params: IGetWorkspaceMemers) => {
+    const fetcher = useCallback(async (params: IGetWorkspaceMembers) => {
         return getWorkspaceUsers(params.workspaceId, params.page, params.pageSize).then(data => data.data)
     }, [])
 

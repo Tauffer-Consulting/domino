@@ -9,7 +9,8 @@ import {
   useAuthenticatedAcceptWorkspaceInvite,
   useAuthenticatedRejectWorkspaceInvite,
   useAuthenticatedWorkspaceInvite,
-  useAuthenticatedRemoveUserWorkspace
+  useAuthenticatedRemoveUserWorkspace,
+  useAuthenticatedGetWorkspaceUsers
 } from 'services/requests/workspaces'
 
 import { createCustomContext } from 'utils'
@@ -29,6 +30,13 @@ interface IWorkspacesContext {
   handleRejectWorkspaceInvite: (id: string) => void,
   handleInviteUserWorkspace: (id: string, userEmail: string, permission: string) => void
   handleRemoveUserWorkspace: (workspaceId: string, userId: string) => void
+  workspaceUsers: any
+  workspaceUsersRefresh: () => void
+  workspaceUsersTablePageSize: number
+  workspaceUsersTablePage: number
+  setWorkspaceUsersTablePageSize: (pageSize: number) => void
+  setWorkspaceUsersTablePage: (page: number) => void
+
 }
 
 export const [WorkspacesContext, useWorkspaces] =
@@ -45,6 +53,9 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
       : null
   )
 
+  const [workspaceUsersTablePageSize, setWorkspaceUsersTablePageSize] = useState<number>(5);
+  const [workspaceUsersTablePage, setWorkspaceUsersTablePage] = useState<number>(0);
+
   // Requests hooks
   const {
     data,
@@ -52,6 +63,18 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
     isValidating: workspacesLoading,
     mutate: workspacesRefresh
   } = useAuthenticatedGetWorkspaces()
+
+  const {
+    data: workspaceUsers,
+    mutate: workspaceUsersRefresh
+  } = useAuthenticatedGetWorkspaceUsers(
+    workspace ? 
+      { 
+        workspaceId: workspace.id, 
+        page: workspaceUsersTablePage, 
+        pageSize: workspaceUsersTablePageSize 
+      } : { workspaceId: '', page: workspaceUsersTablePage, pageSize: workspaceUsersTablePageSize }
+  )
 
   const postWorkspace = useAuthenticatedPostWorkspaces()
   const deleteWorkspace = useAuthenticatedDeleteWorkspaces()
@@ -84,11 +107,12 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
     }
     inviteWorkspace({workspaceId: id, userEmail: userEmail, permission: permission}).then(() => {
       toast.success(`User invited successfully`)
+      workspaceUsersRefresh()
     }).catch((error) => {
       console.log('Inviting user error:', error.response.data.detail)
       toast.error(error.response.data.detail)
     })
-  }, [inviteWorkspace])
+  }, [inviteWorkspace, workspaceUsersRefresh()])
 
   const handleAcceptWorkspaceInvite = useCallback(async(id: string) => {
     acceptWorkspaceInvite({workspaceId: id}).then(() => {
@@ -176,7 +200,13 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
         handleAcceptWorkspaceInvite,
         handleRejectWorkspaceInvite,
         handleInviteUserWorkspace,
-        handleRemoveUserWorkspace
+        handleRemoveUserWorkspace,
+        workspaceUsers,
+        workspaceUsersRefresh,
+        workspaceUsersTablePageSize,
+        workspaceUsersTablePage,
+        setWorkspaceUsersTablePageSize,
+        setWorkspaceUsersTablePage
       }}
     >
       {children}

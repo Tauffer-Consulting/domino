@@ -40,7 +40,8 @@ export type IGetWorkspaceUsersResponse = {
   data: [{
     user_id: number
     user_email: string
-    user_permission: string
+    user_permission: string,
+    status: EWorkspaceStatus
   }],
   metadata: IPaginationMetadata
 }
