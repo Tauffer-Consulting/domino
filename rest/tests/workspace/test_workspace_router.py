@@ -138,7 +138,6 @@ class TestWorkspaceRouter:
         user: User,
         user_extra: User,
     ):
-        
         mock_response = ListWorkspaceUsersResponse(
             data=[
                 ListWorkspaceUsersResponseData(
@@ -170,6 +169,14 @@ class TestWorkspaceRouter:
         for key in content.keys():
             assert content.get(key) == mock_response_content.get(key)
 
+    @staticmethod
+    def test_delete_user_from_workspace(
+        create_workspace: Response,
+        register_user_extra: Response, 
+        invite_user: Response, 
+        delete_user_from_workspace: Response,
+    ):
+        assert delete_user_from_workspace.status_code == 204
 
     @staticmethod
     def test_patch_workspace(create_workspace: Response, patch_workspace: Response, workspace: Response):

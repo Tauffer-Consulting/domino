@@ -124,6 +124,19 @@ def list_workspace_users(
         headers={"Authorization": authorization_token["header"]}
     )
 
+@pytest.fixture(scope='function')
+def delete_user_from_workspace(
+    client: ApiTestClient,
+    authorization_token: Dict,
+    workspace: Workspace,
+    login_user_extra: Response,
+    user_extra: User
+):
+    return client.delete(
+        f"/workspaces/{workspace.id}/users/{user_extra.id}",
+        headers={"Authorization": authorization_token["header"]}
+    )
+
 @pytest.fixture(scope="function")
 def patch_workspace(client: ApiTestClient, authorization_token: Dict, workspace: Workspace):
     patch_workspace_request = PatchWorkspaceRequest(

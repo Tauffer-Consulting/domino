@@ -233,6 +233,7 @@ def patch_workspace(
 
 @router.delete(
     path="/{workspace_id}/users/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_204_NO_CONTENT: {},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
