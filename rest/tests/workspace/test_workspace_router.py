@@ -5,7 +5,7 @@ from httpx import Response
 
 from schemas.responses.workspace import CreateWorkspaceResponse, ListUserWorkspacesResponse, GetWorkspaceResponse, PatchWorkspaceResponse
 from database.models.workspace import Workspace
-from database.models.enums import Permission
+from database.models.enums import Permission, UserWorkspaceStatus
 
 pytest_plugins=[
     "tests.workspace.fixtures"
@@ -18,6 +18,7 @@ class TestWorkspaceRouter:
         mock_response = CreateWorkspaceResponse(
             id=workspace.id, 
             name=workspace.name,
+            user_permission=Permission.owner.value
         )
         response = create_workspace
         content = response.json()
@@ -35,7 +36,8 @@ class TestWorkspaceRouter:
                 id=workspace.id, 
                 workspace_name=workspace.name, 
                 github_access_token_filled=False,
-                user_permission=Permission.owner.value
+                user_permission=Permission.owner.value,
+                status=UserWorkspaceStatus.accepted.value
             )
         ]
         response = get_workspaces
@@ -55,7 +57,8 @@ class TestWorkspaceRouter:
             id=workspace.id,
             workspace_name=workspace.name,
             github_access_token_filled=False,
-            user_permission=Permission.owner.value
+            user_permission=Permission.owner.value,
+            status=UserWorkspaceStatus.accepted.value
         )
         response = get_workspace
         content = response.json()
@@ -72,7 +75,8 @@ class TestWorkspaceRouter:
             id=workspace.id,
             workspace_name=workspace.name,
             github_access_token_filled=True,
-            user_permission=Permission.owner.value
+            user_permission=Permission.owner.value,
+            status=UserWorkspaceStatus.accepted.value
         )
         response = patch_workspace
         content = response.json()

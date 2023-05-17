@@ -3,7 +3,6 @@ import json
 from ..api_test_client import ApiTestClient
 from httpx import Response
 from typing import Dict
-from uuid import uuid4
 
 from database.models.workspace import Workspace
 from schemas.requests.workspace import CreateWorkspaceRequest, PatchWorkspaceRequest
@@ -17,7 +16,7 @@ def workspace():
     return Workspace(
         id=1,
         name="workspace_test",
-        github_access_token=None
+        github_access_token=None,
     )
 
 @pytest.fixture(scope="class")
