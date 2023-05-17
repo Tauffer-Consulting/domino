@@ -81,10 +81,26 @@ def create_workspace(client: ApiTestClient, authorization_token: Dict, workspace
 
 @pytest.fixture(scope="function")
 def invite_user(client: ApiTestClient, authorization_token: Dict, workspace: Workspace, user_extra: User):
-    return client.post(
+    response = client.post(
         f"/workspaces/{workspace.id}/invites",
         headers={"Authorization": authorization_token["header"]},
         json={"user_email": user_extra.email, "permission": Permission.read.value}
+    )
+    return response
+
+@pytest.fixture(scope='function')
+def accept_invite(client: ApiTestClient, authorization_token_user_extra: Dict, workspace: Workspace):
+    return client.post(
+        f"/workspaces/{workspace.id}/invites/accept",
+        headers={"Authorization": authorization_token_user_extra["header"]}
+    )
+
+
+@pytest.fixture(scope='function')
+def reject_invite(client: ApiTestClient, authorization_token_user_extra: Dict, workspace: Workspace):
+    return client.post(
+        f"/workspaces/{workspace.id}/invites/reject",
+        headers={"Authorization": authorization_token_user_extra["header"]}
     )
 
 @pytest.fixture(scope="function")

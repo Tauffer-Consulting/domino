@@ -70,6 +70,67 @@ class TestWorkspaceRouter:
             assert content.get(key) == mock_response_content.get(key)
 
     @staticmethod
+    def test_invite_user(
+        create_workspace: Response, 
+        register_user_extra: Response, 
+        user_extra: User, 
+        invite_user: Response
+    ):
+        assert invite_user.status_code == 204
+        # TODO list and match new user
+
+    @staticmethod
+    def test_reject_invite(
+        create_workspace: Response,
+        register_user_extra: Response, 
+        invite_user: Response, 
+        login_user_extra: Response, 
+        reject_invite: Response, 
+        workspace: Workspace
+    ):
+        mock_response = GetWorkspaceResponse(
+            id=workspace.id,
+            workspace_name=workspace.name,
+            github_access_token_filled=False,
+            status=UserWorkspaceStatus.rejected.value,
+            user_permission=Permission.read.value,
+        )
+        response = reject_invite
+        content = response.json()
+        mock_response_content = json.loads(mock_response.json())
+
+        assert response.status_code == 200
+        assert content.keys() == mock_response_content.keys()
+        for key in content.keys():
+            assert content.get(key) == mock_response_content.get(key)
+
+
+    @staticmethod
+    def test_accept_invite(
+        create_workspace: Response,
+        register_user_extra: Response, 
+        invite_user: Response, 
+        login_user_extra: Response, 
+        accept_invite: Response, 
+        workspace: Workspace
+    ):
+        mock_response = GetWorkspaceResponse(
+            id=workspace.id,
+            workspace_name=workspace.name,
+            github_access_token_filled=False,
+            status=UserWorkspaceStatus.accepted.value,
+            user_permission=Permission.read.value,
+        )
+        response = accept_invite
+        content = response.json()
+        mock_response_content = json.loads(mock_response.json())
+
+        assert response.status_code == 200
+        assert content.keys() == mock_response_content.keys()
+        for key in content.keys():
+            assert content.get(key) == mock_response_content.get(key)
+
+    @staticmethod
     def test_patch_workspace(create_workspace: Response, patch_workspace: Response, workspace: Response):
         mock_response = PatchWorkspaceResponse(
             id=workspace.id,
@@ -86,19 +147,6 @@ class TestWorkspaceRouter:
         for key in content.keys():
             assert content.get(key) == mock_response_content.get(key)
 
-    @staticmethod
-    def test_invite_user(create_workspace: Response, register_user_extra: Response, user_extra: User, invite_user: Response):
-        assert invite_user.status_code == 204
-        # TODO list and match new user
-
-
-    @staticmethod
-    def test_accept_invite():
-        ...
-    
-    @staticmethod
-    def test_reject_invite():
-        ...
     
     @staticmethod
     def test_delete_workspace(create_workspace: Response, delete_workspace: Response, get_workspace: Response):
