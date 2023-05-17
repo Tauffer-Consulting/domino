@@ -42,7 +42,7 @@ export const WorkspaceSettingsPage = withContext(WorkspaceSettingsProvider, () =
       <TabContext value={value}>
         <Grid  sx={{ borderBottom: 1, borderColor: 'divider' }} style={{ maxWidth: '1380px', margin: '0 auto' }} >
           <TabList onChange={(e, newValue) => setValue(newValue)} aria-label="workspace-tabs">
-            <Tab label="Secrets" value="1" />
+            <Tab label="Config" value="1" />
             <Tab label="Members" value="2" />
           </TabList>
         </Grid >
