@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import { useState, useMemo, useCallback } from 'react'
-import { useAuthenticatedGetWorkspaceUsers } from 'services/requests/workspaces'
 import { DataGrid, GridColumns, GridActionsCellItem } from '@mui/x-data-grid';
 import {
     Card,
