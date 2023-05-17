@@ -62,13 +62,13 @@ class WorkspaceRepository(object):
             subquery = (
                 session.query(func.count())
                 .select_from(UserWorkspaceAssociative)
-                .filter(UserWorkspaceAssociative.workspace_id == 9)
+                .filter(and_(UserWorkspaceAssociative.workspace_id == workspace_id, UserWorkspaceAssociative.status!=UserWorkspaceStatus.rejected.value))
                 .scalar_subquery()
             )
             query = (
                 session.query(UserWorkspaceAssociative, User, subquery.label('count'))
                 .join(User, User.id == UserWorkspaceAssociative.user_id)
-                .filter(UserWorkspaceAssociative.workspace_id == workspace_id)
+                .filter(and_(UserWorkspaceAssociative.workspace_id == workspace_id, UserWorkspaceAssociative.status!=UserWorkspaceStatus.rejected.value))
             )
             results = query.paginate(page, page_size)
             if results:

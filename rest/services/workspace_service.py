@@ -297,7 +297,8 @@ class WorkspaceService(object):
                 ListWorkspaceUsersResponseData(
                     user_id=workspace_user_data.User.id,
                     user_email=workspace_user_data.User.email,
-                    user_permission=workspace_user_data.UserWorkspaceAssociative.permission
+                    user_permission=workspace_user_data.UserWorkspaceAssociative.permission,
+                    status=workspace_user_data.UserWorkspaceAssociative.status.value
                 )
             )
             

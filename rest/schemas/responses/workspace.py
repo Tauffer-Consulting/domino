@@ -48,6 +48,7 @@ class ListWorkspaceUsersResponseData(BaseModel):
     user_id: int
     user_email: str
     user_permission: Permission
+    status: UserWorkspaceStatus
     
 
 class ListWorkspaceUsersResponse(BaseModel):
