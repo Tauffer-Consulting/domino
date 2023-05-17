@@ -140,8 +140,7 @@ export const WorflowRunTaskFlowchart = () => {
                         })
                         // Update result for the selected task
                         handleFetchWorkflowRunTaskResult(taskId, taskTryNumber).then((response) => {
-                            console.log('task result', response.data)
-                            setTaskResult(response.data)
+                            setTaskResult(response)
                         }).catch((error) => {
                             console.log('Error fetching logs', error)
                         })
