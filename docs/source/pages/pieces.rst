@@ -44,17 +44,79 @@ The `piece.py` file should contain your custom code inside the `piece_function` 
 
     from domino.base_piece import BasePiece
     from .models import InputModel, OutputModel
+    from pathlib import Path
 
     class MyNewPiece(BasePiece):
 
         def piece_function(self, input_model: InputModel):
-            # Your custom function code comes here
+            # Your custom function code comes in here
+            # You can access the input arguments using the input_model
             print(f"Inpu argument 1: {input_model.in_argument_1}")
             print(f"Inpu argument 2: {input_model.in_argument_2}")
             print(f"Inpu argument 3: {input_model.in_argument_3}")
+
+            # You can access the secrets using the self.secrets, or directly using the os.environ
+            print(f"Secret variable: {self.secrets.SECRET_VAR}")
+            print(f"Secret variable: {os.environ.get('SECRET_VAR')}")
+
+            # If you want to save files in a shared storage, to be used by other Pieces,
+            # you should save them under self.results_path
+            msg = "This is a text to be saved in a shared storage, to be read by other Pieces!"
+            file_path = str(Path(self.results_path)/"msg.txt")
+            with open(file_path, "w") as f:
+                f.write(msg)
             
-            # Return the output model
-            return OutputModel(out_argument_1="a string result")
+            # If you want to display results directly in the Domino GUI,
+            # you should set the attribute self.display_result
+            self.display_result = {
+                "file_type": "txt",
+                "file_path": file_path
+            }
+            
+            # You should return the results using the Output model
+            return OutputModel(
+                out_argument_1="a string result",
+                out_file_path=file_path
+            )
+
+
+.. collapse:: Display results in the Domino GUI
+
+    Pieces can display results directly in the Domino GUI, by setting the attribute :code:`self.display_result` in one of two ways:
+
+    1. Saving the result in a file, and passing the file path to the :code:`self.display_result` attribute:
+
+    .. code-block:: python
+
+        self.display_result = {
+            "file_type": "txt",
+            "file_path": file_path
+        }
+
+    2. Passing the result content directly to the :code:`self.display_result` attribute as a base64 encoded string:
+
+    .. code-block:: python
+
+        self.display_result = {
+            "file_type": "txt",
+            "base64_content": base64-encoded-string,
+        }
+
+    In either way, the :code:`file_type` should always be provided. Currently, the supported file types are: 
+    
+        - :code:`txt` 
+        - :code:`json`
+        - :code:`png` 
+        - :code:`jpeg`
+        - :code:`bmp`
+        - :code:`tiff`
+        - :code:`gif`
+        - :code:`svg`
+        - :code:`md`
+        - :code:`pdf`
+        - :code:`html`
+
+|
 
 .. _domino-pieces-models:
 
@@ -85,10 +147,13 @@ The `models.py` file contains the data models for the Input, Output and Secrets 
         out_argument_1: str = Field(
             description="an argument of string type"
         )
+        out_file_path: str = Field(
+            description="The path to a file saved in a shared storage"
+        )
 
     class SecretsModel(BaseModel):
         """MyNewPiece Secrets"""
-        EXAMPLE_VAR: str = Field(
+        SECRET_VAR: str = Field(
             description="Secret variable"
         )
 
