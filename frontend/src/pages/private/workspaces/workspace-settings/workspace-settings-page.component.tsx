@@ -1,27 +1,22 @@
-import { Box, Grid, Typography } from '@mui/material'
-import { PrivateLayout } from 'modules/layout'
-import { WorkspaceSettingsProvider } from 'context/workspaces/workspace-settings.context'
-import { withContext } from 'common/hocs/with-context.hoc'
-import { RepositoriesCard } from './components/repositories-card.component'
-import WorkspaceSecretsCard from './components/workspace-secrets-card.component'
-import { UsersCard } from './components/users-card.component'
-import SecretsCard from './components/repository-secrets-card.component'
-import StorageSecretsCard from './components/storage-secrets-card.component'
-import { useWorkspaceSettings } from 'context/workspaces/workspace-settings.context'
-import { useState } from 'react'
+import { useState } from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import { PrivateLayout } from 'modules/layout';
+import { WorkspaceSettingsProvider } from 'context/workspaces/workspace-settings.context';
+import { withContext } from 'common/hocs/with-context.hoc';
+import { RepositoriesCard } from './components/repositories-card.component';
+import WorkspaceSecretsCard from './components/workspace-secrets-card.component';
+import { UsersCard } from './components/users-card.component';
+import WorkspaceMembersCard from './components/workspace-users-card.component';
+import SecretsCard from './components/repository-secrets-card.component';
+import StorageSecretsCard from './components/storage-secrets-card.component';
+import { useWorkspaceSettings } from 'context/workspaces/workspace-settings.context';
 
 import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 
-/**
- * @todo break into smaller components
- * @todo handle add repository
- * @todo handle add users
- * @todo improve loading/error states
- * @returns Workspace settings component
- */
+
 export const WorkspaceSettingsPage = withContext(WorkspaceSettingsProvider, () => {
 
   const {
@@ -66,6 +61,9 @@ export const WorkspaceSettingsPage = withContext(WorkspaceSettingsProvider, () =
           <Grid container spacing={1} style={{ maxWidth: '1440px', margin: '0 auto' }}>
             <Grid item xs={12} lg={12}>
               <UsersCard />
+            </Grid>
+            <Grid item xs={12} lg={12}>
+              <WorkspaceMembersCard/>
             </Grid>
           </Grid>
         </TabPanel>

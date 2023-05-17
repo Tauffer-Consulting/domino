@@ -7,6 +7,13 @@ export enum EWorkspaceStatus {
   REJECTED = "rejected",
 }
 
+interface IPaginationMetadata {
+  page: number
+  records: number
+  total: number
+  last_page: number
+}
+
 export interface IWorkspaceSummary {
   id: string
   workspace_name: string
@@ -29,6 +36,14 @@ export interface IWorkspaceDetails {
 
 export type IGetWorkspacesResponseInterface = IWorkspaceSummary[]
 export type IGetWorkspaceIdResponseInterface = IWorkspaceSummary
+export type IGetWorkspaceUsersResponse = {
+  data: [{
+    user_id: number
+    user_email: string
+    user_permission: string
+  }],
+  metadata: IPaginationMetadata
+}
 
 /**
  * @todo type properly

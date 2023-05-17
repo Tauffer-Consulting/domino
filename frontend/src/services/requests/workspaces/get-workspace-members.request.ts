@@ -1,42 +1,48 @@
-// TODO move to /runs
+import { useCallback } from 'react'
 import { AxiosResponse } from 'axios'
-import { useWorkspaces } from 'context/workspaces/workspaces.context'
+import useSWR from 'swr'
+import { dominoApiClient } from 'services/clients/domino.client'
+import { IGetWorkspaceUsersResponse } from './workspaces.interface'
+import { useAuthentication } from 'context/authentication'
 
-
-import { dominoApiClient } from '../../clients/domino.client'
-
-
-interface getWorkspaceMembersParams {
+interface IGetWorkspaceMemers {
     workspaceId: string
-}
-
-const getWorkspaceMembersUrl = (workspaceId: string) => `/workspaces/${workspaceId}/users`
-
-/**
- * Run workflow by id using /workflow/run/:id
- * @returns workflow run result
- */
-const getWorkspaceMembers: (
-    params: getWorkspaceMembersParams
-) => Promise<AxiosResponse> = (params) => {
-    return dominoApiClient.get(
-        getWorkspaceMembersUrl(params.workspaceId)
-    )
+    page: number
+    pageSize: number
 }
 
 /**
- * Run workflow by id fetcher fn
- * @param params `{ id: string }`
+ * Get workspaces using GET /workspaces
+ * @returns workspaces
  */
-export const useAuthenticatedGetWorkspaceUsers = () => {
-    const { workspace } = useWorkspaces()
-
-    if (!workspace) throw new Error('Impossible to run workflows without specifying a workspace')
-
-    const fetcher = (params: getWorkspaceMembersParams) => getWorkspaceMembers(params).then(data => data)
-
-    return fetcher
+const getWorkspaceUsers: (
+    workspaceId: string,
+    page: number,
+    pageSize: number
+) => Promise<AxiosResponse<IGetWorkspaceUsersResponse>> = (workspaceId, page, pageSize) => {
+    return dominoApiClient.get(`/workspaces/${workspaceId}/users?page=${page}&page_size=${pageSize}`)
 }
 
+/**
+ * Get workspaces
+ * @returns workspaces as swr response
+ */
+export const useAuthenticatedGetWorkspaceUsers = (params: IGetWorkspaceMemers) => {
 
+    const fetcher = useCallback(async (params: IGetWorkspaceMemers) => {
+        return getWorkspaceUsers(params.workspaceId, params.page, params.pageSize).then(data => data.data)
+    }, [])
 
+    const auth = useAuthentication()
+
+    if (!params.page){
+        params.page = 0
+    }
+    if (!params.pageSize){
+        params.pageSize = 10
+    }
+    return useSWR((auth.isLogged && params.workspaceId) ? `/workspaces/${params.workspaceId}/users?page=${params.page}&page_size=${params.pageSize}` : null, () => fetcher(params), {
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false
+    })
+}
