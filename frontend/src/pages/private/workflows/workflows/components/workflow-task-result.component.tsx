@@ -1,4 +1,4 @@
-import { Grid, CircularProgress } from '@mui/material';
+import { Box, Grid, CircularProgress } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 
 
@@ -22,7 +22,11 @@ export const TaskResult = (props: ITaskResultProps) => {
             case 'bmp':
             case 'gif':
             case 'tiff':
-                return <img src={`data:image/${file_type};base64,${base64_content}`} alt="Content" />;
+                return <img
+                    src={`data:image/${file_type};base64,${base64_content}`}
+                    alt="Content"
+                    style={{ maxWidth: '100%', maxHeight: '100%' }}
+                />;
             case 'svg':
                 return (
                     <object type="image/svg+xml" data={`data:image/svg+xml;base64,${base64_content}`}>
@@ -39,7 +43,7 @@ export const TaskResult = (props: ITaskResultProps) => {
     return (
         <Grid container mt={5}>
             <Grid item xs={12}>
-                {renderContent()}
+                <Box width={1}>{renderContent()}</Box>
             </Grid>
         </Grid>
     )
