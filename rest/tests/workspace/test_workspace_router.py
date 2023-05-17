@@ -3,7 +3,8 @@ import pytest
 from httpx import Response
 
 
-from schemas.responses.workspace import CreateWorkspaceResponse, ListUserWorkspacesResponse, GetWorkspaceResponse, PatchWorkspaceResponse
+from schemas.responses.workspace import CreateWorkspaceResponse, ListUserWorkspacesResponse, GetWorkspaceResponse, PatchWorkspaceResponse, ListWorkspaceUsersResponse, ListWorkspaceUsersResponseData
+from schemas.responses.base import PaginationSet
 from database.models import Workspace, User
 from database.models.enums import Permission, UserWorkspaceStatus
 
@@ -84,7 +85,6 @@ class TestWorkspaceRouter:
         create_workspace: Response,
         register_user_extra: Response, 
         invite_user: Response, 
-        login_user_extra: Response, 
         reject_invite: Response, 
         workspace: Workspace
     ):
@@ -104,13 +104,11 @@ class TestWorkspaceRouter:
         for key in content.keys():
             assert content.get(key) == mock_response_content.get(key)
 
-
     @staticmethod
     def test_accept_invite(
         create_workspace: Response,
         register_user_extra: Response, 
         invite_user: Response, 
-        login_user_extra: Response, 
         accept_invite: Response, 
         workspace: Workspace
     ):
@@ -129,6 +127,49 @@ class TestWorkspaceRouter:
         assert content.keys() == mock_response_content.keys()
         for key in content.keys():
             assert content.get(key) == mock_response_content.get(key)
+
+    @staticmethod
+    def test_list_workspace_users(
+        create_workspace: Response,
+        register_user_extra: Response, 
+        invite_user: Response, 
+        accept_invite: Response,
+        list_workspace_users: Response,
+        user: User,
+        user_extra: User,
+    ):
+        
+        mock_response = ListWorkspaceUsersResponse(
+            data=[
+                ListWorkspaceUsersResponseData(
+                    user_id=user.id,
+                    user_email=user.email,
+                    user_permission=Permission.owner.value,
+                    status=UserWorkspaceStatus.accepted.value
+                ),
+                ListWorkspaceUsersResponseData(
+                    user_id=user_extra.id,
+                    user_email=user_extra.email,
+                    user_permission=Permission.read.value,
+                    status=UserWorkspaceStatus.accepted.value
+                )
+            ],
+            metadata=PaginationSet(
+                page=0,
+                records=2,
+                total=2,
+                last_page=0
+            )
+        )
+        response = list_workspace_users
+        content = response.json()
+        mock_response_content = json.loads(mock_response.json())
+
+        assert response.status_code == 200
+        assert content.keys() == mock_response_content.keys()
+        for key in content.keys():
+            assert content.get(key) == mock_response_content.get(key)
+
 
     @staticmethod
     def test_patch_workspace(create_workspace: Response, patch_workspace: Response, workspace: Response):
