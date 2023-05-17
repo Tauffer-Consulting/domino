@@ -73,7 +73,7 @@ html_theme_options = {
 
 # Custom CSS and JS static files
 html_css_files = [
-    # 'css/bootstrap.min.css',
+    'css/bootstrap.min.css',
     'css/custom.css'
 ]
 

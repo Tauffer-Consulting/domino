@@ -77,7 +77,7 @@ Here's a list of the main resources for Domino:
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Pieces
 
    pages/pieces.rst
