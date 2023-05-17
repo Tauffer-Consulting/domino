@@ -4,7 +4,7 @@ from httpx import Response
 
 
 from schemas.responses.workspace import CreateWorkspaceResponse, ListUserWorkspacesResponse, GetWorkspaceResponse, PatchWorkspaceResponse
-from database.models.workspace import Workspace
+from database.models import Workspace, User
 from database.models.enums import Permission, UserWorkspaceStatus
 
 pytest_plugins=[
@@ -85,6 +85,20 @@ class TestWorkspaceRouter:
         assert content.keys() == mock_response_content.keys()
         for key in content.keys():
             assert content.get(key) == mock_response_content.get(key)
+
+    @staticmethod
+    def test_invite_user(create_workspace: Response, register_user_extra: Response, user_extra: User, invite_user: Response):
+        assert invite_user.status_code == 204
+        # TODO list and match new user
+
+
+    @staticmethod
+    def test_accept_invite():
+        ...
+    
+    @staticmethod
+    def test_reject_invite():
+        ...
     
     @staticmethod
     def test_delete_workspace(create_workspace: Response, delete_workspace: Response, get_workspace: Response):

@@ -96,7 +96,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
 
 @router.post(
     "/{workspace_id}/invites",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_204_NO_CONTENT: {},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
@@ -112,11 +112,11 @@ def add_user_to_workspace(
 ) -> AssignWorkspaceResponse:
     """Assign workspace to user with permission"""
     try:
-        response = workspace_service.add_user_to_workspace(
+        workspace_service.add_user_to_workspace(
             workspace_id=workspace_id,
             body=body
         )
-        return response
+        return
     except (BaseException, ResourceNotFoundException, ConflictException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
     
