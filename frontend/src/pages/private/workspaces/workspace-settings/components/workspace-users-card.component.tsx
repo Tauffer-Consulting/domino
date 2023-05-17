@@ -71,14 +71,14 @@ const WorkspaceMembersCard = () => {
             {
                 field: 'actions',
                 type: 'actions',
-                headerName: 'Actions',
+                headerName: 'Remove',
                 minWidth: 150,
                 flex: 0.6,
                 hide: workspace?.user_permission === 'owner' ?  false : true,
                 getActions: (params) => [
                     <GridActionsCellItem
                         icon={
-                            <Tooltip title="Delete Workflow">
+                            <Tooltip title="Remove User">
                                 <DeleteOutlineOutlinedIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
                             </Tooltip>
                         }
