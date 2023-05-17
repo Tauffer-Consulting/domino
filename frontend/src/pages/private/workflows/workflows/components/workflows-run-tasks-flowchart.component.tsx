@@ -225,8 +225,8 @@ export const WorflowRunTaskFlowchart = () => {
                 </Grid>
                 <Grid item lg={6} sm={12}>
                     <Card variant='elevation' sx={{ height: 700, mt: 2, overflow: 'hidden', padding: '10px' }}>
-                        <CardContent>
-                            <Grid container sx={{ marginTop: '0px' }}>
+                        <CardContent sx={{ height: "inherit", padding: "0" }}>
+                            <Grid container sx={{ marginTop: '0px', height: "inherit" }}>
                                 <Grid item xs={12}>
                                     <ButtonGroup sx={{ width: '100%', background: "#ebebeb", height: "36px" }}>
                                         <Button
@@ -268,7 +268,7 @@ export const WorflowRunTaskFlowchart = () => {
                                         </Button>
                                     </ButtonGroup>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={12} sx={{ height: "calc(100% - 50px)" }}>
                                     {
                                         selectedNodeTaskData === null ? "" : selectedButton === 'details' ? (
                                             <TaskDetails taskData={selectedNodeTaskData} />

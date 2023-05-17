@@ -1,5 +1,6 @@
 import { Box, Grid, CircularProgress } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
+import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 
 interface ITaskResultProps {
@@ -51,16 +52,38 @@ export const TaskResult = (props: ITaskResultProps) => {
                 );
             case 'md':
                 return <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
+            case 'pdf':
+                return (
+                    <div style={{ width: '100%', height: '500px' }}>
+                        PDF result display not yet implemented
+                        {/* <PDFViewer>
+                            <Document file={`data:application/pdf;base64,${base64_content}`}>
+                                <Page pageNumber={1} />
+                            </Document>
+                        </PDFViewer> */}
+                    </div>
+                );
+            case 'html':
+                return (
+                    <div style={{ width: '100%', height: '500px' }}>
+                        HTML result display not yet implemented
+                    </div>
+                    // <iframe
+                    //     src={`data:text/html;base64,${base64_content}`}
+                    //     style={{ width: '100%', height: '100%' }}
+                    // />
+                );
             default:
                 return <div>Unsupported file type</div>;
         }
     };
 
     return (
-        <Grid container mt={5}>
-            <Grid item xs={12}>
-                <Box width={1}>{renderContent()}</Box>
-            </Grid>
-        </Grid>
+        <Box
+            width={1}
+            sx={{ height: "inherit" }}
+        >
+            {renderContent()}
+        </Box>
     )
 }
