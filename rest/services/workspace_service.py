@@ -256,12 +256,13 @@ class WorkspaceService(object):
         if workspace_info.members_count == 1:
             await self.delete_workspace(workspace_id=workspace_id)
             return
-
+        
         # If the user is owner and the workspace has only one owner (the user) but has more than one member, delete the workspace. 
-        if workspace_info.owners_count == 1 and auth_context.workspace.user_permission == Permission.owner.value:
+        if workspace_info.owners_count == 1 and auth_context.user_id == user_id and auth_context.workspace.user_permission == Permission.owner.value:
             await self.delete_workspace(workspace_id=workspace_id)
-            return
 
+
+        # If the user is owner but is deleting another user, just remove the user from workspace
         # If user is read only and workspace has more than one member, just remove the user from workspace
         # Or if workspace has more than one owner just remove the user from workspace
         self.workspace_repository.remove_user_from_workspaces(
