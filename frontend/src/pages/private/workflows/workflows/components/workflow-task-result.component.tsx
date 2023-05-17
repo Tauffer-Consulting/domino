@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid, CircularProgress } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 
 
@@ -11,6 +11,9 @@ export const TaskResult = (props: ITaskResultProps) => {
     const { base64_content, file_type } = props
 
     const renderContent = () => {
+        if (!base64_content || !file_type) {
+            return <CircularProgress />;
+        }
         switch (file_type) {
             case 'txt':
                 return <pre>{window.atob(base64_content)}</pre>;
