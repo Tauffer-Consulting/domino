@@ -80,7 +80,7 @@ def list_user_workspaces(
     "/{workspace_id}",
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_200_OK: {'model': List[ListUserWorkspacesResponse]},
+        status.HTTP_200_OK: {'model': GetWorkspaceResponse},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError}
     },

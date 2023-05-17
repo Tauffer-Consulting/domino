@@ -102,10 +102,23 @@ class WorkspaceRepository(object):
 
     def find_by_id_and_user(self, id: int, user_id: int) -> Workspace:
         with session_scope() as session:
-            result = session.query(Workspace.id, Workspace.name, Workspace.github_access_token, UserWorkspaceAssociative.permission, UserWorkspaceAssociative.status)\
-                .filter(Workspace.id == id)\
-                    .filter(UserWorkspaceAssociative.user_id == user_id)\
-                        .first()
+            """
+            SELECT workspace.id, workspace.name, workspace.github_access_token, user_workspace_associative.permission
+            FROM workspace
+            INNER JOIN user_workspace_associative 
+            ON  user_workspace_associative.workspace_id = workspace.id and user_id=1
+            WHERE workspace_id=9;
+            """
+            query = session.query(
+                Workspace.id.label('id'), 
+                Workspace.name, 
+                Workspace.github_access_token, 
+                UserWorkspaceAssociative.permission.label('permission'),
+                UserWorkspaceAssociative.status.label('status')
+            )\
+            .join(UserWorkspaceAssociative, and_(UserWorkspaceAssociative.workspace_id==Workspace.id, UserWorkspaceAssociative.user_id==user_id))\
+            .filter(Workspace.id==id)
+            result = query.first()
             if result:
                 session.expunge_all()
         return result
