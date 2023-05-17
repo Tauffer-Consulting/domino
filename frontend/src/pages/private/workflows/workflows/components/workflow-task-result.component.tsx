@@ -42,7 +42,10 @@ export const TaskResult = (props: ITaskResultProps) => {
                 />;
             case 'svg':
                 return (
-                    <object type="image/svg+xml" data={`data:image/svg+xml;base64,${base64_content}`}>
+                    <object
+                        type="image/svg+xml" data={`data:image/svg+xml;base64,${base64_content}`}
+                        style={{ maxWidth: '100%', maxHeight: '100%' }}
+                    >
                         Your browser does not support SVG
                     </object>
                 );
