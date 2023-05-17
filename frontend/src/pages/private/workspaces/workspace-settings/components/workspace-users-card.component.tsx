@@ -58,12 +58,15 @@ const WorkspaceMembersCard = () => {
             {
                 field: 'memberPermission',
                 headerName: 'Member Permission',
-                flex: 1
+                flex: 1,
+                valueFormatter: ({ value }) => value.charAt(0).toUpperCase() + value.slice(1)
             },
             {
                 field: 'status',
                 headerName: 'Status',
                 flex: 1,
+                valueFormatter: ({ value }) => value.charAt(0).toUpperCase() + value.slice(1)
+
             },
             {
                 field: 'actions',
