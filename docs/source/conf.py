@@ -32,6 +32,7 @@ extensions = [
     'sphinx.ext.napoleon',
     "sphinx_copybutton",
     'sphinx-pydantic',
+    'sphinx_toolbox.collapse',
     # 'myst_parser',
 ]
 

@@ -10,7 +10,8 @@ from schemas.responses.workflow import (
     CreateWorkflowResponse,
     GetWorkflowRunsResponse,
     GetWorkflowRunTasksResponse,
-    GetWorkflowRunTaskLogsResponse
+    GetWorkflowRunTaskLogsResponse,
+    GetWorkflowRunTaskResultResponse
 )
 from schemas.exceptions.base import (
     BaseException,
@@ -240,6 +241,39 @@ def get_task_logs(
     """
     try:
         return workflow_service.get_task_logs(
+            workflow_id=workflow_id,
+            workflow_run_id=workflow_run_id,
+            task_id=task_id,
+            task_try_number=task_try_number
+        )
+    except (BaseException, ForbiddenException, ResourceNotFoundException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+
+
+@router.get(
+    "/{workflow_id}/runs/{workflow_run_id}/tasks/{task_id}/{task_try_number}/result",
+    status_code=200,
+    responses={
+        status.HTTP_200_OK: {"model": GetWorkflowRunTaskResultResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
+        status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError}
+    }
+)
+def get_task_result(
+    workspace_id: int,
+    workflow_id: int, 
+    workflow_run_id: str,
+    task_id: str,
+    task_try_number: int,
+    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+) -> GetWorkflowRunTaskResultResponse:
+
+    """
+    Get workflow run task parsed logs lines.
+    """
+    try:
+        return workflow_service.get_task_result(
             workflow_id=workflow_id,
             workflow_run_id=workflow_run_id,
             task_id=task_id,
