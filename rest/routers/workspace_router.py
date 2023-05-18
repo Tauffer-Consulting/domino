@@ -98,7 +98,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
     "/{workspace_id}/invites",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
-        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_204_NO_CONTENT: {'model': None},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
         status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
@@ -109,14 +109,13 @@ def add_user_to_workspace(
     workspace_id: int,
     body: AssignWorkspaceRequest,
     auth_context: AuthorizationContextData = Depends(auth_service.workspace_owner_access_authorizer)
-) -> AssignWorkspaceResponse:
+):
     """Assign workspace to user with permission"""
     try:
         workspace_service.add_user_to_workspace(
             workspace_id=workspace_id,
             body=body
         )
-        return
     except (BaseException, ResourceNotFoundException, ConflictException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
     
