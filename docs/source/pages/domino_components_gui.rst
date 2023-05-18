@@ -37,7 +37,8 @@ The Domino frontend service is a React application that provides the GUI for eas
             <strong>Invite an user to your workspace</strong>
         </summary>
         <br>
-        Invite an user with defined permissions to your workspace.
+        In Domino UI you can create different workspaces and invite other users to collaborate with you.
+        For each workspace you can select the users that will have access to it and the pieces repositories you want to install on it.
         <br>
         <img src="../_static/media/3_invite_user.gif" style="margin-top: 20px;">
     </details>
@@ -49,7 +50,8 @@ The Domino frontend service is a React application that provides the GUI for eas
             <strong>Accept/Reject workspace invites</strong>
         </summary>
         <br>
-        Accept or reject an invite to a workspace.
+        When you are invited to a workspace, you will see the workspace invite in the workspaces page.
+        You can accept or reject an invite.
         <br>
         <img src="../_static/media/4_accept_invite.gif" style="margin-top: 20px;">
     </details>
@@ -61,7 +63,8 @@ The Domino frontend service is a React application that provides the GUI for eas
             <strong>Remove an user from workspace</strong>
         </summary>
         <br>
-        Remove an user from your workspace.
+        If you are the owner of a workspace, you can remove an user from it.
+        If you are not the owner, you can leave the workspace by yourself.
         <br>
         <img src="../_static/media/5_remove_user.gif" style="margin-top: 20px;">
     </details>
