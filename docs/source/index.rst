@@ -15,7 +15,7 @@ Domino is an open source workflow management platform, with:
 Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
 
 
-.. image:: /_static/media/4_create_workflow.gif
+.. image:: /_static/media/7_create_workflow.gif
    :width: 800
 
 
