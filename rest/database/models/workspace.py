@@ -1,6 +1,7 @@
 from database.models.base import Base, BaseDatabaseModel
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 
 class Workspace(Base, BaseDatabaseModel):
@@ -9,6 +10,7 @@ class Workspace(Base, BaseDatabaseModel):
     # Table columns
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     github_access_token = Column(String, nullable=True)
     
 

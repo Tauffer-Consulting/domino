@@ -11,3 +11,4 @@ class PatchWorkspaceRequest(BaseModel):
 
 class AssignWorkspaceRequest(BaseModel):
     permission: Permission
+    user_email: str = Field(..., description="Email of the user to be assigned to the workspace")

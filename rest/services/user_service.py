@@ -92,7 +92,7 @@ class UserService(object):
         workspaces_ids_to_delete = list()
         workspaces_ids_to_remove_association = list()
         for workspace_data in user_workspaces_members_count:
-            if workspace_data.members_count == 1:
+            if (workspace_data.members_count == 1) or (workspace_data.members_count > 1 and workspace_data.permission == Permission.owner.value):
                 workspaces_ids_to_delete.append(workspace_data.workspace_id)
                 continue
             workspaces_ids_to_remove_association.append(workspace_data.workspace_id)

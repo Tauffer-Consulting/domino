@@ -1,5 +1,6 @@
 export interface IAuthenticationStore {
   token: string | null
+  userId: string | null
 }
 
 export interface IAuthenticationContext {

@@ -5,7 +5,12 @@ import {
   IWorkspaceSummary,
   useAuthenticatedGetWorkspaces,
   useAuthenticatedPostWorkspaces,
-  useAuthenticatedDeleteWorkspaces
+  useAuthenticatedDeleteWorkspaces,
+  useAuthenticatedAcceptWorkspaceInvite,
+  useAuthenticatedRejectWorkspaceInvite,
+  useAuthenticatedWorkspaceInvite,
+  useAuthenticatedRemoveUserWorkspace,
+  useAuthenticatedGetWorkspaceUsers
 } from 'services/requests/workspaces'
 
 import { createCustomContext } from 'utils'
@@ -21,6 +26,17 @@ interface IWorkspacesContext {
   handleCreateWorkspace: (name: string) => Promise<unknown>
   handleDeleteWorkspace: (id: string) => void
   handleUpdateWorkspace: (workspace: IWorkspaceSummary) => void
+  handleAcceptWorkspaceInvite: (id: string) => void
+  handleRejectWorkspaceInvite: (id: string) => void,
+  handleInviteUserWorkspace: (id: string, userEmail: string, permission: string) => void
+  handleRemoveUserWorkspace: (workspaceId: string, userId: string) => void
+  workspaceUsers: any
+  workspaceUsersRefresh: () => void
+  workspaceUsersTablePageSize: number
+  workspaceUsersTablePage: number
+  setWorkspaceUsersTablePageSize: (pageSize: number) => void
+  setWorkspaceUsersTablePage: (page: number) => void
+
 }
 
 export const [WorkspacesContext, useWorkspaces] =
@@ -37,6 +53,9 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
       : null
   )
 
+  const [workspaceUsersTablePageSize, setWorkspaceUsersTablePageSize] = useState<number>(5);
+  const [workspaceUsersTablePage, setWorkspaceUsersTablePage] = useState<number>(0);
+
   // Requests hooks
   const {
     data,
@@ -45,13 +64,79 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
     mutate: workspacesRefresh
   } = useAuthenticatedGetWorkspaces()
 
+  const {
+    data: workspaceUsers,
+    mutate: workspaceUsersRefresh
+  } = useAuthenticatedGetWorkspaceUsers(
+    workspace ? 
+      { 
+        workspaceId: workspace.id, 
+        page: workspaceUsersTablePage, 
+        pageSize: workspaceUsersTablePageSize 
+      } : { workspaceId: '', page: workspaceUsersTablePage, pageSize: workspaceUsersTablePageSize }
+  )
+
   const postWorkspace = useAuthenticatedPostWorkspaces()
   const deleteWorkspace = useAuthenticatedDeleteWorkspaces()
+
+  const acceptWorkspaceInvite = useAuthenticatedAcceptWorkspaceInvite()
+  const rejectWorkspaceInvite = useAuthenticatedRejectWorkspaceInvite()
+  const inviteWorkspace = useAuthenticatedWorkspaceInvite()
+  const removeUserWorkspace = useAuthenticatedRemoveUserWorkspace()
 
   // Memoized data
   const workspaces: IWorkspaceSummary[] = useMemo(() => data ?? [], [data])
 
   // Handlers
+  const handleRemoveUserWorkspace = useCallback((workspaceId: string, userId: string) => {
+    if (!workspaceId || !userId) {
+      toast.error("Workspace and user must be defined to remove user from workspace.")
+    }
+    removeUserWorkspace({workspaceId: workspaceId, userId: userId}).then(() => {
+      toast.success(`User removed successfully from workspace.`)
+      workspacesRefresh()
+    }).catch((error) => {
+      console.log('Removing user error:', error.response.data.detail)
+      toast.error(error.response.data.detail)
+    })
+  }, [removeUserWorkspace, workspacesRefresh])
+
+  const handleInviteUserWorkspace = useCallback((id: string, userEmail: string, permission: string) => {
+    if (!id) {
+      return false
+    }
+    inviteWorkspace({workspaceId: id, userEmail: userEmail, permission: permission}).then(() => {
+      toast.success(`User invited successfully`)
+      workspaceUsersRefresh()
+    }).catch((error) => {
+      console.log('Inviting user error:', error.response.data.detail)
+      toast.error(error.response.data.detail)
+    })
+  }, [inviteWorkspace, workspaceUsersRefresh()])
+
+  const handleAcceptWorkspaceInvite = useCallback(async(id: string) => {
+    acceptWorkspaceInvite({workspaceId: id}).then(() => {
+      //toast.success(`Workspace invitation accepted successfully`)
+      workspacesRefresh()
+    }).catch((error) => {
+      // todo custom msg
+      console.log('Accepting workspace invitation error:', error)
+      toast.error('Error accepting workspace invitation, try again later')
+    })
+  }, [acceptWorkspaceInvite, workspacesRefresh])
+
+  const handleRejectWorkspaceInvite = useCallback(async(id: string) => {
+    rejectWorkspaceInvite({workspaceId: id}).then(() => {
+      toast.error(`You have rejected the workspace invitation.`)
+      workspacesRefresh()
+    }).catch((error) => {
+      // todo custom msg
+      console.log('Rejecting workspace invitation error:', error)
+      toast.error('Error rejecting workspace invitation, try again later')
+    })
+  }, [rejectWorkspaceInvite, workspacesRefresh])
+    
+
   const handleCreateWorkspace = useCallback(
     (name: string) =>
       postWorkspace({ name })
@@ -92,6 +177,11 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
       }
     ).catch((error) => {
       console.log('Deleting workspace error:', error)
+      if (error.response.status === 403) {
+        toast.error("You don't have permission to delete this workspace.")
+        return
+      }
+      toast.error('Error deleting workspace, try again later') 
     })
   }, [deleteWorkspace, workspacesRefresh])
 
@@ -106,7 +196,17 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({ children }) =
         handleChangeWorkspace,
         handleCreateWorkspace,
         handleDeleteWorkspace,
-        handleUpdateWorkspace
+        handleUpdateWorkspace,
+        handleAcceptWorkspaceInvite,
+        handleRejectWorkspaceInvite,
+        handleInviteUserWorkspace,
+        handleRemoveUserWorkspace,
+        workspaceUsers,
+        workspaceUsersRefresh,
+        workspaceUsersTablePageSize,
+        workspaceUsersTablePage,
+        setWorkspaceUsersTablePageSize,
+        setWorkspaceUsersTablePage
       }}
     >
       {children}

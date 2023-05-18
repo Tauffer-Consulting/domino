@@ -36,19 +36,22 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const navigate = useNavigate()
   const [authLoading, setAuthLoading] = useState(false)
   const [store, setStore] = useState<IAuthenticationStore>({
-    token: localStorage.getItem('auth_token')
+    token: localStorage.getItem('auth_token'),
+    userId: localStorage.getItem('userId')
   })
 
   const isLogged = useRef(!!store.token)
 
   const login = useCallback(
-    (token: string, redirect = '') => {
+    (token: string, userId: string, redirect = '') => {
       isLogged.current = true
       setStore((store) => ({
         ...store,
-        token
+        token,
+        userId
       }))
       localStorage.setItem('auth_token', token)
+      localStorage.setItem('userId', userId as string)
       navigate(redirect)
     },
     [navigate]
@@ -74,7 +77,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       postAuthLogin({ email, password })
         .then((res) => {
           if (res.status === 200) {
-            login(res.data.access_token)
+            login(res.data.access_token, res.data.user_id as string)
           }
         })
         .catch(() => {

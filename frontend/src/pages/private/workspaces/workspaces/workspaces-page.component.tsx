@@ -16,6 +16,8 @@ import { useWorkspaces } from 'context/workspaces/workspaces.context'
 
 import { AddWorkspace } from './components/add-workspace.component'
 import { WorkspaceListItem } from './components/item.component'
+import { WorkspacePendingListItem } from './components/pending-item.component'
+import { useAuthentication } from 'context/authentication'
 
 /**
  * Workspace list page
@@ -30,11 +32,17 @@ export const WorkspacesPage: FC = () => {
     workspacesLoading,
     handleRefreshWorkspaces,
     handleChangeWorkspace,
-    handleDeleteWorkspace
+    handleDeleteWorkspace,
+    handleRemoveUserWorkspace
   } = useWorkspaces()
+
+  const auth = useAuthentication()
 
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false)
   const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null)
+
+  const [isOpenLeaveDialog, setIsOpenLeaveDialog] = useState<boolean>(false)
+  const [leaveWorkspaceId, setLeaveWorkspaceId] = useState<string | null>(null)
   
   const deleteWorkspace = useCallback(() => {
     if (deleteWorkspaceId){
@@ -43,6 +51,16 @@ export const WorkspacesPage: FC = () => {
     setDeleteWorkspaceId(null)
     setIsOpenDeleteDialog(false)
   }, [handleDeleteWorkspace, deleteWorkspaceId])
+
+
+  const leaveWorkspace = useCallback(()=>{
+    if (leaveWorkspaceId){
+      handleRemoveUserWorkspace(leaveWorkspaceId, auth.store.userId as string)
+    }
+    setLeaveWorkspaceId(null)
+    setIsOpenLeaveDialog(false)
+  }, [leaveWorkspaceId, handleRemoveUserWorkspace, auth.store.userId])
+
 
   return (
     <PrivateLayout>
@@ -53,7 +71,7 @@ export const WorkspacesPage: FC = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Confirm Workflow Deletion"}
+          {"Confirm Workspace Deletion"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
@@ -65,6 +83,28 @@ export const WorkspacesPage: FC = () => {
           <Button onClick={() => setIsOpenDeleteDialog(false)}>Cancel</Button>
           <Button onClick={deleteWorkspace} variant='outlined' color='error'>
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={isOpenLeaveDialog}
+        onClose={() => setIsOpenLeaveDialog(false)}
+        aria-labelledby="alert-leave-dialog-title"
+        aria-describedby="alert-leave-dialog-description"
+      >
+        <DialogTitle id="alert-leave-dialog-title">
+          {"Confirm Leave Workspace"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to leave this workspace and all its contents?
+            This action <span style={{ fontWeight: 'bold' }}>cannot be undone and may cause workspace deletion.</span>.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsOpenLeaveDialog(false)}>Cancel</Button>
+          <Button onClick={leaveWorkspace} variant='outlined' color='warning'>
+            Leave
           </Button>
         </DialogActions>
       </Dialog>
@@ -84,16 +124,28 @@ export const WorkspacesPage: FC = () => {
         <AddWorkspace />
 
         {workspaces.map((ws, index) => (
-          <WorkspaceListItem
-            workspace={ws}
-            key={index}
-            handleSelect={() => handleChangeWorkspace(ws.id)}
-            handleDelete={()=> {
-              setDeleteWorkspaceId(ws.id)
-              setIsOpenDeleteDialog(true)
-            }}
-            selectedWorkspaceId={workspace?.id}
-          />
+          ws.status === 'rejected' ? null :
+          ws.status === 'pending' ? 
+            <WorkspacePendingListItem
+              workspace={ws}
+              key={index}
+              selectedWorkspaceId={workspace?.id}
+            />
+           :
+            <WorkspaceListItem
+              workspace={ws}
+              key={index}
+              handleSelect={() => handleChangeWorkspace(ws.id)}
+              handleDelete={()=> {
+                setDeleteWorkspaceId(ws.id)
+                setIsOpenDeleteDialog(true)
+              }}
+              selectedWorkspaceId={workspace?.id}
+              handleLeave={() => {
+                setLeaveWorkspaceId(ws.id)
+                setIsOpenLeaveDialog(true)
+              }}
+            />
         ))}
       </Grid>
     </PrivateLayout>

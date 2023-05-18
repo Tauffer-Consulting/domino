@@ -1,9 +1,24 @@
 import { ERepositorySource } from "common/interfaces/repository-source.enum"
 
+// Workspace status enum with values (pending, accepted and rejected)
+export enum EWorkspaceStatus {
+  PENDING = "pending",
+  ACCEPTED = "accepted",
+  REJECTED = "rejected",
+}
+
+interface IPaginationMetadata {
+  page: number
+  records: number
+  total: number
+  last_page: number
+}
+
 export interface IWorkspaceSummary {
   id: string
   workspace_name: string
   user_permission: string
+  status: EWorkspaceStatus
   github_access_token_filled: boolean
 }
 
@@ -21,6 +36,15 @@ export interface IWorkspaceDetails {
 
 export type IGetWorkspacesResponseInterface = IWorkspaceSummary[]
 export type IGetWorkspaceIdResponseInterface = IWorkspaceSummary
+export type IGetWorkspaceUsersResponse = {
+  data: [{
+    user_id: number
+    user_email: string
+    user_permission: string,
+    status: EWorkspaceStatus
+  }],
+  metadata: IPaginationMetadata
+}
 
 /**
  * @todo type properly

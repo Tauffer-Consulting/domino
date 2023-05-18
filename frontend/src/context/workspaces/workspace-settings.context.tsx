@@ -101,6 +101,10 @@ export const WorkspaceSettingsProvider: FC<IWorkspaceSettingsProviderProps> = ({
           return data
         })
         .catch((e) => {
+          if (e.response?.status === 403){
+            toast.error(`You don't have permission to add repositories to this workspace.`)
+            return
+          }
           toast.error(`Error adding repository, try again later.`)
         }),
     [postRepository, refreshWorkspaceData, workspace?.id]
