@@ -6,13 +6,15 @@ import ReactFlow, {
     Controls,
     ReactFlowProvider,
 } from 'reactflow'
+import 'reactflow/dist/style.css';
+
 import { useWorkflows } from 'context/workflows/workflows.context';
 import CustomNode from '../../workflows-editor/components/custom-node.component'; // todo move to shared
 import { taskStatesColorMap } from '../../../../../constants';
 import { TaskDetails } from './workflow-task-details.component';
 import { TaskLogs } from './workflow-task-logs.component';
+import { TaskResult } from './workflow-task-result.component';
 
-import 'reactflow/dist/style.css';
 
 const nodeTypes = {
     CustomNode: CustomNode
@@ -54,6 +56,10 @@ export const WorflowRunTaskFlowchart = () => {
     const [selectedNodeTaskData, setSelectedNodeTaskData] = useState<any>(null)
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
     const [logs, setLogs] = useState<any>([])
+    const [taskResult, setTaskResult] = useState<any>({
+        base64_content: "",
+        file_type: "",
+    })
     const updateTime = 5000 // in ms
 
     const {
@@ -61,7 +67,8 @@ export const WorflowRunTaskFlowchart = () => {
         handleFetchWorkflowRunTasks,
         selectedWorkflowRunId,
         workflowRuns,
-        handleFetchWorkflowRunTaskLogs
+        handleFetchWorkflowRunTaskLogs,
+        handleFetchWorkflowRunTaskResult,
     } = useWorkflows()
 
     const fetchTasks = useCallback(async () => {
@@ -131,6 +138,12 @@ export const WorflowRunTaskFlowchart = () => {
                         }).catch((error) => {
                             console.log('Error fetching logs', error)
                         })
+                        // Update result for the selected task
+                        handleFetchWorkflowRunTaskResult(taskId, taskTryNumber).then((response) => {
+                            setTaskResult(response)
+                        }).catch((error) => {
+                            console.log('Error fetching logs', error)
+                        })
                     }
                     // Check if the run is finished to avoid fetching tasks after the run is finished
                     if ((workflowRun?.state === 'success') || (workflowRun?.state === 'failed')) {
@@ -142,7 +155,7 @@ export const WorflowRunTaskFlowchart = () => {
             }, updateTime); // Update every X seconds
             return () => clearInterval(interval);
         }
-    }, [fetchTasks, selectedWorkflowRunId, workflowRuns, handleFetchWorkflowRunTaskLogs, selectedNodeId])
+    }, [fetchTasks, selectedWorkflowRunId, workflowRuns, handleFetchWorkflowRunTaskLogs, handleFetchWorkflowRunTaskResult, selectedNodeId])
 
 
     const onNodeDoubleClick = useCallback(async (event: any, node: any) => {
@@ -173,8 +186,14 @@ export const WorflowRunTaskFlowchart = () => {
             console.log('Error fetching logs', error)
             toast.error("Failed to fetch task logs")
         })
+        // Fetch result for the selected task
+        handleFetchWorkflowRunTaskResult(taskId, taskTryNumber).then((response) => {
+            setTaskResult(response)
+        }).catch((error) => {
+            console.log('Error fetching logs', error)
+        })
 
-    }, [nodeIdTaskMapping, nodes, handleFetchWorkflowRunTaskLogs])
+    }, [nodeIdTaskMapping, nodes, handleFetchWorkflowRunTaskLogs, handleFetchWorkflowRunTaskResult])
 
 
     const handleButtonClick = useCallback((event: any) => {
@@ -206,8 +225,8 @@ export const WorflowRunTaskFlowchart = () => {
                 </Grid>
                 <Grid item lg={6} sm={12}>
                     <Card variant='elevation' sx={{ height: 700, mt: 2, overflow: 'hidden', padding: '10px' }}>
-                        <CardContent>
-                            <Grid container sx={{ marginTop: '0px' }}>
+                        <CardContent sx={{ height: "inherit", padding: "0" }}>
+                            <Grid container sx={{ marginTop: '0px', height: "inherit" }}>
                                 <Grid item xs={12}>
                                     <ButtonGroup sx={{ width: '100%', background: "#ebebeb", height: "36px" }}>
                                         <Button
@@ -235,9 +254,8 @@ export const WorflowRunTaskFlowchart = () => {
                                             Logs
                                         </Button>
                                         <Button
-                                            value='report'
-                                            sx={selectedButton === "report" ? buttonSXActive : buttonSX}
-                                            disabled
+                                            value='result'
+                                            sx={selectedButton === "result" ? buttonSXActive : buttonSX}
                                             onClick={handleButtonClick}
                                             style={{
                                                 borderTopRightRadius: '8px',
@@ -246,16 +264,21 @@ export const WorflowRunTaskFlowchart = () => {
                                                 borderBottomLeftRadius: '8px',
                                             }}
                                         >
-                                            Report
+                                            Result
                                         </Button>
                                     </ButtonGroup>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={12} sx={{ height: "calc(100% - 50px)" }}>
                                     {
                                         selectedNodeTaskData === null ? "" : selectedButton === 'details' ? (
                                             <TaskDetails taskData={selectedNodeTaskData} />
                                         ) : selectedButton === 'logs' ? (
                                             <TaskLogs logs={logs} />
+                                        ) : selectedButton === 'result' ? (
+                                            <TaskResult
+                                                base64_content={taskResult.base64_content}
+                                                file_type={taskResult.file_type}
+                                            />
                                         ) : ""
                                     }
                                 </Grid>

@@ -15,5 +15,5 @@ sphinx-apidoc -f -o source .. ../*setup*
 
 Build documentation:
 ```
-make html
+make clean html
 ```

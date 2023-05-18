@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 import requests
+import ast
 from aiohttp import BasicAuth
 from urllib.parse import urljoin
 from core.logger import get_configured_logger
@@ -137,4 +138,21 @@ class AirflowRestClient(requests.Session):
             resource=resource,
         )
         return response
+
+    def get_task_result(self, dag_id: str, dag_run_id: str, task_id: str, task_try_number: int):
+        # ref: https://airflow.apache.org/docs/apache-airflow/stable/stable-rest-api-ref.html#operation/get_xcom_entries
+        resource = f"/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/xcomEntries/return_value"
+        response = self.request(
+            method='get',
+            resource=resource,
+        )
+        if response.status_code != 200:
+            raise BaseException("Error while trying to get task result base64_content")
+        response_dict =  ast.literal_eval(response.json()["value"])
+        # Get base64_content and file_type
+        result_dict = dict()
+        if "display_result" in response_dict:
+            result_dict["base64_content"] = response_dict["display_result"].get("base64_content", None)
+            result_dict["file_type"] = response_dict["display_result"].get("file_type", None)
+        return result_dict
 
