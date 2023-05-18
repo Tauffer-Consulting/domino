@@ -1,5 +1,5 @@
 Sphinx
-myst-parser
 sphinx-pydantic
 sphinx-rtd-theme
 sphinx-copybutton
+sphinx-toolbox==3.4.0
