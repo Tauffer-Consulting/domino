@@ -225,7 +225,7 @@ services:
   # Modified Airflow Scheduler with Domino
   airflow-scheduler:
     <<: *airflow-common
-    # image: airflow-domino-scheduler:latest
+    # image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
     build:
       context: .
       dockerfile: Dockerfile-airflow-domino-base-dev
@@ -251,7 +251,7 @@ services:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
-      - ./domino/:/opt/airflow/domino/domino_py/domino # Hot reload d omino package - remove in production
+      - ./domino/:/opt/airflow/domino/domino_py/domino # Hot reload domino package - remove in production
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -260,7 +260,7 @@ services:
   # Modified Airflow Worker with Domino
   airflow-worker:
     <<: *airflow-common
-    # image: airflow-domino-worker:latest
+    # image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
     build:
       context: .
       dockerfile: Dockerfile-airflow-domino-base-dev
@@ -282,7 +282,6 @@ services:
       DOMINO_DEPLOY_MODE: local-compose
       LOCAL_DOMINO_SHARED_DATA_PATH: ${PWD}/domino_data
     restart: always
-
     volumes:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs

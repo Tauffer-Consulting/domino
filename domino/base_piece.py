@@ -4,13 +4,17 @@ import os
 import ast
 from datetime import datetime
 from pathlib import Path
+from typing import Union
 import pydantic
 import pickle
-from domino.logger import get_configured_logger
-from domino.schemas.deploy_mode import DeployModeType
-from domino.exceptions.exceptions import InvalidPieceOutputError
 import time
 import subprocess
+import base64
+
+from domino.logger import get_configured_logger
+from domino.schemas.deploy_mode import DeployModeType
+from domino.schemas.display_result import DisplayResultFileType
+from domino.exceptions.exceptions import InvalidPieceOutputError
 
 
 class BasePiece(metaclass=abc.ABCMeta):
@@ -56,6 +60,8 @@ class BasePiece(metaclass=abc.ABCMeta):
         # Logger
         self.logger = get_configured_logger(f"{self.__class__.__name__ }-{self.task_id}")
 
+        self.display_result = None
+
 
     def start_logger(self):
         """
@@ -63,12 +69,14 @@ class BasePiece(metaclass=abc.ABCMeta):
         """
         self.logger.info(f"Started {self.task_id} of type {self.__class__.__name__} at {str(datetime.now().isoformat())}")
 
+
     def _wait_for_sidecar_paths(self):
         # Wait for sidecar create directories
         while True:
             if Path(self.report_path).is_dir():
                 break
             time.sleep(2)
+
 
     def generate_paths(self):
         """
@@ -178,6 +186,21 @@ class BasePiece(metaclass=abc.ABCMeta):
                     v_type = output_schema["definitions"][type_model]["type"]
             xcom_obj[f"{k}_type"] = v_type
 
+        # Serialize self.display_result and add it to XCOM
+        if isinstance(self.display_result, dict):
+            if "file_type" not in self.display_result:
+                raise Exception("display_result must have 'file_type' key")
+            if "base64_content" not in self.display_result:
+                if "file_path" not in self.display_result:
+                    raise Exception("self.display_result dict must have either 'file_path' or 'base64_content' keys")
+                self.display_result["base64_content"] = self.serialize_display_result_file(
+                    file_path=self.display_result["file_path"],
+                    file_type=self.display_result["file_type"]
+                )
+            self.display_result["file_path"] = str(self.display_result["file_path"])
+            self.display_result["file_type"] = str(self.display_result["file_type"])
+            xcom_obj["display_result"] = self.display_result
+
         # Update XCOM with extra metadata
         xcom_obj.update(
             piece_name=self.__class__.__name__,
@@ -198,6 +221,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         """
         if self.deploy_mode in ["local-python"]:
             self.airflow_context['ti'].xcom_push(key=self.task_id, value=xcom_obj)
+
         elif self.deploy_mode == "local-compose":
             file_path = Path('/airflow/xcom/return.out')
             file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -210,6 +234,7 @@ class BasePiece(metaclass=abc.ABCMeta):
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(str(file_path), 'w') as fp:
                 json.dump(xcom_obj, fp, indent=4)
+
         elif self.deploy_mode in ["k8s", "local-k8s", "local-k8s-dev"]:
             # In Kubernetes, return XCom must be stored in /airflow/xcom/return.json
             # https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/pieces.html#how-does-xcom-work
@@ -223,6 +248,7 @@ class BasePiece(metaclass=abc.ABCMeta):
             with open(file_path, 'w') as fp:
                 json.dump(xcom_obj, fp)
             #time.sleep(120)
+
         else:
             raise NotImplementedError("deploy mode not accepted for xcom push")
     
@@ -321,6 +347,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         # Run piece function
         return cls.piece_function(self=dry_instance, input_model=input_model_obj)
 
+
     @staticmethod
     def get_container_cpu_limit() -> float:
         """
@@ -335,6 +362,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         container_cpus = float(cfs_quota_us / cfs_period_us)
         return container_cpus
 
+
     @staticmethod
     def get_nvidia_smi_output() -> str:
         """
@@ -346,6 +374,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         except Exception as e:
             raise Exception(f"Error while running nvidia-smi: {e}")
 
+
     @staticmethod
     def get_container_memory_limit() -> int:
         """
@@ -354,6 +383,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         with open("/sys/fs/cgroup/memory/memory.limit_in_bytes") as fp:
             container_memory_limit = int(fp.read())
         return container_memory_limit
+
 
     @staticmethod
     def get_container_memory_usage() -> int:
@@ -374,7 +404,32 @@ class BasePiece(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError("This method must be implemented in the child class!")        
 
-    
-    def generate_report(self):
-        """This function carries the relevant code for the Piece report."""
-        raise NotImplementedError("This method must be implemented in the child class!")
+
+    def serialize_display_result_file(self, file_path: Union[str, Path], file_type: DisplayResultFileType) -> dict:
+        """
+        Serializes the content of 'display_result_file' into base64 string, to fit Airflow XCOM.
+
+        Args:
+            file_path (Union[str, Path]): The path to the file.
+            file_type (DisplayResultFileType): The type of the file.
+
+        Returns:
+            dict: A dictionary containing the base64-encoded content and the file type.
+        """
+        if not Path(file_path).exists():
+            print(f"File {file_path} does not exist. Skipping serialization...")
+            return None
+        if not Path(file_path).is_file():
+            print(f"Path {file_path} is not a file. Skipping serialization...")
+            return None
+        # Read file content as bytes and encode content into base64
+        with open(file_path, "rb") as f:
+            content_bytes = f.read()
+        encoded_content = base64.b64encode(content_bytes).decode('utf-8')
+        return encoded_content
+
+
+    # @abc.abstractmethod
+    # def generate_report(self):
+    #     """This function carries the relevant code for the Piece report."""
+    #     raise NotImplementedError("This method must be implemented in the child class!")
