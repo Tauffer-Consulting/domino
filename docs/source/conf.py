@@ -28,11 +28,12 @@ author = 'Luiz Tauffer and Vinicius Camozzato Vaz'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
     "sphinx_copybutton",
-    'sphinx-pydantic',
     'sphinx_toolbox.collapse',
+    # 'sphinx.ext.autodoc',
+    # 'sphinx.ext.napoleon',
+    # 'sphinx_design',
+    # 'sphinx-pydantic',
     # 'myst_parser',
 ]
 
