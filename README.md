@@ -15,6 +15,9 @@
   </a>
 </p>
 
+<br>
+
+![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_create_workflow.gif)
 
 # Table of contents
 - [About](#about)
