@@ -1,6 +1,6 @@
-import { Box, Grid, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
-import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+//import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 
 interface ITaskResultProps {
