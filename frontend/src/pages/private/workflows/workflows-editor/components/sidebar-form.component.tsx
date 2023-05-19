@@ -10,6 +10,9 @@ import { operatorStorageSchema } from 'common/schemas/storageSchemas'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
 import { toast } from 'react-toastify'
 
+import DominoForm from './domino-form.component'
+
+
 const handleDefaultsAjv = createAjv({ useDefaults: true })
 
 interface ISidebarFormProps {
@@ -142,18 +145,18 @@ const SidebarForm = (props: ISidebarFormProps) => {
       } else {
         handleOnChange({ data: forageData })
         // If the form has checkboxes, we need to update the storage data
-        if (isPieceForm && !forageData.storage){
+        if (isPieceForm && !forageData.storage) {
           const defaultStorageData = extractDefaultValues(operatorStorageSchema)
           handleOnChangeStorage({ data: defaultStorageData })
-        }else if (isPieceForm){
+        } else if (isPieceForm) {
           handleOnChangeStorage({ data: forageData.storage })
         }
 
-        if (isPieceForm && !forageData.containerResources){
+        if (isPieceForm && !forageData.containerResources) {
           const defaultContainerResourcesData = extractDefaultValues(containerResourcesSchema)
-          handleOnChangeContainerResources({data: defaultContainerResourcesData})
-        } else if (isPieceForm){
-          handleOnChangeContainerResources({data: forageData.containerResources})
+          handleOnChangeContainerResources({ data: defaultContainerResourcesData })
+        } else if (isPieceForm) {
+          handleOnChangeContainerResources({ data: forageData.containerResources })
         }
         setFormData(forageData)
       }
@@ -273,19 +276,19 @@ const SidebarForm = (props: ISidebarFormProps) => {
     setFormData(auxFormData)
 
   },
-  [
-    formJsonSchema, 
-    formId, 
-    fetchForageWorkflowEdges, 
-    fetchForagePieceById, 
-    setForageUpstreamMap, 
-    getForageUpstreamMap, 
-    formData,
-    getForageCheckboxStates,
-    setForageCheckboxStates,
-    setNameKeyUpstreamArgsMap,
-    getNameKeyUpstreamArgsMap
-  ])
+    [
+      formJsonSchema,
+      formId,
+      fetchForageWorkflowEdges,
+      fetchForagePieceById,
+      setForageUpstreamMap,
+      getForageUpstreamMap,
+      formData,
+      getForageCheckboxStates,
+      setForageCheckboxStates,
+      setNameKeyUpstreamArgsMap,
+      getNameKeyUpstreamArgsMap
+    ])
 
   useEffect(() => {
     // This is a hack because customizing jsonforms ui for accepting multi column would be harder than create a custom checkbox column
@@ -337,7 +340,11 @@ const SidebarForm = (props: ISidebarFormProps) => {
           }
           <Grid container sx={{ paddingBottom: "25px" }}>
             <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
-              <JsonForms
+              <DominoForm
+                schema={formJsonSchema}
+                initialData={formData}
+              />
+              {/* <JsonForms
                 schema={formJsonSchema}
                 uischema={uiSchema || undefined}
                 data={formData}
@@ -345,7 +352,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
                 onChange={handleOnChange}
                 ajv={handleDefaultsAjv}
                 cells={materialCells}
-              />
+              /> */}
             </Grid>
             {
               isPieceForm ?
