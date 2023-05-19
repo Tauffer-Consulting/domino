@@ -73,7 +73,6 @@ const SidebarForm = (props: ISidebarFormProps) => {
       const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
       var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
 
-
       for (const key in data) {
         const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
         const upstreamId = fromUpstream && upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].upstreamId : null
@@ -82,7 +81,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
             fromUpstream: fromUpstream,
             upstreamId: upstreamId,
             upstreamArgument: fromUpstream && nameKeyUpstreamArgsMap[data[key]] ? nameKeyUpstreamArgsMap[data[key]] : null,
-            value: data[key] ? data[key] : null
+            value: (data[key] === null || data[key] === undefined) ? null : data[key]
           }
         }
       }
@@ -142,18 +141,18 @@ const SidebarForm = (props: ISidebarFormProps) => {
       } else {
         handleOnChange({ data: forageData })
         // If the form has checkboxes, we need to update the storage data
-        if (isPieceForm && !forageData.storage){
+        if (isPieceForm && !forageData.storage) {
           const defaultStorageData = extractDefaultValues(operatorStorageSchema)
           handleOnChangeStorage({ data: defaultStorageData })
-        }else if (isPieceForm){
+        } else if (isPieceForm) {
           handleOnChangeStorage({ data: forageData.storage })
         }
 
-        if (isPieceForm && !forageData.containerResources){
+        if (isPieceForm && !forageData.containerResources) {
           const defaultContainerResourcesData = extractDefaultValues(containerResourcesSchema)
-          handleOnChangeContainerResources({data: defaultContainerResourcesData})
-        } else if (isPieceForm){
-          handleOnChangeContainerResources({data: forageData.containerResources})
+          handleOnChangeContainerResources({ data: defaultContainerResourcesData })
+        } else if (isPieceForm) {
+          handleOnChangeContainerResources({ data: forageData.containerResources })
         }
         setFormData(forageData)
       }
@@ -273,19 +272,19 @@ const SidebarForm = (props: ISidebarFormProps) => {
     setFormData(auxFormData)
 
   },
-  [
-    formJsonSchema, 
-    formId, 
-    fetchForageWorkflowEdges, 
-    fetchForagePieceById, 
-    setForageUpstreamMap, 
-    getForageUpstreamMap, 
-    formData,
-    getForageCheckboxStates,
-    setForageCheckboxStates,
-    setNameKeyUpstreamArgsMap,
-    getNameKeyUpstreamArgsMap
-  ])
+    [
+      formJsonSchema,
+      formId,
+      fetchForageWorkflowEdges,
+      fetchForagePieceById,
+      setForageUpstreamMap,
+      getForageUpstreamMap,
+      formData,
+      getForageCheckboxStates,
+      setForageCheckboxStates,
+      setNameKeyUpstreamArgsMap,
+      getNameKeyUpstreamArgsMap
+    ])
 
   useEffect(() => {
     // This is a hack because customizing jsonforms ui for accepting multi column would be harder than create a custom checkbox column

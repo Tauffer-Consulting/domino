@@ -348,7 +348,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     const storageWorkflowData = workflowFormData?.storage
 
     const auxTaskDict: any = {}
-    for (let index=0; index < nodes.length; index++){
+    for (let index = 0; index < nodes.length; index++) {
       let element = nodes[index]
       let taskIndex = 0
       let taskName = `task_${element.data.name}_${taskIndex}`
