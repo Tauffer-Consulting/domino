@@ -63,7 +63,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
   }, [formSchema])
 
   useEffect(() => {
-    setFormWidthSpace(isPieceForm ? 9 : 12)
+    setFormWidthSpace(isPieceForm ? 12 : 12)
   }, [isPieceForm])
 
 
@@ -327,10 +327,10 @@ const SidebarForm = (props: ISidebarFormProps) => {
           {
             isPieceForm ?
               <Grid container spacing={2} sx={{ marginBottom: '20px' }}>
-                <Grid item xs={formWidthSpace}>
+                <Grid item xs={10}>
                   <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Input Argument</Typography>
                 </Grid>
-                <Grid item xs={12 - formWidthSpace}>
+                <Grid item xs={12 - 10}>
                   <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Upstream</Typography>
                 </Grid>
               </Grid>
@@ -352,14 +352,14 @@ const SidebarForm = (props: ISidebarFormProps) => {
                 cells={materialCells}
               /> */}
             </Grid>
-            {
+            {/* {
               isPieceForm ?
                 <Grid item xs={3}>
                   <FormGroup sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', height: '100%' }}>
                     {checkboxes}
                   </FormGroup>
                 </Grid> : null
-            }
+            } */}
           </Grid>
           {
             isPieceForm ?

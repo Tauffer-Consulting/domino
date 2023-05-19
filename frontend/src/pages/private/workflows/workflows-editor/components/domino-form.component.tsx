@@ -21,8 +21,8 @@ const DominoForm: React.FC<DominoFormProps> = ({ schema, initialData }) => {
             {Object.keys(schema.properties).map(key => (
                 <div key={key}>
                     <DominoFormItem
-                        schema={schema.properties[key]}
-                        key={key}
+                        schema={schema}
+                        itemKey={key}
                         value={formData[key]}
                         onChange={handleChange(key)}
                     />

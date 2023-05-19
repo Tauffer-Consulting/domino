@@ -12,13 +12,15 @@ import {
 
 interface DominoFormItemProps {
     schema: any;
-    key: string;
+    itemKey: any;
     value: any;
     onChange: (val: any) => void;
 }
 
-const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, key, value, onChange }) => {
+const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
     const [checked, setChecked] = useState(false);
+
+    let itemSchema: any = schema.properties[itemKey];
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.target.value);
@@ -51,42 +53,45 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, key, value, onC
                 ))}
             </Select>
         );
-    } else if (schema.enum) {
+    } else if (itemSchema?.allOf && itemSchema.allOf.length > 0) {
+        const typeClass = itemSchema.allOf[0]['$ref'].split("/").pop();
+        const valuesOptions: Array<string> = schema?.definitions?.[typeClass].enum;
         inputElement = (
             <Select
+                fullWidth
                 value={value}
             // onChange={handleSelectChange}
             >
-                {schema.enum.map((option: string) => (
+                {valuesOptions.map((option: string) => (
                     <MenuItem key={option} value={option}>
                         {option}
                     </MenuItem>
                 ))}
             </Select>
         );
-    } else if (schema.type === 'boolean') {
+    } else if (itemSchema.type === 'boolean') {
         inputElement = <FormControlLabel
             control={<Checkbox
                 checked={value}
                 onChange={handleInputChange}
             />}
-            label={schema.title}
+            label={itemSchema.title}
         />;
-    } else if (schema.type === 'number') {
+    } else if (itemSchema.type === 'number') {
         inputElement = <TextField
             fullWidth
             variant="outlined"
             type="number"
-            label={schema.title}
+            label={itemSchema.title}
             value={value}
             onChange={handleInputChange}
         />;
-    } else if (schema.type === 'integer') {
+    } else if (itemSchema.type === 'integer') {
         inputElement = <TextField
             fullWidth
             variant="outlined"
             type="number"
-            label={schema.title}
+            label={itemSchema.title}
             value={value}
             onChange={handleInputChange}
         />;
@@ -96,7 +101,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, key, value, onC
                 fullWidth
                 multiline
                 variant="outlined"
-                label={schema.title}
+                label={itemSchema.title}
                 // value={value}
                 onChange={handleInputChange}
             />
