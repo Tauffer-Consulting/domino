@@ -111,10 +111,11 @@ class AirflowRestClient(requests.Session):
         )
         return response
 
-    def get_all_workflow_runs(self, dag_id: str, page: int, page_size: int):
+    def get_all_workflow_runs(self, dag_id: str, page: int, page_size: int, descending: bool = False):
         page, page_size = self._validate_pagination_params(page, page_size)
         offset = page * page_size
-        resource = f"api/v1/dags/{dag_id}/dagRuns?limit={page_size}&offset={offset}"
+        order_by = "-execution_date" if descending else "execution_date"
+        resource = f"api/v1/dags/{dag_id}/dagRuns?limit={page_size}&offset={offset}&order_by={order_by}"
         response = self.request(
             method='get',
             resource=resource,

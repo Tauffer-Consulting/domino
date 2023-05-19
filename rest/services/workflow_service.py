@@ -537,7 +537,8 @@ class WorkflowService(object):
         response = self.airflow_client.get_all_workflow_runs(
             dag_id=airflow_workflow_id,
             page=page,
-            page_size=page_size
+            page_size=page_size,
+            descending=True
         )
         response_data = response.json()
         if not response_data:
