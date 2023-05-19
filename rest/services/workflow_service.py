@@ -24,7 +24,8 @@ from schemas.responses.workflow import (
     GetWorkflowRunTasksResponseData,
     GetWorkflowRunTasksResponse,
     GetWorkflowRunTaskLogsResponse,
-    GetWorkflowRunTaskResultResponse
+    GetWorkflowRunTaskResultResponse,
+    WorkflowStatus
 )
 from schemas.responses.base import PaginationSet
 from schemas.exceptions.base import ConflictException, ForbiddenException, ResourceNotFoundException, BadRequestException
@@ -169,6 +170,18 @@ class WorkflowService(object):
 
         # TODO - Create chunks of N dag_ids if necessary 
         airflow_dags_responses = await self.get_airflow_dags_by_id_gather_chunk(list(workflow_uuid_map.keys()))
+        
+        max_total_errors_limit = 100
+        import_errors_response = self.airflow_client.list_import_errors(limit=max_total_errors_limit)
+        if import_errors_response.status_code != 200:
+            raise BaseException("Error when trying to fetch import errors from airflow webserver.")
+        
+        import_errors_response_content = import_errors_response.json()
+        if import_errors_response_content['total_entries'] >= max_total_errors_limit:
+            # TODO handle to many import errors
+            raise BaseException("To many import errors in airflow webserver.")
+
+        import_errors_uuids = [e.get('filename').split('dags/')[1].split('.py')[0] for e in import_errors_response_content['import_errors']]
 
         # Add more info to model if necessary
         data = []
@@ -177,11 +190,24 @@ class WorkflowService(object):
             dag_data = workflow_uuid_map[dag_uuid]
             response = dag_info['response']
 
+            is_dag_broken = dag_uuid in import_errors_uuids
             schedule_interval = 'creating'
-            if response:
+            is_active = 'creating'
+            is_paused = 'creating'
+            status = WorkflowStatus.creating.value
+            if is_dag_broken:
+                status = WorkflowStatus.failed.value
+                schedule_interval = 'failed'
+                is_active = 'failed'
+                is_paused = 'failed'
+
+            if response and not is_dag_broken:
                 schedule_interval = response.get("schedule_interval")
                 if isinstance(schedule_interval, dict):
                     schedule_interval = schedule_interval.get("value")
+                status = WorkflowStatus.active.value
+                is_active = response.get("is_active")
+                is_paused = response.get("is_paused")
 
             data.append(
                 GetWorkflowsResponseData(
@@ -192,8 +218,9 @@ class WorkflowService(object):
                     last_changed_by=dag_data.last_changed_by,
                     created_by=dag_data.created_by,
                     workspace_id=dag_data.workspace_id,
-                    is_paused='creating' if not response else response.get('is_paused'),
-                    is_active='creating' if not response else response.get('is_active'),
+                    is_paused=is_active,
+                    is_active=is_paused,
+                    status=status,
                     schedule_interval=schedule_interval#'creating' if not response else response.get('schedule_interval').replace("@", ""),
                 )
             )
