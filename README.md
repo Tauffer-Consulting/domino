@@ -15,6 +15,9 @@
   </a>
 </p>
 
+<br>
+
+![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_create_workflow.gif)
 
 # Table of contents
 - [About](#about)
@@ -77,7 +80,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Install bundles of Pieces to your Domino Workspaces direclty from Github repositories, and use them in your Workflows. <br></br>
 
-  ![install pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/3_install_pieces.gif)
+  ![install pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/6_install_pieces.gif)
 
 </details>
 
@@ -87,7 +90,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Create Workflows by dragging and dropping Pieces to the canvas, and connecting them. <br></br>
 
-  ![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/4_create_workflow.gif)
+  ![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_create_workflow.gif)
 
 </details>
 
@@ -97,7 +100,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system. <br></br>
 
-  ![edit pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/5_edit_pieces.gif)
+  ![edit pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/8_edit_pieces.gif)
 
 </details>
 
@@ -107,7 +110,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
 
-  ![schedule workflows](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/6_edit_workflow.gif)
+  ![schedule workflows](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/9_edit_workflow.gif)
 </details>
 
 <details>
@@ -116,7 +119,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Monitor Workflows in real time, including the status of each Piece, the logs and results of each run. <br></br>
 
-  ![monitor workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_monitor_workflow.gif)
+  ![monitor workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/10_monitor_workflow.gif)
 
 </details>
 
