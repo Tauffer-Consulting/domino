@@ -27,14 +27,15 @@ class WorkflowRepository(object):
         page_size: int = 100, 
         filters: dict = None, 
         paginate=True, 
-        count=True
+        count=True,
+        descending=False
     ):
         if filters is None:
             filters = {}
         with session_scope() as session:
             query = session.query(Workflow, func.count().over().label('count')) if count else session.query(Workflow)
             query = query.filter(Workflow.workspace_id == workspace_id)\
-                        .order_by(Workflow.id)\
+                .order_by(Workflow.created_at.desc() if descending else Workflow.created_at.asc())
 
             if filters:
                 query = query.magic_filters(filters)
