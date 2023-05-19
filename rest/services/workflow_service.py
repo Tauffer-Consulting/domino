@@ -158,7 +158,8 @@ class WorkflowService(object):
             workspace_id=workspace_id,
             page=page,
             page_size=page_size,
-            filters=filters.dict(exclude_none=True)
+            filters=filters.dict(exclude_none=True),
+            descending=True
         )
 
         workflow_uuid_map = {
