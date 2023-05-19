@@ -7,9 +7,9 @@ import {
     CircularProgress,
     Tooltip,
     Dialog,
-    DialogActions, 
+    DialogActions,
     DialogContent,
-    DialogContentText, 
+    DialogContentText,
     DialogTitle,
     Button
 } from '@mui/material';
@@ -98,7 +98,7 @@ export const WorkflowsTable = () => {
 
 
     const viewWorkflow = useCallback((id: GridRowId) => async () => {
-        
+
         handleFetchWorkflow(id as string).then((workflow) => {
             setSelectedWorkflow(workflow)
             setSelectedWorkflowRunId(null)
@@ -116,11 +116,11 @@ export const WorkflowsTable = () => {
         })
 
     }, [
-        handleFetchWorkflow, 
-        setSelectedWorkflow, 
-        setSelectedWorkflowRunId, 
-        setSelectionModel, 
-        handleRefreshWorkflowRuns, 
+        handleFetchWorkflow,
+        setSelectedWorkflow,
+        setSelectedWorkflowRunId,
+        setSelectionModel,
+        handleRefreshWorkflowRuns,
         selectedWorkflow
     ]);
 
@@ -175,9 +175,9 @@ export const WorkflowsTable = () => {
                 flex: 1,
                 valueFormatter: ({ value }) => new Date(value).toLocaleString(),
             },
-            { 
-                field: 'scheduleInterval', 
-                headerName: 'Schedule Interval', 
+            {
+                field: 'scheduleInterval',
+                headerName: 'Schedule Interval',
                 width: 250,
                 renderCell: (params) => {
                     if (params.value === 'creating') {
@@ -186,24 +186,40 @@ export const WorkflowsTable = () => {
                                 <CircularProgress size={20} />
                             </Tooltip>
                         )
+                    } else if (params.value === 'failed') {
+                        return (
+                            <Tooltip title='Failed'>
+                                <HighlightOffIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
+                            </Tooltip>
+                        )
                     }
                     return params.value
                 }
             },
             {
-                field: 'active',
-                headerName: 'Active',
+                field: 'status',
+                headerName: 'Status',
                 minWidth: 100,
                 flex: 0.4,
                 renderCell: (params) => {
-                    if (params.value === 'creating') {
+                    if (params.row.status === 'creating') {
                         return (
                             <Tooltip title='Creating'>
                                 <CircularProgress size={20} />
                             </Tooltip>
                         )
+                    } else if (params.row.status === 'failed') {
+                        return (
+                            <Tooltip title='Failed'>
+                                <HighlightOffIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
+                            </Tooltip>
+                        )
                     }
-                    return params.value === true ? <CheckCircleOutlineIcon sx={{ color: "#02b120", fontSize: '26px' }} /> : <HighlightOffIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
+                    return (
+                        <Tooltip title='Active'>
+                            <CheckCircleOutlineIcon sx={{ color: "#02b120", fontSize: '26px' }} />
+                        </Tooltip>
+                    )
                 }
             },
             {
@@ -212,14 +228,20 @@ export const WorkflowsTable = () => {
                 minWidth: 100,
                 flex: 0.4,
                 renderCell: (params) => {
-                    if (params.value === 'creating'){
+                    if (params.row.status === 'creating') {
                         return (
                             <Tooltip title='Creating'>
                                 <CircularProgress size={20} />
                             </Tooltip>
                         )
+                    } else if (params.row.status === 'failed') {
+                        return (
+                            <Tooltip title='Failed'>
+                                <HighlightOffIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
+                            </Tooltip>
+                        )
                     }
-                    return params.value ? <PauseCircleOutlineIcon sx={{ color: "#e71d1d", fontSize: '26px' }} /> : <span/>
+                    return params.value ? <PauseCircleOutlineIcon sx={{ color: "#e71d1d", fontSize: '26px' }} /> : <span />
                 }
             },
             {
@@ -232,30 +254,35 @@ export const WorkflowsTable = () => {
                     <GridActionsCellItem
                         icon={
                             params.row.active === 'creating' ?
-                            <Tooltip title='Creating'>
-                                <CircularProgress size={20} />
-                            </Tooltip>
-                            :
-                            <Tooltip title="Delete Workflow">
-                                <DeleteOutlineOutlinedIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
-                            </Tooltip>
+                                <Tooltip title='Creating'>
+                                    <CircularProgress size={20} />
+                                </Tooltip>
+                                :
+                                <Tooltip title="Delete Workflow">
+                                    <DeleteOutlineOutlinedIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
+                                </Tooltip>
                         }
                         label="Delete"
-                        onClick={() => {setDeleteWorkflowId(params.id) ; setIsOpenDeleteDialog(true)}}
+                        onClick={() => { setDeleteWorkflowId(params.id); setIsOpenDeleteDialog(true) }}
                     />,
                     <GridActionsCellItem
                         icon={
-                            params.row.active === 'creating' ?
-                            <Tooltip title='Creating'>
-                                <CircularProgress size={20} />
-                            </Tooltip>
-                            :
-                            <Tooltip title="Run Workflow">
-                                <PlayCircleFilledWhiteOutlinedIcon sx={{ color: "#0086df", fontSize: '26px' }} />
-                            </Tooltip>
+                            params.row.status === 'creating' ?
+                                <Tooltip title='Creating'>
+                                    <CircularProgress size={20} />
+                                </Tooltip>
+                                :
+                                params.row.status === 'active' ?
+                                    <Tooltip title="Run Workflow">
+                                        <PlayCircleFilledWhiteOutlinedIcon sx={{ color: "#0086df", fontSize: '26px' }} />
+                                    </Tooltip>
+                                    :
+                                    <Tooltip title='Failed'>
+                                        <HighlightOffIcon sx={{ color: "#e71d1d", fontSize: '26px' }} />
+                                    </Tooltip>
                         }
                         label="Run"
-                        onClick={runWorkflow(params.id)}
+                        onClick={params.row.status === 'active' ? runWorkflow(params.id) : () => { }}
                     />,
                 ],
             },
@@ -269,14 +296,14 @@ export const WorkflowsTable = () => {
                 createdAt: workflow.created_at,
                 lastModified: workflow.last_changed_at,
                 scheduleInterval: workflow.schedule_interval,
-                active: workflow.is_active,
+                status: workflow.status,
                 paused: workflow.is_paused,
             }
         }) : []
         const totalRows = workflows.metadata?.total || 0
         return { rowsData, totalRows }
     }, [workflows])
-    
+
 
     return (
         <>
@@ -294,8 +321,8 @@ export const WorkflowsTable = () => {
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            
-                            Are you sure you want to delete this workflow? 
+
+                            Are you sure you want to delete this workflow?
                             This action <span style={{ fontWeight: 'bold' }}>cannot be undone</span>.
                         </DialogContentText>
                     </DialogContent>

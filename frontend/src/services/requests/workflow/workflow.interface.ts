@@ -9,6 +9,12 @@ export interface IWorkflowElement {
   position: { x: number, y: number }
 }
 
+enum WorkflowStatus {
+  creating = "creating",
+  failed = "failed",
+  active = "active",
+}
+
 export interface IWorkflow {
   id: number
   name: string
@@ -21,6 +27,7 @@ export interface IWorkflow {
   workspace_id: number
   is_paused: boolean
   is_active: boolean
+  status: WorkflowStatus
   is_subdag: boolean
   last_pickled: string
   schedule_interval: string

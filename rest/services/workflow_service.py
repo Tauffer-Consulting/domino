@@ -191,7 +191,8 @@ class WorkflowService(object):
             response = dag_info['response']
 
             is_dag_broken = dag_uuid in import_errors_uuids
-            schedule_interval = 'creating'
+
+            schedule_interval = 'none'
             is_active = 'creating'
             is_paused = 'creating'
             status = WorkflowStatus.creating.value
@@ -206,8 +207,9 @@ class WorkflowService(object):
                 if isinstance(schedule_interval, dict):
                     schedule_interval = schedule_interval.get("value")
                 status = WorkflowStatus.active.value
-                is_active = response.get("is_active")
+
                 is_paused = response.get("is_paused")
+                is_active = response.get("is_active")
 
             data.append(
                 GetWorkflowsResponseData(
@@ -218,10 +220,10 @@ class WorkflowService(object):
                     last_changed_by=dag_data.last_changed_by,
                     created_by=dag_data.created_by,
                     workspace_id=dag_data.workspace_id,
-                    is_paused=is_active,
-                    is_active=is_paused,
+                    is_paused=is_paused,
+                    is_active=is_active,
                     status=status,
-                    schedule_interval=schedule_interval#'creating' if not response else response.get('schedule_interval').replace("@", ""),
+                    schedule_interval=schedule_interval
                 )
             )
 
@@ -268,6 +270,10 @@ class WorkflowService(object):
             }
         else:
             airflow_dag_info = airflow_dag_info.json()
+        
+        schedule_interval = airflow_dag_info.pop("schedule_interval")
+        if isinstance(schedule_interval, dict):
+            schedule_interval = schedule_interval.get("value")
 
         response = GetWorkflowResponse(
             id=workflow.id,
@@ -279,6 +285,7 @@ class WorkflowService(object):
             last_changed_by=workflow.last_changed_by,
             created_by=workflow.created_by,
             workspace_id=workflow.workspace_id,
+            schedule_interval=schedule_interval,
             **airflow_dag_info
         )
 

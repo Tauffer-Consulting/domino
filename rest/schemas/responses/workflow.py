@@ -73,10 +73,10 @@ class GetWorkflowsResponseData(BaseModel):
     last_changed_by: int
     created_by: int
     workspace_id: int
-    is_paused: Union[bool, WorkflowStatus]
-    is_active: Union[bool, WorkflowStatus]
+    is_paused: bool
+    is_active: bool
     status: WorkflowStatus
-    schedule_interval: Optional[Union[ScheduleIntervalTypeResponse, WorkflowStatus]]
+    schedule_interval: Optional[ScheduleIntervalTypeResponse]
 
     @validator('schedule_interval')
     def set_schedule_interval(cls, schedule_interval):
