@@ -6,7 +6,8 @@ import {
     Checkbox,
     FormControlLabel,
     Box,
-    FormControl
+    FormControl,
+    InputLabel
 } from '@mui/material';
 
 
@@ -57,17 +58,19 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
         const typeClass = itemSchema.allOf[0]['$ref'].split("/").pop();
         const valuesOptions: Array<string> = schema?.definitions?.[typeClass].enum;
         inputElement = (
-            <Select
-                fullWidth
-                value={value}
-            // onChange={handleSelectChange}
-            >
-                {valuesOptions.map((option: string) => (
-                    <MenuItem key={option} value={option}>
-                        {option}
-                    </MenuItem>
-                ))}
-            </Select>
+            <FormControl fullWidth>
+                <InputLabel>{itemKey}</InputLabel>
+                <Select
+                    value={value}
+                // onChange={handleSelectChange}
+                >
+                    {valuesOptions.map((option: string) => (
+                        <MenuItem key={option} value={option}>
+                            {option}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
         );
     } else if (itemSchema.type === 'boolean') {
         inputElement = <FormControlLabel
@@ -75,6 +78,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
                 checked={value}
                 onChange={handleInputChange}
             />}
+            labelPlacement="start"
             label={itemSchema.title}
         />;
     } else if (itemSchema.type === 'number') {
@@ -102,14 +106,19 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
                 multiline
                 variant="outlined"
                 label={itemSchema.title}
-                // value={value}
+                value={value}
                 onChange={handleInputChange}
             />
         );
     }
 
     return (
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 1 }}
+        >
             {inputElement}
             <Checkbox checked={checked} onChange={handleCheckboxChange} />
         </Box>
