@@ -25,8 +25,6 @@ interface ISidebarFormProps {
   isPieceForm?: boolean,
 }
 
-
-
 const SidebarForm = (props: ISidebarFormProps) => {
   const {
     formSchema,

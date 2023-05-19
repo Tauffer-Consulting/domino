@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { TextField, Select, MenuItem, Checkbox, FormControlLabel, Box } from '@mui/material';
+import {
+    TextField,
+    Select,
+    MenuItem,
+    Checkbox,
+    FormControlLabel,
+    Box,
+    FormControl
+} from '@mui/material';
 
 
 interface DominoFormItemProps {
@@ -25,6 +33,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, key, value, onC
     };
 
     let inputElement: JSX.Element;
+
+    // console.log('schema', schema);
 
     if (checked) {
         const options = ['Option 1', 'Option 2', 'Option 3'];
@@ -55,18 +65,42 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, key, value, onC
             </Select>
         );
     } else if (schema.type === 'boolean') {
-        inputElement = <FormControlLabel control={<Checkbox checked={value} onChange={handleInputChange} />} label="" />;
+        inputElement = <FormControlLabel
+            control={<Checkbox
+                checked={value}
+                onChange={handleInputChange}
+            />}
+            label={schema.title}
+        />;
     } else if (schema.type === 'number') {
-        inputElement = <TextField type="number" value={value} onChange={handleInputChange} />;
-    } else {
         inputElement = <TextField
             fullWidth
-            id="outlined-basic"
             variant="outlined"
-            label={key}
-        // value={value}
-        // onChange={handleInputChange}
+            type="number"
+            label={schema.title}
+            value={value}
+            onChange={handleInputChange}
         />;
+    } else if (schema.type === 'integer') {
+        inputElement = <TextField
+            fullWidth
+            variant="outlined"
+            type="number"
+            label={schema.title}
+            value={value}
+            onChange={handleInputChange}
+        />;
+    } else {
+        inputElement = (
+            <TextField
+                fullWidth
+                multiline
+                variant="outlined"
+                label={schema.title}
+                // value={value}
+                onChange={handleInputChange}
+            />
+        );
     }
 
     return (

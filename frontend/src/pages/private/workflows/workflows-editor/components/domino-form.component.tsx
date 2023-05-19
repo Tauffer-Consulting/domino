@@ -14,11 +14,12 @@ const DominoForm: React.FC<DominoFormProps> = ({ schema, initialData }) => {
         // setFormData(prevData => ({ ...prevData, [key]: value }));
     };
 
+    // console.log('schema', schema);
+
     return (
         <form>
             {Object.keys(schema.properties).map(key => (
                 <div key={key}>
-                    {/* <label>{key}</label> */}
                     <DominoFormItem
                         schema={schema.properties[key]}
                         key={key}
