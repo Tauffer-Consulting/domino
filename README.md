@@ -23,24 +23,33 @@
 - [About](#about)
 - [Quick start](#quick-start)
 - [GUI](#gui)
-- [REST](#rest)
 - [Pieces](#pieces)
+- [REST](#rest)
 
 <br>
 
 # About
 Domino is an open source workflow management platform, with:
 
-- an intuitive [Graphical User Interface](#gui) that facilitates creating, editing and monitoring any type of Workflow, from data processing to machine learning
-- a [REST API](#rest) that controls a running Apache Airflow instance
-- a standard way of writing and publishing functional [Pieces](#pieces), which follows good practices for data modeling, documentation and distribution
+- :desktop_computer: an intuitive [Graphical User Interface](#gui) that facilitates creating, editing and monitoring any type of Workflow, from data processing to machine learning
+- :package: a standard way of writing and publishing functional [Pieces](#pieces), which follows good practices for data modeling, documentation and distribution
+- :gear: a [REST API](#rest) that controls a running Apache Airflow instance
 
 
 Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas, and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
 
+Pieces are functional units that can be reused in multiple Workflows. Pieces can execute anything that can be written in Python, and can be easily distributed and installed directly from Github repositories to be used in Domino Workflows.
+
 Every Domino Workflow corresponds to an Apache Airflow DAG, and each Piece corresponds to an Airflow task. Domino controls an Airflow instance, which is responsible for executing, scheduling and monitoring the Workflows (DAGs).
 
-Pieces are functional units that can be reused in multiple Workflows. Pieces can execute anything that can be written in Python, and can be easily distributed and installed directly from Github repositories to be used in Domino Workflows.
+You can think of Domino as Airflow with superpowers:
+
+- :desktop_computer: create highly complex Workflows with simple point-and-click and drag-and-drop operations, in an user-friendly GUI
+- :package: make use of Pieces developed by other people, share and reuse your own Pieces
+- :busts_in_silhouette: collaborate in groups to edit and monitor Workflows
+- :chart_with_upwards_trend: experience a cleaner and more intuitive GUI for viewing Workflows results, including logs and richer reports with images and tables
+- :arrows_counterclockwise: use gitSync to sync DAGs from files stored in a Git repository
+- :minidisc: shared storage for tasks in the same workflow
 
 <br>
 
@@ -125,17 +134,6 @@ The Domino frontend service is a React application that provides the GUI for eas
 
 <br>
 
-# REST
-The Backend service is a REST API that controls a running Apache Airflow instance. It is responsible for:
-
-- executing operations requested by the frontend service
-- interacting with the Airflow instance, including triggering, creating, editing and deleting Workflows (DAGs)
-- interacting with the Domino Database
-
-The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://domino-py.readthedocs.io/en/latest/pages/rest.html).
-
-<br>
-
 # Pieces
 Pieces are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
 
@@ -160,24 +158,16 @@ Read more about Pieces and how to create them in the [Pieces documentation](http
 
 <br>
 
-# Platform
+# REST
+The Backend service is a REST API that controls a running Apache Airflow instance. It is responsible for:
 
-## GitSync
-A good practice when running Airflow in a Kubernetes cluster is to use a GitSync container to sync DAGs from a Git repository to the Airflow services. 
+- executing operations requested by the frontend service
+- interacting with the Airflow instance, including triggering, creating, editing and deleting Workflows (DAGs)
+- interacting with the Domino Database
 
-## Shared storage structure
-Shared workflow data could be stored in a remote source (e.g. S3 bucket) or locally (for dev and tests only).
+The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://domino-py.readthedocs.io/en/latest/pages/rest.html).
 
-```
-/shared_storage
-..../{workflow-id}
-......../{run-id}
-............/{task-id}
-................/results
-..................../log.txt
-..................../result.npy
-..................../result.html
-................/report
-................/xcom_out
-..................../xcom_out.json
-```
+<br>
+
+
+
