@@ -69,6 +69,7 @@ export const WorflowRunTaskFlowchart = () => {
         workflowRuns,
         handleFetchWorkflowRunTaskLogs,
         handleFetchWorkflowRunTaskResult,
+        handleRefreshWorkflowRuns,
     } = useWorkflows()
 
     const fetchTasks = useCallback(async () => {
@@ -144,6 +145,7 @@ export const WorflowRunTaskFlowchart = () => {
                         }).catch((error) => {
                             console.log('Error fetching logs', error)
                         })
+                        handleRefreshWorkflowRuns()
                     }
                     // Check if the run is finished to avoid fetching tasks after the run is finished
                     if ((workflowRun?.state === 'success') || (workflowRun?.state === 'failed')) {
@@ -155,7 +157,15 @@ export const WorflowRunTaskFlowchart = () => {
             }, updateTime); // Update every X seconds
             return () => clearInterval(interval);
         }
-    }, [fetchTasks, selectedWorkflowRunId, workflowRuns, handleFetchWorkflowRunTaskLogs, handleFetchWorkflowRunTaskResult, selectedNodeId])
+    }, [
+        fetchTasks,
+        selectedWorkflowRunId,
+        workflowRuns,
+        handleFetchWorkflowRunTaskLogs,
+        handleFetchWorkflowRunTaskResult,
+        selectedNodeId,
+        handleRefreshWorkflowRuns
+    ])
 
 
     const onNodeDoubleClick = useCallback(async (event: any, node: any) => {

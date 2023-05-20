@@ -74,7 +74,6 @@ const SidebarForm = (props: ISidebarFormProps) => {
       const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
       var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
 
-
       for (const key in data) {
         const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
         const upstreamId = fromUpstream && upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].upstreamId : null
@@ -83,7 +82,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
             fromUpstream: fromUpstream,
             upstreamId: upstreamId,
             upstreamArgument: fromUpstream && nameKeyUpstreamArgsMap[data[key]] ? nameKeyUpstreamArgsMap[data[key]] : null,
-            value: data[key] ? data[key] : null
+            value: (data[key] === null || data[key] === undefined) ? null : data[key]
           }
         }
       }

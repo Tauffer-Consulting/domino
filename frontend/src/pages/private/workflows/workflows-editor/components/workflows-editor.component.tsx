@@ -47,14 +47,14 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
     const workflowSchema: any = workflowFormSchema.properties.config
     const workflowSchemaRequireds = workflowSchema.required
 
-    if (!workflowData || workflowData === undefined){
+    if (!workflowData || workflowData === undefined) {
       throw new Error('Please fill in the workflow settings.')
     }
     // iterate over config keys and validate workflow data
     for (const key in workflowSchema.properties) {
       if (workflowSchemaRequireds.includes(key)) {
         if (!(key in workflowData) || !workflowData[key]) {
-          const title = workflowSchema.properties[key].title 
+          const title = workflowSchema.properties[key].title
           throw new Error(`Please the ${title} field in Settings.`)
         }
       }
@@ -78,7 +78,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
       const requiredFields = pieceInputSchema.required ? pieceInputSchema.required : []
 
       for (const required of requiredFields) {
-        if (!(required in taskPieceInputData)){
+        if (!(required in taskPieceInputData)) {
           throw new Error(`${pieceLabel} is missing required input fields.`)
         }
       }
@@ -92,11 +92,13 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
     try {
       setBackdropIsOpen(true)
       const payload = await workflowsEditorBodyFromFlowchart()
+      console.log('payload', payload)
+
       if ((!payload.tasks)) {
         setBackdropIsOpen(false)
         return toast.error('Please add tasks to the workflow')
       }
-      try{
+      try {
         await validateWorkflowForms(payload)
         await validateTasksForms(payload)
       }
@@ -104,7 +106,7 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
         setBackdropIsOpen(false)
         return toast.error(err.message)
       }
-    
+
       handleCreateWorkflow(payload)
         .then((response) => {
           toast.success('Workflow created successfully.')
@@ -124,12 +126,12 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
       setBackdropIsOpen(false)
       console.log(err)
     }
-  }, 
+  },
     [
-      workflowsEditorBodyFromFlowchart, 
-      handleCreateWorkflow, 
-      setBackdropIsOpen, 
-      validateTasksForms, 
+      workflowsEditorBodyFromFlowchart,
+      handleCreateWorkflow,
+      setBackdropIsOpen,
+      validateTasksForms,
       validateWorkflowForms
     ]
   )

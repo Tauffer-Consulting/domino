@@ -6,6 +6,9 @@ from enum import Enum
 
 class WorkflowStatus(str, Enum):
     creating = "creating"
+    failed = "failed"
+    active = "active"
+
 
 # TODO mapp more states ?
 class WorkflowRunState(str, Enum):
@@ -62,7 +65,6 @@ class BaseWorkflowModel(BaseModel):
         dict
     ]
 
-
 class GetWorkflowsResponseData(BaseModel):
     id: int
     name: str
@@ -71,9 +73,10 @@ class GetWorkflowsResponseData(BaseModel):
     last_changed_by: int
     created_by: int
     workspace_id: int
-    is_paused: Union[bool, WorkflowStatus]
-    is_active: Union[bool, WorkflowStatus]
-    schedule_interval: Optional[Union[ScheduleIntervalTypeResponse, WorkflowStatus]]
+    is_paused: bool
+    is_active: bool
+    status: WorkflowStatus
+    schedule_interval: Optional[ScheduleIntervalTypeResponse]
 
     @validator('schedule_interval')
     def set_schedule_interval(cls, schedule_interval):
