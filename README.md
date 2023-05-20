@@ -80,6 +80,26 @@ The Domino frontend service is a React application that provides the GUI for eas
 
 <details>
   <summary>
+    <strong>Access authentication</strong>
+  </summary>
+  Sign up and login to use the Domino platform. <br></br>
+
+  ![signup and login](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/1_sign_up.gif)
+
+</details>
+
+<details>
+  <summary>
+    <strong>Create Workspaces</strong>
+  </summary>
+  Create new Workspaces and add your github access token. <br></br>
+
+  ![create workspace](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/2_create_workspace_and_token.gif)
+
+</details>
+
+<details>
+  <summary>
     <strong>Install Pieces repositories</strong>
   </summary>
   Install bundles of Pieces to your Domino Workspaces direclty from Github repositories, and use them in your Workflows. <br></br>
