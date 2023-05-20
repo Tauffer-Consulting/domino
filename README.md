@@ -23,24 +23,35 @@
 - [About](#about)
 - [Quick start](#quick-start)
 - [GUI](#gui)
-- [REST](#rest)
 - [Pieces](#pieces)
+- [REST](#rest)
 
 <br>
 
 # About
 Domino is an open source workflow management platform, with:
 
-- an intuitive [Graphical User Interface](#gui) that facilitates creating, editing and monitoring any type of Workflow, from data processing to machine learning
-- a [REST API](#rest) that controls a running Apache Airflow instance
-- a standard way of writing and publishing functional [Pieces](#pieces), which follows good practices for data modeling, documentation and distribution
+- :desktop_computer: an intuitive [Graphical User Interface](#gui) that facilitates creating, editing and monitoring any type of Workflow, from data processing to machine learning
+- :package: a standard way of writing and publishing functional [Pieces](#pieces), which follows good practices for data modeling, documentation and distribution
+- :gear: a [REST API](#rest) that controls a running Apache Airflow instance
 
 
 Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas, and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
 
+Pieces are functional units that can be reused in multiple Workflows. Pieces can execute anything that can be written in Python, and can be easily distributed and installed directly from Github repositories to be used in Domino Workflows.
+
 Every Domino Workflow corresponds to an Apache Airflow DAG, and each Piece corresponds to an Airflow task. Domino controls an Airflow instance, which is responsible for executing, scheduling and monitoring the Workflows (DAGs).
 
-Pieces are functional units that can be reused in multiple Workflows. Pieces can execute anything that can be written in Python, and can be easily distributed and installed directly from Github repositories to be used in Domino Workflows.
+You can think of Domino as Airflow with superpowers:
+
+- :desktop_computer: create highly complex Workflows with simple point-and-click and drag-and-drop operations, in an user-friendly GUI
+- :package: make use of Pieces developed by other people, share and reuse your own Pieces
+- :busts_in_silhouette: collaborate in groups to edit and monitor Workflows
+- :chart_with_upwards_trend: experience a cleaner and more intuitive GUI for viewing Workflows results, including logs and richer reports with images and tables
+- :minidisc: shared storage for tasks in the same workflow
+- :arrows_counterclockwise: use gitSync to sync DAGs from files stored in a Git repository
+- :wheel_of_dharma: scalable, Kubernetes-native platform
+- :battery: powered by Apache Airflow for top-tier workflows scheduling and monitoring
 
 <br>
 
@@ -52,18 +63,13 @@ The Domino Python package can be installed via pip. We reccommend you install Do
 pip install domino-py
 ```
 
-You can then use Domino command line interface to easily run the Domino platform locally. Go to a new, empty directory and run the following command:
+You can then use Domino command line interface to easily run the Domino platform locally (requires Docker compose). Go to a new, empty directory and run the following command:
 
 ```bash
 domino platform run-compose
 ```
 
-This is a convenience command that will:
-- Create the necessary folder structure for Domino and Airflow processes
-- Create a docker-compose.yaml file
-- Run the docker compose up command
-
-This command might take up to a few minutes to execute, since it will download and run all the necessary docker images. If everything worked as expected, after all processes started successfully you should be able to navigate to `localhost:3000` to access the Domino frontend service.
+After all processes started successfully, navigate to `localhost:3000` to access the Domino frontend service.
 
 Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you install Domino in a Kubernetes cluster:
 - Running Domino in a [local Kubernetes cluster with Kind](https://domino-py.readthedocs.io/en/latest/pages/platform.html)
@@ -73,6 +79,26 @@ Running the Domino platform locally with Docker compose is useful for developmen
 
 # GUI
 The Domino frontend service is a React application that provides the GUI for easily creating, editing and monitoring Workflows. Here are some of its features:
+
+<details>
+  <summary>
+    <strong>Access authentication</strong>
+  </summary>
+  Sign up and login to use the Domino platform. <br></br>
+
+  ![signup and login](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/1_sign_up.gif)
+
+</details>
+
+<details>
+  <summary>
+    <strong>Create Workspaces</strong>
+  </summary>
+  Create new Workspaces and add your github access token. <br></br>
+
+  ![create workspace](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/2_create_workspace_and_token.gif)
+
+</details>
 
 <details>
   <summary>
@@ -125,6 +151,28 @@ The Domino frontend service is a React application that provides the GUI for eas
 
 <br>
 
+# Pieces
+Pieces are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
+
+- :snake: can execute anything written in Python, heavy-weight (e.g. Machine Learning) as well as light-weight (e.g. sending emails) tasks
+- :+1: have well defined data models for inputs, outputs and secrets
+- :package: run in isolated execution environments (Docker containers)
+- :octocat: are organized in repositories, for easy distribution and installation
+
+It is very easy to create and share your own Piece:
+
+- write your Python function
+- define its data types (input, output and secrets)
+- define its dependencies (requirements.txt or Dockerfile)
+- publish it in a repository (public or private)
+
+Our [pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
+
+Read more in the [Pieces documentation](https://domino-py.readthedocs.io/en/latest/pages/pieces.html).
+
+
+<br>
+
 # REST
 The Backend service is a REST API that controls a running Apache Airflow instance. It is responsible for:
 
@@ -136,48 +184,5 @@ The REST service is written in Python, using the FastAPI framework. Read more ab
 
 <br>
 
-# Pieces
-Pieces are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
-
-- can execute anything written in Python, heavy-weight (e.g. Machine Learning) as well as light-weight (e.g. sending emails) tasks
-- have well defined data models for inputs, outputs and secrets
-- run in isolated execution environments (Docker containers)
-- are organized in repositories, for easy distribution and installation
-
-To facilitate the creation of Pieces, we provide a [template repository](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) with the basic file structure and examples for data models, metadata, source code and dependencies.
-
-In short, each Piece is a folder containing the following files:
-- A `piece.py` file with the source code to be executed
-- A `models.py` file containing the Pydantic models that define the input, output and secrets for the Piece
-- A `metadata.json` file containing the Piece's metadata, including dependencies and GUI style
-
-A repository contains multiples Pieces. Pieces with the same dependencies are automatically grouped together in a dependency group, and each dependency group is built into a Docker image. The Docker images are the self contained execution environments containing the Piece's source code and with all the necessary dependencies installed.
-
-The Docker images are automatically built and published in the same Github repository as the Pieces. This organization makes it straightforward to install Pieces respositories in Domino Workspaces, to be used in Workflows.
-
-Read more about Pieces and how to create them in the [Pieces documentation](https://domino-py.readthedocs.io/en/latest/pages/pieces.html).
 
 
-<br>
-
-# Platform
-
-## GitSync
-A good practice when running Airflow in a Kubernetes cluster is to use a GitSync container to sync DAGs from a Git repository to the Airflow services. 
-
-## Shared storage structure
-Shared workflow data could be stored in a remote source (e.g. S3 bucket) or locally (for dev and tests only).
-
-```
-/shared_storage
-..../{workflow-id}
-......../{run-id}
-............/{task-id}
-................/results
-..................../log.txt
-..................../result.npy
-..................../result.html
-................/report
-................/xcom_out
-..................../xcom_out.json
-```
