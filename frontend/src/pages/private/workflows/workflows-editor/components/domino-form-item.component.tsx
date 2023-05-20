@@ -7,8 +7,14 @@ import {
     FormControlLabel,
     Box,
     FormControl,
-    InputLabel
+    InputLabel,
+    SelectChangeEvent,
+    Card, CardContent, CardHeader, IconButton
 } from '@mui/material';
+import Delete from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+
+import ArrayInputCard from './domino-form-item-array.component';
 
 
 interface DominoFormItemProps {
@@ -19,33 +25,45 @@ interface DominoFormItemProps {
 }
 
 const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
-    const [checked, setChecked] = useState(false);
+    const [checkedFromUpstream, setCheckedFromUpstream] = useState(false);
+
+    // console.log(itemKey);
+    // console.log(value)
 
     let itemSchema: any = schema.properties[itemKey];
 
+    // if value is undefined, read the defautl value from the schema
+    if (value === undefined) {
+        value = itemSchema.default;
+    }
+
+    // Handle input change
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.target.value);
     };
 
-    const handleSelectChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    const handleSelectChange = (event: SelectChangeEvent<any>) => {
         onChange(event.target.value as string);
     };
 
-    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setChecked(event.target.checked);
+    // FomrUpstream logic
+    const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setCheckedFromUpstream(event.target.checked);
+    };
+
+    const handleSelectFromUpstreamChange = (event: SelectChangeEvent<any>) => {
+        console.log(event.target.value);
     };
 
     let inputElement: JSX.Element;
 
-    // console.log('schema', schema);
-
-    if (checked) {
-        const options = ['Option 1', 'Option 2', 'Option 3'];
+    if (checkedFromUpstream) {
+        const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
         inputElement = (
             <Select
                 fullWidth
                 value={value}
-            // onChange={handleSelectChange}
+                onChange={handleSelectFromUpstreamChange}
             >
                 {options.map(option => (
                     <MenuItem key={option} value={option}>
@@ -62,7 +80,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
                 <InputLabel>{itemKey}</InputLabel>
                 <Select
                     value={value}
-                // onChange={handleSelectChange}
+                    onChange={handleSelectChange}
                 >
                     {valuesOptions.map((option: string) => (
                         <MenuItem key={option} value={option}>
@@ -99,6 +117,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
             value={value}
             onChange={handleInputChange}
         />;
+    } else if (itemSchema.type === 'array') {
+        inputElement = <ArrayInputCard title="Array Input Example" />
     } else {
         inputElement = (
             <TextField
@@ -116,11 +136,11 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
         <Box
             display="flex"
             justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 1 }}
+            alignItems="flex-start"
+            sx={{ paddingTop: "10px" }}
         >
             {inputElement}
-            <Checkbox checked={checked} onChange={handleCheckboxChange} />
+            <Checkbox checked={checkedFromUpstream} onChange={handleCheckboxFromUpstreamChange} />
         </Box>
     );
 };

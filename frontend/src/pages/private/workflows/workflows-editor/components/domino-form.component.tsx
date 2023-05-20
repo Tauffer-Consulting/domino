@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import DominoFormItem from './domino-form-item.component';
+
+
+type initialDataType = Record<string, any>;
 
 interface DominoFormProps {
     schema: any;
-    initialData: any;
+    initialData: initialDataType;
+    onChange: ({ errors, data }: { errors?: any, data: any }) => void;
 }
 
-const DominoForm: React.FC<DominoFormProps> = ({ schema, initialData }) => {
+const DominoForm: React.FC<DominoFormProps> = ({ schema, initialData, onChange }) => {
     const [formData, setFormData] = useState(initialData);
 
     const handleChange = (key: string) => (value: any) => {
-        console.log('handleChange', key, value);
-        // setFormData(prevData => ({ ...prevData, [key]: value }));
+        setFormData(prevData => ({ ...prevData, [key]: value }));
     };
 
-    // console.log('schema', schema);
+    const submitFormToParent = useEffect(() => {
+        onChange({ data: formData });
+    }, [formData]);
 
     return (
         <form>
@@ -32,4 +37,4 @@ const DominoForm: React.FC<DominoFormProps> = ({ schema, initialData }) => {
     );
 };
 
-export default DominoForm;
+export default React.memo(DominoForm);
