@@ -48,8 +48,10 @@ You can think of Domino as Airflow with superpowers:
 - :package: make use of Pieces developed by other people, share and reuse your own Pieces
 - :busts_in_silhouette: collaborate in groups to edit and monitor Workflows
 - :chart_with_upwards_trend: experience a cleaner and more intuitive GUI for viewing Workflows results, including logs and richer reports with images and tables
-- :arrows_counterclockwise: use gitSync to sync DAGs from files stored in a Git repository
 - :minidisc: shared storage for tasks in the same workflow
+- :arrows_counterclockwise: use gitSync to sync DAGs from files stored in a Git repository
+- :wheel_of_dharma: scalable, Kubernetes-native platform
+- :battery: powered by Apache Airflow for top-tier workflows scheduling and monitoring
 
 <br>
 
