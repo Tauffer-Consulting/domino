@@ -61,18 +61,13 @@ The Domino Python package can be installed via pip. We reccommend you install Do
 pip install domino-py
 ```
 
-You can then use Domino command line interface to easily run the Domino platform locally. Go to a new, empty directory and run the following command:
+You can then use Domino command line interface to easily run the Domino platform locally (requires Docker compose). Go to a new, empty directory and run the following command:
 
 ```bash
 domino platform run-compose
 ```
 
-This is a convenience command that will:
-- Create the necessary folder structure for Domino and Airflow processes
-- Create a docker-compose.yaml file
-- Run the docker compose up command
-
-This command might take up to a few minutes to execute, since it will download and run all the necessary docker images. If everything worked as expected, after all processes started successfully you should be able to navigate to `localhost:3000` to access the Domino frontend service.
+After all processes started successfully, navigate to `localhost:3000` to access the Domino frontend service.
 
 Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you install Domino in a Kubernetes cluster:
 - Running Domino in a [local Kubernetes cluster with Kind](https://domino-py.readthedocs.io/en/latest/pages/platform.html)
@@ -137,23 +132,21 @@ The Domino frontend service is a React application that provides the GUI for eas
 # Pieces
 Pieces are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
 
-- can execute anything written in Python, heavy-weight (e.g. Machine Learning) as well as light-weight (e.g. sending emails) tasks
-- have well defined data models for inputs, outputs and secrets
-- run in isolated execution environments (Docker containers)
-- are organized in repositories, for easy distribution and installation
+- :snake: can execute anything written in Python, heavy-weight (e.g. Machine Learning) as well as light-weight (e.g. sending emails) tasks
+- :+1: have well defined data models for inputs, outputs and secrets
+- :package: run in isolated execution environments (Docker containers)
+- :octocat: are organized in repositories, for easy distribution and installation
 
-To facilitate the creation of Pieces, we provide a [template repository](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) with the basic file structure and examples for data models, metadata, source code and dependencies.
+It is very easy to create and share your own Piece:
 
-In short, each Piece is a folder containing the following files:
-- A `piece.py` file with the source code to be executed
-- A `models.py` file containing the Pydantic models that define the input, output and secrets for the Piece
-- A `metadata.json` file containing the Piece's metadata, including dependencies and GUI style
+- write your Python function
+- define its data types (input, output and secrets)
+- define its dependencies (requirements.txt or Dockerfile)
+- publish it in a repository (public or private)
 
-A repository contains multiples Pieces. Pieces with the same dependencies are automatically grouped together in a dependency group, and each dependency group is built into a Docker image. The Docker images are the self contained execution environments containing the Piece's source code and with all the necessary dependencies installed.
+Our [pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
 
-The Docker images are automatically built and published in the same Github repository as the Pieces. This organization makes it straightforward to install Pieces respositories in Domino Workspaces, to be used in Workflows.
-
-Read more about Pieces and how to create them in the [Pieces documentation](https://domino-py.readthedocs.io/en/latest/pages/pieces.html).
+Read more in the [Pieces documentation](https://domino-py.readthedocs.io/en/latest/pages/pieces.html).
 
 
 <br>
