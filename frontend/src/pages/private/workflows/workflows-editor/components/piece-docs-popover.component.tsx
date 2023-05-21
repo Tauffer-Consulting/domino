@@ -23,7 +23,7 @@ function renderPieceProperties(operator: IOperator, key: 'input_schema' | 'outpu
 
         return (
             <Typography key={key} sx={{ padding: '0.5rem 1rem 0rem 1.5rem' }}>
-                <strong>{key}</strong> [<em>{typeName}</em>] - {argument.description}.
+                <strong>{key}</strong> [<em>{typeName}</em>] - {argument.description}
                 {argument.allOf && argument.allOf.length > 0 && (
                     <>
                         {' Options: '}

@@ -9,11 +9,14 @@ import {
     FormControl,
     InputLabel,
     SelectChangeEvent,
-    Card, CardContent, CardHeader, IconButton
 } from '@mui/material';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import CodeEditor from '@uiw/react-textarea-code-editor';
-import Delete from '@mui/icons-material';
-import AddIcon from '@mui/icons-material/Add';
 
 import ArrayInputCard from './domino-form-item-array.component';
 
@@ -126,8 +129,30 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
         />;
     } else if (itemSchema.type === 'array') {
         inputElement = <ArrayInputCard title={itemSchema.title} />
-    } else if (itemSchema.type === 'string' && itemSchema.format === 'date-time') {
-        inputElement = <TextField label={itemSchema.title} value={"TODO - implement datetime"} />
+    } else if (itemSchema.type === 'string' && itemSchema?.widget === 'date') {
+        inputElement = (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DemoContainer components={['DatePicker']}>
+                    <DatePicker label={itemSchema.title} />
+                </DemoContainer>
+            </LocalizationProvider>
+        );
+    } else if (itemSchema.type === 'string' && itemSchema?.widget === 'time') {
+        inputElement = (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DemoContainer components={['TimePicker']}>
+                    <TimePicker label={itemSchema.title} />
+                </DemoContainer>
+            </LocalizationProvider>
+        );
+    } else if (itemSchema.type === 'string' && itemSchema?.widget === 'datetime') {
+        inputElement = (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DemoContainer components={['DateTimePicker']}>
+                    <DateTimePicker label={itemSchema.title} />
+                </DemoContainer>
+            </LocalizationProvider>
+        );
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'codeeditor') {
         inputElement = (
             <CodeEditor
