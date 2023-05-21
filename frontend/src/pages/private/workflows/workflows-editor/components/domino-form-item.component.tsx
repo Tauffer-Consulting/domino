@@ -29,7 +29,9 @@ interface DominoFormItemProps {
 }
 
 const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
-    const [checkedFromUpstream, setCheckedFromUpstream] = useState<boolean>(false);
+    const [checkedFromUpstream, setCheckedFromUpstream] = useState<boolean>(
+        schema.properties[itemKey]?.from_upstream === "always" ? true : false
+    );
     const [codeValue, setCodeValue] = useState(
         `# Do not modify the function definition line 
 def custom_function(input_args: list):
