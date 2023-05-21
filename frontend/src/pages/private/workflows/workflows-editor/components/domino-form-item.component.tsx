@@ -29,9 +29,16 @@ interface DominoFormItemProps {
 }
 
 const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
-    const [checkedFromUpstream, setCheckedFromUpstream] = useState<boolean>(
-        schema.properties[itemKey]?.from_upstream === "always" ? true : false
-    );
+    const [checkedFromUpstream, setCheckedFromUpstream] = useState<boolean>(() => {
+        if (schema.properties[itemKey]?.from_upstream === "always") {
+            if (schema.properties[itemKey].type === 'array') {
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    });
     const [codeValue, setCodeValue] = useState(
         `# Do not modify the function definition line 
 def custom_function(input_args: list):
@@ -64,6 +71,9 @@ def custom_function(input_args: list):
     } else if (itemSchema?.from_upstream === "always") {
         checkedFromUpstreamAllowed = true;
         checkedFromUpstreamEditable = false;
+        if (itemSchema.type === 'array') {
+            checkedFromUpstreamAllowed = false;
+        }
     }
 
     // Handle input change
@@ -150,7 +160,10 @@ def custom_function(input_args: list):
             onChange={handleInputChange}
         />;
     } else if (itemSchema.type === 'array') {
-        inputElement = <ArrayInputCard title={itemSchema.title} />
+        inputElement = <ArrayInputCard
+            itemSchema={itemSchema}
+            parentSchemaDefinitions={schema.definitions}
+        />
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'date') {
         inputElement = (
             <LocalizationProvider dateAdapter={AdapterDayjs}>

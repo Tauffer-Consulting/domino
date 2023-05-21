@@ -17,13 +17,26 @@ import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
+
+// Arrays usually have their inner schema defined in the main schema definitions
 interface ArrayInputCardProps {
-    title: string;
+    itemSchema: any;
+    parentSchemaDefinitions: any;
 }
 
-const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
+const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ itemSchema, parentSchemaDefinitions }) => {
     const [arrayItems, setArrayItems] = useState<string[]>(['']);
     const [checkedFromUpstream, setCheckedFromUpstream] = useState(false)
+
+    // Sub-items schema
+    let subItemSchema: any = itemSchema.items;
+    if (itemSchema.items?.$ref) {
+        const subItemSchemaName = itemSchema.items.$ref.split('/').pop();
+        subItemSchema = parentSchemaDefinitions[subItemSchemaName];
+    }
+
+    console.log(itemSchema);
+    console.log(subItemSchema);
 
     const handleArrayItemChange = (index: number, value: string) => {
         const updatedItems = [...arrayItems];
@@ -31,6 +44,7 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
         setArrayItems(updatedItems);
     };
 
+    // Add and delete items
     const handleAddItem = () => {
         setArrayItems([...arrayItems, '']);
     };
@@ -49,6 +63,18 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
         console.log(event.target.value);
     };
 
+    // TODO: create a function that returns the correct input element based on the schema
+    // TODO: it can be multiple types of input elements, like select, checkbox, etc.
+    {
+        if (subItemSchema?.properties) {
+            Object.keys(subItemSchema?.properties).map(key => (
+                console.log(key)
+            ))
+        }
+    }
+
+
+
     // create element
     const createInputElement = (item: string, index: number) => {
         let inputElement: JSX.Element;
@@ -56,7 +82,7 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
             const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
             inputElement = (
                 <FormControl fullWidth>
-                    <InputLabel>{title}</InputLabel>
+                    <InputLabel>{itemSchema.title}</InputLabel>
                     <Select
                         fullWidth
                         // value={value}
@@ -73,7 +99,7 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
         } else {
             inputElement = <TextField
                 fullWidth
-                label={`${title} [${index}]`}
+                label={`${itemSchema.title} [${index}]`}
                 value={item}
                 onChange={(e) => handleArrayItemChange(index, e.target.value)}
             />
@@ -87,7 +113,7 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
                 <IconButton onClick={handleAddItem} aria-label="Add" sx={{ paddingRight: "16px" }}>
                     <AddIcon />
                 </IconButton>
-                {title}
+                {itemSchema.title}
             </div>
             <CardContent>
                 {arrayItems.map((item, index) => (
