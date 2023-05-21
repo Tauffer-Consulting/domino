@@ -132,24 +132,39 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'date') {
         inputElement = (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={['DatePicker']}>
-                    <DatePicker label={itemSchema.title} />
+                <DemoContainer components={['DatePicker']} sx={{ width: "100%" }}>
+                    <DatePicker
+                        label={itemSchema.title}
+                        views={['day', 'month', 'year']}
+                        format="DD/MM/YYYY"
+                        sx={{ width: "100%" }}
+                    />
                 </DemoContainer>
             </LocalizationProvider>
         );
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'time') {
         inputElement = (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={['TimePicker']}>
-                    <TimePicker label={itemSchema.title} />
+                <DemoContainer components={['TimePicker']} sx={{ width: "100%" }} >
+                    <TimePicker
+                        ampm={false}
+                        label={itemSchema.title}
+                        format='HH:mm'
+                        sx={{ width: "100%" }}
+                    />
                 </DemoContainer>
             </LocalizationProvider>
         );
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'datetime') {
         inputElement = (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={['DateTimePicker']}>
-                    <DateTimePicker label={itemSchema.title} />
+                <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
+                    <DateTimePicker
+                        ampm={false}
+                        label={itemSchema.title}
+                        format='DD/MM/YYYY HH:mm'
+                        sx={{ width: "100%" }}
+                    />
                 </DemoContainer>
             </LocalizationProvider>
         );
