@@ -29,9 +29,18 @@ interface DominoFormItemProps {
 }
 
 const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
-    const [checkedFromUpstream, setCheckedFromUpstream] = useState(false);
+    const [checkedFromUpstream, setCheckedFromUpstream] = useState<boolean>(false);
     const [codeValue, setCodeValue] = useState(
-        "def custom_function(input_args: list):\n    print(input_args)\n    return 'Hello world!'"
+        `# Do not modify the function definition line 
+def custom_function(input_args: list):
+    # Write your code here
+    print(input_args)
+
+    # Return the output of the function as an object
+    return {
+        "out_arg_1": "out_value_1", 
+        "out_arg_2": "out_value_2"
+    }`
     );
 
     // console.log(itemKey);
@@ -42,6 +51,17 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
     // if value is undefined, read the defautl value from the schema
     if (value === undefined) {
         value = itemSchema.default;
+    }
+
+    // from upstream condition, if "never" or "always"
+    let checkedFromUpstreamAllowed: boolean = true;
+    let checkedFromUpstreamEditable: boolean = true;
+    if (itemSchema?.from_upstream === "never") {
+        checkedFromUpstreamAllowed = false;
+        checkedFromUpstreamEditable = false;
+    } else if (itemSchema?.from_upstream === "always") {
+        checkedFromUpstreamAllowed = true;
+        checkedFromUpstreamEditable = false;
     }
 
     // Handle input change
@@ -210,7 +230,13 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
             sx={{ paddingTop: "10px" }}
         >
             {inputElement}
-            <Checkbox checked={checkedFromUpstream} onChange={handleCheckboxFromUpstreamChange} />
+            {checkedFromUpstreamAllowed ? (
+                <Checkbox
+                    checked={checkedFromUpstream}
+                    onChange={handleCheckboxFromUpstreamChange}
+                    disabled={!checkedFromUpstreamEditable}
+                />
+            ) : null}
         </Box>
     );
 };
