@@ -9,7 +9,9 @@ import {
     Input,
     Select,
     MenuItem,
-    SelectChangeEvent
+    SelectChangeEvent,
+    FormControl,
+    InputLabel,
 } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -53,22 +55,25 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
         if (checkedFromUpstream) {
             const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
             inputElement = (
-                <Select
-                    fullWidth
-                    // value={value}
-                    onChange={handleSelectFromUpstreamChange}
-                >
-                    {options.map(option => (
-                        <MenuItem key={option} value={option}>
-                            {option}
-                        </MenuItem>
-                    ))}
-                </Select>
+                <FormControl fullWidth>
+                    <InputLabel>{title}</InputLabel>
+                    <Select
+                        fullWidth
+                        // value={value}
+                        onChange={handleSelectFromUpstreamChange}
+                    >
+                        {options.map(option => (
+                            <MenuItem key={option} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
             );
         } else {
             inputElement = <TextField
                 fullWidth
-                label={`Item ${index + 1}`}
+                label={`${title} [${index}]`}
                 value={item}
                 onChange={(e) => handleArrayItemChange(index, e.target.value)}
             />
@@ -77,15 +82,13 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
     }
 
     return (
-        <Card sx={{ width: "100%" }}>
-            <CardHeader
-                title={title}
-                action={
-                    <IconButton onClick={handleAddItem} aria-label="Add" sx={{ paddingRight: "16px" }}>
-                        <AddIcon />
-                    </IconButton>
-                }
-            />
+        <Card sx={{ width: "100%", paddingTop: 0 }}>
+            <div>
+                <IconButton onClick={handleAddItem} aria-label="Add" sx={{ paddingRight: "16px" }}>
+                    <AddIcon />
+                </IconButton>
+                {title}
+            </div>
             <CardContent>
                 {arrayItems.map((item, index) => (
                     <Box
@@ -94,11 +97,11 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ title }) => {
                         alignItems="center"
                         sx={{ mb: 1 }}
                     >
-                        {createInputElement(item, index)}
-                        <Checkbox checked={checkedFromUpstream} onChange={handleCheckboxFromUpstreamChange} />
                         <IconButton onClick={() => handleDeleteItem(index)} aria-label="Delete">
                             <DeleteIcon />
                         </IconButton>
+                        {createInputElement(item, index)}
+                        <Checkbox checked={checkedFromUpstream} onChange={handleCheckboxFromUpstreamChange} />
                     </Box>
                 ))}
             </CardContent>

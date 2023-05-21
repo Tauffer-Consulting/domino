@@ -11,6 +11,7 @@ import {
     SelectChangeEvent,
     Card, CardContent, CardHeader, IconButton
 } from '@mui/material';
+import CodeEditor from '@uiw/react-textarea-code-editor';
 import Delete from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -26,6 +27,9 @@ interface DominoFormItemProps {
 
 const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
     const [checkedFromUpstream, setCheckedFromUpstream] = useState(false);
+    const [codeValue, setCodeValue] = useState(
+        "def custom_function(input_args: list):\n    print(input_args)\n    return 'Hello world!'"
+    );
 
     // console.log(itemKey);
     // console.log(value)
@@ -60,17 +64,20 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
     if (checkedFromUpstream) {
         const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
         inputElement = (
-            <Select
-                fullWidth
-                value={value}
-                onChange={handleSelectFromUpstreamChange}
-            >
-                {options.map(option => (
-                    <MenuItem key={option} value={option}>
-                        {option}
-                    </MenuItem>
-                ))}
-            </Select>
+            <FormControl fullWidth>
+                <InputLabel>{itemKey}</InputLabel>
+                <Select
+                    fullWidth
+                    value={value}
+                    onChange={handleSelectFromUpstreamChange}
+                >
+                    {options.map(option => (
+                        <MenuItem key={option} value={option}>
+                            {option}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
         );
     } else if (itemSchema?.allOf && itemSchema.allOf.length > 0) {
         const typeClass = itemSchema.allOf[0]['$ref'].split("/").pop();
@@ -118,7 +125,30 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
             onChange={handleInputChange}
         />;
     } else if (itemSchema.type === 'array') {
-        inputElement = <ArrayInputCard title="Array Input Example" />
+        inputElement = <ArrayInputCard title={itemSchema.title} />
+    } else if (itemSchema.type === 'string' && itemSchema.format === 'date-time') {
+        inputElement = <TextField label={itemSchema.title} value={"TODO - implement datetime"} />
+    } else if (itemSchema.type === 'string' && itemSchema?.widget === 'codeeditor') {
+        inputElement = (
+            <CodeEditor
+                value={codeValue}
+                language="python"
+                placeholder="Enter Python code."
+                onChange={(evn) => setCodeValue(evn.target.value)}
+                padding={15}
+                style={{
+                    fontSize: 12,
+                    backgroundColor: "#f5f5f5",
+                    fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+                    borderRadius: 4,
+                    border: "1px solid #ddd",
+                    width: "100%",
+                    minHeight: "200px",
+                    maxHeight: "400px",
+                    overflowY: "scroll",
+                }}
+            />
+        )
     } else {
         inputElement = (
             <TextField
