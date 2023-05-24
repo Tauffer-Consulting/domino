@@ -65,14 +65,19 @@ def custom_function(input_args: list):
     // from upstream condition, if "never" or "always"
     let checkedFromUpstreamAllowed: boolean = true;
     let checkedFromUpstreamEditable: boolean = true;
+    let arrayItemsFromUpstreamOption: string = "allowed";
     if (itemSchema?.from_upstream === "never") {
         checkedFromUpstreamAllowed = false;
         checkedFromUpstreamEditable = false;
+        if (itemSchema.type === 'array') {
+            arrayItemsFromUpstreamOption = "never";
+        }
     } else if (itemSchema?.from_upstream === "always") {
         checkedFromUpstreamAllowed = true;
         checkedFromUpstreamEditable = false;
         if (itemSchema.type === 'array') {
             checkedFromUpstreamAllowed = false;
+            arrayItemsFromUpstreamOption = "always";
         }
     }
 
@@ -163,6 +168,7 @@ def custom_function(input_args: list):
         inputElement = <ArrayInputItem
             itemSchema={itemSchema}
             parentSchemaDefinitions={schema.definitions}
+            fromUpstreamMode={arrayItemsFromUpstreamOption}
         />
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'date') {
         inputElement = (

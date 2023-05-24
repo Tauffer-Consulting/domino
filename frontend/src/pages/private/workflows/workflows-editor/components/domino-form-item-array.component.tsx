@@ -18,15 +18,28 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
 
+enum FromUpstreamOptions {
+    always = "always",
+    never = "never",
+    allowed = "allowed"
+}
+
 // Arrays usually have their inner schema defined in the main schema definitions
 interface ArrayInputItemProps {
     itemSchema: any;
     parentSchemaDefinitions: any;
+    fromUpstreamMode?: FromUpstreamOptions | string;
 }
 
-const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions }) => {
+const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions, fromUpstreamMode }) => {
     const [arrayItems, setArrayItems] = useState<string[]>(['']);
-    const [checkedFromUpstream, setCheckedFromUpstream] = useState(false)
+    const [checkedFromUpstream, setCheckedFromUpstream] = useState(() => {
+        if (fromUpstreamMode === "always") {
+            return true;
+        } else {
+            return false;
+        }
+    })
 
     // Sub-items schema
     let subItemSchema: any = itemSchema.items;
@@ -127,7 +140,13 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                             <DeleteIcon />
                         </IconButton>
                         {createInputElement(item, index)}
-                        <Checkbox checked={checkedFromUpstream} onChange={handleCheckboxFromUpstreamChange} />
+                        {fromUpstreamMode !== "never" ? (
+                            <Checkbox
+                                checked={checkedFromUpstream}
+                                onChange={handleCheckboxFromUpstreamChange}
+                                disabled={fromUpstreamMode === "allowed" ? false : true}
+                            />
+                        ) : null}
                     </Box>
                 ))}
             </CardContent>
