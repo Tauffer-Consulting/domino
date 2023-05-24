@@ -39,8 +39,11 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
             return false;
         }
     });
-    const [codeValue, setCodeValue] = useState(
-        `# Do not modify the function definition line 
+    const [codeValue, setCodeValue] = useState(() => {
+        if (schema.properties[itemKey]?.default) {
+            return schema.properties[itemKey].default;
+        } else {
+            return `# Do not modify the function definition line 
 def custom_function(input_args: list):
     # Write your code here
     print(input_args)
@@ -49,8 +52,9 @@ def custom_function(input_args: list):
     return {
         "out_arg_1": "out_value_1", 
         "out_arg_2": "out_value_2"
-    }`
-    );
+    }`;
+        }
+    });
 
     // console.log(itemKey);
     // console.log(value)

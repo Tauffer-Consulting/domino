@@ -68,8 +68,6 @@ const SidebarForm = (props: ISidebarFormProps) => {
 
 
   const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
-    console.log('formid', formId)
-    console.log('data', data)
     // On change update form data in forage
     try {
       var upstreamMap = await getForageUpstreamMap()
