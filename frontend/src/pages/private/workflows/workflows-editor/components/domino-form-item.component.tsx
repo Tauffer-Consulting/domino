@@ -18,7 +18,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import CodeEditor from '@uiw/react-textarea-code-editor';
 
-import ArrayInputCard from './domino-form-item-array.component';
+import ArrayInputItem from './domino-form-item-array.component';
 
 
 interface DominoFormItemProps {
@@ -160,7 +160,7 @@ def custom_function(input_args: list):
             onChange={handleInputChange}
         />;
     } else if (itemSchema.type === 'array') {
-        inputElement = <ArrayInputCard
+        inputElement = <ArrayInputItem
             itemSchema={itemSchema}
             parentSchemaDefinitions={schema.definitions}
         />

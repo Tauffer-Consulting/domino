@@ -19,12 +19,12 @@ import AddIcon from '@mui/icons-material/Add';
 
 
 // Arrays usually have their inner schema defined in the main schema definitions
-interface ArrayInputCardProps {
+interface ArrayInputItemProps {
     itemSchema: any;
     parentSchemaDefinitions: any;
 }
 
-const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ itemSchema, parentSchemaDefinitions }) => {
+const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions }) => {
     const [arrayItems, setArrayItems] = useState<string[]>(['']);
     const [checkedFromUpstream, setCheckedFromUpstream] = useState(false)
 
@@ -135,4 +135,4 @@ const ArrayInputCard: React.FC<ArrayInputCardProps> = ({ itemSchema, parentSchem
     );
 };
 
-export default ArrayInputCard;
+export default ArrayInputItem;
