@@ -34,7 +34,6 @@ interface ArrayInputItemProps {
 const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions, fromUpstreamMode }) => {
     const [arrayItems, setArrayItems] = useState<string[]>(() => {
         if (itemSchema.default && itemSchema.default.length > 0) {
-            console.log("itemSchema.default", itemSchema.default);
             return itemSchema.default;
         } else {
             return [""];
@@ -99,7 +98,12 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
             Object.keys(arrayOfProperties).map((itemKey, subIndex) => {
                 let inputElement: JSX.Element;
                 const subSubItemSchema = arrayOfProperties[itemKey];
-                const value = arrayItems[index as number][itemKey as keyof typeof arrayItems[number]]
+                let initialValue: any = '';
+                if (typeof arrayItems[index] === 'object') {
+                    initialValue = arrayItems[index as number][itemKey as keyof typeof arrayItems[number]];
+                } else {
+                    initialValue = arrayItems[index as number];
+                }
                 if (checkedFromUpstream) {
                     const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
                     inputElement = (
@@ -124,7 +128,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                         <FormControl fullWidth>
                             <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
                             <Select
-                                value={value}
+                                value={initialValue}
                             // onChange={handleSelectChange}
                             >
                                 {valuesOptions.map((option: string) => (
@@ -139,7 +143,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                     inputElement = <TextField
                         fullWidth
                         label={`${itemKey} [${index}]`}
-                        value={value}
+                        value={initialValue}
                         onChange={(e) => handleArrayItemChange(index, e.target.value)}
                     />
                 }
