@@ -70,6 +70,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
   const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
     // On change update form data in forage
     try {
+      console.log('handleOnChange')
       var upstreamMap = await getForageUpstreamMap()
       const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
       var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
@@ -163,150 +164,150 @@ const SidebarForm = (props: ISidebarFormProps) => {
   }, [formId, formJsonSchema, open, fetchForageDataById, setFormsForageData, handleOnChange, handleOnChangeStorage, isPieceForm, handleOnChangeContainerResources])
 
 
-  const handleCheckbox = useCallback(async (e: any) => {
-    var auxSchema = JSON.parse(JSON.stringify(formJsonSchema))
-    var formKeys = Object.keys(formJsonSchema.properties)
-    const edges = await fetchForageWorkflowEdges()
+  // const handleCheckbox = useCallback(async (e: any) => {
+  //   var auxSchema = JSON.parse(JSON.stringify(formJsonSchema))
+  //   var formKeys = Object.keys(formJsonSchema.properties)
+  //   const edges = await fetchForageWorkflowEdges()
 
-    // Save checkbox state to use when closing/opening the drawer
-    var auxCheckboxState: any = await getForageCheckboxStates()
-    if (!auxCheckboxState) {
-      auxCheckboxState = {}
-    }
+  //   // Save checkbox state to use when closing/opening the drawer
+  //   var auxCheckboxState: any = await getForageCheckboxStates()
+  //   if (!auxCheckboxState) {
+  //     auxCheckboxState = {}
+  //   }
 
-    var auxFormData = formData ? JSON.parse(JSON.stringify(formData)) : {}
-    if (formId in auxCheckboxState) {
-      auxCheckboxState[formId][e.target.value] = e.target.checked
-    } else {
-      auxCheckboxState[formId] = {
-        [e.target.value]: e.target.checked
-      }
-    }
+  //   var auxFormData = formData ? JSON.parse(JSON.stringify(formData)) : {}
+  //   if (formId in auxCheckboxState) {
+  //     auxCheckboxState[formId][e.target.value] = e.target.checked
+  //   } else {
+  //     auxCheckboxState[formId] = {
+  //       [e.target.value]: e.target.checked
+  //     }
+  //   }
 
-    await setForageCheckboxStates(auxCheckboxState)
-    //setCheckboxState(auxCheckboxState)
+  //   await setForageCheckboxStates(auxCheckboxState)
+  //   //setCheckboxState(auxCheckboxState)
 
-    // We can improve the logic using a forage key using following structure: 
-    // nodeId: {
-    //   upstreams: [],
-    //   downstreams: [],
-    // }
-    // It will avoid to iterate over all edges
-    var upstreamsIds = []
-    for (var ed of edges) {
-      if (ed.target === formId) {
-        upstreamsIds.push(ed.source)
-      }
-    }
+  //   // We can improve the logic using a forage key using following structure: 
+  //   // nodeId: {
+  //   //   upstreams: [],
+  //   //   downstreams: [],
+  //   // }
+  //   // It will avoid to iterate over all edges
+  //   var upstreamsIds = []
+  //   for (var ed of edges) {
+  //     if (ed.target === formId) {
+  //       upstreamsIds.push(ed.source)
+  //     }
+  //   }
 
-    if (!upstreamsIds.length) {
-      return
-    }
+  //   if (!upstreamsIds.length) {
+  //     return
+  //   }
 
-    var upstreamMap = await getForageUpstreamMap()
-    if (!(formId in upstreamMap)) {
-      upstreamMap[formId] = {}
-    }
+  //   var upstreamMap = await getForageUpstreamMap()
+  //   if (!(formId in upstreamMap)) {
+  //     upstreamMap[formId] = {}
+  //   }
 
-    const auxNameKeyUpstreamArgsMap: any = {}
-    for (let i = 0; i < formKeys.length; i++) {
-      if (formKeys[i] === e.target.value) {
-        const fieldType = formJsonSchema.properties[formKeys[i]].type
-        var dropdownSchema: any = {
-          type: fieldType
-        }
-        const enums: any = []
-        for (var upstreamId of upstreamsIds) {
-          const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
-          if (e.target.checked) {
-            // If checked add dropdown options from upstreams
-            const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
-            const outputSchema = upstreamOperator?.output_schema
-            Object.keys(outputSchema?.properties).forEach((key, index) => {
-              const obj = outputSchema?.properties[key]
-              if (obj.type === fieldType) {
-                enums.push(
-                  `${upstreamOperator?.name} - ${obj['title']}`
-                )
-                // TODO - improve this because it doesn't accept duplicated upstream nodes
-                auxNameKeyUpstreamArgsMap[`${upstreamOperator?.name} - ${obj['title']}`] = key
-              }
-            });
-            // Set upstream map to piece if using upstream
-            upstreamMap[formId][e.target.value] = {
-              fromUpstream: true,
-              upstreamId: upstreamId,
-              upstreamArgument: null
-            }
+  //   const auxNameKeyUpstreamArgsMap: any = {}
+  //   for (let i = 0; i < formKeys.length; i++) {
+  //     if (formKeys[i] === e.target.value) {
+  //       const fieldType = formJsonSchema.properties[formKeys[i]].type
+  //       var dropdownSchema: any = {
+  //         type: fieldType
+  //       }
+  //       const enums: any = []
+  //       for (var upstreamId of upstreamsIds) {
+  //         const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
+  //         if (e.target.checked) {
+  //           // If checked add dropdown options from upstreams
+  //           const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
+  //           const outputSchema = upstreamOperator?.output_schema
+  //           Object.keys(outputSchema?.properties).forEach((key, index) => {
+  //             const obj = outputSchema?.properties[key]
+  //             if (obj.type === fieldType) {
+  //               enums.push(
+  //                 `${upstreamOperator?.name} - ${obj['title']}`
+  //               )
+  //               // TODO - improve this because it doesn't accept duplicated upstream nodes
+  //               auxNameKeyUpstreamArgsMap[`${upstreamOperator?.name} - ${obj['title']}`] = key
+  //             }
+  //           });
+  //           // Set upstream map to piece if using upstream
+  //           upstreamMap[formId][e.target.value] = {
+  //             fromUpstream: true,
+  //             upstreamId: upstreamId,
+  //             upstreamArgument: null
+  //           }
 
-          } else {
-            // If unchecked remove dropdown options from upstreams and use operator inputs schemas
-            const operatorId = parseInt(formId.split('_')[0])
-            const operator = await fetchForagePieceById(operatorId)
-            const inputSchema = operator?.input_schema
-            auxSchema.properties[formKeys[i]] = inputSchema?.properties[formKeys[i]]
-            auxFormData[formKeys[i]] = inputSchema?.properties[formKeys[i]].default
-            upstreamMap[formId][e.target.value] = {
-              fromUpstream: false,
-              upstreamId: upstreamId,
-              upstreamArgument: null
-            }
-          }
-        }
-        if (e.target.checked && !enums.length) {
-          auxCheckboxState[formId][e.target.value] = false
-          await setForageCheckboxStates(auxCheckboxState)
-          toast.error('There are no upstream outputs with the same type as the selected field')
-        }
-        else if (e.target.checked) {
-          dropdownSchema['enum'] = enums
-          dropdownSchema['default'] = enums[0]
-          auxSchema.properties[formKeys[i]] = dropdownSchema
-          auxFormData[formKeys[i]] = dropdownSchema.default
-        }
-      }
-    }
-    const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
-    setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
-    setForageUpstreamMap(upstreamMap)
-    setFormJsonSchema(auxSchema)
-    setFormData(auxFormData)
+  //         } else {
+  //           // If unchecked remove dropdown options from upstreams and use operator inputs schemas
+  //           const operatorId = parseInt(formId.split('_')[0])
+  //           const operator = await fetchForagePieceById(operatorId)
+  //           const inputSchema = operator?.input_schema
+  //           auxSchema.properties[formKeys[i]] = inputSchema?.properties[formKeys[i]]
+  //           auxFormData[formKeys[i]] = inputSchema?.properties[formKeys[i]].default
+  //           upstreamMap[formId][e.target.value] = {
+  //             fromUpstream: false,
+  //             upstreamId: upstreamId,
+  //             upstreamArgument: null
+  //           }
+  //         }
+  //       }
+  //       if (e.target.checked && !enums.length) {
+  //         auxCheckboxState[formId][e.target.value] = false
+  //         await setForageCheckboxStates(auxCheckboxState)
+  //         toast.error('There are no upstream outputs with the same type as the selected field')
+  //       }
+  //       else if (e.target.checked) {
+  //         dropdownSchema['enum'] = enums
+  //         dropdownSchema['default'] = enums[0]
+  //         auxSchema.properties[formKeys[i]] = dropdownSchema
+  //         auxFormData[formKeys[i]] = dropdownSchema.default
+  //       }
+  //     }
+  //   }
+  //   const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
+  //   setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
+  //   setForageUpstreamMap(upstreamMap)
+  //   setFormJsonSchema(auxSchema)
+  //   setFormData(auxFormData)
 
-  },
-    [
-      formJsonSchema,
-      formId,
-      fetchForageWorkflowEdges,
-      fetchForagePieceById,
-      setForageUpstreamMap,
-      getForageUpstreamMap,
-      formData,
-      getForageCheckboxStates,
-      setForageCheckboxStates,
-      setNameKeyUpstreamArgsMap,
-      getNameKeyUpstreamArgsMap
-    ])
+  // },
+  //   [
+  //     formJsonSchema,
+  //     formId,
+  //     fetchForageWorkflowEdges,
+  //     fetchForagePieceById,
+  //     setForageUpstreamMap,
+  //     getForageUpstreamMap,
+  //     formData,
+  //     getForageCheckboxStates,
+  //     setForageCheckboxStates,
+  //     setNameKeyUpstreamArgsMap,
+  //     getNameKeyUpstreamArgsMap
+  //   ])
 
-  useEffect(() => {
-    // This is a hack because customizing jsonforms ui for accepting multi column would be harder than create a custom checkbox column
-    // When form schema changes, update checkboxes
-    const loadCheckboxes = async () => {
-      var auxCheckboxes: any = []
-      var forageCheckboxState: any = await getForageCheckboxStates()
-      for (const key in formJsonSchema?.properties) {
-        var checked = false
-        if (formId in forageCheckboxState) {
-          checked = forageCheckboxState[formId][key]
-        }
-        const newCheckbox = checked ? <FormControlLabel sx={{ justifyContent: 'center' }} key={uuidv4()} control={<Checkbox onChange={handleCheckbox} value={key} defaultChecked />} label="" /> : <FormControlLabel key={uuidv4()} sx={{ justifyContent: 'center' }} control={<Checkbox onChange={handleCheckbox} value={key} />} label="" />
-        auxCheckboxes.push(newCheckbox)
-      }
-      setCheckboxes(auxCheckboxes)
-    }
-    if (formJsonSchema) {
-      loadCheckboxes()
-    }
-  }, [formJsonSchema, handleCheckbox, formId, getForageCheckboxStates])
+  // useEffect(() => {
+  //   // This is a hack because customizing jsonforms ui for accepting multi column would be harder than create a custom checkbox column
+  //   // When form schema changes, update checkboxes
+  //   const loadCheckboxes = async () => {
+  //     var auxCheckboxes: any = []
+  //     var forageCheckboxState: any = await getForageCheckboxStates()
+  //     for (const key in formJsonSchema?.properties) {
+  //       var checked = false
+  //       if (formId in forageCheckboxState) {
+  //         checked = forageCheckboxState[formId][key]
+  //       }
+  //       const newCheckbox = checked ? <FormControlLabel sx={{ justifyContent: 'center' }} key={uuidv4()} control={<Checkbox onChange={handleCheckbox} value={key} defaultChecked />} label="" /> : <FormControlLabel key={uuidv4()} sx={{ justifyContent: 'center' }} control={<Checkbox onChange={handleCheckbox} value={key} />} label="" />
+  //       auxCheckboxes.push(newCheckbox)
+  //     }
+  //     setCheckboxes(auxCheckboxes)
+  //   }
+  //   if (formJsonSchema) {
+  //     loadCheckboxes()
+  //   }
+  // }, [formJsonSchema, handleCheckbox, formId, getForageCheckboxStates])
 
   return (
     <Drawer

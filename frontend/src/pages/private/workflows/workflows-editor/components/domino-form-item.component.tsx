@@ -219,7 +219,7 @@ def custom_function(input_args: list):
                 value={codeValue}
                 language="python"
                 placeholder="Enter Python code."
-                onChange={(evn) => setCodeValue(evn.target.value)}
+                onChange={(evn: any) => setCodeValue(evn.target.value)}
                 padding={15}
                 style={{
                     fontSize: 12,
