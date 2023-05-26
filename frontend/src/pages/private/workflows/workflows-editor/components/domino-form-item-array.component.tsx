@@ -98,7 +98,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         {
             Object.keys(arrayOfProperties).map((itemKey, subIndex) => {
                 let inputElement: JSX.Element;
-                const subSubItemSchema = arrayOfProperties[itemKey];
+                const subItemPropSchema = arrayOfProperties[itemKey];
                 let initialValue: any = '';
                 if (typeof arrayItems[index] === 'object') {
                     initialValue = arrayItems[index as number][itemKey as keyof typeof arrayItems[number]];
@@ -122,8 +122,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                             </Select>
                         </FormControl>
                     );
-                } else if (subSubItemSchema?.allOf && subSubItemSchema.allOf.length > 0) {
-                    const typeClass = subSubItemSchema.allOf[0]['$ref'].split("/").pop();
+                } else if (subItemPropSchema?.allOf && subItemPropSchema.allOf.length > 0) {
+                    const typeClass = subItemPropSchema.allOf[0]['$ref'].split("/").pop();
                     const valuesOptions: Array<string> = parentSchemaDefinitions?.[typeClass].enum;
                     inputElement = (
                         <FormControl fullWidth>
@@ -155,7 +155,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                             <Checkbox
                                 checked={checkedFromUpstream}
                                 onChange={handleCheckboxFromUpstreamChange}
-                                disabled={fromUpstreamMode === "allowed" ? false : true}
+                                disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                             />
                         ) : null}
                     </div>
