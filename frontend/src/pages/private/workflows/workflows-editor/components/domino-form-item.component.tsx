@@ -234,7 +234,7 @@ def custom_function(input_args: list):
                 }}
             />
         )
-    } else {
+    } else if (itemSchema.type === 'string') {
         inputElement = (
             <TextField
                 fullWidth
@@ -245,6 +245,10 @@ def custom_function(input_args: list):
                 onChange={handleInputChange}
             />
         );
+    } else {
+        inputElement = <div style={{ color: "red", fontWeight: "bold" }}>
+            Unknown widget type for {itemSchema.title}
+        </div>;
     }
 
     return (
