@@ -147,10 +147,25 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                         onChange={(e) => handleArrayItemChange(index, e.target.value)}
                     />
                 }
-                itemElements.push(inputElement);
+                itemElements.push(
+                    <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                        {inputElement}
+                        {fromUpstreamMode !== "never" ? (
+                            <Checkbox
+                                checked={checkedFromUpstream}
+                                onChange={handleCheckboxFromUpstreamChange}
+                                disabled={fromUpstreamMode === "allowed" ? false : true}
+                            />
+                        ) : null}
+                    </div>
+                );
             });
         }
-        return itemElements;
+        return <div
+            style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
+        >
+            {itemElements}
+        </div>
     }
 
     return (
@@ -167,19 +182,16 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                         display="flex"
                         justifyContent="space-between"
                         alignItems="center"
-                        sx={{ mb: 1 }}
+                        sx={{
+                            mb: 1,
+                            borderLeft: "solid 1px rgba(0,0,0,0.8)",
+                            borderRadius: "6px",
+                        }}
                     >
                         <IconButton onClick={() => handleDeleteItem(index)} aria-label="Delete">
                             <DeleteIcon />
                         </IconButton>
                         {createItemElements(item, index)}
-                        {fromUpstreamMode !== "never" ? (
-                            <Checkbox
-                                checked={checkedFromUpstream}
-                                onChange={handleCheckboxFromUpstreamChange}
-                                disabled={fromUpstreamMode === "allowed" ? false : true}
-                            />
-                        ) : null}
                     </Box>
                 ))}
             </CardContent>
