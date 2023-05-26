@@ -93,6 +93,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         } else {
             arrayOfProperties[itemSchema.title] = { "": "" };
         }
+        const numProps = Object.keys(arrayOfProperties).length;
         // Loop through each of the item's properties and create the inputs for them
         {
             Object.keys(arrayOfProperties).map((itemKey, subIndex) => {
@@ -162,7 +163,11 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
             });
         }
         return <div
-            style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
+            style={{
+                display: 'flex',
+                flexDirection: fromUpstreamMode === 'never' && numProps < 3 ? 'row' : 'column',
+                width: '100%'
+            }}
         >
             {itemElements}
         </div>
