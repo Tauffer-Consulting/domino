@@ -34,7 +34,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         if (itemSchema.default && itemSchema.default.length > 0) {
             return itemSchema.default;
         } else {
-            return [""];
+            return [];
         }
     });
     type ObjectWithBooleanValues = { [key: string]: boolean };
@@ -84,6 +84,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = [...prevArray];
             const objectToUpdate = newArray[index] as { [key: string]: boolean };
+            console.log(objectToUpdate);
             objectToUpdate[itemKey] = event.target.checked;
             newArray[index] = objectToUpdate;
             return newArray;
