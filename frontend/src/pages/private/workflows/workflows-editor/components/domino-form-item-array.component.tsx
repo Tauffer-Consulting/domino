@@ -102,19 +102,26 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
-    // FromUpstream logic
+    // FromUpstream checkboxes logic
+    // TODO - this is not working for multiple default items, they're changing together
     const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
         console.log(checkedFromUpstreamItemProp);
+        console.log("event", event.target.checked);
+        console.log("index", index);
+        console.log("itemkey", itemKey);
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = [...prevArray];
+            console.log(newArray);
             const objectToUpdate = newArray[index] as { [key: string]: boolean };
             console.log(objectToUpdate);
             objectToUpdate[itemKey] = event.target.checked;
-            // newArray[index] = objectToUpdate;
+            newArray[index] = objectToUpdate;
             return newArray;
         });
         console.log(checkedFromUpstreamItemProp);
     };
+
+    // FromUpstream select logic
     const handleSelectFromUpstreamChange = (event: SelectChangeEvent<any>) => {
         console.log(event.target.value);
     };
