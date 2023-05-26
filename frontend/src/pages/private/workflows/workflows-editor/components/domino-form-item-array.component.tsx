@@ -32,7 +32,8 @@ interface ArrayInputItemProps {
 const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions, fromUpstreamMode }) => {
     const [arrayItems, setArrayItems] = useState<string[]>(() => {
         if (itemSchema.default && itemSchema.default.length > 0) {
-            return itemSchema.default;
+            const initArray = [...itemSchema.default];
+            return initArray;
         } else {
             return [];
         }
@@ -40,8 +41,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
     type ObjectWithBooleanValues = { [key: string]: boolean };
     const [checkedFromUpstreamItemProp, setCheckedFromUpstreamItemProp] = useState<ObjectWithBooleanValues[]>(() => {
         if (itemSchema.default && itemSchema.default.length > 0) {
-            const newArray = new Array<ObjectWithBooleanValues>(itemSchema.default.length).fill({});
-            return newArray;
+            const initArray = new Array<ObjectWithBooleanValues>(itemSchema.default.length).fill({});
+            return initArray;
         } else {
             return [];
         }
