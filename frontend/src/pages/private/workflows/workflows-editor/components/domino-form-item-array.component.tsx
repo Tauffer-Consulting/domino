@@ -39,13 +39,16 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
             return [""];
         }
     });
-    const [checkedFromUpstream, setCheckedFromUpstream] = useState(() => {
-        if (fromUpstreamMode === "always") {
-            return true;
+    type ObjectWithBooleanValues = { [key: string]: boolean };
+    const [checkedFromUpstreamItemProp, setCheckedFromUpstreamItemProp] = useState<ObjectWithBooleanValues[]>(() => {
+        if (itemSchema.default && itemSchema.default.length > 0) {
+            const newArray = new Array<ObjectWithBooleanValues>(itemSchema.default.length).fill({});
+            return newArray;
         } else {
-            return false;
+            return [];
         }
-    })
+    });
+
 
     // Sub-items schema
     let subItemSchema: any = itemSchema.items;
@@ -67,17 +70,28 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
     // Add and delete items
     const handleAddItem = () => {
         setArrayItems([...arrayItems, '']);
+        setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, {}]);
     };
 
     const handleDeleteItem = (index: number) => {
         const updatedItems = [...arrayItems];
         updatedItems.splice(index, 1);
         setArrayItems(updatedItems);
+        const updatedCheckedFromUpstreamItemProp = [...checkedFromUpstreamItemProp];
+        updatedCheckedFromUpstreamItemProp.splice(index, 1);
+        setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
-    // FomrUpstream logic
-    const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setCheckedFromUpstream(event.target.checked);
+    // FromUpstream logic
+    const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
+        setCheckedFromUpstreamItemProp((prevArray) => {
+            const newArray = [...prevArray];
+            const objectToUpdate = newArray[index] as { [key: string]: boolean };
+            objectToUpdate[itemKey] = event.target.checked;
+            newArray[index] = objectToUpdate;
+            return newArray;
+        });
+        console.log(checkedFromUpstreamItemProp);
     };
     const handleSelectFromUpstreamChange = (event: SelectChangeEvent<any>) => {
         console.log(event.target.value);
@@ -105,7 +119,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                 } else {
                     initialValue = arrayItems[index as number];
                 }
-                if (checkedFromUpstream) {
+                if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
                     const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
                     inputElement = (
                         <FormControl fullWidth>
@@ -153,8 +167,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                         {inputElement}
                         {fromUpstreamMode !== "never" ? (
                             <Checkbox
-                                checked={checkedFromUpstream}
-                                onChange={handleCheckboxFromUpstreamChange}
+                                checked={checkedFromUpstreamItemProp[index]?.[itemKey]}
+                                onChange={(event) => handleCheckboxFromUpstreamChange(event, index, itemKey)}
                                 disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                             />
                         ) : null}
