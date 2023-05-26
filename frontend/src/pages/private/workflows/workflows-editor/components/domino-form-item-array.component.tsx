@@ -93,11 +93,12 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         } else {
             arrayOfProperties[itemSchema.title] = { "": "" };
         }
+        const numProps = Object.keys(arrayOfProperties).length;
         // Loop through each of the item's properties and create the inputs for them
         {
             Object.keys(arrayOfProperties).map((itemKey, subIndex) => {
                 let inputElement: JSX.Element;
-                const subSubItemSchema = arrayOfProperties[itemKey];
+                const subItemPropSchema = arrayOfProperties[itemKey];
                 let initialValue: any = '';
                 if (typeof arrayItems[index] === 'object') {
                     initialValue = arrayItems[index as number][itemKey as keyof typeof arrayItems[number]];
@@ -121,8 +122,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                             </Select>
                         </FormControl>
                     );
-                } else if (subSubItemSchema?.allOf && subSubItemSchema.allOf.length > 0) {
-                    const typeClass = subSubItemSchema.allOf[0]['$ref'].split("/").pop();
+                } else if (subItemPropSchema?.allOf && subItemPropSchema.allOf.length > 0) {
+                    const typeClass = subItemPropSchema.allOf[0]['$ref'].split("/").pop();
                     const valuesOptions: Array<string> = parentSchemaDefinitions?.[typeClass].enum;
                     inputElement = (
                         <FormControl fullWidth>
@@ -147,10 +148,29 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                         onChange={(e) => handleArrayItemChange(index, e.target.value)}
                     />
                 }
-                itemElements.push(inputElement);
+                itemElements.push(
+                    <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                        {inputElement}
+                        {fromUpstreamMode !== "never" ? (
+                            <Checkbox
+                                checked={checkedFromUpstream}
+                                onChange={handleCheckboxFromUpstreamChange}
+                                disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
+                            />
+                        ) : null}
+                    </div>
+                );
             });
         }
-        return itemElements;
+        return <div
+            style={{
+                display: 'flex',
+                flexDirection: fromUpstreamMode === 'never' && numProps < 3 ? 'row' : 'column',
+                width: '100%'
+            }}
+        >
+            {itemElements}
+        </div>
     }
 
     return (
@@ -167,19 +187,16 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                         display="flex"
                         justifyContent="space-between"
                         alignItems="center"
-                        sx={{ mb: 1 }}
+                        sx={{
+                            mb: 1,
+                            borderLeft: "solid 1px rgba(0,0,0,0.8)",
+                            borderRadius: "6px",
+                        }}
                     >
                         <IconButton onClick={() => handleDeleteItem(index)} aria-label="Delete">
                             <DeleteIcon />
                         </IconButton>
                         {createItemElements(item, index)}
-                        {fromUpstreamMode !== "never" ? (
-                            <Checkbox
-                                checked={checkedFromUpstream}
-                                onChange={handleCheckboxFromUpstreamChange}
-                                disabled={fromUpstreamMode === "allowed" ? false : true}
-                            />
-                        ) : null}
                     </Box>
                 ))}
             </CardContent>
