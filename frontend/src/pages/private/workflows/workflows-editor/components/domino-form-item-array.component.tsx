@@ -56,7 +56,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
 
 
     // console.log("itemSchema", itemSchema);
-    console.log("subItemSchema", subItemSchema);
+    // console.log("subItemSchema", subItemSchema);
     // console.log("parentSchemaDefinitions", parentSchemaDefinitions);
 
     type ObjectWithBooleanValues = { [key: string]: boolean };
