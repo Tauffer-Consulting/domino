@@ -138,7 +138,11 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
     // FromUpstream select logic
     const handleSelectFromUpstreamChange = (index: number, itemKey: string, value: string) => {
         const updatedItems = [...arrayItems];
-        updatedItems[index][itemKey] = value;
+        if (typeof updatedItems[index] === 'object') {
+            updatedItems[index][itemKey] = value;
+        } else {
+            updatedItems[index] = value;
+        }
         setArrayItems(updatedItems);
     };
 
