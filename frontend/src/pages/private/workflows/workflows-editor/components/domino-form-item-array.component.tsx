@@ -90,9 +90,19 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
     // Add and delete items
     const handleAddItem = () => {
         setArrayItems([...arrayItems, '']);
-        setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, {}]);
+        let newItemPropChecked: { [key: string]: boolean } = {};
+        Object.keys(arrayOfProperties).map((itemKey) => {
+            if (subItemSchema?.properties?.[itemKey]?.from_upstream === "always") {
+                newItemPropChecked[itemKey] = true;
+            } else {
+                newItemPropChecked[itemKey] = false;
+            }
+            return null;
+        });
+        setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, newItemPropChecked]);
     };
 
+    // TODO - this is not working when deleting items with fromUpstrem checked
     const handleDeleteItem = (index: number) => {
         const updatedItems = [...arrayItems];
         updatedItems.splice(index, 1);
