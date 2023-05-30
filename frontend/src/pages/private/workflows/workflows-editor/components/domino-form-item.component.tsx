@@ -32,8 +32,6 @@ interface DominoFormItemProps {
 
 const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey, value, onChange }) => {
     const {
-        setFormsForageData,
-        fetchForageDataById,
         fetchForageWorkflowEdges,
         getForageUpstreamMap,
         setForageUpstreamMap,
@@ -45,6 +43,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
     } = useWorkflowsEditor()
 
     const formFieldType = schema.properties[itemKey].type;
+
+    const [formLabelUpstreamIdMap, setFormLabelUpstreamIdMap] = useState<Record<string, string>>({});
 
     const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
     const [upstreamSelectValue, setUpstreamSelectValue] = useState<string>('');
@@ -75,9 +75,6 @@ def custom_function(input_args: list):
     }`;
         }
     });
-
-    // console.log(itemKey);
-    // console.log(value)
 
     let itemSchema: any = schema.properties[itemKey];
 
@@ -157,8 +154,9 @@ def custom_function(input_args: list):
         }
         
         const auxNameKeyUpstreamArgsMap: any = {}
+        const auxLabelUpstreamIdMap: any = {}
         const upstreamOptions: string[] = []
-        for (var upstreamId of upstreamsIds){parseInt(upstreamId.split('_')[0])
+        for (const upstreamId of upstreamsIds){
             const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
             if (checked) {
                 const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
@@ -174,19 +172,18 @@ def custom_function(input_args: list):
                         }
                         upstreamOptions.push(upstreamOptionName)
                         auxNameKeyUpstreamArgsMap[upstreamOptionName] = key
+                        auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId  
                     }
                 })
                 upstreamMap[formId][itemKey] = {
-                    ...upstreamMap[formId][itemKey],
                     fromUpstream: true,
-                    upstreamId: upstreamId,
+                    upstreamId: null,
                     upstreamArgument: null
                 }
             }else{
                 upstreamMap[formId][itemKey] = {
-                    ...upstreamMap[formId][itemKey],
                     fromUpstream: false,
-                    upstreamId: upstreamId,
+                    upstreamId: null,
                     upstreamArgument: null
                 }
             }
@@ -198,11 +195,20 @@ def custom_function(input_args: list):
             toast.error('There are no upstream outputs with the same type as the selected field')
             return
         }
+        const upstreamValue = upstreamMap[formId][itemKey].value || null
+        const upstreamId = upstreamValue ? auxLabelUpstreamIdMap[upstreamValue] : null
+        upstreamMap[formId][itemKey] = {
+            ...upstreamMap[formId][itemKey],
+            upstreamId: upstreamId,
+            value: upstreamValue
+        }
+
+        setFormLabelUpstreamIdMap(auxLabelUpstreamIdMap)
         const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
         setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
         setForageUpstreamMap(upstreamMap)
         setUpstreamOptions(upstreamOptions)
-        setUpstreamSelectValue(upstreamMap[formId][itemKey].value)
+        setUpstreamSelectValue(upstreamValue)
     },[
         formId,
         itemKey,
@@ -214,7 +220,7 @@ def custom_function(input_args: list):
         fetchForagePieceById,
         setForageUpstreamMap,
         getNameKeyUpstreamArgsMap,
-        setNameKeyUpstreamArgsMap
+        setNameKeyUpstreamArgsMap,
     ]);
 
 
@@ -232,7 +238,6 @@ def custom_function(input_args: list):
             }else{
                 handleCheckboxFromUpstreamChange(false)
             }
-            
 
         })()
     }, [getForageCheckboxStates, formId, itemKey, getForageUpstreamMap, handleCheckboxFromUpstreamChange])
@@ -244,7 +249,8 @@ def custom_function(input_args: list):
         const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
         var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
         const fromUpstream = upstreamMapFormInfo[itemKey] ? upstreamMapFormInfo[itemKey].fromUpstream : false
-        const upstreamId = fromUpstream && upstreamMapFormInfo[itemKey] ? upstreamMapFormInfo[itemKey].upstreamId : null
+        const upstreamId = fromUpstream && formLabelUpstreamIdMap[event.target.value as string] ? formLabelUpstreamIdMap[event.target.value as string] : null
+
         upstreamMapFormInfo[itemKey] = {
             fromUpstream: fromUpstream,
             upstreamId: upstreamId,
@@ -260,7 +266,8 @@ def custom_function(input_args: list):
         getNameKeyUpstreamArgsMap,
         formId,
         setForageUpstreamMap,
-        onChange
+        onChange,
+        formLabelUpstreamIdMap
 
     ]);
 
