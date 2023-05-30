@@ -30,18 +30,9 @@ interface ArrayInputItemProps {
 }
 
 const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions, fromUpstreamMode }) => {
-    const [arrayItems, setArrayItems] = useState<string[]>(() => {
+    const [arrayItems, setArrayItems] = useState<any[] | { [key: string]: any }[]>(() => {
         if (itemSchema.default && itemSchema.default.length > 0) {
             const initArray = [...itemSchema.default];
-            return initArray;
-        } else {
-            return [];
-        }
-    });
-    type ObjectWithBooleanValues = { [key: string]: boolean };
-    const [checkedFromUpstreamItemProp, setCheckedFromUpstreamItemProp] = useState<ObjectWithBooleanValues[]>(() => {
-        if (itemSchema.default && itemSchema.default.length > 0) {
-            const initArray = new Array<ObjectWithBooleanValues>(itemSchema.default.length).fill({});
             return initArray;
         } else {
             return [];
@@ -54,23 +45,68 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         const subItemSchemaName = itemSchema.items.$ref.split('/').pop();
         subItemSchema = parentSchemaDefinitions[subItemSchemaName];
     }
+    let arrayOfProperties: { [key: string]: any } = {};
+    // If array subtypes were not defined in the schema, we create a default one
+    if (subItemSchema?.properties) {
+        arrayOfProperties = subItemSchema?.properties;
+    } else {
+        arrayOfProperties[itemSchema.title] = { "": "" };
+    }
+    const numProps = Object.keys(arrayOfProperties).length;
+
 
     // console.log("itemSchema", itemSchema);
     // console.log("subItemSchema", subItemSchema);
     // console.log("parentSchemaDefinitions", parentSchemaDefinitions);
 
-    const handleArrayItemChange = (index: number, value: string) => {
+    type ObjectWithBooleanValues = { [key: string]: boolean };
+    const [checkedFromUpstreamItemProp, setCheckedFromUpstreamItemProp] = useState<ObjectWithBooleanValues[]>(() => {
+        if (itemSchema.default && itemSchema.default.length > 0) {
+            const initArray = new Array<ObjectWithBooleanValues>(itemSchema.default.length).fill({});
+            // set the default values from the schema in cases where from_upstream==="always"
+            initArray.map((obj, index) => {
+                Object.keys(arrayOfProperties).map((itemKey) => {
+                    if (subItemSchema?.properties?.[itemKey]?.from_upstream === "always") {
+                        initArray[index][itemKey] = true;
+                    } else {
+                        initArray[index][itemKey] = false;
+                    }
+                    return null;
+                });
+                return null;
+            });
+            return initArray;
+        } else {
+            return [];
+        }
+    });
+
+    const handleArrayItemChange = (index: number, itemKey: string, value: string) => {
         const updatedItems = [...arrayItems];
-        updatedItems[index] = value;
+        updatedItems[index][itemKey] = value;
         setArrayItems(updatedItems);
     };
 
     // Add and delete items
+    // TODO - fix setArrayItems to fill the props with correct values types, right now just guessing an empty string, but this will most likely fail e.g. boolen types
     const handleAddItem = () => {
-        setArrayItems([...arrayItems, '']);
-        setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, {}]);
+        let newItemPropsValues: { [key: string]: any } = {};
+        let newItemPropsChecked: { [key: string]: boolean } = {};
+        Object.keys(arrayOfProperties).map((itemKey) => {
+            if (subItemSchema?.properties?.[itemKey]?.from_upstream === "always") {
+                newItemPropsChecked[itemKey] = true;
+                newItemPropsValues[itemKey] = '';
+            } else {
+                newItemPropsChecked[itemKey] = false;
+                newItemPropsValues[itemKey] = '';
+            }
+            return null;
+        });
+        setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, newItemPropsChecked]);
+        setArrayItems([...arrayItems, newItemPropsValues]);
     };
 
+    // TODO - this is not working when deleting items with fromUpstrem checked
     const handleDeleteItem = (index: number) => {
         const updatedItems = [...arrayItems];
         updatedItems.splice(index, 1);
@@ -80,10 +116,16 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
-    // FromUpstream logic
+    // FromUpstream checkboxes logic
+    // TODO - this is not working for multiple default items, they're changing together
     const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
+        console.log(checkedFromUpstreamItemProp);
+        console.log("event", event.target.checked);
+        console.log("index", index);
+        console.log("itemkey", itemKey);
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = [...prevArray];
+            console.log(newArray);
             const objectToUpdate = newArray[index] as { [key: string]: boolean };
             console.log(objectToUpdate);
             objectToUpdate[itemKey] = event.target.checked;
@@ -92,21 +134,21 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         });
         console.log(checkedFromUpstreamItemProp);
     };
-    const handleSelectFromUpstreamChange = (event: SelectChangeEvent<any>) => {
-        console.log(event.target.value);
+
+    // FromUpstream select logic
+    const handleSelectFromUpstreamChange = (index: number, itemKey: string, value: string) => {
+        const updatedItems = [...arrayItems];
+        if (typeof updatedItems[index] === 'object') {
+            updatedItems[index][itemKey] = value;
+        } else {
+            updatedItems[index] = value;
+        }
+        setArrayItems(updatedItems);
     };
 
     // Each item in the array can be multiple inputs, with varied types like text, select, checkbox, etc.
     const createItemElements = (item: string, index: number) => {
         let itemElements: JSX.Element[] = [];
-        let arrayOfProperties: { [key: string]: any } = {};
-        // If array subtypes were not defined in the schema, we create a default one
-        if (subItemSchema?.properties) {
-            arrayOfProperties = subItemSchema?.properties;
-        } else {
-            arrayOfProperties[itemSchema.title] = { "": "" };
-        }
-        const numProps = Object.keys(arrayOfProperties).length;
         // Loop through each of the item's properties and create the inputs for them
         Object.keys(arrayOfProperties).map((itemKey, subIndex) => {
             let inputElement: JSX.Element;
@@ -118,13 +160,14 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                 initialValue = arrayItems[index as number];
             }
             if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
-                const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
+                const options: Array<string> = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
                 inputElement = (
                     <FormControl fullWidth>
                         <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
                         <Select
                             fullWidth
-                            onChange={handleSelectFromUpstreamChange}
+                            value={initialValue}
+                            onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
                         >
                             {options.map(option => (
                                 <MenuItem key={option} value={option}>
@@ -142,7 +185,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                         <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
                         <Select
                             value={initialValue}
-                        // onChange={handleSelectChange}
+                            onChange={(e) => handleArrayItemChange(index, itemKey, e.target.value)}
                         >
                             {valuesOptions.map((option: string) => (
                                 <MenuItem key={option} value={option}>
@@ -157,15 +200,15 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                     fullWidth
                     label={`${itemKey} [${index}]`}
                     value={initialValue}
-                    onChange={(e) => handleArrayItemChange(index, e.target.value)}
+                    onChange={(e) => handleArrayItemChange(index, itemKey, e.target.value)}
                 />
             }
             itemElements.push(
                 <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
                     {inputElement}
-                    {fromUpstreamMode !== "never" ? (
+                    {subItemPropSchema?.from_upstream !== "never" ? (
                         <Checkbox
-                            checked={checkedFromUpstreamItemProp[index]?.[itemKey]}
+                            checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey]}
                             onChange={(event) => handleCheckboxFromUpstreamChange(event, index, itemKey)}
                             disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                         />
