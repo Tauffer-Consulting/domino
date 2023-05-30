@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     TextField,
     Select,
@@ -17,18 +17,34 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import CodeEditor from '@uiw/react-textarea-code-editor';
-
+import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import ArrayInputItem from './domino-form-item-array.component';
 
 
 interface DominoFormItemProps {
+    formId: string;
     schema: any;
     itemKey: any;
     value: any;
     onChange: (val: any) => void;
 }
 
-const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
+const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey, value, onChange }) => {
+    const {
+        setFormsForageData,
+        fetchForageDataById,
+        fetchForageWorkflowEdges,
+        getForageUpstreamMap,
+        setForageUpstreamMap,
+        fetchForagePieceById,
+        getForageCheckboxStates,
+        setForageCheckboxStates,
+        setNameKeyUpstreamArgsMap,
+        getNameKeyUpstreamArgsMap,
+    } = useWorkflowsEditor()
+
+    const formFieldType = schema.properties[itemKey].type;
+    const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
     const [checkedFromUpstream, setCheckedFromUpstream] = useState<boolean>(() => {
         if (schema.properties[itemKey]?.from_upstream === "always") {
             if (schema.properties[itemKey].type === 'array') {
@@ -87,26 +103,109 @@ def custom_function(input_args: list):
 
     // Handle input change
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        console.log('handleInputChange')
         onChange(event.target.value);
     };
 
     const handleSelectChange = (event: SelectChangeEvent<any>) => {
+        console.log('handleSelectChange')
         onChange(event.target.value as string);
     };
 
     // FomrUpstream logic
-    const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCheckboxFromUpstreamChange = useCallback(async(event: React.ChangeEvent<HTMLInputElement>) => {
+        // itemKey = form key to be updated (input_arg for example)
+        // formId has the nodeId to update the possible upstreams enums from edges connections
         setCheckedFromUpstream(event.target.checked);
-    };
+
+        var auxSchema = JSON.parse(JSON.stringify(schema))
+        var formKeys = Object.keys(schema.properties)
+        const edges = await fetchForageWorkflowEdges()
+
+        var auxCheckboxState: any = await getForageCheckboxStates()
+        if (!auxCheckboxState) {
+            auxCheckboxState = {}
+        }
+        if (formId in auxCheckboxState) {
+            auxCheckboxState[formId][itemKey] = event.target.checked
+        } else {
+            auxCheckboxState[formId] = {
+                [itemKey]: event.target.checked
+            }
+        }
+        await setForageCheckboxStates(auxCheckboxState)
+
+        // We can improve the logic using a forage key using following structure: 
+        // nodeId: {
+        //   upstreams: [],
+        //   downstreams: [],
+        // }
+        // It will avoid to iterate over all edges
+        var upstreamsIds = []
+        for (var ed of edges) {
+            if (ed.target === formId) {
+                upstreamsIds.push(ed.source)
+            }
+        }
+        if (!upstreamsIds.length) {
+            return
+        }
+
+        var upstreamMap = await getForageUpstreamMap()
+        if (!(formId in upstreamMap)) {
+            upstreamMap[formId] = {}
+        }
+        
+        const auxNameKeyUpstreamArgsMap: any = {}
+        const upstreamOptions: string[] = []
+        for (var upstreamId of upstreamsIds){parseInt(upstreamId.split('_')[0])
+            const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
+            if (event.target.checked) {
+                const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
+                const upstreamOutputSchema = upstreamOperator?.output_schema
+                Object.keys(upstreamOutputSchema?.properties).forEach((key, index) => {
+                    const obj = upstreamOutputSchema?.properties[key]
+                    console.log(obj.type)
+                    if (obj.type === formFieldType){
+                        // todo add to possible dropdown options
+                        var upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
+                        const counter = 1;
+                        while (upstreamOptions.includes(upstreamOptionName)) {
+                            upstreamOptionName = `${upstreamOptionName} (${counter})`
+                        }
+                        upstreamOptions.push(upstreamOptionName)
+                        auxNameKeyUpstreamArgsMap[upstreamOptionName] = key
+                    }
+                })
+            }
+        }
+        console.log('upstreamOptions', upstreamOptions)
+        console.log('auxNameKeyUpstreamArgsMap', auxNameKeyUpstreamArgsMap)
+        setUpstreamOptions(upstreamOptions)
+
+
+
+    },[
+        formId,
+        schema,
+        itemKey,
+        fetchForageWorkflowEdges,
+        getForageCheckboxStates,
+        setForageCheckboxStates,
+        getForageUpstreamMap,
+        formFieldType,
+        fetchForagePieceById,
+
+    ]);
 
     const handleSelectFromUpstreamChange = (event: SelectChangeEvent<any>) => {
+        console.log('handleSelectFromUpstreamChange')
         console.log(event.target.value);
     };
 
     let inputElement: JSX.Element;
 
     if (checkedFromUpstream) {
-        const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
         inputElement = (
             <FormControl fullWidth>
                 <InputLabel>{itemKey}</InputLabel>
@@ -115,7 +214,7 @@ def custom_function(input_args: list):
                     value={value}
                     onChange={handleSelectFromUpstreamChange}
                 >
-                    {options.map(option => (
+                    {upstreamOptions.map(option => (
                         <MenuItem key={option} value={option}>
                             {option}
                         </MenuItem>

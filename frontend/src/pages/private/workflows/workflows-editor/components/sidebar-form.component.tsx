@@ -70,7 +70,6 @@ const SidebarForm = (props: ISidebarFormProps) => {
   const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
     // On change update form data in forage
     try {
-      console.log('handleOnChange')
       var upstreamMap = await getForageUpstreamMap()
       const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
       var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
@@ -339,6 +338,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
           <Grid container sx={{ paddingBottom: "25px" }}>
             <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
               <DominoForm
+                formId={formId}
                 schema={formJsonSchema}
                 initialData={formData}
                 onChange={handleOnChange}
