@@ -18,7 +18,7 @@ const DominoForm: React.FC<DominoFormProps> = ({ formId, schema, initialData, on
         setFormData(prevData => ({ ...prevData, [key]: value }));
     };
 
-    const submitFormToParent = useEffect(() => {
+    useEffect(() => {
         onChange({ data: formData });
     }, [formData, onChange]);
 
