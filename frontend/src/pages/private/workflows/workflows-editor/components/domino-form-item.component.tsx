@@ -176,12 +176,14 @@ def custom_function(input_args: list):
                     }
                 })
                 upstreamMap[formId][itemKey] = {
+                    ...upstreamMap[formId][itemKey],
                     fromUpstream: true,
                     upstreamId: null,
                     upstreamArgument: null
                 }
             }else{
                 upstreamMap[formId][itemKey] = {
+                    ...upstreamMap[formId][itemKey],
                     fromUpstream: false,
                     upstreamId: null,
                     upstreamArgument: null
@@ -195,7 +197,7 @@ def custom_function(input_args: list):
             toast.error('There are no upstream outputs with the same type as the selected field')
             return
         }
-        const upstreamValue = upstreamMap[formId][itemKey].value || null
+        const upstreamValue = upstreamMap[formId][itemKey].value || ""
         const upstreamId = upstreamValue ? auxLabelUpstreamIdMap[upstreamValue] : null
         upstreamMap[formId][itemKey] = {
             ...upstreamMap[formId][itemKey],
@@ -236,7 +238,7 @@ def custom_function(input_args: list):
             if (itemKey in formCheckboxStates) {
                 await handleCheckboxFromUpstreamChange(formCheckboxStates[itemKey])
             }else{
-                handleCheckboxFromUpstreamChange(false)
+                await handleCheckboxFromUpstreamChange(false)
             }
 
         })()
