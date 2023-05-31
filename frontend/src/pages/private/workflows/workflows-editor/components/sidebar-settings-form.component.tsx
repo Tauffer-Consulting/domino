@@ -63,8 +63,6 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
       [name]: fieldValue,
     }
 
-    console.log('storageFormData', storageFormData)
-
     const currentData = await fetchForageDataById(formId)
     const outputData = {
       ...currentData,
@@ -99,7 +97,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchForageDataById(formId)
-      if (data) {
+      if (Object.keys(data).length > 0) {
         setConfigFormData(data.config)
         setStorageFormData(data.storage)
       }else{
@@ -110,7 +108,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
       }
     }
     fetchData()
-  })
+  }, [fetchForageDataById, setFormsForageData])
 
   return (
     <Drawer
