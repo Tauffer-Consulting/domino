@@ -7,7 +7,6 @@ import {
     Checkbox,
     Select,
     MenuItem,
-    SelectChangeEvent,
     FormControl,
     InputLabel,
 } from '@mui/material';

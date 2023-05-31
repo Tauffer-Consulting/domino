@@ -1,14 +1,12 @@
 import { createAjv } from '@jsonforms/core'
-import { Drawer, Grid, Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material'
+import { Drawer, Grid, Typography } from '@mui/material'
 import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
 import { JsonForms } from '@jsonforms/react'
 import { useCallback, useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid';
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
 import { operatorStorageSchema } from 'common/schemas/storageSchemas'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
-import { toast } from 'react-toastify'
 
 import DominoForm from './domino-form.component'
 
@@ -28,8 +26,6 @@ interface ISidebarFormProps {
 const SidebarForm = (props: ISidebarFormProps) => {
   const {
     formSchema,
-    uiSchema,
-    //formData,
     formId,
     open,
     onClose,
@@ -41,7 +37,6 @@ const SidebarForm = (props: ISidebarFormProps) => {
   const [formData, setFormData] = useState<any>({})
   const [storageFormData, setStorageFormData] = useState<any>({})
   const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>({})
-  const [checkboxes, setCheckboxes] = useState<any>([])
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
   const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...formSchema })
 
