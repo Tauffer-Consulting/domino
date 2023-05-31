@@ -18,11 +18,25 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 
-
 interface ISidebarSettingsFormProps {
   open: boolean,
   onClose: (event: any) => void
 }
+
+const defaultConfigData = {
+  name: '',
+  scheduleInterval: 'none',
+  startDate: '',
+  generateReport: false,
+}
+
+const defaultStorageData = {
+  storageSource: 'None',
+  baseFolder: '',
+  bucket: ''
+}
+const formId = 'workflowForm'
+
 
 const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   const {
@@ -35,42 +49,15 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   ] : [
     "None", "AWS S3"
   ]
-
-  const formId = 'workflowForm'
-
-  //const [checkboxState, setCheckboxState] = useState<any>({})
-  const [formData, setFormData] = useState({
-    name: '',
-    scheduleInterval: 'none',
-    startDate: '',
-    generateReport: false,
-  });
-  const [storageFormData, setStorageFormData] = useState({
-    storageSource: 'None',
-    baseFolder: '',
-    bucket: ''
-  });
+  const [configFormData, setConfigFormData] = useState(defaultConfigData);
+  const [storageFormData, setStorageFormData] = useState(defaultStorageData);
   
-  const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>({})
-
   const {
     setFormsForageData,
     fetchForageDataById,
   } = useWorkflowsEditor()
 
-  // const handleOnChangeStorage = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
   const handleOnChangeStorage = useCallback(async (event: any) => {
-    /*
-
-    // On change update node form data in forage
-    // The storage access mode key is inside the node form data in the `storage` key
-    {
-      ...nodeData,
-      storage: {
-        storageAccessMode: 'Enum(Read, Write, ReadWrite)'
-      }
-    }
-    */
     const { name, value, type, checked } = event.target;
     const fieldValue = type === 'checkbox' ? checked : value;
 
@@ -78,6 +65,8 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
       ...storageFormData,
       [name]: fieldValue,
     }
+
+    console.log('storageFormData', storageFormData)
 
     const currentData = await fetchForageDataById(formId)
     const outputData = {
@@ -87,34 +76,46 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
     await setFormsForageData(formId, outputData)
     setStorageFormData(newStorageFormData);
   
-  }, [fetchForageDataById, setFormsForageData, formId, storageFormData])
-
-  const handleOnChangeContainerResources = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
-    const currentData = await fetchForageDataById(formId)
-    const outputData = {
-      ...currentData,
-      containerResources: data
-    }
-    await setFormsForageData(formId, outputData)
-    setContainerResourcesFormData(data)
-  }, [formId, fetchForageDataById, setFormsForageData])
+  }, [fetchForageDataById, setFormsForageData, storageFormData])
 
   const handleChangeConfig = useCallback(async (event: any) => {
     const { name, value, type, checked } = event.target;
     const fieldValue = type === 'checkbox' ? checked : value;
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    const newFormData = {
+      ...configFormData,
       [name]: fieldValue,
-    }));
+    }
 
-  }, [])
+    console.log('newFormData', newFormData)
 
-  // useEffect(()=> {
-  //   console.log('formData', formData)
-  // }, [formData])
+    const currentData = await fetchForageDataById(formId)
+    const outputData = {
+      ...currentData,
+      config: newFormData
+    }
+    await setFormsForageData(formId, outputData)
+    setConfigFormData(newFormData);
 
-  //console.log('storageFormData', storageFormData)
+  }, [configFormData, fetchForageDataById, setFormsForageData])
+
+  // On load fetch data from forage and set it to the form data 
+  // If data is not present then set default data to the forage
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await fetchForageDataById(formId)
+      if (data) {
+        setConfigFormData(data.config)
+        setStorageFormData(data.storage)
+      }else{
+        await setFormsForageData(formId, {
+          config: defaultConfigData,
+          storage: defaultStorageData,
+        })
+      }
+    }
+    fetchData()
+  })
 
   return (
     <Drawer
@@ -135,7 +136,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                 <TextField
                   name="name"
                   label="Name"
-                  value={formData.name}
+                  value={configFormData.name}
                   onChange={handleChangeConfig}
                   required
                   fullWidth
@@ -146,7 +147,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   <InputLabel>Schedule Interval</InputLabel>
                   <Select
                     name="scheduleInterval"
-                    value={formData.scheduleInterval}
+                    value={configFormData.scheduleInterval}
                     onChange={handleChangeConfig}
                     required
                   >
@@ -165,7 +166,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   name="startDate"
                   label="Start Date"
                   type="date"
-                  value={formData.startDate}
+                  value={configFormData.startDate}
                   onChange={handleChangeConfig}
                   required
                   InputLabelProps={{
@@ -178,7 +179,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   control={
                     <Checkbox
                       name="generateReport"
-                      checked={formData.generateReport}
+                      checked={configFormData.generateReport}
                       onChange={handleChangeConfig}
                     />
                   }
@@ -204,8 +205,8 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                     required
                   >
                     {
-                      storageSourceOptions.map((option: string) => (
-                        <MenuItem value={option}>{option}</MenuItem>
+                      storageSourceOptions.map((option: string, index: number) => (
+                        <MenuItem key={index}  value={option}>{option}</MenuItem>
                       ))
                     }
                   </Select>
