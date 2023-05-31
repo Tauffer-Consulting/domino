@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import WorkflowEditorPanelComponent from './workflow-editor-panel.component'
 import { PermanentDrawerRightWorkflows } from './drawer-menu-component'
-import SidebarForm from './sidebar-form.component'
+import SidebarSettingsForm from './sidebar-settings-form.component'
 import { workflowFormSchema, workflowFormUISchema } from 'common/schemas/workflowFormSchema'
 import { useWorkflowsEditor } from "context/workflows/workflows-editor.context"
 import { workflowFormName } from "../../../../../constants"
@@ -247,7 +247,11 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
             handleClose={() => setMenuOpen(!menuOpen)}
           />
         </Grid>
-        <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} />
+        {/* <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} /> */}
+        <SidebarSettingsForm 
+          onClose={toggleDrawer(false)} 
+          open={drawerState} 
+        />
       </div>
     </>
   )

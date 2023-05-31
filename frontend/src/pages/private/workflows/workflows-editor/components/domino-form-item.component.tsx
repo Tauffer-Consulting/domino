@@ -140,7 +140,7 @@ def custom_function(input_args: list):
             auxCheckboxState[formId][itemKey] = false
             setCheckedFromUpstream(false);
             await setForageCheckboxStates(auxCheckboxState)
-            toast.error('This node has no upstreams.')
+            toast.error('This piece has no upstreams.')
             return
         }
 

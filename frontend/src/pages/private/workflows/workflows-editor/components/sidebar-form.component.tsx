@@ -1,12 +1,13 @@
 import { createAjv } from '@jsonforms/core'
 import { Drawer, Grid, Typography } from '@mui/material'
-import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
-import { JsonForms } from '@jsonforms/react'
+//import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
+//import { JsonForms } from '@jsonforms/react'
 import { useCallback, useEffect, useState } from 'react'
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
 import { operatorStorageSchema } from 'common/schemas/storageSchemas'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
+import { workflowFormSchema } from 'common/schemas/workflowFormSchema'
 
 import DominoForm from './domino-form.component'
 
@@ -151,7 +152,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     if (open) { fetchForage() }
 
   }, [formId, formJsonSchema, open, fetchForageDataById, setFormsForageData, handleOnChange, handleOnChangeStorage, isPieceForm, handleOnChangeContainerResources])
-
+  
   return (
     <Drawer
       anchor='left'
@@ -179,63 +180,20 @@ const SidebarForm = (props: ISidebarFormProps) => {
               </Grid>
               : null
           }
-          <Grid container sx={{ paddingBottom: "25px" }}>
-            <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
-              <DominoForm
-                formId={formId}
-                schema={formJsonSchema}
-                initialData={formData}
-                onChange={handleOnChange}
-              />
-              {/* <JsonForms
-                schema={formJsonSchema}
-                uischema={uiSchema || undefined}
-                data={formData}
-                renderers={materialRenderers}
-                onChange={handleOnChange}
-                ajv={handleDefaultsAjv}
-                cells={materialCells}
-              /> */}
-            </Grid>
-            {/* {
-              isPieceForm ?
-                <Grid item xs={3}>
-                  <FormGroup sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', height: '100%' }}>
-                    {checkboxes}
-                  </FormGroup>
-                </Grid> : null
-            } */}
-          </Grid>
           {
             isPieceForm ?
-              <Grid container spacing={0}>
-                <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid", marginBottom: '20px', marginTop: '20px' }}>Storage</Typography>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', paddingBottom: '25px' }} className='sidebar-jsonforms-grid'>
-                  <JsonForms
-                    data={storageFormData}
-                    onChange={handleOnChangeStorage}
-                    schema={operatorStorageSchema}
-                    renderers={materialRenderers}
-                    ajv={handleDefaultsAjv}
-                    cells={materialCells}
+              <Grid container sx={{ paddingBottom: "25px" }}>
+                <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
+                  <DominoForm
+                    formId={formId}
+                    schema={formJsonSchema}
+                    initialData={formData}
+                    onChange={handleOnChange}
                   />
-                </div>
-
-                <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid", marginBottom: '20px', marginTop: '20px' }}>ADVANCED - Container resources</Typography>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%' }} className='sidebar-jsonforms-grid'>
-                  <JsonForms
-                    data={containerResourcesFormData}
-                    onChange={handleOnChangeContainerResources}
-                    schema={containerResourcesSchema}
-                    renderers={materialRenderers}
-                    ajv={handleDefaultsAjv}
-                    cells={materialCells}
-                  />
-                </div>
+                </Grid>
               </Grid>
-              : null
+            : null
           }
-
         </Grid>
       </div>
     </Drawer>
