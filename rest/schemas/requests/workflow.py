@@ -37,11 +37,11 @@ class WorkflowBaseSettings(BaseModel):
         example="workflow_name", 
         regex=r"^[\w]*$",
     )
-    start_date: str
-    end_date: Optional[str] # TODO add end date to UI?
-    schedule_interval: ScheduleIntervalType
+    start_date: str = Field(alias="startDate")
+    end_date: Optional[str] = Field(alias='endDate')# TODO add end date to UI? 
+    schedule_interval: ScheduleIntervalType = Field(alias="scheduleInterval")
     catchup: Optional[bool] = False # TODO add catchup to UI?
-    generate_report: Optional[bool] = False
+    generate_report: Optional[bool] = Field(alias="generateReport", default=False) # TODO add generate report to UI?
     description: Optional[str] # TODO add description to UI?
     
 
