@@ -28,11 +28,13 @@ author = 'Luiz Tauffer and Vinicius Camozzato Vaz'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
     "sphinx_copybutton",
-    'myst_parser',
-    'sphinx-pydantic',
+    'sphinx_toolbox.collapse',
+    # 'sphinx.ext.autodoc',
+    # 'sphinx.ext.napoleon',
+    # 'sphinx_design',
+    # 'sphinx-pydantic',
+    # 'myst_parser',
 ]
 
 source_suffix = {
@@ -63,9 +65,11 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 html_logo = '_static/media/logo.png'
+html_favicon = '_static/media/favicon.ico'
 html_theme_options = {
     'logo_only': True,
     'display_version': False,
+    "style_nav_header_background": "#4e5a5b"
 }
 
 # Custom CSS and JS static files

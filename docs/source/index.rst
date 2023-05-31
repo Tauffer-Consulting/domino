@@ -4,18 +4,38 @@
 |
 
 Domino
-----------
+=================
 
-Domino is an open source workflow management platform, containing:
+Domino is an open source workflow management platform, with:
 
-- an intuitive Graphical User Interface that facilitates authoring, editing and monitoring any type of Workflow, from data processing to machine learning
-- a REST API that controls a running Apache Airflow instance, which is responsible for scheduling and executing Workflows
-- a standard way of writing and publishing functional Pieces, which follows good practices for data modeling, documentation and distribution
+- an intuitive :ref:`Graphical User Interface<domino-gui-page>` that facilitates creating, editing and monitoring any type of Workflow, from data processing to machine learning
+- a :ref:`REST API<domino-rest-page>` that controls a running Apache Airflow instance, which is responsible for scheduling and executing Workflows
+- a standard way of writing and publishing functional :ref:`Pieces<domino-pieces-page>`, which follows good practices for data modeling, documentation and distribution
+
+Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
 
 
-[TODO - IMAGE, GIF OR VIDEO]
+.. image:: /_static/media/7_create_workflow.gif
+   :width: 800
 
-Domino makes it easy to experiment with cutting-edge methods in Machine Learning and Data Science. By porting any algorithms as modular units (Pieces), Domino allows users from all technical backgrounds, from engineers to managers, to experiment, create, collaborate and supervise complex data Workflows.
+
+Domino vs Apache Airflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Every Domino Workflow corresponds to an Apache Airflow DAG, and each Piece corresponds to an Airflow task. Domino controls an Airflow instance, which is responsible for executing, scheduling and monitoring the Workflows (DAGs).
+
+You can think of Domino as Airflow with superpowers, where users can:
+
+- create highly complex Workflows with simple point-and-click and drag-and-drop operations, in an user-friendly GUI
+- make use of Pieces developed by other people, share and reuse your own Pieces
+- collaborate in groups to edit and monitor Workflows
+- experience a cleaner and more intuitive GUI for viewing Workflows results, including logs and richer reports with images and tables
+
+
+Development
+~~~~~~~~~~~~~
+
+The source code of the project is available `here <https://github.com/Tauffer-Consulting/domino>`_.
 
 Domino is a modular and open source software, which allows for contributions from a large spectrum of expertises, from DevOps to frontend developers:
 
@@ -28,55 +48,25 @@ Domino is a modular and open source software, which allows for contributions fro
 - Domino runs on Kubernetes, both in the cloud or locally (using Kind)
 - Domino is distributed as a pip installable package and a Helm chart
 
-|
 
-Domino Pieces
-~~~~~~~~~~~~~~~
-
-Domino defines standards for writing and distributing modular Pieces, which guarantees their reusability and consistency across Workflows.
-Those Pieces can be included in any Workflow by drag-and-drop, and Domino will take care of running them according to user defined schedules.
-
-these Piece can serve heavy-weight (e.g. Machine Learning, data processing) as well as light-weight (e.g. sending emails) tasks
-
-|
-
-Domino Workflows
-~~~~~~~~~~~~~~~~~~
-
-Domino Workflows are a collection of Pieces, connected in a directed acyclic graph (DAG). Domino Workflows can be easily created, edited and monitored through the Domino UI.
-
-|
-
-Domino vs Apache Airflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Domino makes use of Apache Airflow for Workflows management. You can think of Domino as Airflow with superpowers, where users can:
-
-- create highly complex Workflows with point-and-click and drag-and-drop operations in an user-friendly UI
-- make use of Pieces developed by other people, share and reuse their own Pieces
-- collaborate in groups to edit and monitor Workflows
-- experience a cleaner and more intuitive UI for viewing Workflows results, including logs and richer reports with images and tables
-
-|
-
-Docker images
+Resources
 ~~~~~~~~~~~~~~~~
 
-We maintain the updated Docker images for the necessary Domino components in Github Container Registry:
+Here's a list of the main resources for Domino:
 
-- `REST API component <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-rest>`_
-- `Frontend component <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-frontend>`_
-- `Airflow components with Domino extension <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-airflow-base>`_
+- `Python package <https://pypi.org/project/domino-py/>`_
+- `Helm chart <https://artifacthub.io/packages/helm/domino/domino>`_
+- `REST API image <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-rest>`_
+- `Frontend image <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-frontend>`_
+- `Airflow image with Domino extension <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-airflow-base>`_
 - `Base Piece image <https://github.com/Tauffer-Consulting/domino/pkgs/container/domino-airflow-pod>`_
 
-The basic Piece image comes already with many popular Python packages installed (Numpy, Scipy, ...) and should be sufficient for many simple Pieces. If you need more complex images to run your custom Pieces, check [THIS SESSION]() to see how you can declare extra dependencies or even pre-built images in your pieces repository.
 
 |
 
-Documentation
-~~~~~~~~~~~~~~~~
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Run Domino
 
@@ -86,32 +76,28 @@ Documentation
 
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
+   :maxdepth: 2
    :caption: Pieces
 
-   pages/pieces.md
+   pages/pieces.rst
    pages/pieces_repository.rst
-   pages/testing_pieces_locally.md
+   pages/pieces_unit_testing.md
 
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Domino components
 
-   pages/domino_components_frontend.rst
+   pages/domino_components_gui.rst
    pages/domino_components_rest.rst
    pages/domino_components_database.rst
    pages/domino_components_python_package.rst
 
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: API Reference
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

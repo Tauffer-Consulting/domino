@@ -1,0 +1,66 @@
+{
+  "name": "domino",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@babel/core": "^7.20.5",
+    "@babel/plugin-syntax-flow": "^7.18.6",
+    "@babel/plugin-transform-react-jsx": "^7.19.0",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@jsonforms/core": "^3.0.0",
+    "@jsonforms/material-renderers": "^3.0.0",
+    "@jsonforms/react": "^3.0.0",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@mui/icons-material": "^5.11.0",
+    "@mui/lab": "^5.0.0-alpha.113",
+    "@mui/material": "^5.11.1",
+    "@mui/system": "^5.11.1",
+    "@mui/x-data-grid": "^5.17.16",
+    "@mui/x-date-pickers": "^5.0.11",
+    "@react-pdf/renderer": "^3.1.9",
+    "@types/react-dom": "^18.0.9",
+    "@types/uuid": "^9.0.0",
+    "ag-grid-community": "^28.2.1",
+    "ag-grid-react": "^28.2.1",
+    "axios": "^1.2.1",
+    "axios-mock-adapter": "^1.21.2",
+    "cross-env": "^7.0.3",
+    "localforage": "^1.10.0",
+    "material-ui-dropzone": "^3.5.0",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-datepicker": "^4.8.0",
+    "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.5",
+    "react-hook-form": "^7.41.0",
+    "react-markdown": "^8.0.7",
+    "react-router-dom": "^6.6.0",
+    "react-scripts": "^5.0.1",
+    "react-toastify": "^9.1.1",
+    "reactflow": "^11.4.0",
+    "swr": "^2.0.0",
+    "typescript": "^4.9.4",
+    "uuid": "^9.0.0"
+  },
+  "scripts": {
+    "start": "cross-env REACT_APP_API_ENV=dev react-scripts start",
+    "start:local": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local react-scripts start",
+    "start:mock": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local REACT_APP_USE_MOCK=true react-scripts start",
+    "build": "cross-env react-scripts build",
+    "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts test",
+    "eject": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ]
+}

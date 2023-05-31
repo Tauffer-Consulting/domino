@@ -1,5 +1,5 @@
-Sphinx
-myst-parser
-sphinx-pydantic
-sphinx-rtd-theme
-sphinx-copybutton
+Sphinx==6.2.1
+sphinx-rtd-theme==1.2.0
+sphinx-copybutton==0.5.2
+sphinx-toolbox==3.4.0
+# sphinx-pydantic

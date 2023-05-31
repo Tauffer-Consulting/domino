@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: domino-database-migrations-job
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 4
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: database-migrations
+        image: {{ .Values.rest.image }}
+        command: ["/bin/bash"]
+        args: ["run_migrations.sh"]   # will sleep for 20 seconds, run migrations and create first user
+        env:
+          - name: DOMINO_DB_HOST
+            value: {{ .Release.Name }}-postgres-service
+          - name: DOMINO_DB_NAME
+            value: {{ .Values.database.name }}
+          - name: DOMINO_DB_USER
+            value: {{ .Values.database.user }}
+          - name: DOMINO_DB_PASSWORD
+            value: {{ .Values.database.password }}
+          - name: DOMINO_DB_PORT
+            value: "5432"
+      

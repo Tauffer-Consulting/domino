@@ -1,0 +1,24 @@
+# Configuration file for running Domino platform locally
+
+[path]
+DOMINO_LOCAL_RUNNING_PATH = ""
+
+[kind]
+DOMINO_KIND_CLUSTER_NAME = "domino-cluster"
+
+[github]
+DOMINO_GITHUB_WORKFLOWS_REPOSITORY = ""
+DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN = ""
+DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS = ""
+DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY = ""
+DOMINO_GITHUB_WORKFLOWS_SSH_PUBLIC_KEY = ""
+
+[domino_db]
+DOMINO_DB_HOST = "postgres"
+DOMINO_DB_PORT = "postgres"
+DOMINO_DB_USER = "postgres"
+DOMINO_DB_PASSWORD = "postgres"
+DOMINO_DB_NAME = "postgres"
+
+[dev]
+DOMINO_LOCAL_DOMINO_PACKAGE=""

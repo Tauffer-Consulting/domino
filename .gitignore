@@ -241,5 +241,9 @@ airflow/logs/*
 # Jupyter notebooks
 *.ipynb
 
-
+# local fuse files
 **.fuse_hidden**
+
+# Helm
+/helm/domino/charts/*
+/helm/domino/Chart.lock

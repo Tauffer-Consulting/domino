@@ -1,0 +1,58 @@
+name: Create Kind cluster and run Domino API tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - test/*
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Domino.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Build REST image.
+        uses: docker/build-push-action@v3
+        with:
+          push: false
+          tags: domino-rest:test
+          context: rest
+          file: rest/Dockerfile
+
+      - name: Install k8s Kind.
+        uses: helm/kind-action@v1.4.0
+        with:
+          install_only: true
+
+      - name: Prepare and create cluster.
+        run: |
+          domino platform prepare --cluster-name=domino-cluster --workflows-repository=${{secrets.TESTS_WORKFLOWS_REPOSITORY}} --github-workflows-ssh-private-key=None --github-workflows-token=${{ secrets.TESTS_GITHUB_WORKFLOWS_TOKEN }} --github-default-pieces-repository-token=${{ secrets.TESTS_GITHUB_PIECES_TOKEN }} --deploy-mode=local-k8s --local-pieces-repository-path=[] --local-domino-path=''
+          domino platform create --domino-rest-image=domino-rest:test --run-airflow=False
+
+      - name: Install tests dependencies.
+        run: pip install -r rest/requirements-test.txt
+
+      - name: Setup kubectl.
+        uses: azure/setup-kubectl@v3
+
+      - name: Wait pods to be ready.
+        run: python rest/tests/utils/kubernetes.py
+
+      - name: Run tests.
+        env:
+          DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: ${{ secrets.TESTS_GITHUB_PIECES_TOKEN }}
+          DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS: ${{ secrets.TESTS_GITHUB_WORKFLOWS_TOKEN }}
+          DOMINO_GITHUB_WORKFLOWS_REPOSITORY: ${{secrets.TESTS_WORKFLOWS_REPOSITORY}}
+          
+        run: pytest rest/tests/ -v
+
+      - name: Delete cluster
+        run: kind delete cluster --name domino-cluster
