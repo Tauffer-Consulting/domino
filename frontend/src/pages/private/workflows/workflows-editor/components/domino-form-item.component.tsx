@@ -20,7 +20,6 @@ import CodeEditor from '@uiw/react-textarea-code-editor';
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import ArrayInputItem from './domino-form-item-array.component';
 import { toast } from 'react-toastify';
-import { setSchema } from '@jsonforms/core';
 
 interface DominoFormItemProps {
     formId: string;
@@ -41,6 +40,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         setNameKeyUpstreamArgsMap,
         getNameKeyUpstreamArgsMap,
     } = useWorkflowsEditor();
+
     const formFieldType = schema.properties[itemKey].type;
     const [formLabelUpstreamIdMap, setFormLabelUpstreamIdMap] = useState<Record<string, string>>({});
     const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
@@ -74,7 +74,6 @@ def custom_function(input_args: list):
 
     let itemSchema: any = schema.properties[itemKey];
 
-    // if value is undefined, read the default value from the schema
     if (value === undefined) {
         value = itemSchema.default;
     }
@@ -98,7 +97,6 @@ def custom_function(input_args: list):
         }
     }
 
-    // Handle input change
     const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.target.value);
     }, [onChange]);
@@ -107,10 +105,8 @@ def custom_function(input_args: list):
         onChange(event.target.value as string);
     }, [onChange]);
 
-    // FomrUpstream logic
+
     const handleCheckboxFromUpstreamChange = useCallback(async (checked: boolean) => {
-        // itemKey = form key to be updated (input_arg for example)
-        // formId has the nodeId to update the possible upstreams enums from edges connections
         setCheckedFromUpstream(checked);
 
         const edges = await fetchForageWorkflowEdges()
@@ -128,7 +124,7 @@ def custom_function(input_args: list):
         }
         await setForageCheckboxStates(auxCheckboxState)
 
-        // We can improve the logic using a forage key using following structure: 
+        // We can improve the logic using a forage key with the following structure: 
         // nodeId: {
         //   upstreams: [],
         //   downstreams: [],
@@ -154,13 +150,13 @@ def custom_function(input_args: list):
         const upstreamOptions: string[] = []
         for (const upstreamId of upstreamsIds) {
             const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
+            var fromUpstream = false
             if (checked) {
                 const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
                 const upstreamOutputSchema = upstreamOperator?.output_schema
                 Object.keys(upstreamOutputSchema?.properties).forEach((key, index) => {
                     const obj = upstreamOutputSchema?.properties[key]
                     if (obj.type === formFieldType) {
-                        // todo add to possible dropdown options
                         var upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
                         const counter = 1;
                         while (upstreamOptions.includes(upstreamOptionName)) {
@@ -171,19 +167,12 @@ def custom_function(input_args: list):
                         auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
                     }
                 })
-                upstreamMap[formId][itemKey] = {
-                    ...upstreamMap[formId][itemKey],
-                    fromUpstream: true,
-                    upstreamId: null,
-                    upstreamArgument: null
-                }
-            } else {
-                upstreamMap[formId][itemKey] = {
-                    ...upstreamMap[formId][itemKey],
-                    fromUpstream: false,
-                    upstreamId: null,
-                    upstreamArgument: null
-                }
+                fromUpstream = true
+            } 
+            upstreamMap[formId][itemKey] = {
+                ...upstreamMap[formId][itemKey],
+                fromUpstream: fromUpstream,
+                upstreamId: null,
             }
         }
         if (checked && !upstreamOptions.length) {
@@ -193,21 +182,32 @@ def custom_function(input_args: list):
             toast.error('There are no upstream outputs with the same type as the selected field')
             return
         }
-        const upstreamValue = upstreamMap[formId][itemKey].value || ""
-        const upstreamId = upstreamValue ? auxLabelUpstreamIdMap[upstreamValue] : null
+    
+        var upstreamValue = upstreamMap[formId][itemKey].value || ""
+        if (!checked){
+            upstreamValue = value
+        }
+        if (upstreamOptions.length && !upstreamOptions.includes(upstreamValue)) {
+            upstreamValue = upstreamOptions[0]
+        }
+        const upstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ? 
+            auxLabelUpstreamIdMap[upstreamValue] : null
+        const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue] 
+            ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
         upstreamMap[formId][itemKey] = {
             ...upstreamMap[formId][itemKey],
             upstreamId: upstreamId,
-            value: upstreamValue
+            value: upstreamValue,
+            upstreamArgument: upstreamArgument
         }
-
+        setUpstreamOptions(upstreamOptions)
         setFormLabelUpstreamIdMap(auxLabelUpstreamIdMap)
         const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
         setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
         setForageUpstreamMap(upstreamMap)
-        setUpstreamOptions(upstreamOptions)
         setUpstreamSelectValue(upstreamValue)
     }, [
+        value,
         formId,
         itemKey,
         fetchForageWorkflowEdges,
@@ -234,7 +234,6 @@ def custom_function(input_args: list):
             }else{
                 await handleCheckboxFromUpstreamChange(false)
             }
-
         })()
     }, [getForageCheckboxStates, formId, itemKey, getForageUpstreamMap, handleCheckboxFromUpstreamChange])
 
@@ -268,6 +267,7 @@ def custom_function(input_args: list):
     ]);
 
     let inputElement: JSX.Element;
+
 
     if (checkedFromUpstream) {
         inputElement = (
