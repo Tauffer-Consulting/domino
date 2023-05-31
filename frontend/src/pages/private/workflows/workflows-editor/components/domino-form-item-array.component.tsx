@@ -132,7 +132,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
             newArray[index] = objectToUpdate;
             return newArray;
         });
-        console.log(checkedFromUpstreamItemProp);
     };
 
     // FromUpstream select logic
