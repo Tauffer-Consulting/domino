@@ -1,4 +1,3 @@
-import { createAjv } from '@jsonforms/core'
 import { 
   Drawer, 
   Grid, 
@@ -10,8 +9,6 @@ import {
   Select,
   MenuItem,
   Checkbox,
-  Button,
-
  } from '@mui/material'
 //import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
 //import { JsonForms } from '@jsonforms/react'
@@ -86,8 +83,6 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
       ...configFormData,
       [name]: fieldValue,
     }
-
-    console.log('newFormData', newFormData)
 
     const currentData = await fetchForageDataById(formId)
     const outputData = {
