@@ -80,17 +80,16 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
 
   }, [fetchForageDataById, setFormsForageData, storageFormData])
 
-  // TODO - not working for datetime pickers
-  const handleChangeConfig = useCallback(async (event: any) => {
-    let name = event?.target?.name;
-    let fieldValue = event?.target?.value;
-    if (event.target) {
-      const { name, value, type, checked } = event.target;
-      fieldValue = type === 'checkbox' ? checked : value;
-    } else {
+  const handleChangeConfig = useCallback(async (event: any, source: string) => {
+    let name = event?.target?.name || "";
+    let fieldValue = event?.target?.value || "";
+    if (source === 'endDateTime' || source === 'startDateTime') {
       const newDate = event;
       fieldValue = new Date(newDate).toISOString();
-      name = 'startDateTime';
+      name = source;
+    } else {
+      const { name, value, type, checked } = event.target;
+      fieldValue = type === 'checkbox' ? checked : value;
     }
 
     const newFormData = {
@@ -164,7 +163,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   name="name"
                   label="Name"
                   value={configFormData.name}
-                  onChange={handleChangeConfig}
+                  onChange={(event) => handleChangeConfig(event, "workflowName")}
                   required
                   fullWidth
                 />
@@ -175,7 +174,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   <Select
                     name="scheduleInterval"
                     value={configFormData.scheduleInterval}
-                    onChange={handleChangeConfig}
+                    onChange={(event) => handleChangeConfig(event, "scheduleInterval")}
                     required
                   >
                     <MenuItem value="none">None</MenuItem>
@@ -194,7 +193,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                     <DateTimePicker
                       label="Start Date/Time"
                       value={dayjs(configFormData.startDateTime)}
-                      onChange={handleChangeConfig}
+                      onChange={(event) => handleChangeConfig(event, "startDateTime")}
                       ampm={false}
                       format='DD/MM/YYYY HH:mm'
                       sx={{ width: "100%" }}
@@ -209,7 +208,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                     <Select
                       name="selectEndDateTime"
                       value={configFormData.selectEndDateTime}
-                      onChange={handleChangeConfig}
+                      onChange={(event) => handleChangeConfig(event, "selectEndDateTime")}
                     >
                       <MenuItem value="never">Never</MenuItem>
                       <MenuItem value="user-defined">User defined</MenuItem>
@@ -223,7 +222,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                         disabled={isEndDateTimeDisabled}
                         label="End Date/Time"
                         value={dayjs(configFormData.endDateTime)}
-                        onChange={handleChangeConfig}
+                        onChange={(event) => handleChangeConfig(event, "endDateTime")}
                         ampm={false}
                         format='DD/MM/YYYY HH:mm'
                         sx={{ width: "100%" }}
