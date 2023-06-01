@@ -1,5 +1,14 @@
 import { createAjv } from '@jsonforms/core'
-import { Drawer, Grid, Typography } from '@mui/material'
+import { 
+  Divider,
+  Drawer,
+  Grid, 
+  Typography,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
+ } from '@mui/material'
 //import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
 //import { JsonForms } from '@jsonforms/react'
 import { useCallback, useEffect, useState } from 'react'
@@ -36,7 +45,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
 
   //const [checkboxState, setCheckboxState] = useState<any>({})
   const [formData, setFormData] = useState<any>({})
-  const [storageFormData, setStorageFormData] = useState<any>({})
+  const [storageFormData, setStorageFormData] = useState<string>('None')
   const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>({})
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
   const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...formSchema })
@@ -86,7 +95,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     }
   }, [formId, setFormsForageData, getForageUpstreamMap, setForageUpstreamMap, getNameKeyUpstreamArgsMap])
 
-  const handleOnChangeStorage = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
+  const handleOnChangeStorage = useCallback(async (event: any) => {
     /*
 
     // On change update node form data in forage
@@ -98,9 +107,13 @@ const SidebarForm = (props: ISidebarFormProps) => {
       }
     }
     */
+    if (!event?.target?.value) {
+      return
+    }
+    const data = event.target.value
     const currentData = await fetchForageDataById(formId)
     const storageData = currentData?.storage ? currentData.storage : {}
-    storageData['storageAccessMode'] = data.storageAccessMode
+    storageData['storageAccessMode'] = data
     const outputData = {
       ...currentData,
       storage: storageData
@@ -111,33 +124,36 @@ const SidebarForm = (props: ISidebarFormProps) => {
   }, [fetchForageDataById, setFormsForageData, formId])
 
   const handleOnChangeContainerResources = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
-    const currentData = await fetchForageDataById(formId)
-    const outputData = {
-      ...currentData,
-      containerResources: data
-    }
-    await setFormsForageData(formId, outputData)
-    setContainerResourcesFormData(data)
+    // const currentData = await fetchForageDataById(formId)
+    // const outputData = {
+    //   ...currentData,
+    //   containerResources: data
+    // }
+    // await setFormsForageData(formId, outputData)
+    // setContainerResourcesFormData(data)
   }, [formId, fetchForageDataById, setFormsForageData])
+
+  
 
   useEffect(() => {
     // When opened fetch forage data and update forms data
     const fetchForage = async () => {
       const forageData = await fetchForageDataById(formId)
+      
       if (!forageData) {
         const defaultData = extractDefaultValues(formJsonSchema)
         handleOnChange({ data: defaultData })
-        const defaultStorageData = extractDefaultValues(operatorStorageSchema)
-        isPieceForm && handleOnChangeStorage({ data: defaultStorageData })
+        isPieceForm && handleOnChangeStorage({ data: "None" })
         setFormData(defaultData)
       } else {
         handleOnChange({ data: forageData })
         // If the form has checkboxes, we need to update the storage data
         if (isPieceForm && !forageData.storage) {
-          const defaultStorageData = extractDefaultValues(operatorStorageSchema)
-          handleOnChangeStorage({ data: defaultStorageData })
+          handleOnChangeStorage({ data: "None" })
+          setStorageFormData("None")
         } else if (isPieceForm) {
           handleOnChangeStorage({ data: forageData.storage })
+          setStorageFormData(forageData.storage.storageAccessMode)
         }
 
         if (isPieceForm && !forageData.containerResources) {
@@ -184,14 +200,35 @@ const SidebarForm = (props: ISidebarFormProps) => {
             isPieceForm ?
               <Grid container sx={{ paddingBottom: "25px" }}>
                 <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
-                  <DominoForm
-                    formId={formId}
-                    schema={formJsonSchema}
-                    initialData={formData}
-                    onChange={handleOnChange}
-                  />
+                  <Grid item xs={12}>
+                    <DominoForm
+                      formId={formId}
+                      schema={formJsonSchema}
+                      initialData={formData}
+                      onChange={handleOnChange}
+                    />
+                  </Grid>
+                  <Divider sx={{ marginTop: '20px', marginBottom: '25px' }} />
+                  <Grid item xs={12}>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth>
+                        <InputLabel>Storage Access Mode</InputLabel>
+                        <Select
+                          name="storageAccessMode"
+                          value={storageFormData}
+                          onChange={handleOnChangeStorage}
+                          required
+                        >
+                          <MenuItem value="None">None</MenuItem>
+                          <MenuItem value="Read">Read</MenuItem>
+                          <MenuItem value="Read/Write">Read/Write</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+            
                 </Grid>
               </Grid>
+            </Grid>
             : null
           }
         </Grid>
