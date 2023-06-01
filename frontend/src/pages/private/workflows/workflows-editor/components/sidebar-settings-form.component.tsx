@@ -28,9 +28,9 @@ interface ISidebarSettingsFormProps {
 const defaultConfigData = {
   name: '',
   scheduleInterval: 'none',
-  startDate: '',
+  startDateTime: '',
   selectEndDateTime: 'never',
-  endDate: '',
+  endDateTime: '',
 }
 
 const defaultStorageData = {
@@ -79,9 +79,18 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
 
   }, [fetchForageDataById, setFormsForageData, storageFormData])
 
+  // TODO - not working for datetime pickers
   const handleChangeConfig = useCallback(async (event: any) => {
-    const { name, value, type, checked } = event.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
+    let name = event?.target?.name;
+    let fieldValue = event?.target?.value;
+    if (event.target) {
+      const { name, value, type, checked } = event.target;
+      fieldValue = type === 'checkbox' ? checked : value;
+    } else {
+      const newDate = event;
+      fieldValue = new Date(newDate).toISOString();
+      name = 'startDateTime';
+    }
 
     const newFormData = {
       ...configFormData,
@@ -90,8 +99,8 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
 
     // changes the disable state of the selectEndDateTime
     if (name === 'selectEndDateTime') {
-      setIsEndDateTimeDisabled(value === 'never')
-      newFormData.endDate = ''
+      setIsEndDateTimeDisabled(fieldValue === 'never')
+      newFormData.endDateTime = ''
     }
 
     const currentData = await fetchForageDataById(formId)
@@ -171,7 +180,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
                     <DateTimePicker
                       label="Start Date/Time"
-                      value={configFormData.startDate}
+                      value={configFormData.startDateTime}
                       onChange={handleChangeConfig}
                       ampm={false}
                       format='DD/MM/YYYY HH:mm'
@@ -187,7 +196,6 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                     <Select
                       name="selectEndDateTime"
                       value={configFormData.selectEndDateTime}
-                      // onChange={handleChangeSelectEndDatetime}
                       onChange={handleChangeConfig}
                     >
                       <MenuItem value="never">Never</MenuItem>
@@ -201,7 +209,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                       <DateTimePicker
                         disabled={isEndDateTimeDisabled}
                         label="End Date/Time"
-                        value={configFormData.endDate}
+                        value={configFormData.endDateTime}
                         onChange={handleChangeConfig}
                         ampm={false}
                         format='DD/MM/YYYY HH:mm'
