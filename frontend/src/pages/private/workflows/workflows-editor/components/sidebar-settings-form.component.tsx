@@ -97,15 +97,21 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchForageDataById(formId)
-      if (Object.keys(data).length > 0) {
-        setConfigFormData(data.config)
-        setStorageFormData(data.storage)
+      
+      const newData: any = {}
+      if ('config' in data) {
+        newData['config'] = data.config
       }else{
-        await setFormsForageData(formId, {
-          config: defaultConfigData,
-          storage: defaultStorageData,
-        })
+        newData['config'] = defaultConfigData
       }
+      if ('storage' in data) {
+        newData['storage'] = data.storage
+      }else{
+        newData['storage'] = defaultStorageData
+      }
+      await setFormsForageData(formId, newData)
+      setConfigFormData(newData.config)
+      setStorageFormData(newData.storage)
     }
     fetchData()
   }, [fetchForageDataById, setFormsForageData])
