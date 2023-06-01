@@ -16,10 +16,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import CodeEditor from '@uiw/react-textarea-code-editor';
+import { toast } from 'react-toastify';
+
+
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import ArrayInputItem from './domino-form-item-array.component';
-import { toast } from 'react-toastify';
+import TextCodeItem from './domino-form-item-textcode.component';
+
 
 interface DominoFormItemProps {
     formId: string;
@@ -55,22 +58,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             return false;
         }
     });
-    const [codeValue, setCodeValue] = useState(() => {
-        if (schema.properties[itemKey]?.default) {
-            return schema.properties[itemKey].default;
-        } else {
-            return `# Do not modify the function definition line 
-def custom_function(input_args: list):
-    # Write your code here
-    print(input_args)
 
-    # Return the output of the function as an object
-    return {
-        "out_arg_1": "out_value_1", 
-        "out_arg_2": "out_value_2"
-    }`;
-        }
-    });
 
     let itemSchema: any = schema.properties[itemKey];
 
@@ -172,7 +160,7 @@ def custom_function(input_args: list):
                     }
                 })
                 fromUpstream = true
-            } 
+            }
             upstreamMap[formId][itemKey] = {
                 ...upstreamMap[formId][itemKey],
                 fromUpstream: fromUpstream,
@@ -186,17 +174,17 @@ def custom_function(input_args: list):
             toast.error('There are no upstream outputs with the same type as the selected field')
             return
         }
-    
+
         var upstreamValue = upstreamMap[formId][itemKey].value || ""
-        if (!checked){
+        if (!checked) {
             upstreamValue = value
         }
         if (upstreamOptions.length && !upstreamOptions.includes(upstreamValue)) {
             upstreamValue = upstreamOptions[0]
         }
-        const upstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ? 
+        const upstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ?
             auxLabelUpstreamIdMap[upstreamValue] : null
-        const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue] 
+        const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue]
             ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
         upstreamMap[formId][itemKey] = {
             ...upstreamMap[formId][itemKey],
@@ -235,7 +223,7 @@ def custom_function(input_args: list):
             const formCheckboxStates = auxCheckboxState[formId]
             if (itemKey in formCheckboxStates) {
                 await handleCheckboxFromUpstreamChange(formCheckboxStates[itemKey])
-            }else{
+            } else {
                 await handleCheckboxFromUpstreamChange(false)
             }
         })()
@@ -382,23 +370,8 @@ def custom_function(input_args: list):
         );
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'codeeditor') {
         inputElement = (
-            <CodeEditor
-                value={codeValue}
-                language="python"
-                placeholder="Enter Python code."
-                onChange={(evn: any) => setCodeValue(evn.target.value)}
-                padding={15}
-                style={{
-                    fontSize: 12,
-                    backgroundColor: "#f5f5f5",
-                    fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
-                    borderRadius: 4,
-                    border: "1px solid #ddd",
-                    width: "100%",
-                    minHeight: "200px",
-                    maxHeight: "400px",
-                    overflowY: "scroll",
-                }}
+            <TextCodeItem
+                itemSchema={itemSchema}
             />
         )
     } else if (itemSchema.type === 'string') {

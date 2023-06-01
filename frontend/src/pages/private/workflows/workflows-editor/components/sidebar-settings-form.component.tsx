@@ -1,7 +1,7 @@
-import { 
-  Drawer, 
-  Grid, 
-  Typography, 
+import {
+  Drawer,
+  Grid,
+  Typography,
   FormControl,
   TextField,
   InputLabel,
@@ -9,11 +9,16 @@ import {
   Select,
   MenuItem,
   Checkbox,
- } from '@mui/material'
+} from '@mui/material'
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 //import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
 //import { JsonForms } from '@jsonforms/react'
 import { useCallback, useEffect, useState } from 'react'
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
+import { set } from 'react-hook-form';
 
 interface ISidebarSettingsFormProps {
   open: boolean,
@@ -23,8 +28,9 @@ interface ISidebarSettingsFormProps {
 const defaultConfigData = {
   name: '',
   scheduleInterval: 'none',
-  startDate: '',
-  generateReport: false,
+  startDateTime: '',
+  selectEndDateTime: 'never',
+  endDateTime: '',
 }
 
 const defaultStorageData = {
@@ -48,7 +54,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   ]
   const [configFormData, setConfigFormData] = useState(defaultConfigData);
   const [storageFormData, setStorageFormData] = useState(defaultStorageData);
-  
+  const [isEndDateTimeDisabled, setIsEndDateTimeDisabled] = useState(true);
   const {
     setFormsForageData,
     fetchForageDataById,
@@ -68,18 +74,33 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
       ...currentData,
       storage: newStorageFormData
     }
-    await setFormsForageData(formId, outputData)
+    await setFormsForageData(formId, outputData);
     setStorageFormData(newStorageFormData);
-  
+
   }, [fetchForageDataById, setFormsForageData, storageFormData])
 
+  // TODO - not working for datetime pickers
   const handleChangeConfig = useCallback(async (event: any) => {
-    const { name, value, type, checked } = event.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
+    let name = event?.target?.name;
+    let fieldValue = event?.target?.value;
+    if (event.target) {
+      const { name, value, type, checked } = event.target;
+      fieldValue = type === 'checkbox' ? checked : value;
+    } else {
+      const newDate = event;
+      fieldValue = new Date(newDate).toISOString();
+      name = 'startDateTime';
+    }
 
     const newFormData = {
       ...configFormData,
       [name]: fieldValue,
+    }
+
+    // changes the disable state of the selectEndDateTime
+    if (name === 'selectEndDateTime') {
+      setIsEndDateTimeDisabled(fieldValue === 'never')
+      newFormData.endDateTime = ''
     }
 
     const currentData = await fetchForageDataById(formId)
@@ -161,29 +182,48 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  name="startDate"
-                  label="Start Date"
-                  type="date"
-                  value={configFormData.startDate}
-                  onChange={handleChangeConfig}
-                  required
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="generateReport"
-                      checked={configFormData.generateReport}
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
+                    <DateTimePicker
+                      label="Start Date/Time"
+                      value={configFormData.startDateTime}
                       onChange={handleChangeConfig}
+                      ampm={false}
+                      format='DD/MM/YYYY HH:mm'
+                      sx={{ width: "100%" }}
                     />
-                  }
-                  label="Generate Report"
-                />
+                  </DemoContainer>
+                </LocalizationProvider>
+              </Grid>
+              <Grid container spacing={2} sx={{ margin: "0px" }}>
+                <Grid item xs={4}>
+                  <FormControl fullWidth sx={{ paddingTop: "8px" }}>
+                    <InputLabel>End Date/Time</InputLabel>
+                    <Select
+                      name="selectEndDateTime"
+                      value={configFormData.selectEndDateTime}
+                      onChange={handleChangeConfig}
+                    >
+                      <MenuItem value="never">Never</MenuItem>
+                      <MenuItem value="user-defined">User defined</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={8}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
+                      <DateTimePicker
+                        disabled={isEndDateTimeDisabled}
+                        label="End Date/Time"
+                        value={configFormData.endDateTime}
+                        onChange={handleChangeConfig}
+                        ampm={false}
+                        format='DD/MM/YYYY HH:mm'
+                        sx={{ width: "100%" }}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </Grid>
               </Grid>
             </Grid>
           </form>
@@ -192,7 +232,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
           <Grid item xs={12}>
             <Typography variant='h5' component="h5" sx={{ marginTop: '20px', marginBottom: "20px" }}>Storage</Typography >
           </Grid>
-          <form id='storage-form' style={{width: '100%'}}>
+          <form id='storage-form' style={{ width: '100%' }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <FormControl fullWidth>
@@ -205,7 +245,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   >
                     {
                       storageSourceOptions.map((option: string, index: number) => (
-                        <MenuItem key={index}  value={option}>{option}</MenuItem>
+                        <MenuItem key={index} value={option}>{option}</MenuItem>
                       ))
                     }
                   </Select>
