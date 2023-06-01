@@ -116,9 +116,13 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   // On load fetch data from forage and set it to the form data 
   // If data is not present then set default data to the forage
   useEffect(() => {
+    if (!open) return
+
     const fetchData = async () => {
-      const data = await fetchForageDataById(formId)
-      
+      var data = await fetchForageDataById(formId)
+      if (data === undefined || data === null) {
+        data = {}
+      }
       const newData: any = {}
       if ('config' in data) {
         newData['config'] = data.config
@@ -135,7 +139,9 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
       setStorageFormData(newData.storage)
     }
     fetchData()
-  }, [fetchForageDataById, setFormsForageData])
+  }, [fetchForageDataById, setFormsForageData, open])
+
+  
 
   return (
     <Drawer
