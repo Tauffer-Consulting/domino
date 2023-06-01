@@ -26,19 +26,23 @@ const DominoForm: React.FC<DominoFormProps> = ({ formId, schema, initialData, on
         setFormData(initialData)
     }, [initialData])
 
+
+    if (!schema.properties) return null;
     return (
         <form>
-            {Object.keys(schema.properties).map(key => (
-                <div key={key}>
-                    <DominoFormItem
-                        formId={formId}
-                        schema={schema}
-                        itemKey={key}
-                        value={formData[key]}
-                        onChange={handleChange(key)}
-                    />
-                </div>
-            ))}
+            {
+                Object.keys(schema.properties).map(key => (
+                    <div key={key}>
+                        <DominoFormItem
+                            formId={formId}
+                            schema={schema}
+                            itemKey={key}
+                            value={formData[key]}
+                            onChange={handleChange(key)}
+                        />
+                    </div>
+                ))
+            }
         </form>
     );
 };
