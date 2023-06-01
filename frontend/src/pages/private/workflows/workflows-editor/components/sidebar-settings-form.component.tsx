@@ -10,6 +10,7 @@ import {
   MenuItem,
   Checkbox,
 } from '@mui/material'
+import dayjs from 'dayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -126,12 +127,12 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
       const newData: any = {}
       if ('config' in data) {
         newData['config'] = data.config
-      }else{
+      } else {
         newData['config'] = defaultConfigData
       }
       if ('storage' in data) {
         newData['storage'] = data.storage
-      }else{
+      } else {
         newData['storage'] = defaultStorageData
       }
       await setFormsForageData(formId, newData)
@@ -141,7 +142,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
     fetchData()
   }, [fetchForageDataById, setFormsForageData, open])
 
-  
+
 
   return (
     <Drawer
@@ -192,7 +193,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
                     <DateTimePicker
                       label="Start Date/Time"
-                      value={configFormData.startDateTime}
+                      value={dayjs(configFormData.startDateTime)}
                       onChange={handleChangeConfig}
                       ampm={false}
                       format='DD/MM/YYYY HH:mm'
@@ -221,7 +222,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                       <DateTimePicker
                         disabled={isEndDateTimeDisabled}
                         label="End Date/Time"
-                        value={configFormData.endDateTime}
+                        value={dayjs(configFormData.endDateTime)}
                         onChange={handleChangeConfig}
                         ampm={false}
                         format='DD/MM/YYYY HH:mm'
