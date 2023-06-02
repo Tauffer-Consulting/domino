@@ -1,8 +1,9 @@
-import { createAjv } from '@jsonforms/core'
-import { 
+import { useCallback, useEffect, useState } from 'react'
+// import { createAjv } from '@jsonforms/core'
+import {
   Divider,
   Drawer,
-  Grid, 
+  Grid,
   Typography,
   MenuItem,
   Select,
@@ -11,21 +12,16 @@ import {
   TextField,
   FormControlLabel,
   Checkbox
-
  } from '@mui/material'
-//import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
-//import { JsonForms } from '@jsonforms/react'
-import { useCallback, useEffect, useState } from 'react'
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
 import { operatorStorageSchema } from 'common/schemas/storageSchemas'
-import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
 import { workflowFormSchema } from 'common/schemas/workflowFormSchema'
-
+import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
 import DominoForm from './domino-form.component'
 
 
-const handleDefaultsAjv = createAjv({ useDefaults: true })
+// const handleDefaultsAjv = createAjv({ useDefaults: true })
 
 interface ISidebarFormProps {
   formSchema: any,
@@ -58,14 +54,12 @@ const SidebarForm = (props: ISidebarFormProps) => {
     title,
     isPieceForm = true
   } = props
-
   //const [checkboxState, setCheckboxState] = useState<any>({})
   const [formData, setFormData] = useState<any>({})
   const [storageFormData, setStorageFormData] = useState<string>('None')
   const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>(defaultContainerResources)
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
   const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...formSchema })
-
   const {
     setFormsForageData,
     fetchForageDataById,
@@ -82,14 +76,12 @@ const SidebarForm = (props: ISidebarFormProps) => {
     setFormWidthSpace(isPieceForm ? 12 : 12)
   }, [isPieceForm])
 
-
+  // On change update form data in forage
   const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
-    // On change update form data in forage
     try {
       var upstreamMap = await getForageUpstreamMap()
       const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
       var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
-
       for (const key in data) {
         const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
         const upstreamId = fromUpstream && upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].upstreamId : null
@@ -103,7 +95,6 @@ const SidebarForm = (props: ISidebarFormProps) => {
         }
       }
       upstreamMap[formId] = upstreamMapFormInfo
-
       await setFormsForageData(formId, data)
       await setForageUpstreamMap(upstreamMap)
     } catch (err) {
@@ -176,13 +167,11 @@ const SidebarForm = (props: ISidebarFormProps) => {
     // setContainerResourcesFormData(data)
   }, [formId, fetchForageDataById, setFormsForageData])
 
-  
-
+  // When opened fetch forage data and update forms data
   useEffect(() => {
-    // When opened fetch forage data and update forms data
     const fetchForage = async () => {
       const forageData = await fetchForageDataById(formId)
-      
+
       if (!forageData) {
         const defaultData = extractDefaultValues(formJsonSchema)
         handleOnChange({ data: defaultData })
@@ -211,7 +200,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     if (open) { fetchForage() }
 
   }, [formId, formJsonSchema, open, fetchForageDataById, setFormsForageData, handleOnChange, handleOnChangeStorage, isPieceForm, handleOnChangeContainerResources])
-  
+
   return (
     <Drawer
       anchor='left'
@@ -334,13 +323,15 @@ const SidebarForm = (props: ISidebarFormProps) => {
                       />
                       </Grid>
                   </Grid>
-              </Grid>
-            </Grid>
-            : null
+
+                  </Grid>
+                </Grid>
+              : null
           }
         </Grid>
       </div>
     </Drawer>
   )
-}
-export default SidebarForm
+};
+
+export default SidebarForm;
