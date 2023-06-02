@@ -43,7 +43,6 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         setNameKeyUpstreamArgsMap,
         getNameKeyUpstreamArgsMap,
     } = useWorkflowsEditor();
-
     const formFieldType = schema.properties[itemKey].type;
     const [formLabelUpstreamIdMap, setFormLabelUpstreamIdMap] = useState<Record<string, string>>({});
     const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
@@ -59,9 +58,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         }
     });
 
-
+    // The schema for this item
     let itemSchema: any = schema.properties[itemKey];
-
     if (value === undefined) {
         value = itemSchema.default;
     }
@@ -85,6 +83,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         }
     }
 
+    // Handle input change
     const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         onChange(event.target.value);
     }, [onChange]);
@@ -93,7 +92,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         onChange(event.target.value as string);
     }, [onChange]);
 
-
+    // From upstream checkbox callback
     const handleCheckboxFromUpstreamChange = useCallback(async (checked: boolean) => {
         setCheckedFromUpstream(checked);
 
@@ -229,7 +228,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         })()
     }, [getForageCheckboxStates, formId, itemKey, getForageUpstreamMap, handleCheckboxFromUpstreamChange])
 
-
+    // Select fromUpstream source
     const handleSelectFromUpstreamChange = useCallback(async (event: SelectChangeEvent<any>) => {
         setUpstreamSelectValue(event.target.value as string);
         var upstreamMap = await getForageUpstreamMap()
@@ -258,9 +257,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
 
     ]);
 
+    // Set input element based on type
     let inputElement: JSX.Element;
-
-
     if (checkedFromUpstream) {
         inputElement = (
             <FormControl fullWidth>
