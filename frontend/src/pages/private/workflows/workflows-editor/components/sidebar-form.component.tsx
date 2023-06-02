@@ -10,8 +10,12 @@ import {
   InputLabel,
   TextField,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
 } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
@@ -289,138 +293,151 @@ const SidebarForm = (props: ISidebarFormProps) => {
         <Grid container>
           {
             isPieceForm ?
-              <Grid container spacing={2} sx={{ marginBottom: '20px' }}>
-                <Grid item xs={10}>
-                  <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Input Argument</Typography>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <Grid container spacing={2} sx={{ marginBottom: '20px' }}>
+                  <Grid item xs={10}>
+                    <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Input Arguments</Typography>
+                  </Grid>
+                  <Grid item xs={12 - 10}>
+                    <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Upstream</Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12 - 10}>
-                  <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Upstream</Typography>
-                </Grid>
-              </Grid>
-              : null
-          }
-          {
-            isPieceForm ?
-              <Grid container sx={{ paddingBottom: "25px" }}>
-                <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
-                  <Grid item xs={12}>
-                    <DominoForm
-                      formId={formId}
-                      schema={formJsonSchema}
-                      initialData={formData}
-                      onChange={handleOnChange}
-                    />
-                  </Grid>
-                  <Divider sx={{ marginTop: '20px', marginBottom: '25px' }} />
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} marginBottom={2}>
-                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Storage</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControl fullWidth>
-                        <InputLabel>Storage Access Mode</InputLabel>
-                        <Select
-                          name="storageAccessMode"
-                          value={storageFormData}
-                          onChange={handleOnChangeStorage}
-                          required
-                        >
-                          <MenuItem value="None">None</MenuItem>
-                          <MenuItem value="Read">Read</MenuItem>
-                          <MenuItem value="Read/Write">Read/Write</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                  <Divider sx={{ marginTop: '20px', marginBottom: '25px' }} />
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} marginBottom={2}>
-                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        name={"cpu.min"}
-                        label="CPU Min"
-                        type="number"
-                        value={containerResourcesFormData.cpu.min}
-                        onChange={handleOnChangeContainerResources}
-                        required
-                        fullWidth
-                        inputProps={{
-                          min: minAcceptedCpu,
-                          max: maxAcceptedCpu
-                        }}
-                        error={containerResourcesFieldsErrors.cpu.min}
-                        helperText={containerResourcesFieldsErrors.cpu.min ? 'Min CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        name={"cpu.max"}
-                        label="CPU Max"
-                        type="number"
-                        value={containerResourcesFormData.cpu.max}
-                        onChange={handleOnChangeContainerResources}
-                        required
-                        fullWidth
-                        inputProps={{
-                          min: minAcceptedCpu,
-                          max: maxAcceptedCpu
-                        }}
-                        error={containerResourcesFieldsErrors.cpu.max}
-                        helperText={containerResourcesFieldsErrors.cpu.max ? 'Max CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        name={"memory.min"}
-                        label="Memory Min"
-                        type="number"
-                        value={containerResourcesFormData.memory.min}
-                        onChange={handleOnChangeContainerResources}
-                        required
-                        fullWidth
-                        inputProps={{
-                          min: minAcceptedMemory,
-                          max: maxAcceptedMemory
-                        }}
-                        error={containerResourcesFieldsErrors.memory.min}
-                        helperText={containerResourcesFieldsErrors.memory.min ? 'Min Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        name={"memory.max"}
-                        label="Memory Max"
-                        type="number"
-                        value={containerResourcesFormData.memory.max}
-                        onChange={handleOnChangeContainerResources}
-                        required
-                        fullWidth
-                        inputProps={{
-                          min: minAcceptedMemory,
-                          max: maxAcceptedMemory
-                        }}
-                        error={containerResourcesFieldsErrors.memory.max}
-                        helperText={containerResourcesFieldsErrors.memory.max ? 'Max Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name={"useGpu"}
-                            checked={containerResourcesFormData.useGpu}
-                            onChange={handleOnChangeContainerResources}
-                          />
-                        }
-                        label="Use GPU"
-                      />
-                    </Grid>
-                  </Grid>
 
+                <Grid container sx={{ paddingBottom: "25px" }}>
+                  <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
+                    <Grid item xs={12}>
+                      <DominoForm
+                        formId={formId}
+                        schema={formJsonSchema}
+                        initialData={formData}
+                        onChange={handleOnChange}
+                      />
+                    </Grid>
+
+                    <div style={{ marginBottom: '50px' }} />
+
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1 }}>
+                          Advanced Options
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} marginBottom={2}>
+                            <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Storage</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <FormControl fullWidth>
+                              <InputLabel>Storage Access Mode</InputLabel>
+                              <Select
+                                name="storageAccessMode"
+                                value={storageFormData}
+                                onChange={handleOnChangeStorage}
+                                required
+                              >
+                                <MenuItem value="None">None</MenuItem>
+                                <MenuItem value="Read">Read</MenuItem>
+                                <MenuItem value="Read/Write">Read/Write</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        </Grid>
+
+                        <div style={{ marginBottom: '50px' }} />
+
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} marginBottom={2}>
+                            <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"cpu.min"}
+                              label="CPU Min"
+                              type="number"
+                              value={containerResourcesFormData.cpu.min}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedCpu,
+                                max: maxAcceptedCpu
+                              }}
+                              error={containerResourcesFieldsErrors.cpu.min}
+                              helperText={containerResourcesFieldsErrors.cpu.min ? 'Min CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"cpu.max"}
+                              label="CPU Max"
+                              type="number"
+                              value={containerResourcesFormData.cpu.max}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedCpu,
+                                max: maxAcceptedCpu
+                              }}
+                              error={containerResourcesFieldsErrors.cpu.max}
+                              helperText={containerResourcesFieldsErrors.cpu.max ? 'Max CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"memory.min"}
+                              label="Memory Min"
+                              type="number"
+                              value={containerResourcesFormData.memory.min}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedMemory,
+                                max: maxAcceptedMemory
+                              }}
+                              error={containerResourcesFieldsErrors.memory.min}
+                              helperText={containerResourcesFieldsErrors.memory.min ? 'Min Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"memory.max"}
+                              label="Memory Max"
+                              type="number"
+                              value={containerResourcesFormData.memory.max}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedMemory,
+                                max: maxAcceptedMemory
+                              }}
+                              error={containerResourcesFieldsErrors.memory.max}
+                              helperText={containerResourcesFieldsErrors.memory.max ? 'Max Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name={"useGpu"}
+                                  checked={containerResourcesFormData.useGpu}
+                                  onChange={handleOnChangeContainerResources}
+                                />
+                              }
+                              label="Use GPU"
+                            />
+                          </Grid>
+                        </Grid>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Grid>
                 </Grid>
-              </Grid>
+
+                <div style={{ marginBottom: '70px' }} />
+              </div>
               : null
           }
         </Grid>

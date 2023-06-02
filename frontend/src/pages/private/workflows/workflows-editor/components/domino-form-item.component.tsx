@@ -9,6 +9,7 @@ import {
     FormControl,
     InputLabel,
     SelectChangeEvent,
+    Grid
 } from '@mui/material';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -412,13 +413,17 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             alignItems="flex-start"
             sx={{ paddingTop: "10px" }}
         >
-            {inputElement}
+            <Grid item xs={checkedFromUpstreamAllowed ? 10 : 12}>
+                {inputElement}
+            </Grid>
             {checkedFromUpstreamAllowed ? (
-                <Checkbox
-                    checked={checkedFromUpstream}
-                    onChange={(event) => handleCheckboxFromUpstreamChange(event.target.checked)}
-                    disabled={!checkedFromUpstreamEditable}
-                />
+                <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Checkbox
+                        checked={checkedFromUpstream}
+                        onChange={(event) => handleCheckboxFromUpstreamChange(event.target.checked)}
+                        disabled={!checkedFromUpstreamEditable}
+                    />
+                </Grid>
             ) : null}
         </Box>
     );
