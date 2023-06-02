@@ -8,9 +8,11 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel
-} from '@mui/material'
-
+  InputLabel,
+  TextField,
+  FormControlLabel,
+  Checkbox
+ } from '@mui/material'
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
 import { operatorStorageSchema } from 'common/schemas/storageSchemas'
@@ -31,6 +33,18 @@ interface ISidebarFormProps {
   isPieceForm?: boolean,
 }
 
+const defaultContainerResources = {
+  "useGpu": false,
+  "memory": {
+    "min": 128,
+    "max": 128
+  },
+  "cpu": {
+    "min": 100,
+    "max": 100
+  }
+}
+
 const SidebarForm = (props: ISidebarFormProps) => {
   const {
     formSchema,
@@ -43,7 +57,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
   //const [checkboxState, setCheckboxState] = useState<any>({})
   const [formData, setFormData] = useState<any>({})
   const [storageFormData, setStorageFormData] = useState<string>('None')
-  const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>({})
+  const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>(defaultContainerResources)
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
   const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...formSchema })
   const {
@@ -116,12 +130,39 @@ const SidebarForm = (props: ISidebarFormProps) => {
 
   }, [fetchForageDataById, setFormsForageData, formId])
 
-  const handleOnChangeContainerResources = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
-    // const currentData = await fetchForageDataById(formId)
-    // const outputData = {
-    //   ...currentData,
-    //   containerResources: data
-    // }
+  const handleOnChangeContainerResources = useCallback(async (event: any) => {
+    if (!event?.target) {
+      return
+    }
+    const { name, value, type, checked } = event.target;
+    console.log('value', value)
+    console.log('type', type)
+    console.log(typeof value)
+    var newContainerResourcesData = {}
+    if (name.includes('.')){
+      const firstLevelKey = name.split('.')[0]
+      const secondLevelKey = name.split('.')[1]
+      newContainerResourcesData = {
+        ...containerResourcesFormData,
+        [firstLevelKey]: {
+          ...containerResourcesFormData[firstLevelKey],
+          [secondLevelKey]: type === 'checkbox' ? checked : value
+        }
+      }
+    }else{
+      const firstLevelKey = name
+      newContainerResourcesData = {
+        ...containerResourcesFormData,
+        [firstLevelKey]: type === 'checkbox' ? checked : value
+      }
+    }
+    
+    const currentData = await fetchForageDataById(formId)
+    const outputData = {
+      ...currentData,
+      containerResources: newContainerResourcesData
+    }
+    console.log('outputData', outputData)
     // await setFormsForageData(formId, outputData)
     // setContainerResourcesFormData(data)
   }, [formId, fetchForageDataById, setFormsForageData])
@@ -200,7 +241,10 @@ const SidebarForm = (props: ISidebarFormProps) => {
                     />
                   </Grid>
                   <Divider sx={{ marginTop: '20px', marginBottom: '25px' }} />
-                  <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} marginBottom={2}>
+                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
+                    </Grid>
                     <Grid item xs={12}>
                       <FormControl fullWidth>
                         <InputLabel>Storage Access Mode</InputLabel>
@@ -216,10 +260,72 @@ const SidebarForm = (props: ISidebarFormProps) => {
                         </Select>
                       </FormControl>
                     </Grid>
+                  </Grid>
+                  <Divider sx={{ marginTop: '20px', marginBottom: '25px' }} />
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} marginBottom={2}>
+                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        name={"cpu.min"}
+                        label="CPU Min"
+                        type="number"
+                        value={containerResourcesFormData.cpu.min}
+                        onChange={handleOnChangeContainerResources}
+                        required
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        name={"cpu.max"}
+                        label="CPU Max"
+                        type="number"
+                        value={containerResourcesFormData.cpu.max}
+                        onChange={handleOnChangeContainerResources}
+                        required
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        name={"memory.min"}
+                        label="Memory Min"
+                        type="number"
+                        value={containerResourcesFormData.memory.min}
+                        onChange={handleOnChangeContainerResources}
+                        required
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        name={"memory.max"}
+                        label="Memory Max"
+                        type="number"
+                        value={containerResourcesFormData.memory.max}
+                        onChange={handleOnChangeContainerResources}
+                        required
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name={"useGpu"}
+                            checked={containerResourcesFormData.useGpu}
+                            onChange={handleOnChangeContainerResources}
+                          />
+                        }
+                        label="Use GPU"
+                      />
+                      </Grid>
+                  </Grid>
 
                   </Grid>
                 </Grid>
-              </Grid>
               : null
           }
         </Grid>
