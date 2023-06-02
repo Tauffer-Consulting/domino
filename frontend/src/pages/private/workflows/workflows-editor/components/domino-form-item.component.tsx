@@ -17,7 +17,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { toast } from 'react-toastify';
-
+import dayjs from 'dayjs';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import ArrayInputItem from './domino-form-item-array.component';
@@ -60,6 +60,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
 
     // The schema for this item
     let itemSchema: any = schema.properties[itemKey];
+
+    // The value for this item
     if (value === undefined) {
         value = itemSchema.default;
     }
@@ -84,8 +86,16 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
     }
 
     // Handle input change
-    const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(event.target.value);
+    const handleInputChange = useCallback((event: any, source: string) => {
+        let fieldValue = event?.target?.value || "";
+        if (source === 'datePicker' || source === 'timePicker' || source === 'dateTimePicker') {
+            const newDate = event;
+            fieldValue = new Date(newDate).toISOString();
+        } else {
+            const { name, value, type, checked } = event.target;
+            fieldValue = type === 'checkbox' ? checked : value;
+        }
+        onChange(fieldValue);
     }, [onChange]);
 
     const handleSelectChange = useCallback((event: SelectChangeEvent<any>) => {
@@ -298,7 +308,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         inputElement = <FormControlLabel
             control={<Checkbox
                 checked={value}
-                onChange={handleInputChange}
+                onChange={(event) => handleInputChange(event, "boolean")}
             />}
             labelPlacement="start"
             label={itemSchema.title}
@@ -310,7 +320,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             type="number"
             label={itemSchema.title}
             value={value}
-            onChange={handleInputChange}
+            onChange={(event) => handleInputChange(event, "number")}
         />;
     } else if (itemSchema.type === 'integer') {
         inputElement = <TextField
@@ -319,7 +329,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             type="number"
             label={itemSchema.title}
             value={value}
-            onChange={handleInputChange}
+            onChange={(event) => handleInputChange(event, "integer")}
         />;
     } else if (itemSchema.type === 'array') {
         inputElement = <ArrayInputItem
@@ -336,6 +346,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                         views={['day', 'month', 'year']}
                         format="DD/MM/YYYY"
                         sx={{ width: "100%" }}
+                        value={dayjs(value)}
+                        onChange={(event) => handleInputChange(event, "datePicker")}
                     />
                 </DemoContainer>
             </LocalizationProvider>
@@ -349,6 +361,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                         label={itemSchema.title}
                         format='HH:mm'
                         sx={{ width: "100%" }}
+                        value={dayjs(value)}
+                        onChange={(event) => handleInputChange(event, "timePicker")}
                     />
                 </DemoContainer>
             </LocalizationProvider>
@@ -362,6 +376,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                         label={itemSchema.title}
                         format='DD/MM/YYYY HH:mm'
                         sx={{ width: "100%" }}
+                        value={dayjs(value)}
+                        onChange={(event) => handleInputChange(event, "dateTimePicker")}
                     />
                 </DemoContainer>
             </LocalizationProvider>
@@ -380,7 +396,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                 variant="outlined"
                 label={itemSchema.title}
                 value={value}
-                onChange={handleInputChange}
+                onChange={(event) => handleInputChange(event, "string")}
             />
         );
     } else {
