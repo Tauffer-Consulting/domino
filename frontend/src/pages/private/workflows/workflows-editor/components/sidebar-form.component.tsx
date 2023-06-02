@@ -19,6 +19,7 @@ import { operatorStorageSchema } from 'common/schemas/storageSchemas'
 import { workflowFormSchema } from 'common/schemas/workflowFormSchema'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
 import DominoForm from './domino-form.component'
+import { toast } from 'react-toastify'
 
 
 // const handleDefaultsAjv = createAjv({ useDefaults: true })
@@ -33,6 +34,23 @@ interface ISidebarFormProps {
   isPieceForm?: boolean,
 }
 
+const minAcceptedMemory = 128
+const minAcceptedCpu = 100
+const maxAcceptedMemory = 128000
+const maxAcceptedCpu = 100000
+
+const storageValidationValues: any = {
+  "memory": {
+    "min": minAcceptedMemory,
+    "max": maxAcceptedMemory
+  },
+  "cpu": {
+    "min": minAcceptedCpu,
+    "max": maxAcceptedCpu
+  }
+}
+
+
 const defaultContainerResources = {
   "useGpu": false,
   "memory": {
@@ -44,6 +62,7 @@ const defaultContainerResources = {
     "max": 100
   }
 }
+
 
 const SidebarForm = (props: ISidebarFormProps) => {
   const {
@@ -58,6 +77,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
   const [formData, setFormData] = useState<any>({})
   const [storageFormData, setStorageFormData] = useState<string>('None')
   const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>(defaultContainerResources)
+  const [storageFieldErrors, setStorageFieldErrors] = useState({});
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
   const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...formSchema })
   const {
@@ -135,18 +155,27 @@ const SidebarForm = (props: ISidebarFormProps) => {
       return
     }
     const { name, value, type, checked } = event.target;
-    console.log('value', value)
-    console.log('type', type)
-    console.log(typeof value)
+
+    var parsedValue = value;
+    if (type === 'number') {
+      parsedValue = parseInt(value); // Convert the value to a float or use parseInt() for an integer
+    }
     var newContainerResourcesData = {}
     if (name.includes('.')){
       const firstLevelKey = name.split('.')[0]
       const secondLevelKey = name.split('.')[1]
+      
+      const validationValue: any = storageValidationValues[firstLevelKey]
+      
+      if (parsedValue < validationValue.min || parsedValue > validationValue.max) {
+        toast.error(`The value must be between ${validationValue.min} and ${validationValue.max}`)
+      }
+
       newContainerResourcesData = {
         ...containerResourcesFormData,
         [firstLevelKey]: {
           ...containerResourcesFormData[firstLevelKey],
-          [secondLevelKey]: type === 'checkbox' ? checked : value
+          [secondLevelKey]: type === 'checkbox' ? checked : parsedValue
         }
       }
     }else{
@@ -162,9 +191,9 @@ const SidebarForm = (props: ISidebarFormProps) => {
       ...currentData,
       containerResources: newContainerResourcesData
     }
-    console.log('outputData', outputData)
+    //console.log('outputData', outputData)
     // await setFormsForageData(formId, outputData)
-    // setContainerResourcesFormData(data)
+    setContainerResourcesFormData(newContainerResourcesData)
   }, [formId, fetchForageDataById, setFormsForageData])
 
   // When opened fetch forage data and update forms data
@@ -275,6 +304,10 @@ const SidebarForm = (props: ISidebarFormProps) => {
                         onChange={handleOnChangeContainerResources}
                         required
                         fullWidth
+                        inputProps={{
+                          min: minAcceptedCpu,
+                          max: maxAcceptedCpu
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -286,6 +319,10 @@ const SidebarForm = (props: ISidebarFormProps) => {
                         onChange={handleOnChangeContainerResources}
                         required
                         fullWidth
+                        inputProps={{
+                          min: minAcceptedCpu,
+                          max: maxAcceptedCpu
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -297,6 +334,10 @@ const SidebarForm = (props: ISidebarFormProps) => {
                         onChange={handleOnChangeContainerResources}
                         required
                         fullWidth
+                        inputProps={{
+                          min: minAcceptedMemory,
+                          max: maxAcceptedMemory
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -308,6 +349,10 @@ const SidebarForm = (props: ISidebarFormProps) => {
                         onChange={handleOnChangeContainerResources}
                         required
                         fullWidth
+                        inputProps={{
+                          min: minAcceptedMemory,  
+                          max: maxAcceptedMemory
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
