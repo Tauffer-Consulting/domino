@@ -1,5 +1,3 @@
-
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/media/logo.png" width="450" title="Domino">
 </p>
@@ -183,6 +181,3 @@ The Backend service is a REST API that controls a running Apache Airflow instanc
 The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://domino-py.readthedocs.io/en/latest/pages/rest.html).
 
 <br>
-
-
-
