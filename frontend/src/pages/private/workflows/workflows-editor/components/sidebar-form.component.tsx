@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-// import { createAjv } from '@jsonforms/core'
 import {
   Divider,
   Drawer,
@@ -12,14 +11,16 @@ import {
   TextField,
   FormControlLabel,
   Checkbox
- } from '@mui/material'
+} from '@mui/material'
+
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
-import { operatorStorageSchema } from 'common/schemas/storageSchemas'
-import { workflowFormSchema } from 'common/schemas/workflowFormSchema'
-import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
 import DominoForm from './domino-form.component'
-import { toast } from 'react-toastify'
+// import { createAjv } from '@jsonforms/core'
+// import { operatorStorageSchema } from 'common/schemas/storageSchemas'
+// import { workflowFormSchema } from 'common/schemas/workflowFormSchema'
+// import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
+// import { toast } from 'react-toastify'
 
 
 // const handleDefaultsAjv = createAjv({ useDefaults: true })
@@ -87,7 +88,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
   } = props
   //const [checkboxState, setCheckboxState] = useState<any>({})
   const [formData, setFormData] = useState<any>({})
-  const [storageFormData, setStorageFormData] = useState<string>('None')
+  const [storageFormData, setStorageFormData] = useState<string>('Read/Write')
   const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>(defaultContainerResources)
   const [containerResourcesFieldsErrors, setContainerResourcesFieldsErrors] = useState<any>(defaultErrorState);
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
@@ -108,7 +109,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     setFormWidthSpace(isPieceForm ? 12 : 12)
   }, [isPieceForm])
 
-  // On change update form data in forage
+  // Update form data in forage
   const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
     try {
       var upstreamMap = await getForageUpstreamMap()
@@ -134,9 +135,9 @@ const SidebarForm = (props: ISidebarFormProps) => {
     }
   }, [formId, setFormsForageData, getForageUpstreamMap, setForageUpstreamMap, getNameKeyUpstreamArgsMap])
 
+  // On Change of storage access mode option
   const handleOnChangeStorage = useCallback(async (event: any) => {
     /*
-
     // On change update node form data in forage
     // The storage access mode key is inside the node form data in the `storage` key
     {
@@ -159,9 +160,9 @@ const SidebarForm = (props: ISidebarFormProps) => {
     }
     await setFormsForageData(formId, outputData)
     setStorageFormData(data)
-
   }, [fetchForageDataById, setFormsForageData, formId])
 
+  // On Change of container resources options
   const handleOnChangeContainerResources = useCallback(async (event: any) => {
     if (!event?.target) {
       return
@@ -176,12 +177,12 @@ const SidebarForm = (props: ISidebarFormProps) => {
     var newStorageErrors = {
       ...containerResourcesFieldsErrors
     }
-    if (name.includes('.')){
+    if (name.includes('.')) {
       const firstLevelKey = name.split('.')[0]
       const secondLevelKey = name.split('.')[1]
-      
+
       const validationValue: any = storageValidationValues[firstLevelKey]
-      
+
       if (parsedValue < validationValue.min || parsedValue > validationValue.max) {
         newStorageErrors = {
           ...containerResourcesFieldsErrors,
@@ -190,7 +191,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
             [secondLevelKey]: true
           }
         }
-      }else{
+      } else {
         newStorageErrors = {
           ...containerResourcesFieldsErrors,
           [firstLevelKey]: {
@@ -207,7 +208,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
           [secondLevelKey]: type === 'checkbox' ? checked : parsedValue
         }
       }
-    }else{
+    } else {
       const firstLevelKey = name
       newContainerResourcesData = {
         ...containerResourcesFormData,
@@ -223,7 +224,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     await setFormsForageData(formId, outputData)
     setContainerResourcesFormData(newContainerResourcesData)
     setContainerResourcesFieldsErrors(newStorageErrors)
-  }, 
+  },
     [
       formId,
       fetchForageDataById,
@@ -242,16 +243,16 @@ const SidebarForm = (props: ISidebarFormProps) => {
         handleOnChange({ data: defaultData })
         setFormData(defaultData)
         return
-      } 
-  
+      }
+
       handleOnChange({ data: forageData })
       // If the form has checkboxes, we need to update the storage data
       if (!forageData.storage) {
-        setStorageFormData("None")
-      } else{
+        setStorageFormData("Read/Write")
+      } else {
         setStorageFormData(forageData.storage.storageAccessMode)
       }
-      
+
       if (!forageData.containerResources) {
         setContainerResourcesFormData(defaultContainerResources)
       } else {
@@ -268,7 +269,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
     fetchForageDataById,
     setFormsForageData,
     handleOnChange,
-    isPieceForm, 
+    isPieceForm,
   ])
 
   return (
@@ -313,7 +314,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
                   <Divider sx={{ marginTop: '20px', marginBottom: '25px' }} />
                   <Grid container spacing={2}>
                     <Grid item xs={12} marginBottom={2}>
-                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
+                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Storage</Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <FormControl fullWidth>
@@ -367,7 +368,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
                           max: maxAcceptedCpu
                         }}
                         error={containerResourcesFieldsErrors.cpu.max}
-                        helperText={containerResourcesFieldsErrors.cpu.max ? 'Max CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu: ''}
+                        helperText={containerResourcesFieldsErrors.cpu.max ? 'Max CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -384,7 +385,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
                           max: maxAcceptedMemory
                         }}
                         error={containerResourcesFieldsErrors.memory.min}
-                        helperText={containerResourcesFieldsErrors.memory.min ? 'Min Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory: ''}
+                        helperText={containerResourcesFieldsErrors.memory.min ? 'Min Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -397,11 +398,11 @@ const SidebarForm = (props: ISidebarFormProps) => {
                         required
                         fullWidth
                         inputProps={{
-                          min: minAcceptedMemory,  
+                          min: minAcceptedMemory,
                           max: maxAcceptedMemory
                         }}
                         error={containerResourcesFieldsErrors.memory.max}
-                        helperText={containerResourcesFieldsErrors.memory.max ? 'Max Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory: ''}
+                        helperText={containerResourcesFieldsErrors.memory.max ? 'Max Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -415,11 +416,11 @@ const SidebarForm = (props: ISidebarFormProps) => {
                         }
                         label="Use GPU"
                       />
-                      </Grid>
+                    </Grid>
                   </Grid>
 
-                  </Grid>
                 </Grid>
+              </Grid>
               : null
           }
         </Grid>
