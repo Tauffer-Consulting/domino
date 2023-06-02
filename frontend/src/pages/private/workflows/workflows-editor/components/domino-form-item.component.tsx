@@ -44,7 +44,14 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         setNameKeyUpstreamArgsMap,
         getNameKeyUpstreamArgsMap,
     } = useWorkflowsEditor();
-    const formFieldType = schema.properties[itemKey].type;
+    var formFieldType = schema.properties[itemKey].type;
+    const formFieldFormat = schema.properties[itemKey].format;
+    if (formFieldFormat !== undefined && formFieldFormat !== null) {
+        formFieldType = formFieldFormat;
+    }
+    if ('allOf' in schema.properties[itemKey] || "oneOf" in schema.properties[itemKey] || "anyOf" in schema.properties[itemKey]) {
+        formFieldType = 'enum'
+    }
     const [formLabelUpstreamIdMap, setFormLabelUpstreamIdMap] = useState<Record<string, string>>({});
     const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
     const [upstreamSelectValue, setUpstreamSelectValue] = useState<string>('');
@@ -95,7 +102,6 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         } else if (source === 'timePicker') {
             const newTime = event;
             // const newDate = dayjs().set('hour', newTime.getHours()).set('minute', newTime.getMinutes()).set('second', newTime.getSeconds());
-            console.log("newDate", newTime);
             // fieldValue = new Date(newDate).toISOString();
         } else {
             const { name, value, type, checked } = event.target;
@@ -163,7 +169,12 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                 const upstreamOutputSchema = upstreamOperator?.output_schema
                 Object.keys(upstreamOutputSchema?.properties).forEach((key, index) => {
                     const obj = upstreamOutputSchema?.properties[key]
-                    if (obj.type === formFieldType) {
+                    var objType = obj.format ? obj.format : obj.type
+                    if ('allOf' in obj || "oneOf" in obj || "anyOf" in obj) {
+                        objType = 'enum'
+                    }
+
+                    if (objType === formFieldType) {
                         var upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
                         const counter = 1;
                         while (upstreamOptions.includes(upstreamOptionName)) {
@@ -343,7 +354,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             parentSchemaDefinitions={schema.definitions}
             fromUpstreamMode={arrayItemsFromUpstreamOption}
         />
-    } else if (itemSchema.type === 'string' && itemSchema?.widget === 'date') {
+    } else if (itemSchema.type === 'string' && itemSchema?.format === 'date') {
         inputElement = (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DemoContainer components={['DatePicker']} sx={{ width: "100%" }}>
@@ -358,7 +369,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                 </DemoContainer>
             </LocalizationProvider>
         );
-    } else if (itemSchema.type === 'string' && itemSchema?.widget === 'time') {
+    } else if (itemSchema.type === 'string' && itemSchema?.format === 'time') {
         inputElement = (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DemoContainer components={['TimePicker']} sx={{ width: "100%" }} >
@@ -368,13 +379,13 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                         format='HH:mm'
                         sx={{ width: "100%" }}
                         // value={new Date(`1970-01-01T${value}:00`)}  // this trick is necessary to properly parse only time
-                        value={dayjs(value)}
+                        value={dayjs(value, "HH:mm")}
                         onChange={(event) => handleInputChange(event, "timePicker")}
                     />
                 </DemoContainer>
             </LocalizationProvider>
         );
-    } else if (itemSchema.type === 'string' && itemSchema?.widget === 'datetime') {
+    } else if (itemSchema.type === 'string' && itemSchema?.format === 'datetime') {
         inputElement = (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
