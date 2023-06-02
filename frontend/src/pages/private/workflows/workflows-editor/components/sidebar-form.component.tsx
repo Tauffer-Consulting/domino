@@ -316,9 +316,14 @@ const SidebarForm = (props: ISidebarFormProps) => {
 
                     <div style={{ marginBottom: '50px' }} />
 
-                    <Accordion>
+                    <Accordion
+                      sx={{
+                        '&.MuiAccordion-root:before': {
+                          display: 'none',
+                        },
+                      }}>
                       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1 }}>
+                        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>
                           Advanced Options
                         </Typography>
                       </AccordionSummary>
@@ -435,12 +440,11 @@ const SidebarForm = (props: ISidebarFormProps) => {
                     </Accordion>
                   </Grid>
                 </Grid>
-
-                <div style={{ marginBottom: '70px' }} />
               </div>
               : null
           }
         </Grid>
+        <div style={{ marginBottom: '70px' }} />
       </div>
     </Drawer>
   )
