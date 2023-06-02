@@ -34,10 +34,11 @@ interface ISidebarFormProps {
   isPieceForm?: boolean,
 }
 
+// TODO check if these values make sense
 const minAcceptedMemory = 128
 const minAcceptedCpu = 100
-const maxAcceptedMemory = 128000
-const maxAcceptedCpu = 100000
+const maxAcceptedMemory = 12800
+const maxAcceptedCpu = 10000
 
 const storageValidationValues: any = {
   "memory": {
@@ -63,6 +64,17 @@ const defaultContainerResources = {
   }
 }
 
+const defaultErrorState = {
+  "memory": {
+    "min": false,
+    "max": false
+  },
+  "cpu": {
+    "min": false,
+    "max": false
+  }
+}
+
 
 const SidebarForm = (props: ISidebarFormProps) => {
   const {
@@ -77,7 +89,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
   const [formData, setFormData] = useState<any>({})
   const [storageFormData, setStorageFormData] = useState<string>('None')
   const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>(defaultContainerResources)
-  const [storageFieldErrors, setStorageFieldErrors] = useState({});
+  const [containerResourcesFieldsErrors, setContainerResourcesFieldsErrors] = useState<any>(defaultErrorState);
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
   const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...formSchema })
   const {
@@ -161,6 +173,9 @@ const SidebarForm = (props: ISidebarFormProps) => {
       parsedValue = parseInt(value); // Convert the value to a float or use parseInt() for an integer
     }
     var newContainerResourcesData = {}
+    var newStorageErrors = {
+      ...containerResourcesFieldsErrors
+    }
     if (name.includes('.')){
       const firstLevelKey = name.split('.')[0]
       const secondLevelKey = name.split('.')[1]
@@ -168,7 +183,21 @@ const SidebarForm = (props: ISidebarFormProps) => {
       const validationValue: any = storageValidationValues[firstLevelKey]
       
       if (parsedValue < validationValue.min || parsedValue > validationValue.max) {
-        toast.error(`The value must be between ${validationValue.min} and ${validationValue.max}`)
+        newStorageErrors = {
+          ...containerResourcesFieldsErrors,
+          [firstLevelKey]: {
+            ...containerResourcesFieldsErrors[firstLevelKey],
+            [secondLevelKey]: true
+          }
+        }
+      }else{
+        newStorageErrors = {
+          ...containerResourcesFieldsErrors,
+          [firstLevelKey]: {
+            ...containerResourcesFieldsErrors[firstLevelKey],
+            [secondLevelKey]: false
+          }
+        }
       }
 
       newContainerResourcesData = {
@@ -185,16 +214,23 @@ const SidebarForm = (props: ISidebarFormProps) => {
         [firstLevelKey]: type === 'checkbox' ? checked : value
       }
     }
-    
+
     const currentData = await fetchForageDataById(formId)
     const outputData = {
       ...currentData,
       containerResources: newContainerResourcesData
     }
-    //console.log('outputData', outputData)
-    // await setFormsForageData(formId, outputData)
+    await setFormsForageData(formId, outputData)
     setContainerResourcesFormData(newContainerResourcesData)
-  }, [formId, fetchForageDataById, setFormsForageData])
+    setContainerResourcesFieldsErrors(newStorageErrors)
+  }, 
+    [
+      formId,
+      fetchForageDataById,
+      setFormsForageData,
+      containerResourcesFieldsErrors,
+      containerResourcesFormData
+    ])
 
   // When opened fetch forage data and update forms data
   useEffect(() => {
@@ -204,31 +240,36 @@ const SidebarForm = (props: ISidebarFormProps) => {
       if (!forageData) {
         const defaultData = extractDefaultValues(formJsonSchema)
         handleOnChange({ data: defaultData })
-        isPieceForm && handleOnChangeStorage({ data: "None" })
         setFormData(defaultData)
-      } else {
-        handleOnChange({ data: forageData })
-        // If the form has checkboxes, we need to update the storage data
-        if (isPieceForm && !forageData.storage) {
-          handleOnChangeStorage({ data: "None" })
-          setStorageFormData("None")
-        } else if (isPieceForm) {
-          handleOnChangeStorage({ data: forageData.storage })
-          setStorageFormData(forageData.storage.storageAccessMode)
-        }
-
-        if (isPieceForm && !forageData.containerResources) {
-          const defaultContainerResourcesData = extractDefaultValues(containerResourcesSchema)
-          handleOnChangeContainerResources({ data: defaultContainerResourcesData })
-        } else if (isPieceForm) {
-          handleOnChangeContainerResources({ data: forageData.containerResources })
-        }
-        setFormData(forageData)
+        return
+      } 
+  
+      handleOnChange({ data: forageData })
+      // If the form has checkboxes, we need to update the storage data
+      if (!forageData.storage) {
+        setStorageFormData("None")
+      } else{
+        setStorageFormData(forageData.storage.storageAccessMode)
       }
+      
+      if (!forageData.containerResources) {
+        setContainerResourcesFormData(defaultContainerResources)
+      } else {
+        setContainerResourcesFormData(forageData.containerResources)
+      }
+      setFormData(forageData)
     }
     if (open) { fetchForage() }
 
-  }, [formId, formJsonSchema, open, fetchForageDataById, setFormsForageData, handleOnChange, handleOnChangeStorage, isPieceForm, handleOnChangeContainerResources])
+  }, [
+    formId,
+    formJsonSchema,
+    open,
+    fetchForageDataById,
+    setFormsForageData,
+    handleOnChange,
+    isPieceForm, 
+  ])
 
   return (
     <Drawer
@@ -308,6 +349,8 @@ const SidebarForm = (props: ISidebarFormProps) => {
                           min: minAcceptedCpu,
                           max: maxAcceptedCpu
                         }}
+                        error={containerResourcesFieldsErrors.cpu.min}
+                        helperText={containerResourcesFieldsErrors.cpu.min ? 'Min CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -323,6 +366,8 @@ const SidebarForm = (props: ISidebarFormProps) => {
                           min: minAcceptedCpu,
                           max: maxAcceptedCpu
                         }}
+                        error={containerResourcesFieldsErrors.cpu.max}
+                        helperText={containerResourcesFieldsErrors.cpu.max ? 'Max CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu: ''}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -338,6 +383,8 @@ const SidebarForm = (props: ISidebarFormProps) => {
                           min: minAcceptedMemory,
                           max: maxAcceptedMemory
                         }}
+                        error={containerResourcesFieldsErrors.memory.min}
+                        helperText={containerResourcesFieldsErrors.memory.min ? 'Min Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory: ''}
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -353,6 +400,8 @@ const SidebarForm = (props: ISidebarFormProps) => {
                           min: minAcceptedMemory,  
                           max: maxAcceptedMemory
                         }}
+                        error={containerResourcesFieldsErrors.memory.max}
+                        helperText={containerResourcesFieldsErrors.memory.max ? 'Max Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory: ''}
                       />
                     </Grid>
                     <Grid item xs={12}>
