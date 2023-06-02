@@ -1,19 +1,33 @@
-import { createAjv } from '@jsonforms/core'
-import { Drawer, Grid, Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material'
-import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
-import { JsonForms } from '@jsonforms/react'
 import { useCallback, useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid';
+import {
+  Divider,
+  Drawer,
+  Grid,
+  Typography,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
+} from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
-import { operatorStorageSchema } from 'common/schemas/storageSchemas'
-import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
-import { toast } from 'react-toastify'
-
 import DominoForm from './domino-form.component'
+// import { createAjv } from '@jsonforms/core'
+// import { operatorStorageSchema } from 'common/schemas/storageSchemas'
+// import { workflowFormSchema } from 'common/schemas/workflowFormSchema'
+// import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
+// import { toast } from 'react-toastify'
 
 
-const handleDefaultsAjv = createAjv({ useDefaults: true })
+// const handleDefaultsAjv = createAjv({ useDefaults: true })
 
 interface ISidebarFormProps {
   formSchema: any,
@@ -25,37 +39,70 @@ interface ISidebarFormProps {
   isPieceForm?: boolean,
 }
 
+// TODO check if these values make sense
+const minAcceptedMemory = 128
+const minAcceptedCpu = 100
+const maxAcceptedMemory = 12800
+const maxAcceptedCpu = 10000
+
+const storageValidationValues: any = {
+  "memory": {
+    "min": minAcceptedMemory,
+    "max": maxAcceptedMemory
+  },
+  "cpu": {
+    "min": minAcceptedCpu,
+    "max": maxAcceptedCpu
+  }
+}
+
+
+const defaultContainerResources = {
+  "useGpu": false,
+  "memory": {
+    "min": 128,
+    "max": 128
+  },
+  "cpu": {
+    "min": 100,
+    "max": 100
+  }
+}
+
+const defaultErrorState = {
+  "memory": {
+    "min": false,
+    "max": false
+  },
+  "cpu": {
+    "min": false,
+    "max": false
+  }
+}
+
+
 const SidebarForm = (props: ISidebarFormProps) => {
   const {
     formSchema,
-    uiSchema,
-    //formData,
     formId,
     open,
     onClose,
     title,
     isPieceForm = true
   } = props
-
   //const [checkboxState, setCheckboxState] = useState<any>({})
   const [formData, setFormData] = useState<any>({})
-  const [storageFormData, setStorageFormData] = useState<any>({})
-  const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>({})
-  const [checkboxes, setCheckboxes] = useState<any>([])
+  const [storageFormData, setStorageFormData] = useState<string>('Read/Write')
+  const [containerResourcesFormData, setContainerResourcesFormData] = useState<any>(defaultContainerResources)
+  const [containerResourcesFieldsErrors, setContainerResourcesFieldsErrors] = useState<any>(defaultErrorState);
   const [formWidthSpace, setFormWidthSpace] = useState<any>(12)
   const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...formSchema })
-
   const {
     setFormsForageData,
     fetchForageDataById,
-    fetchForageWorkflowEdges,
     getForageUpstreamMap,
     setForageUpstreamMap,
-    fetchForagePieceById,
-    getForageCheckboxStates,
-    setForageCheckboxStates,
-    setNameKeyUpstreamArgsMap,
-    getNameKeyUpstreamArgsMap,
+    getNameKeyUpstreamArgsMap
   } = useWorkflowsEditor()
 
   useEffect(() => {
@@ -66,14 +113,12 @@ const SidebarForm = (props: ISidebarFormProps) => {
     setFormWidthSpace(isPieceForm ? 12 : 12)
   }, [isPieceForm])
 
-
+  // Update form data in forage
   const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
-    // On change update form data in forage
     try {
       var upstreamMap = await getForageUpstreamMap()
       const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
       var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
-
       for (const key in data) {
         const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
         const upstreamId = fromUpstream && upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].upstreamId : null
@@ -87,7 +132,6 @@ const SidebarForm = (props: ISidebarFormProps) => {
         }
       }
       upstreamMap[formId] = upstreamMapFormInfo
-
       await setFormsForageData(formId, data)
       await setForageUpstreamMap(upstreamMap)
     } catch (err) {
@@ -95,9 +139,9 @@ const SidebarForm = (props: ISidebarFormProps) => {
     }
   }, [formId, setFormsForageData, getForageUpstreamMap, setForageUpstreamMap, getNameKeyUpstreamArgsMap])
 
-  const handleOnChangeStorage = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
+  // On Change of storage access mode option
+  const handleOnChangeStorage = useCallback(async (event: any) => {
     /*
-
     // On change update node form data in forage
     // The storage access mode key is inside the node form data in the `storage` key
     {
@@ -107,206 +151,130 @@ const SidebarForm = (props: ISidebarFormProps) => {
       }
     }
     */
+    if (!event?.target?.value) {
+      return
+    }
+    const data = event.target.value
     const currentData = await fetchForageDataById(formId)
     const storageData = currentData?.storage ? currentData.storage : {}
-    storageData['storageAccessMode'] = data.storageAccessMode
+    storageData['storageAccessMode'] = data
     const outputData = {
       ...currentData,
       storage: storageData
     }
     await setFormsForageData(formId, outputData)
     setStorageFormData(data)
-
   }, [fetchForageDataById, setFormsForageData, formId])
 
-  const handleOnChangeContainerResources = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
+  // On Change of container resources options
+  const handleOnChangeContainerResources = useCallback(async (event: any) => {
+    if (!event?.target) {
+      return
+    }
+    const { name, value, type, checked } = event.target;
+
+    var parsedValue = value;
+    if (type === 'number') {
+      parsedValue = parseInt(value); // Convert the value to a float or use parseInt() for an integer
+    }
+    var newContainerResourcesData = {}
+    var newStorageErrors = {
+      ...containerResourcesFieldsErrors
+    }
+    if (name.includes('.')) {
+      const firstLevelKey = name.split('.')[0]
+      const secondLevelKey = name.split('.')[1]
+
+      const validationValue: any = storageValidationValues[firstLevelKey]
+
+      if (parsedValue < validationValue.min || parsedValue > validationValue.max) {
+        newStorageErrors = {
+          ...containerResourcesFieldsErrors,
+          [firstLevelKey]: {
+            ...containerResourcesFieldsErrors[firstLevelKey],
+            [secondLevelKey]: true
+          }
+        }
+      } else {
+        newStorageErrors = {
+          ...containerResourcesFieldsErrors,
+          [firstLevelKey]: {
+            ...containerResourcesFieldsErrors[firstLevelKey],
+            [secondLevelKey]: false
+          }
+        }
+      }
+
+      newContainerResourcesData = {
+        ...containerResourcesFormData,
+        [firstLevelKey]: {
+          ...containerResourcesFormData[firstLevelKey],
+          [secondLevelKey]: type === 'checkbox' ? checked : parsedValue
+        }
+      }
+    } else {
+      const firstLevelKey = name
+      newContainerResourcesData = {
+        ...containerResourcesFormData,
+        [firstLevelKey]: type === 'checkbox' ? checked : value
+      }
+    }
+
     const currentData = await fetchForageDataById(formId)
     const outputData = {
       ...currentData,
-      containerResources: data
+      containerResources: newContainerResourcesData
     }
     await setFormsForageData(formId, outputData)
-    setContainerResourcesFormData(data)
-  }, [formId, fetchForageDataById, setFormsForageData])
+    setContainerResourcesFormData(newContainerResourcesData)
+    setContainerResourcesFieldsErrors(newStorageErrors)
+  },
+    [
+      formId,
+      fetchForageDataById,
+      setFormsForageData,
+      containerResourcesFieldsErrors,
+      containerResourcesFormData
+    ])
 
+  // When opened fetch forage data and update forms data
   useEffect(() => {
-    // When opened fetch forage data and update forms data
     const fetchForage = async () => {
       const forageData = await fetchForageDataById(formId)
+
       if (!forageData) {
         const defaultData = extractDefaultValues(formJsonSchema)
         handleOnChange({ data: defaultData })
-        const defaultStorageData = extractDefaultValues(operatorStorageSchema)
-        isPieceForm && handleOnChangeStorage({ data: defaultStorageData })
         setFormData(defaultData)
-      } else {
-        handleOnChange({ data: forageData })
-        // If the form has checkboxes, we need to update the storage data
-        if (isPieceForm && !forageData.storage) {
-          const defaultStorageData = extractDefaultValues(operatorStorageSchema)
-          handleOnChangeStorage({ data: defaultStorageData })
-        } else if (isPieceForm) {
-          handleOnChangeStorage({ data: forageData.storage })
-        }
-
-        if (isPieceForm && !forageData.containerResources) {
-          const defaultContainerResourcesData = extractDefaultValues(containerResourcesSchema)
-          handleOnChangeContainerResources({ data: defaultContainerResourcesData })
-        } else if (isPieceForm) {
-          handleOnChangeContainerResources({ data: forageData.containerResources })
-        }
-        setFormData(forageData)
+        return
       }
+
+      handleOnChange({ data: forageData })
+      // If the form has checkboxes, we need to update the storage data
+      if (!forageData.storage) {
+        setStorageFormData("Read/Write")
+      } else {
+        setStorageFormData(forageData.storage.storageAccessMode)
+      }
+
+      if (!forageData.containerResources) {
+        setContainerResourcesFormData(defaultContainerResources)
+      } else {
+        setContainerResourcesFormData(forageData.containerResources)
+      }
+      setFormData(forageData)
     }
     if (open) { fetchForage() }
 
-  }, [formId, formJsonSchema, open, fetchForageDataById, setFormsForageData, handleOnChange, handleOnChangeStorage, isPieceForm, handleOnChangeContainerResources])
-
-
-  const handleCheckbox = useCallback(async (e: any) => {
-    var auxSchema = JSON.parse(JSON.stringify(formJsonSchema))
-    var formKeys = Object.keys(formJsonSchema.properties)
-    const edges = await fetchForageWorkflowEdges()
-
-    // Save checkbox state to use when closing/opening the drawer
-    var auxCheckboxState: any = await getForageCheckboxStates()
-    if (!auxCheckboxState) {
-      auxCheckboxState = {}
-    }
-
-    var auxFormData = formData ? JSON.parse(JSON.stringify(formData)) : {}
-    if (formId in auxCheckboxState) {
-      auxCheckboxState[formId][e.target.value] = e.target.checked
-    } else {
-      auxCheckboxState[formId] = {
-        [e.target.value]: e.target.checked
-      }
-    }
-
-    await setForageCheckboxStates(auxCheckboxState)
-    //setCheckboxState(auxCheckboxState)
-
-    // We can improve the logic using a forage key using following structure: 
-    // nodeId: {
-    //   upstreams: [],
-    //   downstreams: [],
-    // }
-    // It will avoid to iterate over all edges
-    var upstreamsIds = []
-    for (var ed of edges) {
-      if (ed.target === formId) {
-        upstreamsIds.push(ed.source)
-      }
-    }
-
-    if (!upstreamsIds.length) {
-      return
-    }
-
-    var upstreamMap = await getForageUpstreamMap()
-    if (!(formId in upstreamMap)) {
-      upstreamMap[formId] = {}
-    }
-
-    const auxNameKeyUpstreamArgsMap: any = {}
-    for (let i = 0; i < formKeys.length; i++) {
-      if (formKeys[i] === e.target.value) {
-        const fieldType = formJsonSchema.properties[formKeys[i]].type
-        var dropdownSchema: any = {
-          type: fieldType
-        }
-        const enums: any = []
-        for (var upstreamId of upstreamsIds) {
-          const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
-          if (e.target.checked) {
-            // If checked add dropdown options from upstreams
-            const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
-            const outputSchema = upstreamOperator?.output_schema
-            Object.keys(outputSchema?.properties).forEach((key, index) => {
-              const obj = outputSchema?.properties[key]
-              if (obj.type === fieldType) {
-                enums.push(
-                  `${upstreamOperator?.name} - ${obj['title']}`
-                )
-                // TODO - improve this because it doesn't accept duplicated upstream nodes
-                auxNameKeyUpstreamArgsMap[`${upstreamOperator?.name} - ${obj['title']}`] = key
-              }
-            });
-            // Set upstream map to piece if using upstream
-            upstreamMap[formId][e.target.value] = {
-              fromUpstream: true,
-              upstreamId: upstreamId,
-              upstreamArgument: null
-            }
-
-          } else {
-            // If unchecked remove dropdown options from upstreams and use operator inputs schemas
-            const operatorId = parseInt(formId.split('_')[0])
-            const operator = await fetchForagePieceById(operatorId)
-            const inputSchema = operator?.input_schema
-            auxSchema.properties[formKeys[i]] = inputSchema?.properties[formKeys[i]]
-            auxFormData[formKeys[i]] = inputSchema?.properties[formKeys[i]].default
-            upstreamMap[formId][e.target.value] = {
-              fromUpstream: false,
-              upstreamId: upstreamId,
-              upstreamArgument: null
-            }
-          }
-        }
-        if (e.target.checked && !enums.length) {
-          auxCheckboxState[formId][e.target.value] = false
-          await setForageCheckboxStates(auxCheckboxState)
-          toast.error('There are no upstream outputs with the same type as the selected field')
-        }
-        else if (e.target.checked) {
-          dropdownSchema['enum'] = enums
-          dropdownSchema['default'] = enums[0]
-          auxSchema.properties[formKeys[i]] = dropdownSchema
-          auxFormData[formKeys[i]] = dropdownSchema.default
-        }
-      }
-    }
-    const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
-    setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
-    setForageUpstreamMap(upstreamMap)
-    setFormJsonSchema(auxSchema)
-    setFormData(auxFormData)
-
-  },
-    [
-      formJsonSchema,
-      formId,
-      fetchForageWorkflowEdges,
-      fetchForagePieceById,
-      setForageUpstreamMap,
-      getForageUpstreamMap,
-      formData,
-      getForageCheckboxStates,
-      setForageCheckboxStates,
-      setNameKeyUpstreamArgsMap,
-      getNameKeyUpstreamArgsMap
-    ])
-
-  useEffect(() => {
-    // This is a hack because customizing jsonforms ui for accepting multi column would be harder than create a custom checkbox column
-    // When form schema changes, update checkboxes
-    const loadCheckboxes = async () => {
-      var auxCheckboxes: any = []
-      var forageCheckboxState: any = await getForageCheckboxStates()
-      for (const key in formJsonSchema?.properties) {
-        var checked = false
-        if (formId in forageCheckboxState) {
-          checked = forageCheckboxState[formId][key]
-        }
-        const newCheckbox = checked ? <FormControlLabel sx={{ justifyContent: 'center' }} key={uuidv4()} control={<Checkbox onChange={handleCheckbox} value={key} defaultChecked />} label="" /> : <FormControlLabel key={uuidv4()} sx={{ justifyContent: 'center' }} control={<Checkbox onChange={handleCheckbox} value={key} />} label="" />
-        auxCheckboxes.push(newCheckbox)
-      }
-      setCheckboxes(auxCheckboxes)
-    }
-    if (formJsonSchema) {
-      loadCheckboxes()
-    }
-  }, [formJsonSchema, handleCheckbox, formId, getForageCheckboxStates])
+  }, [
+    formId,
+    formJsonSchema,
+    open,
+    fetchForageDataById,
+    setFormsForageData,
+    handleOnChange,
+    isPieceForm,
+  ])
 
   return (
     <Drawer
@@ -325,75 +293,161 @@ const SidebarForm = (props: ISidebarFormProps) => {
         <Grid container>
           {
             isPieceForm ?
-              <Grid container spacing={2} sx={{ marginBottom: '20px' }}>
-                <Grid item xs={10}>
-                  <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Input Argument</Typography>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <Grid container spacing={2} sx={{ marginBottom: '20px' }}>
+                  <Grid item xs={10}>
+                    <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Input Arguments</Typography>
+                  </Grid>
+                  <Grid item xs={12 - 10}>
+                    <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Upstream</Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12 - 10}>
-                  <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Upstream</Typography>
+
+                <Grid container sx={{ paddingBottom: "25px" }}>
+                  <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
+                    <Grid item xs={12}>
+                      <DominoForm
+                        formId={formId}
+                        schema={formJsonSchema}
+                        initialData={formData}
+                        onChange={handleOnChange}
+                      />
+                    </Grid>
+
+                    <div style={{ marginBottom: '50px' }} />
+
+                    <Accordion
+                      sx={{
+                        '&.MuiAccordion-root:before': {
+                          display: 'none',
+                        },
+                      }}>
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>
+                          Advanced Options
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} marginBottom={2}>
+                            <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Storage</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <FormControl fullWidth>
+                              <InputLabel>Storage Access Mode</InputLabel>
+                              <Select
+                                name="storageAccessMode"
+                                value={storageFormData}
+                                onChange={handleOnChangeStorage}
+                                required
+                              >
+                                <MenuItem value="None">None</MenuItem>
+                                <MenuItem value="Read">Read</MenuItem>
+                                <MenuItem value="Read/Write">Read/Write</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        </Grid>
+
+                        <div style={{ marginBottom: '50px' }} />
+
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} marginBottom={2}>
+                            <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"cpu.min"}
+                              label="CPU Min"
+                              type="number"
+                              value={containerResourcesFormData.cpu.min}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedCpu,
+                                max: maxAcceptedCpu
+                              }}
+                              error={containerResourcesFieldsErrors.cpu.min}
+                              helperText={containerResourcesFieldsErrors.cpu.min ? 'Min CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"cpu.max"}
+                              label="CPU Max"
+                              type="number"
+                              value={containerResourcesFormData.cpu.max}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedCpu,
+                                max: maxAcceptedCpu
+                              }}
+                              error={containerResourcesFieldsErrors.cpu.max}
+                              helperText={containerResourcesFieldsErrors.cpu.max ? 'Max CPU must be between ' + minAcceptedCpu + ' and ' + maxAcceptedCpu : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"memory.min"}
+                              label="Memory Min"
+                              type="number"
+                              value={containerResourcesFormData.memory.min}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedMemory,
+                                max: maxAcceptedMemory
+                              }}
+                              error={containerResourcesFieldsErrors.memory.min}
+                              helperText={containerResourcesFieldsErrors.memory.min ? 'Min Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              name={"memory.max"}
+                              label="Memory Max"
+                              type="number"
+                              value={containerResourcesFormData.memory.max}
+                              onChange={handleOnChangeContainerResources}
+                              required
+                              fullWidth
+                              inputProps={{
+                                min: minAcceptedMemory,
+                                max: maxAcceptedMemory
+                              }}
+                              error={containerResourcesFieldsErrors.memory.max}
+                              helperText={containerResourcesFieldsErrors.memory.max ? 'Max Memory must be between ' + minAcceptedMemory + ' and ' + maxAcceptedMemory : ''}
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name={"useGpu"}
+                                  checked={containerResourcesFormData.useGpu}
+                                  onChange={handleOnChangeContainerResources}
+                                />
+                              }
+                              label="Use GPU"
+                            />
+                          </Grid>
+                        </Grid>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Grid>
                 </Grid>
-              </Grid>
+              </div>
               : null
           }
-          <Grid container sx={{ paddingBottom: "25px" }}>
-            <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
-              <DominoForm
-                schema={formJsonSchema}
-                initialData={formData}
-                onChange={handleOnChange}
-              />
-              {/* <JsonForms
-                schema={formJsonSchema}
-                uischema={uiSchema || undefined}
-                data={formData}
-                renderers={materialRenderers}
-                onChange={handleOnChange}
-                ajv={handleDefaultsAjv}
-                cells={materialCells}
-              /> */}
-            </Grid>
-            {/* {
-              isPieceForm ?
-                <Grid item xs={3}>
-                  <FormGroup sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', height: '100%' }}>
-                    {checkboxes}
-                  </FormGroup>
-                </Grid> : null
-            } */}
-          </Grid>
-          {
-            isPieceForm ?
-              <Grid container spacing={0}>
-                <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid", marginBottom: '20px', marginTop: '20px' }}>Storage</Typography>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', paddingBottom: '25px' }} className='sidebar-jsonforms-grid'>
-                  <JsonForms
-                    data={storageFormData}
-                    onChange={handleOnChangeStorage}
-                    schema={operatorStorageSchema}
-                    renderers={materialRenderers}
-                    ajv={handleDefaultsAjv}
-                    cells={materialCells}
-                  />
-                </div>
-
-                <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid", marginBottom: '20px', marginTop: '20px' }}>ADVANCED - Container resources</Typography>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%' }} className='sidebar-jsonforms-grid'>
-                  <JsonForms
-                    data={containerResourcesFormData}
-                    onChange={handleOnChangeContainerResources}
-                    schema={containerResourcesSchema}
-                    renderers={materialRenderers}
-                    ajv={handleDefaultsAjv}
-                    cells={materialCells}
-                  />
-                </div>
-              </Grid>
-              : null
-          }
-
         </Grid>
+        <div style={{ marginBottom: '70px' }} />
       </div>
     </Drawer>
   )
-}
-export default SidebarForm
+};
+
+export default SidebarForm;

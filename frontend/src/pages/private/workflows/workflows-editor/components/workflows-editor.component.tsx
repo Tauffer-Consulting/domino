@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import WorkflowEditorPanelComponent from './workflow-editor-panel.component'
 import { PermanentDrawerRightWorkflows } from './drawer-menu-component'
-import SidebarForm from './sidebar-form.component'
+import SidebarSettingsForm from './sidebar-settings-form.component'
 import { workflowFormSchema, workflowFormUISchema } from 'common/schemas/workflowFormSchema'
 import { useWorkflowsEditor } from "context/workflows/workflows-editor.context"
 import { workflowFormName } from "../../../../../constants"
@@ -44,18 +44,20 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
 
   const validateWorkflowForms = useCallback(async (payload: any) => {
     const workflowData = payload.workflow
-    const workflowSchema: any = workflowFormSchema.properties.config
-    const workflowSchemaRequireds = workflowSchema.required
+    const workflowRequiredFields: any = {
+      "name": "Name",
+      "scheduleInterval": "Schedule Interval",
+      "startDate": "Start Date",
+    }
 
     if (!workflowData || workflowData === undefined) {
-      throw new Error('Please fill in the workflow settings.')
+      throw new Error('Workflow settings are missing.')
     }
-    // iterate over config keys and validate workflow data
-    for (const key in workflowSchema.properties) {
-      if (workflowSchemaRequireds.includes(key)) {
-        if (!(key in workflowData) || !workflowData[key]) {
-          const title = workflowSchema.properties[key].title
-          throw new Error(`Please the ${title} field in Settings.`)
+
+    for (const fieldKey in workflowData) {
+      if (fieldKey in workflowRequiredFields) {
+        if (!(fieldKey in workflowData) || !workflowData[fieldKey]) {
+          throw new Error(`Please fill the ${workflowRequiredFields[fieldKey]} field in Settings.`)
         }
       }
     }
@@ -247,7 +249,11 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
             handleClose={() => setMenuOpen(!menuOpen)}
           />
         </Grid>
-        <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} />
+        {/* <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} /> */}
+        <SidebarSettingsForm 
+          onClose={toggleDrawer(false)} 
+          open={drawerState} 
+        />
       </div>
     </>
   )

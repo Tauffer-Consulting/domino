@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     TextField,
     Select,
@@ -9,6 +9,7 @@ import {
     FormControl,
     InputLabel,
     SelectChangeEvent,
+    Grid
 } from '@mui/material';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -16,19 +17,37 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import CodeEditor from '@uiw/react-textarea-code-editor';
+import { toast } from 'react-toastify';
+import dayjs from 'dayjs';
 
+import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import ArrayInputItem from './domino-form-item-array.component';
+import TextCodeItem from './domino-form-item-textcode.component';
 
 
 interface DominoFormItemProps {
+    formId: string;
     schema: any;
     itemKey: any;
     value: any;
     onChange: (val: any) => void;
 }
 
-const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value, onChange }) => {
+const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey, value, onChange }) => {
+    const {
+        fetchForageWorkflowEdges,
+        getForageUpstreamMap,
+        setForageUpstreamMap,
+        fetchForagePieceById,
+        getForageCheckboxStates,
+        setForageCheckboxStates,
+        setNameKeyUpstreamArgsMap,
+        getNameKeyUpstreamArgsMap,
+    } = useWorkflowsEditor();
+    const formFieldType = schema.properties[itemKey].type;
+    const [formLabelUpstreamIdMap, setFormLabelUpstreamIdMap] = useState<Record<string, string>>({});
+    const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
+    const [upstreamSelectValue, setUpstreamSelectValue] = useState<string>('');
     const [checkedFromUpstream, setCheckedFromUpstream] = useState<boolean>(() => {
         if (schema.properties[itemKey]?.from_upstream === "always") {
             if (schema.properties[itemKey].type === 'array') {
@@ -39,34 +58,16 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ schema, itemKey, value,
             return false;
         }
     });
-    const [codeValue, setCodeValue] = useState(() => {
-        if (schema.properties[itemKey]?.default) {
-            return schema.properties[itemKey].default;
-        } else {
-            return `# Do not modify the function definition line 
-def custom_function(input_args: list):
-    # Write your code here
-    print(input_args)
 
-    # Return the output of the function as an object
-    return {
-        "out_arg_1": "out_value_1", 
-        "out_arg_2": "out_value_2"
-    }`;
-        }
-    });
-
-    // console.log(itemKey);
-    // console.log(value)
-
+    // The schema for this item
     let itemSchema: any = schema.properties[itemKey];
 
-    // if value is undefined, read the defautl value from the schema
+    // The value for this item
     if (value === undefined) {
         value = itemSchema.default;
     }
 
-    // from upstream condition, if "never" or "always"
+    // from_upstream condition, if "never" or "always"
     let checkedFromUpstreamAllowed: boolean = true;
     let checkedFromUpstreamEditable: boolean = true;
     let arrayItemsFromUpstreamOption: string = "allowed";
@@ -86,36 +87,204 @@ def custom_function(input_args: list):
     }
 
     // Handle input change
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(event.target.value);
-    };
+    const handleInputChange = useCallback((event: any, source: string) => {
+        let fieldValue = event?.target?.value || "";
+        if (source === 'datePicker' || source === 'dateTimePicker') {
+            const newDate = event;
+            fieldValue = new Date(newDate).toISOString();
+        } else if (source === 'timePicker') {
+            const newTime = event;
+            // const newDate = dayjs().set('hour', newTime.getHours()).set('minute', newTime.getMinutes()).set('second', newTime.getSeconds());
+            console.log("newDate", newTime);
+            // fieldValue = new Date(newDate).toISOString();
+        } else {
+            const { name, value, type, checked } = event.target;
+            fieldValue = type === 'checkbox' ? checked : value;
+        }
+        onChange(fieldValue);
+    }, [onChange]);
 
-    const handleSelectChange = (event: SelectChangeEvent<any>) => {
+    const handleSelectChange = useCallback((event: SelectChangeEvent<any>) => {
         onChange(event.target.value as string);
-    };
+    }, [onChange]);
 
-    // FomrUpstream logic
-    const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setCheckedFromUpstream(event.target.checked);
-    };
+    // From upstream checkbox callback
+    const handleCheckboxFromUpstreamChange = useCallback(async (checked: boolean) => {
+        setCheckedFromUpstream(checked);
 
-    const handleSelectFromUpstreamChange = (event: SelectChangeEvent<any>) => {
-        console.log(event.target.value);
-    };
+        const edges = await fetchForageWorkflowEdges()
 
+        var auxCheckboxState: any = await getForageCheckboxStates()
+        if (!auxCheckboxState) {
+            auxCheckboxState = {}
+        }
+        if (formId in auxCheckboxState) {
+            auxCheckboxState[formId][itemKey] = checked
+        } else {
+            auxCheckboxState[formId] = {
+                [itemKey]: checked
+            }
+        }
+        await setForageCheckboxStates(auxCheckboxState)
+
+        // We can improve the logic using a forage key with the following structure: 
+        // nodeId: {
+        //   upstreams: [],
+        //   downstreams: [],
+        // }
+        // It will avoid to iterate over all edges
+        var upstreamsIds = []
+        for (var ed of edges) {
+            if (ed.target === formId) {
+                upstreamsIds.push(ed.source)
+            }
+        }
+        if (!upstreamsIds.length) {
+            auxCheckboxState[formId][itemKey] = false
+            setCheckedFromUpstream(false);
+            await setForageCheckboxStates(auxCheckboxState)
+            toast.error('This piece has no upstreams.')
+            return
+        }
+
+        var upstreamMap = await getForageUpstreamMap()
+        if (!(formId in upstreamMap)) {
+            upstreamMap[formId] = {}
+        }
+
+        const auxNameKeyUpstreamArgsMap: any = {}
+        const auxLabelUpstreamIdMap: any = {}
+        const upstreamOptions: string[] = []
+        for (const upstreamId of upstreamsIds) {
+            const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
+            var fromUpstream = false
+            if (checked) {
+                const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
+                const upstreamOutputSchema = upstreamOperator?.output_schema
+                Object.keys(upstreamOutputSchema?.properties).forEach((key, index) => {
+                    const obj = upstreamOutputSchema?.properties[key]
+                    if (obj.type === formFieldType) {
+                        var upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
+                        const counter = 1;
+                        while (upstreamOptions.includes(upstreamOptionName)) {
+                            upstreamOptionName = `${upstreamOptionName} (${counter})`
+                        }
+                        upstreamOptions.push(upstreamOptionName)
+                        auxNameKeyUpstreamArgsMap[upstreamOptionName] = key
+                        auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
+                    }
+                })
+                fromUpstream = true
+            }
+            upstreamMap[formId][itemKey] = {
+                ...upstreamMap[formId][itemKey],
+                fromUpstream: fromUpstream,
+                upstreamId: null,
+            }
+        }
+        if (checked && !upstreamOptions.length) {
+            auxCheckboxState[formId][itemKey] = false
+            setCheckedFromUpstream(false);
+            await setForageCheckboxStates(auxCheckboxState)
+            toast.error('There are no upstream outputs with the same type as the selected field')
+            return
+        }
+
+        var upstreamValue = upstreamMap[formId][itemKey].value || ""
+        if (!checked) {
+            upstreamValue = value
+        }
+        if (upstreamOptions.length && !upstreamOptions.includes(upstreamValue)) {
+            upstreamValue = upstreamOptions[0]
+        }
+        const upstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ?
+            auxLabelUpstreamIdMap[upstreamValue] : null
+        const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue]
+            ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
+        upstreamMap[formId][itemKey] = {
+            ...upstreamMap[formId][itemKey],
+            upstreamId: upstreamId,
+            value: upstreamValue,
+            upstreamArgument: upstreamArgument
+        }
+        setUpstreamOptions(upstreamOptions)
+        setFormLabelUpstreamIdMap(auxLabelUpstreamIdMap)
+        const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
+        setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
+        setForageUpstreamMap(upstreamMap)
+        setUpstreamSelectValue(upstreamValue)
+    }, [
+        value,
+        formId,
+        itemKey,
+        fetchForageWorkflowEdges,
+        getForageCheckboxStates,
+        setForageCheckboxStates,
+        getForageUpstreamMap,
+        formFieldType,
+        fetchForagePieceById,
+        setForageUpstreamMap,
+        getNameKeyUpstreamArgsMap,
+        setNameKeyUpstreamArgsMap,
+    ]);
+
+    // Load checkboxes states from localForage
+    useEffect(() => {
+        (async () => {
+            var auxCheckboxState: any = await getForageCheckboxStates()
+            if (!(formId in auxCheckboxState)) {
+                return
+            }
+            const formCheckboxStates = auxCheckboxState[formId]
+            if (itemKey in formCheckboxStates) {
+                await handleCheckboxFromUpstreamChange(formCheckboxStates[itemKey])
+            } else {
+                await handleCheckboxFromUpstreamChange(false)
+            }
+        })()
+    }, [getForageCheckboxStates, formId, itemKey, getForageUpstreamMap, handleCheckboxFromUpstreamChange])
+
+    // Select fromUpstream source
+    const handleSelectFromUpstreamChange = useCallback(async (event: SelectChangeEvent<any>) => {
+        setUpstreamSelectValue(event.target.value as string);
+        var upstreamMap = await getForageUpstreamMap()
+        const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
+        var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
+        const fromUpstream = upstreamMapFormInfo[itemKey] ? upstreamMapFormInfo[itemKey].fromUpstream : false
+        const upstreamId = fromUpstream && formLabelUpstreamIdMap[event.target.value as string] ? formLabelUpstreamIdMap[event.target.value as string] : null
+
+        upstreamMapFormInfo[itemKey] = {
+            fromUpstream: fromUpstream,
+            upstreamId: upstreamId,
+            upstreamArgument: fromUpstream && nameKeyUpstreamArgsMap[event.target.value] ? nameKeyUpstreamArgsMap[event.target.value] : null,
+            value: (event.target.value === null || event.target.value === undefined) ? null : event.target.value
+        }
+        upstreamMap[formId] = upstreamMapFormInfo
+        await setForageUpstreamMap(upstreamMap)
+        onChange(event.target.value);
+    }, [
+        itemKey,
+        getForageUpstreamMap,
+        getNameKeyUpstreamArgsMap,
+        formId,
+        setForageUpstreamMap,
+        onChange,
+        formLabelUpstreamIdMap
+
+    ]);
+
+    // Set input element based on type
     let inputElement: JSX.Element;
-
     if (checkedFromUpstream) {
-        const options = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
         inputElement = (
             <FormControl fullWidth>
-                <InputLabel>{itemKey}</InputLabel>
+                <InputLabel>{itemSchema?.title}</InputLabel>
                 <Select
                     fullWidth
-                    value={value}
+                    value={upstreamSelectValue}
                     onChange={handleSelectFromUpstreamChange}
                 >
-                    {options.map(option => (
+                    {upstreamOptions.map(option => (
                         <MenuItem key={option} value={option}>
                             {option}
                         </MenuItem>
@@ -145,7 +314,7 @@ def custom_function(input_args: list):
         inputElement = <FormControlLabel
             control={<Checkbox
                 checked={value}
-                onChange={handleInputChange}
+                onChange={(event) => handleInputChange(event, "boolean")}
             />}
             labelPlacement="start"
             label={itemSchema.title}
@@ -157,7 +326,7 @@ def custom_function(input_args: list):
             type="number"
             label={itemSchema.title}
             value={value}
-            onChange={handleInputChange}
+            onChange={(event) => handleInputChange(event, "number")}
         />;
     } else if (itemSchema.type === 'integer') {
         inputElement = <TextField
@@ -166,7 +335,7 @@ def custom_function(input_args: list):
             type="number"
             label={itemSchema.title}
             value={value}
-            onChange={handleInputChange}
+            onChange={(event) => handleInputChange(event, "integer")}
         />;
     } else if (itemSchema.type === 'array') {
         inputElement = <ArrayInputItem
@@ -183,6 +352,8 @@ def custom_function(input_args: list):
                         views={['day', 'month', 'year']}
                         format="DD/MM/YYYY"
                         sx={{ width: "100%" }}
+                        value={dayjs(value)}
+                        onChange={(event) => handleInputChange(event, "datePicker")}
                     />
                 </DemoContainer>
             </LocalizationProvider>
@@ -196,6 +367,9 @@ def custom_function(input_args: list):
                         label={itemSchema.title}
                         format='HH:mm'
                         sx={{ width: "100%" }}
+                        // value={new Date(`1970-01-01T${value}:00`)}  // this trick is necessary to properly parse only time
+                        value={dayjs(value)}
+                        onChange={(event) => handleInputChange(event, "timePicker")}
                     />
                 </DemoContainer>
             </LocalizationProvider>
@@ -209,29 +383,16 @@ def custom_function(input_args: list):
                         label={itemSchema.title}
                         format='DD/MM/YYYY HH:mm'
                         sx={{ width: "100%" }}
+                        value={dayjs(value)}
+                        onChange={(event) => handleInputChange(event, "dateTimePicker")}
                     />
                 </DemoContainer>
             </LocalizationProvider>
         );
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'codeeditor') {
         inputElement = (
-            <CodeEditor
-                value={codeValue}
-                language="python"
-                placeholder="Enter Python code."
-                onChange={(evn) => setCodeValue(evn.target.value)}
-                padding={15}
-                style={{
-                    fontSize: 12,
-                    backgroundColor: "#f5f5f5",
-                    fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
-                    borderRadius: 4,
-                    border: "1px solid #ddd",
-                    width: "100%",
-                    minHeight: "200px",
-                    maxHeight: "400px",
-                    overflowY: "scroll",
-                }}
+            <TextCodeItem
+                itemSchema={itemSchema}
             />
         )
     } else if (itemSchema.type === 'string') {
@@ -242,7 +403,7 @@ def custom_function(input_args: list):
                 variant="outlined"
                 label={itemSchema.title}
                 value={value}
-                onChange={handleInputChange}
+                onChange={(event) => handleInputChange(event, "string")}
             />
         );
     } else {
@@ -258,13 +419,17 @@ def custom_function(input_args: list):
             alignItems="flex-start"
             sx={{ paddingTop: "10px" }}
         >
-            {inputElement}
+            <Grid item xs={checkedFromUpstreamAllowed ? 10 : 12}>
+                {inputElement}
+            </Grid>
             {checkedFromUpstreamAllowed ? (
-                <Checkbox
-                    checked={checkedFromUpstream}
-                    onChange={handleCheckboxFromUpstreamChange}
-                    disabled={!checkedFromUpstreamEditable}
-                />
+                <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Checkbox
+                        checked={checkedFromUpstream}
+                        onChange={(event) => handleCheckboxFromUpstreamChange(event.target.checked)}
+                        disabled={!checkedFromUpstreamEditable}
+                    />
+                </Grid>
             ) : null}
         </Box>
     );

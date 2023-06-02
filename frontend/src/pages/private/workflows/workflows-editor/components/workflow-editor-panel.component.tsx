@@ -149,7 +149,7 @@ const WorkflowEditorPanelComponent = () => {
     upstreamMap[newNode.id] = upstreamMapFormInfo
     await setForageUpstreamMap(upstreamMap)
     defaultData['storage'] = {
-      "storageAccessMode": 'Read/Write'
+      "storageAccessMode": 'Read/Write',
     }
     defaultData['containerResources'] = containerResourcesDefaultData
     // Set default data for the node form - used in json-forms

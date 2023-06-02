@@ -376,9 +376,9 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
         ui_schema['nodes'][taskName] = element
         const taskDict: any = {}
 
-        const { source, baseFolder, ...providerOptions } = storageWorkflowData || {}
+        const { storageSource, baseFolder, ...providerOptions } = storageWorkflowData || {}
         const storageDict: any = {
-          "source": source || null,
+          "source": storageSource || null,
           "base_folder": baseFolder || null,
           "mode": elementData?.storage?.storageAccessMode,
           "provider_options": providerOptions || null

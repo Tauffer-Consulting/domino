@@ -193,14 +193,14 @@ class WorkflowService(object):
             is_dag_broken = dag_uuid in import_errors_uuids
 
             schedule_interval = 'none'
-            is_active = 'creating'
-            is_paused = 'creating'
+            is_active = False
+            is_paused = False
             status = WorkflowStatus.creating.value
             if is_dag_broken:
                 status = WorkflowStatus.failed.value
                 schedule_interval = 'failed'
-                is_active = 'failed'
-                is_paused = 'failed'
+                is_active = False
+                is_paused = False
 
             if response and not is_dag_broken:
                 schedule_interval = response.get("schedule_interval")
@@ -397,6 +397,7 @@ class WorkflowService(object):
         - end_date (not none)
         """
         workflow_kwargs['dag_id'] = workflow_kwargs.pop('id')
+        select_end_date = workflow_kwargs.pop('select_end_date') # TODO define how to use select end date
         workflow_kwargs['schedule_interval'] = None if workflow_kwargs['schedule_interval'] == 'none' else f"@{workflow_kwargs['schedule_interval']}"
 
         workflow_processed_schema = {
