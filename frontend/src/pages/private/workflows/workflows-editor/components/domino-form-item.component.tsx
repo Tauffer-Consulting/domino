@@ -89,9 +89,14 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
     // Handle input change
     const handleInputChange = useCallback((event: any, source: string) => {
         let fieldValue = event?.target?.value || "";
-        if (source === 'datePicker' || source === 'timePicker' || source === 'dateTimePicker') {
+        if (source === 'datePicker' || source === 'dateTimePicker') {
             const newDate = event;
             fieldValue = new Date(newDate).toISOString();
+        } else if (source === 'timePicker') {
+            const newTime = event;
+            // const newDate = dayjs().set('hour', newTime.getHours()).set('minute', newTime.getMinutes()).set('second', newTime.getSeconds());
+            console.log("newDate", newTime);
+            // fieldValue = new Date(newDate).toISOString();
         } else {
             const { name, value, type, checked } = event.target;
             fieldValue = type === 'checkbox' ? checked : value;
@@ -362,6 +367,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                         label={itemSchema.title}
                         format='HH:mm'
                         sx={{ width: "100%" }}
+                        // value={new Date(`1970-01-01T${value}:00`)}  // this trick is necessary to properly parse only time
                         value={dayjs(value)}
                         onChange={(event) => handleInputChange(event, "timePicker")}
                     />
