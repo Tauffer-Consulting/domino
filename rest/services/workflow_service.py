@@ -397,6 +397,7 @@ class WorkflowService(object):
         - end_date (not none)
         """
         workflow_kwargs['dag_id'] = workflow_kwargs.pop('id')
+        select_end_date = workflow_kwargs.pop('select_end_date') # TODO define how to use select end date
         workflow_kwargs['schedule_interval'] = None if workflow_kwargs['schedule_interval'] == 'none' else f"@{workflow_kwargs['schedule_interval']}"
 
         workflow_processed_schema = {
