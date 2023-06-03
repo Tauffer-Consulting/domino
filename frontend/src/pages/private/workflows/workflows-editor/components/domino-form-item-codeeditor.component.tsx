@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import CodeEditor from '@uiw/react-textarea-code-editor';
 
 
-interface TextCodeItemProps {
+interface CodeEditorItemProps {
     itemSchema: any;
     codeValue: string;
     onChange: (value: any) => void;
 }
 
-const TextCodeItem: React.FC<TextCodeItemProps> = ({ itemSchema, codeValue, onChange }) => {
+const CodeEditorItem: React.FC<CodeEditorItemProps> = ({ itemSchema, codeValue, onChange }) => {
 
     return (
         <CodeEditor
@@ -32,4 +32,4 @@ const TextCodeItem: React.FC<TextCodeItemProps> = ({ itemSchema, codeValue, onCh
     );
 };
 
-export default React.memo(TextCodeItem);
+export default React.memo(CodeEditorItem);

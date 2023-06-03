@@ -22,7 +22,7 @@ import dayjs from 'dayjs';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import ArrayInputItem from './domino-form-item-array.component';
-import TextCodeItem from './domino-form-item-textcode.component';
+import CodeEditorItem from './domino-form-item-codeeditor.component';
 
 
 interface DominoFormItemProps {
@@ -397,7 +397,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         );
     } else if (itemSchema.type === 'string' && itemSchema?.widget === 'codeeditor') {
         inputElement = (
-            <TextCodeItem
+            <CodeEditorItem
                 itemSchema={itemSchema}
                 onChange={(event) => handleInputChange(event, "codeeditor")}
                 codeValue={value}
