@@ -26,17 +26,21 @@ interface ArrayInputItemProps {
     itemSchema: any;
     parentSchemaDefinitions: any;
     fromUpstreamMode?: FromUpstreamOptions | string;
+    arrayItems: Array<any> | { [key: string]: any }[];
+    onChange: (value: any) => void;
 }
 
-const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions, fromUpstreamMode }) => {
-    const [arrayItems, setArrayItems] = useState<any[] | { [key: string]: any }[]>(() => {
-        if (itemSchema.default && itemSchema.default.length > 0) {
-            const initArray = [...itemSchema.default];
-            return initArray;
-        } else {
-            return [];
-        }
-    });
+const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions, fromUpstreamMode, arrayItems, onChange }) => {
+    // const [arrayItems, setArrayItems] = useState<any[] | { [key: string]: any }[]>(() => {
+    //     if (itemSchema.default && itemSchema.default.length > 0) {
+    //         const initArray = [...itemSchema.default];
+    //         return initArray;
+    //     } else {
+    //         return [];
+    //     }
+    // });
+
+    console.log(arrayItems)
 
     // Sub-items schema
     let subItemSchema: any = itemSchema.items;
@@ -83,11 +87,12 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
     const handleArrayItemChange = (index: number, itemKey: string, value: string) => {
         const updatedItems = [...arrayItems];
         updatedItems[index][itemKey] = value;
-        setArrayItems(updatedItems);
+        onChange(updatedItems);
     };
 
     // Add and delete items
-    // TODO - fix setArrayItems to fill the props with correct values types, right now just guessing an empty string, but this will most likely fail e.g. boolen types
+    // TODO - fix setArrayItems to fill the props with correct values types, 
+    // right now just guessing an empty string, but this will most likely fail e.g. boolen types
     const handleAddItem = () => {
         let newItemPropsValues: { [key: string]: any } = {};
         let newItemPropsChecked: { [key: string]: boolean } = {};
@@ -102,14 +107,14 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
             return null;
         });
         setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, newItemPropsChecked]);
-        setArrayItems([...arrayItems, newItemPropsValues]);
+        onChange([...arrayItems, newItemPropsValues]);
     };
 
     // TODO - this is not working when deleting items with fromUpstrem checked
     const handleDeleteItem = (index: number) => {
         const updatedItems = [...arrayItems];
         updatedItems.splice(index, 1);
-        setArrayItems(updatedItems);
+        onChange(updatedItems);
         const updatedCheckedFromUpstreamItemProp = [...checkedFromUpstreamItemProp];
         updatedCheckedFromUpstreamItemProp.splice(index, 1);
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
@@ -141,7 +146,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         } else {
             updatedItems[index] = value;
         }
-        setArrayItems(updatedItems);
+        // setArrayItems(updatedItems);
     };
 
     // Each item in the array can be multiple inputs, with varied types like text, select, checkbox, etc.
@@ -257,4 +262,4 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
     );
 };
 
-export default ArrayInputItem;
+export default React.memo(ArrayInputItem);

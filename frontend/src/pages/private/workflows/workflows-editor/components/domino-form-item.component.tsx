@@ -104,6 +104,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             fieldValue = dayjs(newTime).format('HH:mm');
         } else if (source === 'codeeditor') {
             fieldValue = event;
+        } else if (source === 'array') {
+            fieldValue = event;
         } else {
             const { name, value, type, checked } = event.target;
             fieldValue = type === 'checkbox' ? checked : value;
@@ -348,6 +350,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             itemSchema={itemSchema}
             parentSchemaDefinitions={schema.definitions}
             fromUpstreamMode={arrayItemsFromUpstreamOption}
+            arrayItems={value}
+            onChange={(event) => handleInputChange(event, "array")}
         />
     } else if (itemSchema.type === 'string' && itemSchema?.format === 'date') {
         inputElement = (
