@@ -101,8 +101,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             fieldValue = new Date(newDate).toISOString();
         } else if (source === 'timePicker') {
             const newTime = event;
-            // const newDate = dayjs().set('hour', newTime.getHours()).set('minute', newTime.getMinutes()).set('second', newTime.getSeconds());
-            // fieldValue = new Date(newDate).toISOString();
+            fieldValue = dayjs(newTime).format('HH:mm');
         } else {
             const { name, value, type, checked } = event.target;
             fieldValue = type === 'checkbox' ? checked : value;
