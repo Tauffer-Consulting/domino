@@ -102,6 +102,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         } else if (source === 'timePicker') {
             const newTime = event;
             fieldValue = dayjs(newTime).format('HH:mm');
+        } else if (source === 'codeeditor') {
+            fieldValue = event;
         } else {
             const { name, value, type, checked } = event.target;
             fieldValue = type === 'checkbox' ? checked : value;
@@ -132,12 +134,6 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         }
         await setForageCheckboxStates(auxCheckboxState)
 
-        // We can improve the logic using a forage key with the following structure: 
-        // nodeId: {
-        //   upstreams: [],
-        //   downstreams: [],
-        // }
-        // It will avoid to iterate over all edges
         var upstreamsIds = []
         for (var ed of edges) {
             if (ed.target === formId) {
@@ -403,6 +399,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         inputElement = (
             <TextCodeItem
                 itemSchema={itemSchema}
+                onChange={(event) => handleInputChange(event, "codeeditor")}
+                codeValue={value}
             />
         )
     } else if (itemSchema.type === 'string') {
