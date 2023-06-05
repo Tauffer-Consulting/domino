@@ -68,6 +68,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         arrayOfProperties[itemSchema.title] = { "": "" };
     }
     const numProps = Object.keys(arrayOfProperties).length;
+    const itemsType = subItemSchema?.type
     const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
 
 
@@ -189,7 +190,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             return
         }
 
-
         for (var i=0; i<checkedFromUpstreamItemProp.length; i++){
             if (i === index){
                 auxCheckboxState[formId][itemKey][i] = checked
@@ -198,17 +198,58 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             }
         }
         await setForageCheckboxStates(auxCheckboxState)
-        
+
+        const auxNameKeyUpstreamArgsMap: any = {}
+        const auxLabelUpstreamIdMap: any = {}
+        const upstreamOptions: string[] = []
+
+        var upstreamMap = await getForageUpstreamMap()
+        if (!(formId in upstreamMap)) {
+            upstreamMap[formId] = {}
+        }
+
+        for (const upstreamId of upstreamsIds) {
+            const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
+            var fromUpstream = false
+            if (checked){
+                const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
+                const upstreamOutputSchema = upstreamOperator?.output_schema
+                Object.keys(upstreamOutputSchema?.properties).forEach((key, index) => {
+                    const obj = upstreamOutputSchema?.properties[key]
+                    var objType = obj.format ? obj.format : obj.type
+                    if (objType === itemsType) {
+                        var upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
+                        const counter = 1;
+                        while (upstreamOptions.includes(upstreamOptionName)) {
+                            upstreamOptionName = `${upstreamOptionName} (${counter})`
+                        }
+                        upstreamOptions.push(upstreamOptionName)
+                        auxNameKeyUpstreamArgsMap[upstreamOptionName] = key
+                        auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
+                    }
+                })
+                fromUpstream = true
+            }
+            // TODO fix
+            upstreamMap[formId][itemKey] = {
+                ...upstreamMap[formId][itemKey],
+                fromUpstream: fromUpstream,
+                upstreamId: null,
+            }
+        }
 
 
     }, [
+        getForageUpstreamMap,
+        fetchForagePieceById,
         fetchForageWorkflowEdges,
         getForageCheckboxStates,
         formId,
         setForageCheckboxStates,
         arrayItems,
         checkedFromUpstreamItemProp,
-        itemKey
+        itemKey,
+        itemsType
     ]);
 
     // FromUpstream select logic
