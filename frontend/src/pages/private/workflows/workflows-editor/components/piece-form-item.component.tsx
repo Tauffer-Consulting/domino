@@ -21,11 +21,11 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
-import ArrayInputItem from './domino-form-item-array.component';
-import CodeEditorItem from './domino-form-item-codeeditor.component';
+import ArrayInputItem from './piece-form-arrayinput-item.component';
+import CodeEditorItem from './piece-form-codeeditor-item.component';
 
 
-interface DominoFormItemProps {
+interface PieceFormItemProps {
     formId: string;
     schema: any;
     itemKey: any;
@@ -33,7 +33,7 @@ interface DominoFormItemProps {
     onChange: (val: any) => void;
 }
 
-const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey, value, onChange }) => {
+const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, value, onChange }) => {
     const {
         fetchForageWorkflowEdges,
         getForageUpstreamMap,
@@ -449,4 +449,4 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
     );
 };
 
-export default DominoFormItem;
+export default PieceFormItem;
