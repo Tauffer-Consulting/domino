@@ -80,7 +80,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             const initArray = new Array<ObjectWithBooleanValues>(itemSchema.default.length).fill({});
             // set the default values from the schema in cases where from_upstream==="always"
             initArray.map((obj, index) => {
-                Object.keys(arrayOfProperties).map((itemKey) => {
+                Object.keys(arrayOfProperties).map(() => {
                     if (subItemSchema?.properties?.[itemKey]?.from_upstream === "always") {
                         initArray[index][itemKey] = true;
                     } else {
@@ -133,8 +133,9 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
-    const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
+    const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number, _itemKey: string) => {
 
+        const checked = event.target.checked;
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = prevArray.map((item, i) => {
                 if (i !== index) {
@@ -142,21 +143,49 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 }
                 return {
                     ...item,
-                    [itemKey]: event.target.checked,
+                    [_itemKey]: checked
                 };
             });
             return newArray;
         });
 
-        
         const edges = await fetchForageWorkflowEdges()
         var auxCheckboxState: any = await getForageCheckboxStates()
         if (!auxCheckboxState) {
             auxCheckboxState = {}
         }
 
+        console.log(typeof auxCheckboxState[formId][itemKey] !== 'object')
+        
+        if ((!(formId in auxCheckboxState))){
+            if (!(itemKey in auxCheckboxState[formId])){
+                auxCheckboxState[formId] = {
+                    [itemKey]: new Array(arrayItems.length).fill(false)
+                }
+            }
+        } else if (typeof auxCheckboxState[formId][itemKey] !== 'object') {
+            auxCheckboxState[formId][itemKey] = new Array(arrayItems.length).fill(false)
+        }
 
-    }, [fetchForageWorkflowEdges, getForageCheckboxStates]);
+        for (var i=0; i<checkedFromUpstreamItemProp.length; i++){
+            if (i === index){
+                auxCheckboxState[formId][itemKey][i] = checked
+            }else{
+                auxCheckboxState[formId][itemKey][i] = checkedFromUpstreamItemProp[i][itemKey]
+            }
+        }
+        await setForageCheckboxStates(auxCheckboxState)
+
+
+    }, [
+        fetchForageWorkflowEdges,
+        getForageCheckboxStates,
+        formId,
+        setForageCheckboxStates,
+        arrayItems,
+        checkedFromUpstreamItemProp,
+        itemKey
+    ]);
 
     // FromUpstream select logic
     const handleSelectFromUpstreamChange = (index: number, itemKey: string, value: string) => {
