@@ -190,7 +190,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
                 upstreamId: null,
             }
         }
-        if (checked && !upstreamOptions.length) {
+        if (checked && !upstreamOptions.length && showWarnings) {
             auxCheckboxState[formId][itemKey] = false
             setCheckedFromUpstream(false);
             await setForageCheckboxStates(auxCheckboxState)
