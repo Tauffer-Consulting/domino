@@ -21,11 +21,11 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
-import ArrayInputItem from './domino-form-item-array.component';
-import CodeEditorItem from './domino-form-item-codeeditor.component';
+import ArrayInputItem from './piece-form-arrayinput-item.component';
+import CodeEditorItem from './piece-form-codeeditor-item.component';
 
 
-interface DominoFormItemProps {
+interface PieceFormItemProps {
     formId: string;
     schema: any;
     itemKey: any;
@@ -33,7 +33,7 @@ interface DominoFormItemProps {
     onChange: (val: any) => void;
 }
 
-const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey, value, onChange }) => {
+const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, value, onChange }) => {
     const {
         fetchForageWorkflowEdges,
         getForageUpstreamMap,
@@ -118,7 +118,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         onChange(event.target.value as string);
     }, [onChange]);
 
-    const handleCheckboxFromUpstreamChange = useCallback(async (checked: boolean) => {
+    const handleCheckboxFromUpstreamChange = useCallback(async (checked: boolean, showWarnings: boolean = true) => {
         setCheckedFromUpstream(checked);
 
         const edges = await fetchForageWorkflowEdges()
@@ -142,7 +142,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                 upstreamsIds.push(ed.source)
             }
         }
-        if (!upstreamsIds.length) {
+        if (!upstreamsIds.length && showWarnings) {
             auxCheckboxState[formId][itemKey] = false
             setCheckedFromUpstream(false);
             await setForageCheckboxStates(auxCheckboxState)
@@ -190,7 +190,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
                 upstreamId: null,
             }
         }
-        if (checked && !upstreamOptions.length) {
+        if (checked && !upstreamOptions.length && showWarnings) {
             auxCheckboxState[formId][itemKey] = false
             setCheckedFromUpstream(false);
             await setForageCheckboxStates(auxCheckboxState)
@@ -245,9 +245,9 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
             }
             const formCheckboxStates = auxCheckboxState[formId]
             if (itemKey in formCheckboxStates) {
-                await handleCheckboxFromUpstreamChange(formCheckboxStates[itemKey])
+                await handleCheckboxFromUpstreamChange(formCheckboxStates[itemKey], false)
             } else {
-                await handleCheckboxFromUpstreamChange(false)
+                await handleCheckboxFromUpstreamChange(false, false)
             }
         })()
     }, [getForageCheckboxStates, formId, itemKey, getForageUpstreamMap, handleCheckboxFromUpstreamChange])
@@ -449,4 +449,4 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
     );
 };
 
-export default DominoFormItem;
+export default PieceFormItem;

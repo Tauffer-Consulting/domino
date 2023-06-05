@@ -19,7 +19,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
-import DominoForm from './domino-form.component'
+import PieceForm from './piece-form.component'
 // import { createAjv } from '@jsonforms/core'
 // import { operatorStorageSchema } from 'common/schemas/storageSchemas'
 // import { workflowFormSchema } from 'common/schemas/workflowFormSchema'
@@ -55,7 +55,6 @@ const storageValidationValues: any = {
     "max": maxAcceptedCpu
   }
 }
-
 
 const defaultContainerResources = {
   "useGpu": false,
@@ -306,7 +305,7 @@ const SidebarForm = (props: ISidebarFormProps) => {
                 <Grid container sx={{ paddingBottom: "25px" }}>
                   <Grid item xs={formWidthSpace} className='sidebar-jsonforms-grid'>
                     <Grid item xs={12}>
-                      <DominoForm
+                      <PieceForm
                         formId={formId}
                         schema={formJsonSchema}
                         initialData={formData}

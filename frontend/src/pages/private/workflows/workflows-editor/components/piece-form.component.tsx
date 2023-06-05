@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import DominoFormItem from './domino-form-item.component';
+import PieceFormItem from './piece-form-item.component';
 
 
 type initialDataType = Record<string, any>;
 
-interface DominoFormProps {
+interface PieceFormProps {
     formId: string;
     schema: any;
     initialData: initialDataType;
     onChange: ({ errors, data }: { errors?: any, data: any }) => void;
 }
 
-const DominoForm: React.FC<DominoFormProps> = ({ formId, schema, initialData, onChange }) => {
+const PieceForm: React.FC<PieceFormProps> = ({ formId, schema, initialData, onChange }) => {
     const [formData, setFormData] = useState(initialData);
 
     const handleChange = (key: string) => (value: any) => {
         setFormData(prevData => ({ ...prevData, [key]: value }));
+        // setNodePieceSchema()
     };
 
     useEffect(() => {
@@ -33,7 +34,7 @@ const DominoForm: React.FC<DominoFormProps> = ({ formId, schema, initialData, on
             {
                 Object.keys(schema.properties).map(key => (
                     <div key={key}>
-                        <DominoFormItem
+                        <PieceFormItem
                             formId={formId}
                             schema={schema}
                             itemKey={key}
@@ -47,4 +48,4 @@ const DominoForm: React.FC<DominoFormProps> = ({ formId, schema, initialData, on
     );
 };
 
-export default React.memo(DominoForm);
+export default React.memo(PieceForm);
