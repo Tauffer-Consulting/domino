@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     Card,
     CardContent,
@@ -40,7 +40,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
     //     }
     // });
 
-    console.log(arrayItems)
+    //console.log(arrayItems)
 
     // Sub-items schema
     let subItemSchema: any = itemSchema.items;
@@ -79,12 +79,13 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                 return null;
             });
             return initArray;
-        } else {
-            return [];
-        }
+        } 
+        return [];
+        
     });
 
     const handleArrayItemChange = (index: number, itemKey: string, value: string) => {
+        console.log('handleArrayItemChange')
         const updatedItems = [...arrayItems];
         updatedItems[index][itemKey] = value;
         onChange(updatedItems);
@@ -120,26 +121,25 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
-    // FromUpstream checkboxes logic
-    // TODO - this is not working for multiple default items, they're changing together
-    const handleCheckboxFromUpstreamChange = (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
-        console.log(checkedFromUpstreamItemProp);
-        console.log("event", event.target.checked);
-        console.log("index", index);
-        console.log("itemkey", itemKey);
+    const handleCheckboxFromUpstreamChange = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
         setCheckedFromUpstreamItemProp((prevArray) => {
-            const newArray = [...prevArray];
-            console.log(newArray);
-            const objectToUpdate = newArray[index] as { [key: string]: boolean };
-            console.log(objectToUpdate);
-            objectToUpdate[itemKey] = event.target.checked;
-            newArray[index] = objectToUpdate;
+            const newArray = prevArray.map((item, i) => {
+                if (i !== index) {
+                    return item;
+                }
+                return {
+                    ...item,
+                    [itemKey]: event.target.checked, 
+                };
+            });
             return newArray;
         });
-    };
+    }, []);
 
     // FromUpstream select logic
     const handleSelectFromUpstreamChange = (index: number, itemKey: string, value: string) => {
+        console.log('handleSelectFromUpstreamChange', handleSelectFromUpstreamChange)
         const updatedItems = [...arrayItems];
         if (typeof updatedItems[index] === 'object') {
             updatedItems[index][itemKey] = value;
