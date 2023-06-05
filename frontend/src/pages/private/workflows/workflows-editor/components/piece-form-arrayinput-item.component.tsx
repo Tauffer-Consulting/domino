@@ -14,6 +14,7 @@ import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
+import { toast } from 'react-toastify';
 
 enum FromUpstreamOptions {
     always = "always",
@@ -184,7 +185,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 return newArray;
             });
             await setForageCheckboxStates(auxCheckboxState)
-            // todo add toast
+            toast.error('This piece has no upstreams.')
             return
         }
 
