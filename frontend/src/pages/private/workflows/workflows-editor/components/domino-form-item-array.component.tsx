@@ -42,9 +42,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     onChange
 }) => {
 
-    console.log(formId, itemKey)
-    console.log('arrayItems', arrayItems)
-
     const {
         fetchForageWorkflowEdges,
         getForageUpstreamMap,
@@ -138,13 +135,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
     const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
 
-        const edges = await fetchForageWorkflowEdges()
-        var auxCheckboxState: any = await getForageCheckboxStates()
-        if (!auxCheckboxState) {
-            auxCheckboxState = {}
-        }
-
-
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = prevArray.map((item, i) => {
                 if (i !== index) {
@@ -157,7 +147,16 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             });
             return newArray;
         });
-    }, []);
+
+        
+        const edges = await fetchForageWorkflowEdges()
+        var auxCheckboxState: any = await getForageCheckboxStates()
+        if (!auxCheckboxState) {
+            auxCheckboxState = {}
+        }
+
+
+    }, [fetchForageWorkflowEdges, getForageCheckboxStates]);
 
     // FromUpstream select logic
     const handleSelectFromUpstreamChange = (index: number, itemKey: string, value: string) => {
