@@ -133,7 +133,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
-    const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number, _itemKey: string) => {
+    const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
 
         const checked = event.target.checked;
         setCheckedFromUpstreamItemProp((prevArray) => {
@@ -143,7 +143,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 }
                 return {
                     ...item,
-                    [_itemKey]: checked
+                    [itemKey]: checked
                 };
             });
             return newArray;
@@ -154,18 +154,40 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         if (!auxCheckboxState) {
             auxCheckboxState = {}
         }
-
-        console.log(typeof auxCheckboxState[formId][itemKey] !== 'object')
         
         if ((!(formId in auxCheckboxState))){
-            if (!(itemKey in auxCheckboxState[formId])){
-                auxCheckboxState[formId] = {
-                    [itemKey]: new Array(arrayItems.length).fill(false)
-                }
+            auxCheckboxState[formId] = {
+                [itemKey]: new Array(arrayItems.length).fill(false)
             }
         } else if (typeof auxCheckboxState[formId][itemKey] !== 'object') {
             auxCheckboxState[formId][itemKey] = new Array(arrayItems.length).fill(false)
         }
+
+        var upstreamsIds = []
+        for (var ed of edges) {
+            if (ed.target === formId) {
+                upstreamsIds.push(ed.source)
+            }
+        }
+        if (!upstreamsIds.length) {
+            // set checkbox react states to false
+            setCheckedFromUpstreamItemProp((prevArray) => {
+                const newArray = prevArray.map((item, i) => {
+                    if (i !== index) {
+                        return item;
+                    }
+                    return {
+                        ...item,
+                        [itemKey]: false
+                    };
+                });
+                return newArray;
+            });
+            await setForageCheckboxStates(auxCheckboxState)
+            // todo add toast
+            return
+        }
+
 
         for (var i=0; i<checkedFromUpstreamItemProp.length; i++){
             if (i === index){
@@ -175,6 +197,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             }
         }
         await setForageCheckboxStates(auxCheckboxState)
+        
 
 
     }, [
@@ -203,7 +226,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     const createItemElements = (item: string, index: number) => {
         let itemElements: JSX.Element[] = [];
         // Loop through each of the item's properties and create the inputs for them
-        Object.keys(arrayOfProperties).map((itemKey, subIndex) => {
+        Object.keys(arrayOfProperties).map((_itemKey, subIndex) => {
             let inputElement: JSX.Element;
             const subItemPropSchema = arrayOfProperties[itemKey];
             let initialValue: any = '';
@@ -215,7 +238,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
                 inputElement = (
                     <FormControl fullWidth>
-                        <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
+                        <InputLabel>{`${_itemKey} [${index}]`}</InputLabel>
                         <Select
                             fullWidth
                             value={initialValue}
@@ -261,7 +284,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                     {subItemPropSchema?.from_upstream !== "never" ? (
                         <Checkbox
                             checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey]}
-                            onChange={(event) => handleCheckboxFromUpstreamChange(event, index, itemKey)}
+                            onChange={(event) => handleCheckboxFromUpstreamChange(event, index)}
                             disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                         />
                     ) : null}
