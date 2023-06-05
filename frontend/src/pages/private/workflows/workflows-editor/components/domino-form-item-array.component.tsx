@@ -13,7 +13,7 @@ import {
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-
+import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 
 enum FromUpstreamOptions {
     always = "always",
@@ -23,6 +23,8 @@ enum FromUpstreamOptions {
 
 // Arrays usually have their inner schema defined in the main schema definitions
 interface ArrayInputItemProps {
+    formId: string;
+    itemKey: string;
     itemSchema: any;
     parentSchemaDefinitions: any;
     fromUpstreamMode?: FromUpstreamOptions | string;
@@ -30,17 +32,29 @@ interface ArrayInputItemProps {
     onChange: (value: any) => void;
 }
 
-const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchemaDefinitions, fromUpstreamMode, arrayItems, onChange }) => {
-    // const [arrayItems, setArrayItems] = useState<any[] | { [key: string]: any }[]>(() => {
-    //     if (itemSchema.default && itemSchema.default.length > 0) {
-    //         const initArray = [...itemSchema.default];
-    //         return initArray;
-    //     } else {
-    //         return [];
-    //     }
-    // });
+const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
+    formId,
+    itemKey,
+    itemSchema,
+    parentSchemaDefinitions,
+    fromUpstreamMode,
+    arrayItems,
+    onChange
+}) => {
 
-    //console.log(arrayItems)
+    console.log(formId, itemKey)
+    console.log('arrayItems', arrayItems)
+
+    const {
+        fetchForageWorkflowEdges,
+        getForageUpstreamMap,
+        setForageUpstreamMap,
+        fetchForagePieceById,
+        getForageCheckboxStates,
+        setForageCheckboxStates,
+        setNameKeyUpstreamArgsMap,
+        getNameKeyUpstreamArgsMap,
+    } = useWorkflowsEditor();
 
     // Sub-items schema
     let subItemSchema: any = itemSchema.items;
@@ -56,6 +70,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         arrayOfProperties[itemSchema.title] = { "": "" };
     }
     const numProps = Object.keys(arrayOfProperties).length;
+    const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
 
 
     // console.log("itemSchema", itemSchema);
@@ -79,9 +94,9 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                 return null;
             });
             return initArray;
-        } 
+        }
         return [];
-        
+
     });
 
     const handleArrayItemChange = (index: number, itemKey: string, value: string) => {
@@ -121,8 +136,15 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
-    const handleCheckboxFromUpstreamChange = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
+    const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number, itemKey: string) => {
+
+        const edges = await fetchForageWorkflowEdges()
+        var auxCheckboxState: any = await getForageCheckboxStates()
+        if (!auxCheckboxState) {
+            auxCheckboxState = {}
+        }
+
+
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = prevArray.map((item, i) => {
                 if (i !== index) {
@@ -130,7 +152,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                 }
                 return {
                     ...item,
-                    [itemKey]: event.target.checked, 
+                    [itemKey]: event.target.checked,
                 };
             });
             return newArray;
@@ -139,7 +161,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
 
     // FromUpstream select logic
     const handleSelectFromUpstreamChange = (index: number, itemKey: string, value: string) => {
-        console.log('handleSelectFromUpstreamChange', handleSelectFromUpstreamChange)
+        console.log('handleSelectFromUpstreamChange')
         const updatedItems = [...arrayItems];
         if (typeof updatedItems[index] === 'object') {
             updatedItems[index][itemKey] = value;
@@ -163,7 +185,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                 initialValue = arrayItems[index as number];
             }
             if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
-                const options: Array<string> = ['upstream 1', 'upstream 2', 'upstream 3', 'upstream 4'];
                 inputElement = (
                     <FormControl fullWidth>
                         <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
@@ -172,7 +193,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({ itemSchema, parentSchem
                             value={initialValue}
                             onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
                         >
-                            {options.map(option => (
+                            {upstreamOptions.map(option => (
                                 <MenuItem key={option} value={option}>
                                     {option}
                                 </MenuItem>

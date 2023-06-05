@@ -44,6 +44,7 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         setNameKeyUpstreamArgsMap,
         getNameKeyUpstreamArgsMap,
     } = useWorkflowsEditor();
+
     var formFieldType = schema.properties[itemKey].type;
     const formFieldFormat = schema.properties[itemKey].format;
     if (formFieldFormat !== undefined && formFieldFormat !== null) {
@@ -117,7 +118,6 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         onChange(event.target.value as string);
     }, [onChange]);
 
-    // From upstream checkbox callback
     const handleCheckboxFromUpstreamChange = useCallback(async (checked: boolean) => {
         setCheckedFromUpstream(checked);
 
@@ -347,6 +347,8 @@ const DominoFormItem: React.FC<DominoFormItemProps> = ({ formId, schema, itemKey
         />;
     } else if (itemSchema.type === 'array') {
         inputElement = <ArrayInputItem
+            formId={formId}
+            itemKey={itemKey}
             itemSchema={itemSchema}
             parentSchemaDefinitions={schema.definitions}
             fromUpstreamMode={arrayItemsFromUpstreamOption}
