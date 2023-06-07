@@ -108,22 +108,20 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     // Add and delete items
     // TODO - fix setArrayItems to fill the props with correct values types, 
     // right now just guessing an empty string, but this will most likely fail e.g. boolen types
-    const handleAddItem = () => {
-        let newItemPropsValues: { [key: string]: any } = {};
+    const handleAddItem = useCallback(() => {
+        const newItemPropsValues: string = ''
         let newItemPropsChecked: { [key: string]: boolean } = {};
-        Object.keys(arrayOfProperties).map((itemKey) => {
+        Object.keys(arrayOfProperties).map((_itemKey) => {
             if (subItemSchema?.properties?.[itemKey]?.from_upstream === "always") {
                 newItemPropsChecked[itemKey] = true;
-                newItemPropsValues[itemKey] = '';
             } else {
                 newItemPropsChecked[itemKey] = false;
-                newItemPropsValues[itemKey] = '';
             }
             return null;
         });
         setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, newItemPropsChecked]);
         onChange([...arrayItems, newItemPropsValues]);
-    };
+    }, [onChange, arrayItems, checkedFromUpstreamItemProp, arrayOfProperties, subItemSchema, itemKey]);
 
     // TODO - this is not working when deleting items with fromUpstrem checked
     const handleDeleteItem = (index: number) => {
@@ -251,8 +249,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         //console.log('upstreamMap', upstreamMap)
         setUpstreamOptions(upstreamOptions)
         setForageUpstreamMap(upstreamMap)
-
-
     }, [
         getForageUpstreamMap,
         setForageUpstreamMap,
