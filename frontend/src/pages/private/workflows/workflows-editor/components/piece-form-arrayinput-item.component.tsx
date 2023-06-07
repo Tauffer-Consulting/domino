@@ -211,7 +211,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
         for (const upstreamId of upstreamsIds) {
             const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
-            var fromUpstream = false
             if (checked){
                 const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
                 const upstreamOutputSchema = upstreamOperator?.output_schema
@@ -229,10 +228,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                         auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
                     }
                 })
-                //fromUpstream = true
             }
 
-            const values = []
             const upstreamValue = upstreamOptions ? upstreamOptions[0] : null
             const valueUpstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ?
                 auxLabelUpstreamIdMap[upstreamValue] : null
@@ -253,10 +250,12 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         }
         //console.log('upstreamMap', upstreamMap)
         setUpstreamOptions(upstreamOptions)
+        setForageUpstreamMap(upstreamMap)
 
 
     }, [
         getForageUpstreamMap,
+        setForageUpstreamMap,
         fetchForagePieceById,
         fetchForageWorkflowEdges,
         getForageCheckboxStates,
