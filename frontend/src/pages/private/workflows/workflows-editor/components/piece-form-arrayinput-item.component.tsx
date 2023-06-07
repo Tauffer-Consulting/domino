@@ -136,7 +136,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     };
 
     const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-
+        
         const checked = event.target.checked;
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = prevArray.map((item, i) => {
@@ -204,6 +204,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         const upstreamOptions: string[] = []
 
         var upstreamMap = await getForageUpstreamMap()
+        //console.log('upstreamMap', upstreamMap)
         if (!(formId in upstreamMap)) {
             upstreamMap[formId] = {}
         }
@@ -228,15 +229,30 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                         auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
                     }
                 })
-                fromUpstream = true
+                //fromUpstream = true
             }
-            // TODO fix
-            upstreamMap[formId][itemKey] = {
-                ...upstreamMap[formId][itemKey],
-                fromUpstream: fromUpstream,
-                upstreamId: null,
-            }
+
+            const values = []
+            const upstreamValue = upstreamOptions ? upstreamOptions[0] : null
+            const valueUpstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ?
+                auxLabelUpstreamIdMap[upstreamValue] : null
+            const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue]
+                ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
+            
+            const auxUpstreamValue: any = {}
+            for (const [_key, _value] of Object.entries(upstreamMap[formId][itemKey].value[index])){
+                auxUpstreamValue[_key] = {
+                    fromUpstream: checked,
+                    value: upstreamValue,
+                    upstreamId: valueUpstreamId,
+                    upstreamArgument: upstreamArgument
+                }
+            } 
+            upstreamMap[formId][itemKey].value[index] = auxUpstreamValue
+
         }
+        //console.log('upstreamMap', upstreamMap)
+        setUpstreamOptions(upstreamOptions)
 
 
     }, [
@@ -253,7 +269,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     ]);
 
     // FromUpstream select logic
-    const handleSelectFromUpstreamChange = (index: number, itemKey: string, value: string) => {
+    const handleSelectFromUpstreamChange = useCallback((index: number, itemKey: string, value: string) => {
         console.log('handleSelectFromUpstreamChange')
         const updatedItems = [...arrayItems];
         if (typeof updatedItems[index] === 'object') {
@@ -262,7 +278,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             updatedItems[index] = value;
         }
         // setArrayItems(updatedItems);
-    };
+    }, [arrayItems]);
 
     // Each item in the array can be multiple inputs, with varied types like text, select, checkbox, etc.
     const createItemElements = useCallback((item: string, index: number) => {

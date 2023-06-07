@@ -219,6 +219,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
         setFormLabelUpstreamIdMap(auxLabelUpstreamIdMap)
         const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
         setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
+
         setForageUpstreamMap(upstreamMap)
         setUpstreamSelectValue(upstreamValue)
     }, [

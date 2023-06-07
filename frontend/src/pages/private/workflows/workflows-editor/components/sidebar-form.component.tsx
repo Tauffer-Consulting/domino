@@ -122,14 +122,42 @@ const SidebarForm = (props: ISidebarFormProps) => {
         const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
         const upstreamId = fromUpstream && upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].upstreamId : null
         if (key !== 'storage') {
+          var dataValue = data[key]
+          if (Array.isArray(dataValue)) {
+            const auxValue = []
+            for (const element of dataValue) {
+              const newValue: any = {}
+              if (typeof element === 'object') {
+                for (const [_key, _value] of Object.entries(element)) {
+                  newValue[_key] = {
+                    fromUpstream: fromUpstream,
+                    upstreamId: upstreamId,
+                    upstreamArgument: null,
+                    value: _value
+                  }
+                }
+                auxValue.push(newValue)
+              }else{
+                newValue[key] = {
+                  fromUpstream: fromUpstream,
+                  upstreamId: upstreamId,
+                  upstreamArgument: null,
+                  value: element
+                }
+                auxValue.push(newValue)
+              }
+            }
+            dataValue = auxValue
+          }
           upstreamMapFormInfo[key] = {
             fromUpstream: fromUpstream,
             upstreamId: upstreamId,
             upstreamArgument: fromUpstream && nameKeyUpstreamArgsMap[data[key]] ? nameKeyUpstreamArgsMap[data[key]] : null,
-            value: (data[key] === null || data[key] === undefined) ? null : data[key]
+            value: (dataValue === null || dataValue === undefined) ? null : dataValue
           }
         }
       }
+
       upstreamMap[formId] = upstreamMapFormInfo
       await setFormsForageData(formId, data)
       await setForageUpstreamMap(upstreamMap)
