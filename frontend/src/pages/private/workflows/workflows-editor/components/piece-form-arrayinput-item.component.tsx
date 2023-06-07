@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
     Card,
     CardContent,
@@ -60,7 +60,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         const subItemSchemaName = itemSchema.items.$ref.split('/').pop();
         subItemSchema = parentSchemaDefinitions[subItemSchemaName];
     }
-    let arrayOfProperties: { [key: string]: any } = {};
+    let arrayOfProperties: { [key: string]: any } = useMemo(()=>{return {}},[]);
     // If array subtypes were not defined in the schema, we create a default one
     if (subItemSchema?.properties) {
         arrayOfProperties = subItemSchema?.properties;
@@ -265,15 +265,15 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     };
 
     // Each item in the array can be multiple inputs, with varied types like text, select, checkbox, etc.
-    const createItemElements = (item: string, index: number) => {
+    const createItemElements = useCallback((item: string, index: number) => {
         let itemElements: JSX.Element[] = [];
         // Loop through each of the item's properties and create the inputs for them
         Object.keys(arrayOfProperties).map((_itemKey, subIndex) => {
             let inputElement: JSX.Element;
-            const subItemPropSchema = arrayOfProperties[itemKey];
+            const subItemPropSchema = arrayOfProperties[_itemKey];
             let initialValue: any = '';
             if (typeof arrayItems[index] === 'object') {
-                initialValue = arrayItems[index as number][itemKey as keyof typeof arrayItems[number]];
+                initialValue = arrayItems[index as number][_itemKey as keyof typeof arrayItems[number]];
             } else {
                 initialValue = arrayItems[index as number];
             }
@@ -343,7 +343,19 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         >
             {itemElements}
         </div>
-    }
+    }, [
+        arrayOfProperties,
+        arrayItems,
+        checkedFromUpstreamItemProp,
+        fromUpstreamMode,
+        handleArrayItemChange,
+        handleCheckboxFromUpstreamChange,
+        itemKey,
+        numProps,
+        parentSchemaDefinitions,
+        upstreamOptions,
+        handleSelectFromUpstreamChange
+    ]);
 
     return (
         <Card sx={{ width: "100%", paddingTop: 0 }}>
