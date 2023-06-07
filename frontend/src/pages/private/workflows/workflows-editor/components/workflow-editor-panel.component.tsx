@@ -54,6 +54,7 @@ const WorkflowEditorPanelComponent = () => {
     fetchForagePieceById,
     setFormsForageData,
     removeFormsForageDataById,
+    removeForageUpstreamMapById,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
     getForageUpstreamMap,
@@ -64,8 +65,9 @@ const WorkflowEditorPanelComponent = () => {
   const onNodesDelete = useCallback(async (nodes: any) => {
     for (const node of nodes) {
       await removeFormsForageDataById(node.id)
+      await removeForageUpstreamMapById(node.id)
     }
-  }, [removeFormsForageDataById])
+  }, [removeFormsForageDataById, removeForageUpstreamMapById])
 
 
   // Node double click open drawer with forms
@@ -139,11 +141,41 @@ const WorkflowEditorPanelComponent = () => {
     for (const key in defaultData) {
       const fromUpstream = false // TODO - If someday we allow default upstream true we should change this
       const upstreamId = null
+      
+      var defaultValues = defaultData[key]
+      if (Array.isArray(defaultData[key])){
+        const auxDefaultValues = []
+        for (const element of defaultData[key]) {
+          const newValue: any = {}
+          if (typeof element === 'object') {
+            for (const [_key, _value] of Object.entries(element)) {
+              newValue[_key] = {
+                fromUpstream: fromUpstream,
+                upstreamId: upstreamId,
+                upstreamArgument: null,
+                value: _value
+              }
+            }
+            auxDefaultValues.push(newValue)
+          }else{
+            newValue[key] = {
+              fromUpstream: fromUpstream,
+              upstreamId: upstreamId,
+              upstreamArgument: null,
+              value: element
+            } 
+            auxDefaultValues.push(newValue)
+          }
+        }
+        defaultValues = auxDefaultValues
+      } 
       upstreamMapFormInfo[key] = {
         fromUpstream,
         upstreamId,
         upstreamArgument: null,
-        value: (defaultData[key] === null || defaultData[key] === undefined) ? null : defaultData[key]
+        value: (
+          defaultValues === null || defaultValues === undefined
+        ) ? null : defaultValues
       }
     }
     upstreamMap[newNode.id] = upstreamMapFormInfo
