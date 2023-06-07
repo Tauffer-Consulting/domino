@@ -65,6 +65,7 @@ interface IWorkflowsEditorContext {
   getForageUpstreamMap: () => Promise<any> // TODO add type
   setForageUpstreamMap: (data: any) => Promise<void> // TODO add type
   clearForageUpstreamMap: () => Promise<void>
+  removeForageUpstreamMapById: (id: string) => Promise<void>
 
   setForageCheckboxStates: (checkboxStatesMap: any) => Promise<void> // TODO add type
   getForageCheckboxStates: () => Promise<any> // TODO add type
@@ -208,6 +209,15 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
 
   const clearForageUpstreamMap = useCallback(async () => {
     await localForage.setItem('upstreamMap', {})
+  }, [])
+
+  const removeForageUpstreamMapById = useCallback(async (id: string) => {
+    const currentUpstreamMap = await localForage.getItem<any>("upstreamMap")
+    if (!currentUpstreamMap) {
+      return
+    }
+    delete currentUpstreamMap[id]
+    await localForage.setItem('upstreamMap', currentUpstreamMap)
   }, [])
 
   // Forage forms data
@@ -481,6 +491,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       getForageUpstreamMap,
       setForageUpstreamMap,
       clearForageUpstreamMap,
+      removeForageUpstreamMapById,
       nodeDirection,
       setForageCheckboxStates,
       getForageCheckboxStates,
@@ -507,6 +518,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       getForageUpstreamMap,
       setForageUpstreamMap,
       clearForageUpstreamMap,
+      removeForageUpstreamMapById,
       nodeDirection,
       repositories,
       repositoriesError,
