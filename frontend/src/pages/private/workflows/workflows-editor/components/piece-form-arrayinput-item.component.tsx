@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     Card,
     CardContent,
@@ -71,10 +71,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     const itemsType = subItemSchema?.type
     const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
 
-
-    // console.log("itemSchema", itemSchema);
-    // console.log("subItemSchema", subItemSchema);
-    // console.log("parentSchemaDefinitions", parentSchemaDefinitions);
+    const [renderElements, setRenderElements] = useState<any>(null)
 
     type ObjectWithBooleanValues = { [key: string]: boolean };
     const [checkedFromUpstreamItemProp, setCheckedFromUpstreamItemProp] = useState<ObjectWithBooleanValues[]>(() => {
@@ -98,12 +95,12 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
     });
 
-    const handleArrayItemChange = (index: number, itemKey: string, value: string) => {
+    const handleArrayItemChange = useCallback((index: number, itemKey: string, value: string) => {
         console.log('handleArrayItemChange')
         const updatedItems = [...arrayItems];
         updatedItems[index][itemKey] = value;
         onChange(updatedItems);
-    };
+    }, [onChange, arrayItems]);
 
     // Add and delete items
     // TODO - fix setArrayItems to fill the props with correct values types, 
@@ -244,9 +241,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 }
             } 
             upstreamMap[formId][itemKey].value[index] = auxUpstreamValue
-
         }
-        //console.log('upstreamMap', upstreamMap)
         setUpstreamOptions(upstreamOptions)
         setForageUpstreamMap(upstreamMap)
     }, [
@@ -275,85 +270,93 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         // setArrayItems(updatedItems);
     }, [arrayItems]);
 
-    // Each item in the array can be multiple inputs, with varied types like text, select, checkbox, etc.
-    const createItemElements = useCallback((item: string, index: number) => {
-        let itemElements: JSX.Element[] = [];
-        // Loop through each of the item's properties and create the inputs for them
-        Object.keys(arrayOfProperties).map((_itemKey, subIndex) => {
-            let inputElement: JSX.Element;
-            const subItemPropSchema = arrayOfProperties[_itemKey];
-            let initialValue: any = '';
-            if (typeof arrayItems[index] === 'object') {
-                initialValue = arrayItems[index as number][_itemKey as keyof typeof arrayItems[number]];
-            } else {
-                initialValue = arrayItems[index as number];
-            }
-            if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
-                inputElement = (
-                    <FormControl fullWidth>
-                        <InputLabel>{`${_itemKey} [${index}]`}</InputLabel>
-                        <Select
+
+    useEffect(() => {
+        (async () => {
+            const newElements: any  = {}
+            arrayItems.map((item, index) => {
+                let itemElements: JSX.Element[] = [];
+                // Loop through each of the item's properties and create the inputs for them
+                Object.keys(arrayOfProperties).map((_itemKey, subIndex) => {
+                    let inputElement: JSX.Element;
+                    const subItemPropSchema = arrayOfProperties[_itemKey];
+                    let initialValue: any = '';
+                    if (typeof arrayItems[index] === 'object') {
+                        initialValue = arrayItems[index as number][_itemKey as keyof typeof arrayItems[number]];
+                    } else {
+                        initialValue = arrayItems[index as number];
+                    }
+                    if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
+
+                        inputElement = (
+                            <FormControl fullWidth>
+                                <InputLabel>{`${_itemKey} [${index}]`}</InputLabel>
+                                <Select
+                                    fullWidth
+                                    value={initialValue}
+                                    onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
+                                >
+                                    {upstreamOptions.map(option => (
+                                        <MenuItem key={option} value={option}>
+                                            {option}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        );
+                    } else if (subItemPropSchema?.allOf && subItemPropSchema.allOf.length > 0) {
+                        const typeClass = subItemPropSchema.allOf[0]['$ref'].split("/").pop();
+                        const valuesOptions: Array<string> = parentSchemaDefinitions?.[typeClass].enum;
+                        inputElement = (
+                            <FormControl fullWidth>
+                                <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
+                                <Select
+                                    value={initialValue}
+                                    onChange={(e) => handleArrayItemChange(index, itemKey, e.target.value)}
+                                >
+                                    {valuesOptions.map((option: string) => (
+                                        <MenuItem key={option} value={option}>
+                                            {option}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        );
+                    } else {
+                        inputElement = <TextField
                             fullWidth
-                            value={initialValue}
-                            onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
-                        >
-                            {upstreamOptions.map(option => (
-                                <MenuItem key={option} value={option}>
-                                    {option}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                );
-            } else if (subItemPropSchema?.allOf && subItemPropSchema.allOf.length > 0) {
-                const typeClass = subItemPropSchema.allOf[0]['$ref'].split("/").pop();
-                const valuesOptions: Array<string> = parentSchemaDefinitions?.[typeClass].enum;
-                inputElement = (
-                    <FormControl fullWidth>
-                        <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
-                        <Select
+                            label={`${itemKey} [${index}]`}
                             value={initialValue}
                             onChange={(e) => handleArrayItemChange(index, itemKey, e.target.value)}
-                        >
-                            {valuesOptions.map((option: string) => (
-                                <MenuItem key={option} value={option}>
-                                    {option}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                );
-            } else {
-                inputElement = <TextField
-                    fullWidth
-                    label={`${itemKey} [${index}]`}
-                    value={initialValue}
-                    onChange={(e) => handleArrayItemChange(index, itemKey, e.target.value)}
-                />
-            }
-            itemElements.push(
-                <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
-                    {inputElement}
-                    {subItemPropSchema?.from_upstream !== "never" ? (
-                        <Checkbox
-                            checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey]}
-                            onChange={(event) => handleCheckboxFromUpstreamChange(event, index)}
-                            disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                         />
-                    ) : null}
-                </div>
-            );
-            return null;
-        });
-        return <div
-            style={{
-                display: 'flex',
-                flexDirection: fromUpstreamMode === 'never' && numProps < 3 ? 'row' : 'column',
-                width: '100%'
-            }}
-        >
-            {itemElements}
-        </div>
+                    }
+                    itemElements.push(
+                        <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                            {inputElement}
+                            {subItemPropSchema?.from_upstream !== "never" ? (
+                                <Checkbox
+                                    checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey]}
+                                    onChange={(event) => handleCheckboxFromUpstreamChange(event, index)}
+                                    disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
+                                />
+                            ) : null}
+                        </div>
+                    );
+                    return null;
+                });
+                newElements[index] = ( <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: fromUpstreamMode === 'never' && numProps < 3 ? 'row' : 'column',
+                        width: '100%'
+                    }}
+                >
+                    {itemElements}
+                </div>)
+            })
+            setRenderElements(newElements)
+            
+        })()
     }, [
         arrayOfProperties,
         arrayItems,
@@ -365,8 +368,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         numProps,
         parentSchemaDefinitions,
         upstreamOptions,
-        handleSelectFromUpstreamChange
-    ]);
+        handleSelectFromUpstreamChange,
+    ])
 
     return (
         <Card sx={{ width: "100%", paddingTop: 0 }}>
@@ -391,7 +394,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                         <IconButton onClick={() => handleDeleteItem(index)} aria-label="Delete">
                             <DeleteIcon />
                         </IconButton>
-                        {createItemElements(item, index)}
+                        {renderElements ? renderElements[index] : ''}
                     </Box>
                 ))}
             </CardContent>
