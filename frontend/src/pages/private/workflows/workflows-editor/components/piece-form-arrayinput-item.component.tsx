@@ -324,74 +324,39 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             }
             
             const upstreamMapData = upstreamMap[formId][itemKey].value
+            arrayItems.map((item, index) => {
+                const value = upstreamMapData[index]
+                let itemElements: JSX.Element[] = [];
+                // Loop through each of the item's properties and create the inputs for them
+                Object.keys(arrayOfProperties).map((_itemKey: any, subIndex: any) => {
+                    let inputElement: JSX.Element;
+                    const subItemPropSchema = arrayOfProperties[_itemKey];
+                    const title = subItemPropSchema.title
 
-            for (const i in upstreamMapData){
-                const value = upstreamMapData[i]
-                var index = 0;
-                const entries: [any, any][] = Object.entries(value);
-                //for (let [key, _value] of Object.entries<{ value: string, upstreamId: string, upstreamArgument: string, fromUpstream: boolean }>(value)) {
-                for (let [key, _value] of entries) {
-                    const formValue: string = _value.value
-                    const upstreamId: string = _value.upstreamId
-                    const upstreamArgument: string = _value.upstreamArgument
-                    const fromUpstream: boolean = _value.fromUpstream     
-                    const title = arrayOfProperties[key].title
-                
-                    const upstreamOptionsArray: any = upstreamOptions[key]
-                    var inputElement = null
-                    if (fromUpstream){
+                    let initialValue: any = value[_itemKey].value || '';
+                    if (typeof arrayItems[index] === 'object') {
+                        // console.log("value", _itemKey)
+                        // console.log('entrou aq', _itemKey as keyof typeof arrayItems[number])
+                        // console.log('arrayItems', arrayItems[index as number])
+                        //initialValue = arrayItems[index as number][_itemKey as keyof typeof arrayItems[number]];
+                        //initialValue = value[_itemKey].value
+                        console.log('aquii', upstreamOptions)
+                    }
+                    const upstreamOptionsArray: any = upstreamOptions[_itemKey]
+                    if (upstreamOptionsArray && checkedFromUpstreamItemProp[index]?.[itemKey]) {
                         inputElement = (
                             <FormControl fullWidth>
                                 <InputLabel>{`${title} [${index}]`}</InputLabel>
                                 <Select
                                     fullWidth
-                                    value={formValue}
-                                    //onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
-                                >
-                                    {
-                                        upstreamOptionsArray.map((option: string) => (
-                                            <MenuItem key={option} value={option}>
-                                                {option}
-                                            </MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                            </FormControl>
-                        );
-                    }
-                    index = index + 1
-                }
-
-            }
-            
-
-            arrayItems.map((item, index) => {
-                let itemElements: JSX.Element[] = [];
-                // Loop through each of the item's properties and create the inputs for them
-                Object.keys(arrayOfProperties).map((_itemKey, subIndex) => {
-                    let inputElement: JSX.Element;
-                    const subItemPropSchema = arrayOfProperties[_itemKey];
-                    let initialValue: any = '';
-                    if (typeof arrayItems[index] === 'object') {
-                        initialValue = arrayItems[index as number][_itemKey as keyof typeof arrayItems[number]];
-                    } else {
-                        initialValue = arrayItems[index as number];
-                    }
-                    if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
-                        //inputElement = (<h1>hello</h1>)
-                        inputElement = (
-                            <FormControl fullWidth>
-                                <InputLabel>{`${_itemKey} [${index}]`}</InputLabel>
-                                <Select
-                                    fullWidth
                                     value={initialValue}
                                     onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
                                 >
-                                    {/* {upstreamOptions[itemKey].map((option: string) => (
-                                        <MenuItem key={option} value={option}>
+                                    {upstreamOptionsArray.map((option: string) => (
+                                            <MenuItem key={option} value={option}>
                                             {option}
                                         </MenuItem>
-                                    ))} */}
+                                    ))}
                                 </Select>
                             </FormControl>
                         );
@@ -400,7 +365,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                         const valuesOptions: Array<string> = parentSchemaDefinitions?.[typeClass].enum;
                         inputElement = (
                             <FormControl fullWidth>
-                                <InputLabel>{`${itemKey} [${index}]`}</InputLabel>
+                                <InputLabel>{`${title} [${index}]`}</InputLabel>
                                 <Select
                                     value={initialValue}
                                     onChange={(e) => handleArrayItemChange(index, itemKey, e.target.value)}
@@ -416,7 +381,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                     } else {
                         inputElement = <TextField
                             fullWidth
-                            label={`${itemKey} [${index}]`}
+                            label={`${title} [${index}]`}
                             value={initialValue}
                             onChange={(e) => handleArrayItemChange(index, itemKey, e.target.value)}
                         />
@@ -447,6 +412,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 return null;
             })
             setRenderElements(newElements)
+            
         })()
     }, [
         formId,
