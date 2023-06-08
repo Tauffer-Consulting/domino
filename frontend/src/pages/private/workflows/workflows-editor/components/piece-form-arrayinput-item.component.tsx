@@ -136,8 +136,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     };
 
 
-    const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        
+    const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number, checkboxKey: string) => {
         const checked = event.target.checked;
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = prevArray.map((item, i) => {
@@ -232,20 +231,18 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 Object.keys(upstreamOutputSchema?.properties).forEach((key, _index) => {
                     const obj = upstreamOutputSchema?.properties[key]
                     var objType = obj.format ? obj.format : obj.type
-                    console.log('itemsType', itemsType)
                     if (itemsType === 'object') {
-                        for (const [subItemKey, subItemValuevalue] of Object.entries<any>(subItemSchema.properties)) {
+                        for (const [subItemKey, subItemValue] of Object.entries<any>(subItemSchema.properties)) {
                             if (!(subItemKey in upstreamOptions)) {
                                 upstreamOptions[subItemKey] = []
                             }
-                            let itemType = subItemValuevalue.format ? subItemValuevalue.format : subItemValuevalue.type
-                            console.log('aqui', itemType)
-                            if (objType === itemType){
+                            let itemType = subItemValue.format ? subItemValue.format : subItemValue.type
+                            if (objType === itemType && checkboxKey === subItemKey){
                                 let upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
                                 let counter = 1;
                                 while (upstreamOptions[subItemKey].includes(upstreamOptionName)) {
-                                        upstreamOptionName = `${upstreamOptionName} (${counter})`
-                                    }
+                                    upstreamOptionName = `${upstreamOptionName} (${counter})`
+                                }
                                 upstreamOptions[subItemKey].push(upstreamOptionName)
                                 auxNameKeyUpstreamArgsMap[upstreamOptionName] = key
                                 auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
@@ -274,11 +271,17 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 const upstreamValue = upstreamOptions[_key] ? upstreamOptions[_key][0] : null
                 const valueUpstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ? auxLabelUpstreamIdMap[upstreamValue] : null
                 const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue] ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
-                auxUpstreamValue[_key] = {
-                    fromUpstream: checked,
-                    value: upstreamValue,
-                    upstreamId: valueUpstreamId,
-                    upstreamArgument: upstreamArgument
+                if (checkboxKey === _key){
+                    auxUpstreamValue[_key] = {
+                        fromUpstream: checked,
+                        value: upstreamValue,
+                        upstreamId: valueUpstreamId,
+                        upstreamArgument: upstreamArgument
+                    }
+                }else {
+                    auxUpstreamValue[_key] = {
+                        ...upstreamMap[formId][itemKey].value[index][_key]
+                    }
                 }
             }
             upstreamMap[formId][itemKey].value[index] = auxUpstreamValue
@@ -336,16 +339,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                     const title = subItemPropSchema.title
 
                     let initialValue: any = value[_itemKey].value || '';
-                    if (typeof arrayItems[index] === 'object') {
-                        // console.log("value", _itemKey)
-                        // console.log('entrou aq', _itemKey as keyof typeof arrayItems[number])
-                        // console.log('arrayItems', arrayItems[index as number])
-                        //initialValue = arrayItems[index as number][_itemKey as keyof typeof arrayItems[number]];
-                        //initialValue = value[_itemKey].value
-                        //
-                    }
                     const upstreamOptionsArray: any = upstreamOptions[_itemKey]
-                    if (upstreamOptionsArray && checkedFromUpstreamItemProp[index]?.[itemKey]) {
+                    if (upstreamOptionsArray && value[_itemKey].fromUpstream) {
                         inputElement = (
                             <FormControl fullWidth>
                                 <InputLabel>{`${title} [${index}]`}</InputLabel>
@@ -394,7 +389,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                             {subItemPropSchema?.from_upstream !== "never" ? (
                                 <Checkbox
                                     checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey]}
-                                    onChange={(event) => handleCheckboxFromUpstreamChange(event, index)}
+                                    onChange={(event) => handleCheckboxFromUpstreamChange(event, index, _itemKey)}
                                     disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                                 />
                             ) : null}
