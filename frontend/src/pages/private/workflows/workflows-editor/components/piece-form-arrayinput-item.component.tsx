@@ -15,6 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { toast } from 'react-toastify';
+import { arrayOf } from 'prop-types';
 
 enum FromUpstreamOptions {
     always = "always",
@@ -56,6 +57,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
     // Sub-items schema
     let subItemSchema: any = itemSchema.items;
+    const itemsType = subItemSchema?.type
     if (itemSchema.items?.$ref) {
         const subItemSchemaName = itemSchema.items.$ref.split('/').pop();
         subItemSchema = parentSchemaDefinitions[subItemSchemaName];
@@ -65,12 +67,15 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     if (subItemSchema?.properties) {
         arrayOfProperties = subItemSchema?.properties;
     } else {
-        arrayOfProperties[itemSchema.title] = { "": "" };
+        arrayOfProperties[itemKey] = {
+            "title": itemSchema.title,
+            "type": itemsType,
+            "description": itemSchema.description,
+        };
     }
     const numProps = Object.keys(arrayOfProperties).length;
-    const itemsType = subItemSchema?.type
-    const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
 
+    const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
     const [renderElements, setRenderElements] = useState<any>(null)
 
     type ObjectWithBooleanValues = { [key: string]: boolean };
@@ -130,6 +135,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
     };
 
+
     const handleCheckboxFromUpstreamChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
         
         const checked = event.target.checked;
@@ -153,11 +159,21 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         }
         
         if ((!(formId in auxCheckboxState))){
-            auxCheckboxState[formId] = {
-                [itemKey]: new Array(arrayItems.length).fill(false)
+            auxCheckboxState[formId] = {}
+        }
+
+        if (!(itemKey in auxCheckboxState[formId])){
+            if (itemsType === "object") {
+                for (let key of Object.keys(subItemSchema?.properties)) {
+                    auxCheckboxState[formId][itemKey] = {
+                        [key]: new Array(arrayItems.length).fill(false)
+                    }
+                }
+            }else{
+                auxCheckboxState[formId][itemKey] = {
+                    [itemKey]: new Array(arrayItems.length).fill(false)
+                }
             }
-        } else if (typeof auxCheckboxState[formId][itemKey] !== 'object') {
-            auxCheckboxState[formId][itemKey] = new Array(arrayItems.length).fill(false)
         }
 
         var upstreamsIds = []
@@ -187,16 +203,19 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
         for (var i=0; i<checkedFromUpstreamItemProp.length; i++){
             if (i === index){
-                auxCheckboxState[formId][itemKey][i] = checked
+                for (let key of Object.keys(auxCheckboxState[formId][itemKey])) {
+                    auxCheckboxState[formId][itemKey][key][i] = checked
+                }
             }else{
-                auxCheckboxState[formId][itemKey][i] = checkedFromUpstreamItemProp[i][itemKey]
+                for (let key of Object.keys(auxCheckboxState[formId][itemKey])) {
+                    auxCheckboxState[formId][itemKey][key][i] = checkedFromUpstreamItemProp[i][itemKey]
+                }
             }
         }
         await setForageCheckboxStates(auxCheckboxState)
 
         const auxNameKeyUpstreamArgsMap: any = {}
         const auxLabelUpstreamIdMap: any = {}
-        const upstreamOptions: string[] = []
 
         var upstreamMap = await getForageUpstreamMap()
         //console.log('upstreamMap', upstreamMap)
@@ -204,47 +223,68 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             upstreamMap[formId] = {}
         }
 
+        const upstreamOptions: any = {}
         for (const upstreamId of upstreamsIds) {
             const upstreamOperatorId = parseInt(upstreamId.split('_')[0])
             if (checked){
                 const upstreamOperator = await fetchForagePieceById(upstreamOperatorId)
                 const upstreamOutputSchema = upstreamOperator?.output_schema
-                Object.keys(upstreamOutputSchema?.properties).forEach((key, index) => {
+                Object.keys(upstreamOutputSchema?.properties).forEach((key, _index) => {
                     const obj = upstreamOutputSchema?.properties[key]
                     var objType = obj.format ? obj.format : obj.type
-                    if (objType === itemsType) {
-                        var upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
-                        const counter = 1;
-                        while (upstreamOptions.includes(upstreamOptionName)) {
+                    if (itemsType === 'object') {
+                        for (const [subItemKey, subItemValuevalue] of Object.entries<any>(subItemSchema.properties)) {
+                            if (!(subItemKey in upstreamOptions)) {
+                                upstreamOptions[subItemKey] = []
+                            }
+                            let itemType = subItemValuevalue.format ? subItemValuevalue.format : subItemValuevalue.type
+                            if (objType === itemType){
+                                let upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
+                                let counter = 1;
+                                while (upstreamOptions[subItemKey].includes(upstreamOptionName)) {
+                                        upstreamOptionName = `${upstreamOptionName} (${counter})`
+                                    }
+                                upstreamOptions[subItemKey].push(upstreamOptionName)
+                                auxNameKeyUpstreamArgsMap[upstreamOptionName] = key
+                                auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
+                            }
+                        }
+                    }
+
+                    if (objType === itemsType){
+                        let upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
+                        let counter = 1;
+                        if (!(itemKey in upstreamOptions)) {
+                            upstreamOptions[itemKey] = []
+                        }
+                        while (upstreamOptions[itemKey].includes(upstreamOptionName)) {
                             upstreamOptionName = `${upstreamOptionName} (${counter})`
                         }
-                        upstreamOptions.push(upstreamOptionName)
+                        upstreamOptions[itemKey].push(upstreamOptionName)
                         auxNameKeyUpstreamArgsMap[upstreamOptionName] = key
                         auxLabelUpstreamIdMap[upstreamOptionName] = upstreamId
                     }
                 })
             }
 
-            const upstreamValue = upstreamOptions ? upstreamOptions[0] : null
-            const valueUpstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ?
-                auxLabelUpstreamIdMap[upstreamValue] : null
-            const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue]
-                ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
-            
             const auxUpstreamValue: any = {}
-            for (const [_key, _value] of Object.entries(upstreamMap[formId][itemKey].value[index])){
+            for (let _key of Object.keys(upstreamMap[formId][itemKey].value[index])){
+                const upstreamValue = upstreamOptions[_key] ? upstreamOptions[_key][0] : null
+                const valueUpstreamId = upstreamValue && auxLabelUpstreamIdMap[upstreamValue] ? auxLabelUpstreamIdMap[upstreamValue] : null
+                const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue] ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
                 auxUpstreamValue[_key] = {
                     fromUpstream: checked,
                     value: upstreamValue,
                     upstreamId: valueUpstreamId,
                     upstreamArgument: upstreamArgument
                 }
-            } 
+            }
             upstreamMap[formId][itemKey].value[index] = auxUpstreamValue
         }
         setUpstreamOptions(upstreamOptions)
         setForageUpstreamMap(upstreamMap)
     }, [
+        subItemSchema.properties,
         getForageUpstreamMap,
         setForageUpstreamMap,
         fetchForagePieceById,
@@ -274,6 +314,57 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     useEffect(() => {
         (async () => {
             const newElements: any  = {}
+            const upstreamMap = await getForageUpstreamMap()
+            
+            if (!(formId in upstreamMap)) {
+                return
+            }
+            if (!(itemKey in upstreamMap[formId])) {
+                return
+            }
+            
+            const upstreamMapData = upstreamMap[formId][itemKey].value
+
+            for (const i in upstreamMapData){
+                const value = upstreamMapData[i]
+                var index = 0;
+                const entries: [any, any][] = Object.entries(value);
+                //for (let [key, _value] of Object.entries<{ value: string, upstreamId: string, upstreamArgument: string, fromUpstream: boolean }>(value)) {
+                for (let [key, _value] of entries) {
+                    const formValue: string = _value.value
+                    const upstreamId: string = _value.upstreamId
+                    const upstreamArgument: string = _value.upstreamArgument
+                    const fromUpstream: boolean = _value.fromUpstream     
+                    const title = arrayOfProperties[key].title
+                
+                    const upstreamOptionsArray: any = upstreamOptions[key]
+                    var inputElement = null
+                    if (fromUpstream){
+                        inputElement = (
+                            <FormControl fullWidth>
+                                <InputLabel>{`${title} [${index}]`}</InputLabel>
+                                <Select
+                                    fullWidth
+                                    value={formValue}
+                                    //onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
+                                >
+                                    {
+                                        upstreamOptionsArray.map((option: string) => (
+                                            <MenuItem key={option} value={option}>
+                                                {option}
+                                            </MenuItem>
+                                        ))
+                                    }
+                                </Select>
+                            </FormControl>
+                        );
+                    }
+                    index = index + 1
+                }
+
+            }
+            
+
             arrayItems.map((item, index) => {
                 let itemElements: JSX.Element[] = [];
                 // Loop through each of the item's properties and create the inputs for them
@@ -287,7 +378,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                         initialValue = arrayItems[index as number];
                     }
                     if (checkedFromUpstreamItemProp[index]?.[itemKey]) {
-
+                        //inputElement = (<h1>hello</h1>)
                         inputElement = (
                             <FormControl fullWidth>
                                 <InputLabel>{`${_itemKey} [${index}]`}</InputLabel>
@@ -296,11 +387,11 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                                     value={initialValue}
                                     onChange={(e) => handleSelectFromUpstreamChange(index, itemKey, e.target.value)}
                                 >
-                                    {upstreamOptions.map(option => (
+                                    {/* {upstreamOptions[itemKey].map((option: string) => (
                                         <MenuItem key={option} value={option}>
                                             {option}
                                         </MenuItem>
-                                    ))}
+                                    ))} */}
                                 </Select>
                             </FormControl>
                         );
@@ -353,11 +444,13 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 >
                     {itemElements}
                 </div>)
+                return null;
             })
             setRenderElements(newElements)
-            
         })()
     }, [
+        formId,
+        getForageUpstreamMap,
         arrayOfProperties,
         arrayItems,
         checkedFromUpstreamItemProp,
