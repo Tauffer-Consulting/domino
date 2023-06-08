@@ -57,11 +57,11 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
     // Sub-items schema
     let subItemSchema: any = itemSchema.items;
-    const itemsType = subItemSchema?.type
     if (itemSchema.items?.$ref) {
         const subItemSchemaName = itemSchema.items.$ref.split('/').pop();
         subItemSchema = parentSchemaDefinitions[subItemSchemaName];
     }
+    const itemsType = subItemSchema?.type
     let arrayOfProperties: { [key: string]: any } = useMemo(()=>{return {}},[]);
     // If array subtypes were not defined in the schema, we create a default one
     if (subItemSchema?.properties) {
@@ -232,12 +232,14 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 Object.keys(upstreamOutputSchema?.properties).forEach((key, _index) => {
                     const obj = upstreamOutputSchema?.properties[key]
                     var objType = obj.format ? obj.format : obj.type
+                    console.log('itemsType', itemsType)
                     if (itemsType === 'object') {
                         for (const [subItemKey, subItemValuevalue] of Object.entries<any>(subItemSchema.properties)) {
                             if (!(subItemKey in upstreamOptions)) {
                                 upstreamOptions[subItemKey] = []
                             }
                             let itemType = subItemValuevalue.format ? subItemValuevalue.format : subItemValuevalue.type
+                            console.log('aqui', itemType)
                             if (objType === itemType){
                                 let upstreamOptionName = `${upstreamOperator?.name} - ${obj['title']}`
                                 let counter = 1;
@@ -340,7 +342,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                         // console.log('arrayItems', arrayItems[index as number])
                         //initialValue = arrayItems[index as number][_itemKey as keyof typeof arrayItems[number]];
                         //initialValue = value[_itemKey].value
-                        console.log('aquii', upstreamOptions)
+                        //
                     }
                     const upstreamOptionsArray: any = upstreamOptions[_itemKey]
                     if (upstreamOptionsArray && checkedFromUpstreamItemProp[index]?.[itemKey]) {
