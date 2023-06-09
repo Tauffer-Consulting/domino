@@ -15,7 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { toast } from 'react-toastify';
-import { arrayOf } from 'prop-types';
+
 
 enum FromUpstreamOptions {
     always = "always",
@@ -51,8 +51,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         fetchForagePieceById,
         getForageCheckboxStates,
         setForageCheckboxStates,
-        setNameKeyUpstreamArgsMap,
-        getNameKeyUpstreamArgsMap,
     } = useWorkflowsEditor();
 
     // Sub-items schema
@@ -78,17 +76,18 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     const [upstreamOptions, setUpstreamOptions] = useState<string[]>([]);
     const [renderElements, setRenderElements] = useState<any>(null)
 
-    type ObjectWithBooleanValues = { [key: string]: boolean };
+    type ObjectWithBooleanValues = { [key: string]: {[key: string]: boolean} };
     const [checkedFromUpstreamItemProp, setCheckedFromUpstreamItemProp] = useState<ObjectWithBooleanValues[]>(() => {
         if (itemSchema.default && itemSchema.default.length > 0) {
             const initArray = new Array<ObjectWithBooleanValues>(itemSchema.default.length).fill({});
             // set the default values from the schema in cases where from_upstream==="always"
             initArray.map((obj, index) => {
-                Object.keys(arrayOfProperties).map(() => {
+                initArray[index][itemKey] = {}
+                Object.keys(arrayOfProperties).map((_key) => {
                     if (subItemSchema?.properties?.[itemKey]?.from_upstream === "always") {
-                        initArray[index][itemKey] = true;
+                        initArray[index][itemKey][_key] = true;
                     } else {
-                        initArray[index][itemKey] = false;
+                        initArray[index][itemKey][_key] = false;
                     }
                     return null;
                 });
@@ -97,8 +96,8 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             return initArray;
         }
         return [];
-
     });
+
 
     const handleArrayItemChange = useCallback((index: number, itemKey: string, value: string) => {
         console.log('handleArrayItemChange')
@@ -110,20 +109,61 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     // Add and delete items
     // TODO - fix setArrayItems to fill the props with correct values types, 
     // right now just guessing an empty string, but this will most likely fail e.g. boolen types
-    const handleAddItem = useCallback(() => {
-        const newItemPropsValues: string = ''
-        let newItemPropsChecked: { [key: string]: boolean } = {};
-        Object.keys(arrayOfProperties).map((_itemKey) => {
+    const handleAddItem = useCallback(async() => {
+        const newItemDefaultValue: string = ''
+        let newItemPropsChecked: ObjectWithBooleanValues = {
+            [itemKey]: {}
+        };
+        Object.keys(arrayOfProperties).map((_key) => {
             if (subItemSchema?.properties?.[itemKey]?.from_upstream === "always") {
-                newItemPropsChecked[itemKey] = true;
+                newItemPropsChecked[itemKey][_key] = true;
             } else {
-                newItemPropsChecked[itemKey] = false;
+                newItemPropsChecked[itemKey][_key] = false;
             }
             return null;
         });
+        const upstreamMap = await getForageUpstreamMap()
+        const fromUpstream = false
+        const upstreamId = null
+        const newValue: any = {}
+        for (const _key of Object.keys(arrayOfProperties)) {
+            newValue[_key] = {
+                fromUpstream: fromUpstream,
+                upstreamId: upstreamId,
+                upstreamArgument: null,
+                value: newItemDefaultValue
+            }
+        }
+    
+        const newValues = upstreamMap[formId][itemKey].value
+        newValues.push(newValue)
+
+        const updatedUpstreaMap = {
+            ...upstreamMap,
+            [formId]: {
+                ...upstreamMap[formId],
+                [itemKey]: {
+                    fromUpstream: fromUpstream,
+                    upstreamId: upstreamId,
+                    upstreamArgument: null,
+                    value: newValues
+                }
+            }
+        }
+        setForageUpstreamMap(updatedUpstreaMap)
         setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, newItemPropsChecked]);
-        onChange([...arrayItems, newItemPropsValues]);
-    }, [onChange, arrayItems, checkedFromUpstreamItemProp, arrayOfProperties, subItemSchema, itemKey]);
+        onChange([...arrayItems, newItemDefaultValue]);
+    }, [
+        onChange,
+        arrayItems,
+        checkedFromUpstreamItemProp,
+        arrayOfProperties,
+        subItemSchema,
+        itemKey,
+        formId,
+        getForageUpstreamMap,
+        setForageUpstreamMap
+    ]);
 
     // TODO - this is not working when deleting items with fromUpstrem checked
     const handleDeleteItem = (index: number) => {
@@ -140,13 +180,20 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         const checked = event.target.checked;
         setCheckedFromUpstreamItemProp((prevArray) => {
             const newArray = prevArray.map((item, i) => {
-                if (i !== index) {
-                    return item;
+                for (const [key, value] of Object.entries(item)) {
+                    for (const valueKey of Object.keys(value)) {
+                        if (i === index && valueKey === checkboxKey) {
+                            return {
+                                ...item,
+                                [key]: {
+                                    ...value,
+                                    [valueKey]: checked
+                                }
+                            };
+                        }
+                    }
                 }
-                return {
-                    ...item,
-                    [itemKey]: checked
-                };
+                return item;
             });
             return newArray;
         });
@@ -157,23 +204,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             auxCheckboxState = {}
         }
         
-        if ((!(formId in auxCheckboxState))){
-            auxCheckboxState[formId] = {}
-        }
-
-        if (!(itemKey in auxCheckboxState[formId])){
-            if (itemsType === "object") {
-                for (let key of Object.keys(subItemSchema?.properties)) {
-                    auxCheckboxState[formId][itemKey] = {
-                        [key]: new Array(arrayItems.length).fill(false)
-                    }
-                }
-            }else{
-                auxCheckboxState[formId][itemKey] = {
-                    [itemKey]: new Array(arrayItems.length).fill(false)
-                }
-            }
-        }
+    
 
         var upstreamsIds = []
         for (var ed of edges) {
@@ -181,17 +212,25 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 upstreamsIds.push(ed.source)
             }
         }
+        
         if (!upstreamsIds.length) {
             // set checkbox react states to false
             setCheckedFromUpstreamItemProp((prevArray) => {
                 const newArray = prevArray.map((item, i) => {
-                    if (i !== index) {
-                        return item;
+                    for (const [key, value] of Object.entries(item)) {
+                        for (const valueKey of Object.keys(value)) {
+                            if (i === index && valueKey === checkboxKey) {
+                                return {
+                                    ...item,
+                                    [key]: {
+                                        ...value,
+                                        [valueKey]: false
+                                    }
+                                };
+                            }
+                        }
                     }
-                    return {
-                        ...item,
-                        [itemKey]: false
-                    };
+                    return item;
                 });
                 return newArray;
             });
@@ -202,22 +241,18 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
         for (var i=0; i<checkedFromUpstreamItemProp.length; i++){
             if (i === index){
-                for (let key of Object.keys(auxCheckboxState[formId][itemKey])) {
-                    auxCheckboxState[formId][itemKey][key][i] = checked
-                }
-            }else{
-                for (let key of Object.keys(auxCheckboxState[formId][itemKey])) {
-                    auxCheckboxState[formId][itemKey][key][i] = checkedFromUpstreamItemProp[i][itemKey]
+                for (let key of Object.keys(arrayOfProperties)) {
+                    auxCheckboxState[formId][itemKey][i][key] = checked
                 }
             }
         }
+
         await setForageCheckboxStates(auxCheckboxState)
 
         const auxNameKeyUpstreamArgsMap: any = {}
         const auxLabelUpstreamIdMap: any = {}
 
         var upstreamMap = await getForageUpstreamMap()
-        //console.log('upstreamMap', upstreamMap)
         if (!(formId in upstreamMap)) {
             upstreamMap[formId] = {}
         }
@@ -289,6 +324,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         setUpstreamOptions(upstreamOptions)
         setForageUpstreamMap(upstreamMap)
     }, [
+        arrayOfProperties,
         subItemSchema.properties,
         getForageUpstreamMap,
         setForageUpstreamMap,
@@ -297,7 +333,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         getForageCheckboxStates,
         formId,
         setForageCheckboxStates,
-        arrayItems,
         checkedFromUpstreamItemProp,
         itemKey,
         itemsType
@@ -320,20 +355,39 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         (async () => {
             const newElements: any  = {}
             const upstreamMap = await getForageUpstreamMap()
-            
+            const checkboxStates = await getForageCheckboxStates()
+
+            if ((!(formId in checkboxStates))) {
+                checkboxStates[formId] = {}
+            }
+
+            if (!(itemKey in checkboxStates[formId])) {
+                checkboxStates[formId][itemKey] = []
+                for (let i = 0; i < arrayItems.length; i++) {
+                    const newObj: any = {}
+                    for (let key of Object.keys(arrayOfProperties)) {
+                        newObj[key] = false
+                    }
+                    console.log('aqui', newObj)
+                    checkboxStates[formId][itemKey].push(newObj)
+                }
+                setForageCheckboxStates(checkboxStates)
+            }
+
             if (!(formId in upstreamMap)) {
                 return
             }
             if (!(itemKey in upstreamMap[formId])) {
                 return
             }
-            
+
             const upstreamMapData = upstreamMap[formId][itemKey].value
             arrayItems.map((item, index) => {
                 const value = upstreamMapData[index]
                 let itemElements: JSX.Element[] = [];
                 // Loop through each of the item's properties and create the inputs for them
                 Object.keys(arrayOfProperties).map((_itemKey: any, subIndex: any) => {
+                    
                     let inputElement: JSX.Element;
                     const subItemPropSchema = arrayOfProperties[_itemKey];
                     const title = subItemPropSchema.title
@@ -388,7 +442,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                             {inputElement}
                             {subItemPropSchema?.from_upstream !== "never" ? (
                                 <Checkbox
-                                    checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey]}
+                                    checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey][_itemKey]}
                                     onChange={(event) => handleCheckboxFromUpstreamChange(event, index, _itemKey)}
                                     disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                                 />
@@ -408,11 +462,12 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 </div>)
                 return null;
             })
-            setRenderElements(newElements)
-            
+            setRenderElements(newElements) 
         })()
     }, [
         formId,
+        setForageCheckboxStates,
+        getForageCheckboxStates,
         getForageUpstreamMap,
         arrayOfProperties,
         arrayItems,

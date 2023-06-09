@@ -120,7 +120,6 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
 
     const handleCheckboxFromUpstreamChange = useCallback(async (checked: boolean, showWarnings: boolean = true) => {
         setCheckedFromUpstream(checked);
-
         const edges = await fetchForageWorkflowEdges()
 
         var auxCheckboxState: any = await getForageCheckboxStates()
@@ -219,7 +218,6 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
         setFormLabelUpstreamIdMap(auxLabelUpstreamIdMap)
         const currentNameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
         setNameKeyUpstreamArgsMap({ ...auxNameKeyUpstreamArgsMap, ...currentNameKeyUpstreamArgsMap })
-
         setForageUpstreamMap(upstreamMap)
         setUpstreamSelectValue(upstreamValue)
     }, [
@@ -244,6 +242,9 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
             if (!(formId in auxCheckboxState)) {
                 return
             }
+            if (formFieldType === 'array'){
+                return
+            }
             const formCheckboxStates = auxCheckboxState[formId]
             if (itemKey in formCheckboxStates) {
                 await handleCheckboxFromUpstreamChange(formCheckboxStates[itemKey], false)
@@ -251,7 +252,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
                 await handleCheckboxFromUpstreamChange(false, false)
             }
         })()
-    }, [getForageCheckboxStates, formId, itemKey, getForageUpstreamMap, handleCheckboxFromUpstreamChange])
+    }, [getForageCheckboxStates, formId, itemKey, getForageUpstreamMap, handleCheckboxFromUpstreamChange, formFieldType])
 
     // Select fromUpstream source
     const handleSelectFromUpstreamChange = useCallback(async (event: SelectChangeEvent<any>) => {
