@@ -394,7 +394,14 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
                     let initialValue: any = value[_itemKey].value || '';
                     const upstreamOptionsArray: any = upstreamOptions[_itemKey]
+
+                    // TODO upstreamOptionsArray is undefined when user open the form for the first time
+                    // it is generated only when user clicks on the checkbox
+                    // it will cause a bug if the user close and open the form again since the checkbox will be checked
+                    // but the upstreamOptionsArray will be undefined so the form will be rendered as textfield
+                    // to solve this maybe we need to generate upstreamOptionsArray when the form is opened for the already checked checkboxes
                     if (upstreamOptionsArray && value[_itemKey].fromUpstream) {
+                        console.log('entrou if1')
                         inputElement = (
                             <FormControl fullWidth>
                                 <InputLabel>{`${title} [${index}]`}</InputLabel>
@@ -430,6 +437,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                             </FormControl>
                         );
                     } else {
+                        console.log('entrou text')
                         inputElement = <TextField
                             fullWidth
                             label={`${title} [${index}]`}
