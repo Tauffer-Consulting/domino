@@ -368,7 +368,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                     for (let key of Object.keys(arrayOfProperties)) {
                         newObj[key] = false
                     }
-                    console.log('aqui', newObj)
                     checkboxStates[formId][itemKey].push(newObj)
                 }
                 setForageCheckboxStates(checkboxStates)
@@ -391,6 +390,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                     let inputElement: JSX.Element;
                     const subItemPropSchema = arrayOfProperties[_itemKey];
                     const title = subItemPropSchema.title
+                    const checkboxValue = checkboxStates[formId][itemKey][index][_itemKey]
 
                     let initialValue: any = value[_itemKey].value || '';
                     const upstreamOptionsArray: any = upstreamOptions[_itemKey]
@@ -442,7 +442,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                             {inputElement}
                             {subItemPropSchema?.from_upstream !== "never" ? (
                                 <Checkbox
-                                    checked={subItemPropSchema?.from_upstream === 'always' ? true : checkedFromUpstreamItemProp[index]?.[itemKey][_itemKey]}
+                                    checked={subItemPropSchema?.from_upstream === 'always' ? true : checkboxValue}
                                     onChange={(event) => handleCheckboxFromUpstreamChange(event, index, _itemKey)}
                                     disabled={subItemPropSchema?.from_upstream === 'never' || subItemPropSchema?.from_upstream === 'always'}
                                 />
