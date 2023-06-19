@@ -59,6 +59,9 @@ const WorkflowEditorPanelComponent = () => {
     fetchForageWorkflowEdges,
     getForageUpstreamMap,
     setForageUpstreamMap,
+    setForageWorkflowPieces,
+    getForageWorkflowPieces,
+    removeForageWorkflowPiecesById,
   } = useWorkflowsEditor()
 
   // Removing flowchart elements
@@ -66,17 +69,18 @@ const WorkflowEditorPanelComponent = () => {
     for (const node of nodes) {
       await removeFormsForageDataById(node.id)
       await removeForageUpstreamMapById(node.id)
+      await removeForageWorkflowPiecesById(node.id)
     }
-  }, [removeFormsForageDataById, removeForageUpstreamMapById])
+  }, [removeFormsForageDataById, removeForageUpstreamMapById, removeForageWorkflowPiecesById])
 
 
   // Node double click open drawer with forms
   const onNodeDoubleClick = useCallback(async (event: any, node: any) => {
-    const operatorNode = await fetchForagePieceById(node.id.split('_')[0])
+    const pieceNode = await fetchForagePieceById(node.id.split('_')[0])
 
-    setFormSchema(operatorNode?.input_schema)
+    setFormSchema(pieceNode?.input_schema)
     setFormId(node.id)
-    setFormTitle(() => { return operatorNode?.name ? operatorNode?.name : "" })
+    setFormTitle(() => { return pieceNode?.name ? pieceNode?.name : "" })
     setDrawerState(true)
   }, [fetchForagePieceById])
 
@@ -130,10 +134,17 @@ const WorkflowEditorPanelComponent = () => {
     }
 
     setNodes((ns: Node[]) => ns.concat(newNode))
-    const operator = await fetchForagePieceById(data.id)
-    const inputSchema = operator?.input_schema
+    const piece = await fetchForagePieceById(data.id)
+    const inputSchema = piece?.input_schema
     const defaultData: any = extractDefaultValues(inputSchema)
     const containerResourcesDefaultData: unknown = extractDefaultValues(containerResourcesSchema)
+
+    const currentWorkflowPieces = await getForageWorkflowPieces()
+    const newWorkflowPieces = {
+      ...currentWorkflowPieces,
+      [newNode.id]: piece
+    }
+    await setForageWorkflowPieces(newWorkflowPieces)
 
     // Set default data for upstream mapping - used in dags
     var upstreamMap = await getForageUpstreamMap()
@@ -186,7 +197,17 @@ const WorkflowEditorPanelComponent = () => {
     defaultData['containerResources'] = containerResourcesDefaultData
     // Set default data for the node form - used in json-forms
     await setFormsForageData(newNode.id, defaultData)
-  }, [fetchForagePieceById, nodeDirection, setFormsForageData, setForageUpstreamMap, getForageUpstreamMap, reactFlowInstance, setNodes])
+  }, [
+    fetchForagePieceById,
+    nodeDirection,
+    setFormsForageData,
+    setForageUpstreamMap,
+    getForageUpstreamMap,
+    reactFlowInstance,
+    setNodes,
+    setForageWorkflowPieces,
+    getForageWorkflowPieces 
+  ])
 
   // Left drawer controls
   // @ts-ignore: Unreachable code error

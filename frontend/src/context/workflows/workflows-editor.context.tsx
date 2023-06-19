@@ -70,6 +70,10 @@ interface IWorkflowsEditorContext {
   setForageCheckboxStates: (checkboxStatesMap: any) => Promise<void> // TODO add type
   getForageCheckboxStates: () => Promise<any> // TODO add type
 
+  setForageWorkflowPieces: (workflowPieces: any) => Promise<void> // TODO add type
+  getForageWorkflowPieces: () => Promise<any> // TODO add type
+  removeForageWorkflowPiecesById: (id: string) => Promise<void>
+
   setNameKeyUpstreamArgsMap: (nameKeyUpstreamArgsMap: any) => Promise<void> // TODO add type
   getNameKeyUpstreamArgsMap: () => Promise<any> // TODO add type
   clearNameKeyUpstreamArgsMap: () => Promise<void>
@@ -269,12 +273,18 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     localForage.setItem('formsData', currentData);
   }, [])
 
+  const clearForageWorkflowPieces = useCallback(async () => {
+    await localForage.setItem('workflowPieces', {})
+  }, [])
+
+
   const clearForageData = useCallback(async () => {
     await localForage.setItem('formsData', {})
     await clearForageUpstreamMap()
     await clearForageCheckboxStates()
     await clearNameKeyUpstreamArgsMap()
-  }, [clearForageUpstreamMap, clearForageCheckboxStates, clearNameKeyUpstreamArgsMap])
+    await clearForageWorkflowPieces()
+  }, [clearForageUpstreamMap, clearForageCheckboxStates, clearNameKeyUpstreamArgsMap, clearForageWorkflowPieces])
 
   const setForageWorkflowNodes = useCallback(async (nodes: IWorkflowElement[]) => {
     await localForage.setItem('workflowNodes', nodes)
@@ -299,6 +309,28 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     }
     return workflowEdges
   }, [])
+
+  const setForageWorkflowPieces = useCallback(async (workflowPieces: any) => {
+    await localForage.setItem('workflowPieces', workflowPieces)
+  }, [])
+
+  const getForageWorkflowPieces = useCallback(async () => {
+    const workflowPieces = await localForage.getItem<any>("workflowPieces")
+    if (!workflowPieces) {
+      return {}
+    }
+    return workflowPieces
+  }, [])
+
+  const removeForageWorkflowPiecesById = useCallback(async (id: string) => {
+    const workflowPieces = await localForage.getItem<any>("workflowPieces")
+    if (!workflowPieces) {
+      return
+    }
+    delete workflowPieces[id]
+    await localForage.setItem('workflowPieces', workflowPieces)
+  }, [])
+
 
   useEffect(() => {
     (async () => {
@@ -495,6 +527,9 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       nodeDirection,
       setForageCheckboxStates,
       getForageCheckboxStates,
+      setForageWorkflowPieces,
+      getForageWorkflowPieces,
+      removeForageWorkflowPiecesById,
       setNameKeyUpstreamArgsMap,
       getNameKeyUpstreamArgsMap,
       clearNameKeyUpstreamArgsMap,
@@ -531,6 +566,9 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       setNodes,
       setForageCheckboxStates,
       getForageCheckboxStates,
+      setForageWorkflowPieces,
+      getForageWorkflowPieces,
+      removeForageWorkflowPiecesById,
       setNameKeyUpstreamArgsMap,
       getNameKeyUpstreamArgsMap,
       clearNameKeyUpstreamArgsMap
