@@ -62,6 +62,7 @@ const WorkflowEditorPanelComponent = () => {
     setForageWorkflowPieces,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
+    fetchWorkflowPieceById
   } = useWorkflowsEditor()
 
   // Removing flowchart elements
@@ -76,13 +77,13 @@ const WorkflowEditorPanelComponent = () => {
 
   // Node double click open drawer with forms
   const onNodeDoubleClick = useCallback(async (event: any, node: any) => {
-    const pieceNode = await fetchForagePieceById(node.id.split('_')[0])
-
+    //const pieceNode = await fetchForagePieceById(node.id.split('_')[0])
+    const pieceNode = await fetchWorkflowPieceById(node.id)
     setFormSchema(pieceNode?.input_schema)
     setFormId(node.id)
     setFormTitle(() => { return pieceNode?.name ? pieceNode?.name : "" })
     setDrawerState(true)
-  }, [fetchForagePieceById])
+  }, [fetchWorkflowPieceById])
 
   const onLoad = useCallback(async (_reactFlowInstance: any) => {
     setReactFlowInstance(_reactFlowInstance)

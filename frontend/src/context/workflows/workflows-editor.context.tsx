@@ -73,6 +73,7 @@ interface IWorkflowsEditorContext {
   setForageWorkflowPieces: (workflowPieces: any) => Promise<void> // TODO add type
   getForageWorkflowPieces: () => Promise<any> // TODO add type
   removeForageWorkflowPiecesById: (id: string) => Promise<void>
+  fetchWorkflowPieceById: (id: string) => Promise<IOperator> // TODO add type
 
   setNameKeyUpstreamArgsMap: (nameKeyUpstreamArgsMap: any) => Promise<void> // TODO add type
   getNameKeyUpstreamArgsMap: () => Promise<any> // TODO add type
@@ -331,6 +332,13 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     await localForage.setItem('workflowPieces', workflowPieces)
   }, [])
 
+  const fetchWorkflowPieceById = useCallback(async (id: string) => {
+    const workflowPieces = await localForage.getItem<any>("workflowPieces")
+    if (workflowPieces !== null) {
+      return workflowPieces[id]
+    }
+  }, [])
+
 
   useEffect(() => {
     (async () => {
@@ -530,6 +538,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       setForageWorkflowPieces,
       getForageWorkflowPieces,
       removeForageWorkflowPiecesById,
+      fetchWorkflowPieceById,
       setNameKeyUpstreamArgsMap,
       getNameKeyUpstreamArgsMap,
       clearNameKeyUpstreamArgsMap,
@@ -569,6 +578,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       setForageWorkflowPieces,
       getForageWorkflowPieces,
       removeForageWorkflowPiecesById,
+      fetchWorkflowPieceById,
       setNameKeyUpstreamArgsMap,
       getNameKeyUpstreamArgsMap,
       clearNameKeyUpstreamArgsMap
