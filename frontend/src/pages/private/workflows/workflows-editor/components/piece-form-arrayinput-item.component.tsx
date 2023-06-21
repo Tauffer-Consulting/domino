@@ -165,14 +165,36 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
     ]);
 
     // TODO - this is not working when deleting items with fromUpstrem checked
-    const handleDeleteItem = (index: number) => {
+    const handleDeleteItem = useCallback(async(index: number) => {
+        const upstreamMap = await getForageUpstreamMap()
+        const currentValues = upstreamMap[formId][itemKey].value
+        currentValues.splice(index, 1)
+        await setForageUpstreamMap({
+            ...upstreamMap,
+            [formId]: {
+                ...upstreamMap[formId],
+                [itemKey]: {
+                    ...upstreamMap[formId][itemKey],
+                    value: currentValues
+                }
+            }
+        })
         const updatedItems = [...arrayItems];
         updatedItems.splice(index, 1);
-        onChange(updatedItems);
         const updatedCheckedFromUpstreamItemProp = [...checkedFromUpstreamItemProp];
         updatedCheckedFromUpstreamItemProp.splice(index, 1);
         setCheckedFromUpstreamItemProp(updatedCheckedFromUpstreamItemProp);
-    };
+        onChange(updatedItems);
+
+    }, [
+        onChange,
+        arrayItems,
+        checkedFromUpstreamItemProp,
+        itemKey,
+        formId,
+        getForageUpstreamMap,
+        setForageUpstreamMap
+    ]);
 
 
 
