@@ -149,6 +149,19 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 }
             }
         }
+
+        const checkboxStates = await getForageCheckboxStates()
+        const checkboxStatesArray = checkboxStates[formId][itemKey]
+        checkboxStatesArray.push(newItemPropsChecked[itemKey])
+        await setForageCheckboxStates({
+            ...checkboxStates,
+            [formId]: {
+                ...checkboxStates[formId],
+                [itemKey]: checkboxStatesArray
+            }
+        })
+    
+
         setForageUpstreamMap(updatedUpstreaMap)
         setCheckedFromUpstreamItemProp([...checkedFromUpstreamItemProp, newItemPropsChecked]);
         onChange([...arrayItems, newItemDefaultValue]);
@@ -161,7 +174,9 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         itemKey,
         formId,
         getForageUpstreamMap,
-        setForageUpstreamMap
+        setForageUpstreamMap,
+        getForageCheckboxStates,
+        setForageCheckboxStates
     ]);
 
     // TODO - this is not working when deleting items with fromUpstrem checked
@@ -207,7 +222,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
         getForageUpstreamMap,
         setForageUpstreamMap,
         getForageCheckboxStates,
-        setForageCheckboxStates
+        setForageCheckboxStates,
     ]);
 
 
@@ -428,9 +443,10 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
             var _upstreamOptions = upstreamOptions
             const upstreamMapData = upstreamMap[formId][itemKey].value
-            if (typeof upstreamMapData !== 'object') {
+            if ((typeof upstreamMapData !== 'object') || (checkboxStates[formId][itemKey].length === 0) || (checkboxStates[formId][itemKey].length !== arrayItems.length)) {
                 return
             }
+
             arrayItems.map((item, index) => {
                 const value = upstreamMapData[index]
                 let itemElements: JSX.Element[] = [];
