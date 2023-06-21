@@ -100,7 +100,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
 
     const handleArrayItemChange = useCallback((index: number, itemKey: string, value: string) => {
-        console.log('handleArrayItemChange')
         const updatedItems = [...arrayItems];
         updatedItems[index][itemKey] = value;
         onChange(updatedItems);
@@ -239,6 +238,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             toast.error('This piece has no upstreams.')
             return
         }
+        
 
         for (var i=0; i<checkedFromUpstreamItemProp.length; i++){
             if (i === index){
@@ -351,7 +351,6 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
 
     // FromUpstream select logic
     const handleSelectFromUpstreamChange = useCallback((index: number, itemKey: string, value: string) => {
-        console.log('handleSelectFromUpstreamChange')
         const updatedItems = [...arrayItems];
         if (typeof updatedItems[index] === 'object') {
             updatedItems[index][itemKey] = value;
@@ -372,7 +371,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 checkboxStates[formId] = {}
             }
 
-            if (!(itemKey in checkboxStates[formId])) {
+            if ((!(itemKey in checkboxStates[formId])) || typeof checkboxStates[formId][itemKey] !== 'object') {
                 checkboxStates[formId][itemKey] = []
                 for (let i = 0; i < arrayItems.length; i++) {
                     const newObj: any = {}
@@ -383,7 +382,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 }
                 setForageCheckboxStates(checkboxStates)
             }
-
+            
             if (!(formId in upstreamMap)) {
                 return
             }
@@ -392,8 +391,10 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
             }
 
             var _upstreamOptions = upstreamOptions
-
             const upstreamMapData = upstreamMap[formId][itemKey].value
+            if (typeof upstreamMapData !== 'object') {
+                return
+            }
             arrayItems.map((item, index) => {
                 const value = upstreamMapData[index]
                 let itemElements: JSX.Element[] = [];
@@ -401,9 +402,18 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 Promise.all(
                     Object.keys(arrayOfProperties).map(async(_itemKey: any, subIndex: any) => {
                         let inputElement: JSX.Element;
+                        
                         const subItemPropSchema = arrayOfProperties[_itemKey];
                         const title = subItemPropSchema.title
-                        const checkboxValue = checkboxStates[formId][itemKey][index][_itemKey]
+                        const checkboxFormState = checkboxStates[formId][itemKey]
+                        var checkboxValue = false;
+                        var isParentChecked = false;
+                        if (typeof checkboxFormState === 'boolean'){
+                            isParentChecked = true
+                        }
+                        if (!(typeof checkboxFormState === 'boolean')){
+                            checkboxValue = checkboxStates[formId][itemKey][index][_itemKey]
+                        }
                         
                         // TODO this can be improved, it is slow but is working for now
                         // upstreamOptionsArray is undefined when user open the form for the first time
@@ -411,16 +421,20 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                         // it will cause a bug if the user close and open the form again since the checkbox will be checked
                         // but the upstreamOptionsArray will be undefined so the form will be rendered as textfield
                         // to solve this maybe we need to generate upstreamOptionsArray when the form is opened for the already checked checkboxes
-                        if (upstreamOptions.length === 0 && checkboxValue) {
+                        if (upstreamOptions.length === 0 && typeof checkboxFormState !== 'boolean' && checkboxValue) {
                             const results = await _handleCheckboxFromUpstreamChange(checkboxValue, index, _itemKey)
                             _upstreamOptions = results?.upstreamOptions
                             setUpstreamOptions(_upstreamOptions)
                             setForageUpstreamMap(results?.upstreamMap)
                         }
-                        let initialValue: any = value[_itemKey].value || '';
-                        const upstreamOptionsArray: any = _upstreamOptions[_itemKey]
+                        var initialValue: any = ''
+                        var upstreamOptionsArray: any = []
+                        if (!isParentChecked){
+                            initialValue = value[_itemKey].value || '';
+                            upstreamOptionsArray = _upstreamOptions[_itemKey]
+                        }
 
-                        if (upstreamOptionsArray && value[_itemKey].fromUpstream) {
+                        if (!isParentChecked && (upstreamOptionsArray && value[_itemKey].fromUpstream)) {
                             inputElement = (
                                 <FormControl fullWidth>
                                     <InputLabel>{`${title} [${index}]`}</InputLabel>
@@ -488,6 +502,7 @@ const ArrayInputItem: React.FC<ArrayInputItemProps> = ({
                 </div>)
                 return null;
             })
+
             setRenderElements(newElements) 
         })()
     }, [

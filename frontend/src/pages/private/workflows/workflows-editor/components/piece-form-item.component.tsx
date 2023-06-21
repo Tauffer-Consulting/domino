@@ -208,6 +208,35 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
             auxLabelUpstreamIdMap[upstreamValue] : null
         const upstreamArgument = upstreamValue && auxNameKeyUpstreamArgsMap[upstreamValue]
             ? auxNameKeyUpstreamArgsMap[upstreamValue] : null
+
+        if (Array.isArray(upstreamValue)) {
+            const auxValues = []
+            for (const element of upstreamValue) {
+                const newValue: any = {}
+                if (typeof element === 'object') {
+                    for (const [_key, _value] of Object.entries(element)) {
+                        newValue[_key] = {
+                            fromUpstream: upstreamMap[formId][itemKey].fromUpstream,
+                            upstreamId: upstreamId,
+                            upstreamArgument: null,
+                            value: _value
+                        }
+                    }
+                    auxValues.push(newValue)
+                } else {
+                    newValue[itemKey] = {
+                        fromUpstream: upstreamMap[formId][itemKey].fromUpstream,
+                        upstreamId: upstreamId,
+                        upstreamArgument: null,
+                        value: element
+                    }
+                    auxValues.push(newValue)
+                }
+            }
+            upstreamValue = auxValues
+        }
+        
+
         upstreamMap[formId][itemKey] = {
             ...upstreamMap[formId][itemKey],
             upstreamId: upstreamId,
