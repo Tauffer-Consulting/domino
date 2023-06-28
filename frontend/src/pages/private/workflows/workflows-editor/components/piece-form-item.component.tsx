@@ -271,10 +271,10 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, schema, itemKey, 
             if (!(formId in auxCheckboxState)) {
                 return
             }
-            if (formFieldType === 'array'){
+            const formCheckboxStates = auxCheckboxState[formId]
+            if (formFieldType === 'array' && typeof formCheckboxStates[itemKey] !== 'boolean'){
                 return
             }
-            const formCheckboxStates = auxCheckboxState[formId]
             if (itemKey in formCheckboxStates) {
                 await handleCheckboxFromUpstreamChange(formCheckboxStates[itemKey], false)
             } else {
