@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PieceFormItem from './piece-form-item.component';
+import PieceFormItem from '../piece-form-item.component';
 
 
 type initialDataType = Record<string, any>;

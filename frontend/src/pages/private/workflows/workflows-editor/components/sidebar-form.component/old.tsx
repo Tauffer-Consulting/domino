@@ -19,7 +19,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { extractDefaultValues } from 'utils'
-import PieceForm from './piece-form.component'
+import PieceForm from '../piece-form.component'
 // import { createAjv } from '@jsonforms/core'
 // import { operatorStorageSchema } from 'common/schemas/storageSchemas'
 // import { workflowFormSchema } from 'common/schemas/workflowFormSchema'

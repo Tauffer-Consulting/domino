@@ -260,7 +260,7 @@ const WorkflowEditorPanelComponent = () => {
           <Background color='#aaa' gap={16} />
         </ReactFlow>
       </div>
-      <SidebarForm formSchema={formSchema} formId={formId} onClose={toggleDrawer(false)} open={drawerState} title={formTitle} />
+      <SidebarForm schema={formSchema} formId={formId} onClose={toggleDrawer(false)} open={drawerState} title={formTitle} />
 
     </ReactFlowProvider>
   )

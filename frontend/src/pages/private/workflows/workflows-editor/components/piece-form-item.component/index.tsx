@@ -21,8 +21,8 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
-import ArrayInputItem from './piece-form-arrayinput-item.component';
-import CodeEditorItem from './piece-form-codeeditor-item.component';
+import ArrayInputItem from '../piece-form-arrayinput-item.component';
+import CodeEditorItem from '../piece-form-codeeditor-item.component';
 
 
 interface PieceFormItemProps {
