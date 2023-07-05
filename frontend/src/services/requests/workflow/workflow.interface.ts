@@ -1,6 +1,6 @@
 export interface IWorkflowElement {
   id: string
-  type: string
+  type?: string
   data: {
     name: string
     handleOrientation: "horizontal" | "vertical"

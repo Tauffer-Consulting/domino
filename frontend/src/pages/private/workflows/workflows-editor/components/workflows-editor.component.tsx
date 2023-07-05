@@ -21,7 +21,7 @@ import { toast } from "react-toastify"
  // TODO make it look good
  // TODO remove all '// @ts-ignore: Unreachable code error"'
  */
-export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () => {
+export const WorkflowsEditorComponent: React.FC = () => {
 
   const [formSchema, setFormSchema] = useState<any>({})
   const [formUiSchema, setFormUiSchema] = useState<any>({})
@@ -250,11 +250,11 @@ export const WorkflowsEditorComponent = withContext(WorkflowsEditorProvider, () 
           />
         </Grid>
         {/* <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} /> */}
-        <SidebarSettingsForm 
-          onClose={toggleDrawer(false)} 
-          open={drawerState} 
+        <SidebarSettingsForm
+          onClose={toggleDrawer(false)}
+          open={drawerState}
         />
       </div>
     </>
   )
-})
+}
