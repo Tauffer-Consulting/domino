@@ -8,8 +8,8 @@ import {
 } from '@mui/material'
 
 import * as yup from "yup";
-import { useForm } from "react-hook-form";
-import useYupValidationResolver from "utils/validationResolver";
+import { useFormContext } from "react-hook-form";
+import { IWorkflowPieceData } from "context/workflows/types";
 
 // TODO check if these values make sense
 const minAcceptedMemory = 128
@@ -17,7 +17,7 @@ const minAcceptedCpu = 100
 const maxAcceptedMemory = 12800
 const maxAcceptedCpu = 10000
 
-const defaultContainerResources = {
+export const defaultContainerResources = {
   useGpu: false,
   memoryMin: 128,
   memoryMax: 128,
@@ -25,33 +25,15 @@ const defaultContainerResources = {
   cpuMax: 100
 }
 
-export const formSchema = yup.object().shape({
+export const ContainerResourceFormSchema = yup.object().shape({
   cpuMin: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required(),
   cpuMax: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required(),
   memoryMin: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required(),
   memoryMax: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required(),
 });
 
-interface IContainerResourceFormData {
-  useGpu: boolean,
-  cpuMin: number,
-  cpuMax: number
-  memoryMin: number,
-  memoryMax: number
-}
-
-interface IContainerResourceFormProps {
-  onChange: (data: IContainerResourceFormData) => void
-}
-
-const ContainerResourceForm: React.FC<IContainerResourceFormProps> = ({ onChange }) => {
-
-  const resolver = useYupValidationResolver(formSchema);
-  const { register, watch, formState } = useForm<IContainerResourceFormData>({ resolver, mode: "onChange"});
-  
-
-  const data = watch()
-  onChange(data)
+const ContainerResourceForm: React.FC = () => {
+  const { register, formState } = useFormContext<IWorkflowPieceData>();
 
   return (
     <Grid container spacing={2}>
@@ -62,72 +44,67 @@ const ContainerResourceForm: React.FC<IContainerResourceFormProps> = ({ onChange
         <TextField
           label="CPU Min"
           type="number"
-          defaultValue={defaultContainerResources.cpuMin}
           required
           fullWidth
           inputProps={{
             min: minAcceptedCpu,
             max: maxAcceptedCpu
           }}
-          error={!!formState.errors.cpuMin?.message}
-          helperText={formState.errors.cpuMin?.message}
-          {...register("cpuMin")}
+          error={!!formState.errors.containerResources?.cpuMin?.message}
+          helperText={formState.errors.containerResources?.cpuMin?.message}
+          {...register("containerResources.cpuMin")}
         />
       </Grid>
       <Grid item xs={6}>
         <TextField
           label="CPU Max"
           type="number"
-          defaultValue={defaultContainerResources.cpuMax}
           required
           fullWidth
           inputProps={{
             min: minAcceptedCpu,
             max: maxAcceptedCpu
           }}
-          error={!!formState.errors.cpuMax?.message}
-          helperText={formState.errors.cpuMax?.message}
-          {...register("cpuMax")}
+          error={!!formState.errors.containerResources?.cpuMax?.message}
+          helperText={formState.errors.containerResources?.cpuMax?.message}
+          {...register(`containerResources.${"cpuMax"}`)}
         />
       </Grid>
       <Grid item xs={6}>
         <TextField
           label="Memory Min"
           type="number"
-          defaultValue={defaultContainerResources.memoryMin}
           required
           fullWidth
           inputProps={{
             min: minAcceptedMemory,
             max: maxAcceptedMemory
           }}
-          error={!!formState.errors.memoryMin?.message}
-          helperText={formState.errors.memoryMin?.message}
-          {...register("memoryMin")}
+          error={!!formState.errors.containerResources?.memoryMin?.message}
+          helperText={formState.errors.containerResources?.memoryMin?.message}
+          {...register("containerResources.memoryMin")}
         />
       </Grid>
       <Grid item xs={6}>
         <TextField
           label="Memory Max"
           type="number"
-          defaultValue={defaultContainerResources.memoryMax}
           required
           fullWidth
           inputProps={{
             min: minAcceptedMemory,
             max: maxAcceptedMemory
           }}
-          error={!!formState.errors.memoryMax?.message}
-          helperText={formState.errors.memoryMax?.message}
-          {...register("memoryMax")}
+          error={!!formState.errors.containerResources?.memoryMax?.message}
+          helperText={formState.errors.containerResources?.memoryMax?.message}
+          {...register("containerResources.memoryMax")}
         />
       </Grid>
       <Grid item xs={12}>
         <FormControlLabel
           control={
             <Checkbox
-              {...register("useGpu")}
-              defaultChecked={defaultContainerResources.useGpu}
+              {...register("containerResources.useGpu")}
             />
           }
           label="Use GPU"

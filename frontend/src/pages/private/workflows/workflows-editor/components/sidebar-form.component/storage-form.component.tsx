@@ -1,32 +1,19 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import * as yup from 'yup'
-import useYupValidationResolver from 'utils/validationResolver';
 import { FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { IWorkflowPieceData, storageAccessModeType, storageAccessModes } from 'context/workflows/types';
 
-const storageAccessModes = ['None', 'Read', 'Read/Write'] as const
-type storageAccessModeType = typeof storageAccessModes
-
-export const formSchema = yup.object().shape({
-  storageAccessMode: yup.mixed().oneOf(storageAccessModes).required(),
+export const storageFormSchema = yup.object().shape({
+  storageAccessMode: yup.mixed().oneOf(Object.values(storageAccessModes)).required(),
 });
 
-interface IStorageFormData {
-  storageAccessMode: storageAccessModeType,
+export const defaultStorage = {
+  storageAccessMode: storageAccessModes.None as storageAccessModeType
 }
 
-interface IStorageFormProps {
-  onChange: (data: IStorageFormData) => void
-}
-
-
-const StorageForm: React.FC<IStorageFormProps> = ({ onChange }) => {
-  const resolver = useYupValidationResolver(formSchema);
-  const { register, watch, formState } = useForm<IStorageFormData>({ resolver, mode: "onChange" });
-
-  const data = watch()
-
-  onChange(data)
+const StorageForm: React.FC = () => {
+  const { formState, control } = useFormContext<IWorkflowPieceData>();
 
   return (
     <Grid container spacing={2}>
@@ -36,18 +23,27 @@ const StorageForm: React.FC<IStorageFormProps> = ({ onChange }) => {
       <Grid item xs={12}>
         <FormControl fullWidth>
           <InputLabel>Storage Access Mode</InputLabel>
-          <Select
+          <Controller
+            name="storage.storageAccessMode"
+            control={control}
             defaultValue="None"
-            error={!!formState.errors.storageAccessMode}
-            required
-            {...register("storageAccessMode")}
-          >
-            <MenuItem value="None">None</MenuItem>
-            <MenuItem value="Read">Read</MenuItem>
-            <MenuItem value="Read/Write">Read/Write</MenuItem>
-          </Select>
+            render={({ field }) => (
+              <Select
+                {...field}
+                onChange={(event) =>
+                  field.onChange(event.target.value as storageAccessModeType)
+                }
+              >
+                <MenuItem value="None">None</MenuItem>
+                <MenuItem value="Read">Read</MenuItem>
+                <MenuItem value="Read/Write">Read/Write</MenuItem>
+              </Select>
+            )}
+          />
+
+
           <FormHelperText error>
-            {formState.errors.storageAccessMode?.message}
+            {formState.errors.storage?.storageAccessMode?.message}
           </FormHelperText>
         </FormControl>
       </Grid>
