@@ -184,4 +184,4 @@ The REST service is written in Python, using the FastAPI framework. Read more ab
 <br>
 
 # Credits
-Domino is developed and maintained by [Tauffer Consulting](https://www.taufferconsulting.com/)
+Domino is developed and maintained by [Tauffer Consulting](https://www.taufferconsulting.com/).
