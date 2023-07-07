@@ -21,8 +21,9 @@ import SidebarForm from './sidebar-form.component'
 import { useWorkflowsEditor } from "context/workflows/workflows-editor.context"
 import { INodeData } from './custom-node.component'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
+import { IWorkflowPieceData, storageAccessModes } from 'context/workflows/types'
 /**
- * @todo When change the workspace should we clear the forage ? 
+ * @todo When change the workspace should we clear the forage ?
  * @todo Solve any types
  */
 
@@ -62,7 +63,8 @@ const WorkflowEditorPanelComponent = () => {
     setForageWorkflowPieces,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
-    fetchWorkflowPieceById
+    fetchWorkflowPieceById,
+    setForageWorkflowPiecesData,
   } = useWorkflowsEditor()
 
   // Removing flowchart elements
@@ -153,7 +155,7 @@ const WorkflowEditorPanelComponent = () => {
     for (const key in defaultData) {
       const fromUpstream = false // TODO - If someday we allow default upstream true we should change this
       const upstreamId = null
-      
+
       var defaultValues = defaultData[key]
       if (Array.isArray(defaultData[key])){
         const auxDefaultValues = []
@@ -175,12 +177,12 @@ const WorkflowEditorPanelComponent = () => {
               upstreamId: upstreamId,
               upstreamArgument: null,
               value: element
-            } 
+            }
             auxDefaultValues.push(newValue)
           }
         }
         defaultValues = auxDefaultValues
-      } 
+      }
       upstreamMapFormInfo[key] = {
         fromUpstream,
         upstreamId,
@@ -192,9 +194,19 @@ const WorkflowEditorPanelComponent = () => {
     }
     upstreamMap[newNode.id] = upstreamMapFormInfo
     await setForageUpstreamMap(upstreamMap)
+
+    // TODO: refactor types here
+    const defaultWorkflowPieceData = {
+      storage: {storageAccessMode: storageAccessModes.ReadWrite},
+      containerResources: containerResourcesDefaultData,
+      inputs: upstreamMapFormInfo
+    } as unknown as IWorkflowPieceData
+
+    await setForageWorkflowPiecesData(newNode.id,defaultWorkflowPieceData)
+
     defaultData['storage'] = {
-      "storageAccessMode": 'Read/Write',
-    }
+        "storageAccessMode": 'Read/Write',
+      }
     defaultData['containerResources'] = containerResourcesDefaultData
     // Set default data for the node form - used in json-forms
     await setFormsForageData(newNode.id, defaultData)
@@ -207,7 +219,8 @@ const WorkflowEditorPanelComponent = () => {
     reactFlowInstance,
     setNodes,
     setForageWorkflowPieces,
-    getForageWorkflowPieces 
+    getForageWorkflowPieces,
+    setForageWorkflowPiecesData,
   ])
 
   // Left drawer controls
