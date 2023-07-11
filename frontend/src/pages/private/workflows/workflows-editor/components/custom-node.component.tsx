@@ -93,7 +93,7 @@ const CustomNode = memo((data: any) => {
             type='source'
             id={`$handle-source-${data['id']}`}
             position={sourceHandlePosition}
-            style={{ width: "8px", height: "8px", border: '1px solid black', backgroundColor: 'white' }}
+            style={{ width: "10px", height: "10px", border: '1px solid black', backgroundColor: 'white' }}
           />
         ) : ""
       }
@@ -119,7 +119,7 @@ const CustomNode = memo((data: any) => {
             type='target'
             id={`$handle-target-${data['id']}`}
             position={targetHandlePosition}
-            style={{ width: "8px", height: "8px", borderRadius: '0px', border: '1px solid black', backgroundColor: 'white' }}
+            style={{ width: "8px", height: "16px", borderRadius: '0px', border: '1px solid black', backgroundColor: 'white' }}
           />
         ) : ""
       }

@@ -65,9 +65,15 @@ interface IWorkflowsEditorContext {
   getForageUpstreamMap: () => Promise<any> // TODO add type
   setForageUpstreamMap: (data: any) => Promise<void> // TODO add type
   clearForageUpstreamMap: () => Promise<void>
+  removeForageUpstreamMapById: (id: string) => Promise<void>
 
   setForageCheckboxStates: (checkboxStatesMap: any) => Promise<void> // TODO add type
   getForageCheckboxStates: () => Promise<any> // TODO add type
+
+  setForageWorkflowPieces: (workflowPieces: any) => Promise<void> // TODO add type
+  getForageWorkflowPieces: () => Promise<any> // TODO add type
+  removeForageWorkflowPiecesById: (id: string) => Promise<void>
+  fetchWorkflowPieceById: (id: string) => Promise<IOperator> // TODO add type
 
   setNameKeyUpstreamArgsMap: (nameKeyUpstreamArgsMap: any) => Promise<void> // TODO add type
   getNameKeyUpstreamArgsMap: () => Promise<any> // TODO add type
@@ -210,6 +216,15 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     await localForage.setItem('upstreamMap', {})
   }, [])
 
+  const removeForageUpstreamMapById = useCallback(async (id: string) => {
+    const currentUpstreamMap = await localForage.getItem<any>("upstreamMap")
+    if (!currentUpstreamMap) {
+      return
+    }
+    delete currentUpstreamMap[id]
+    await localForage.setItem('upstreamMap', currentUpstreamMap)
+  }, [])
+
   // Forage forms data
   const fetchForageDataById = useCallback(async (id: string) => {
     const data = await localForage.getItem<any>('formsData')
@@ -259,12 +274,18 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     localForage.setItem('formsData', currentData);
   }, [])
 
+  const clearForageWorkflowPieces = useCallback(async () => {
+    await localForage.setItem('workflowPieces', {})
+  }, [])
+
+
   const clearForageData = useCallback(async () => {
     await localForage.setItem('formsData', {})
     await clearForageUpstreamMap()
     await clearForageCheckboxStates()
     await clearNameKeyUpstreamArgsMap()
-  }, [clearForageUpstreamMap, clearForageCheckboxStates, clearNameKeyUpstreamArgsMap])
+    await clearForageWorkflowPieces()
+  }, [clearForageUpstreamMap, clearForageCheckboxStates, clearNameKeyUpstreamArgsMap, clearForageWorkflowPieces])
 
   const setForageWorkflowNodes = useCallback(async (nodes: IWorkflowElement[]) => {
     await localForage.setItem('workflowNodes', nodes)
@@ -289,6 +310,35 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
     }
     return workflowEdges
   }, [])
+
+  const setForageWorkflowPieces = useCallback(async (workflowPieces: any) => {
+    await localForage.setItem('workflowPieces', workflowPieces)
+  }, [])
+
+  const getForageWorkflowPieces = useCallback(async () => {
+    const workflowPieces = await localForage.getItem<any>("workflowPieces")
+    if (!workflowPieces) {
+      return {}
+    }
+    return workflowPieces
+  }, [])
+
+  const removeForageWorkflowPiecesById = useCallback(async (id: string) => {
+    const workflowPieces = await localForage.getItem<any>("workflowPieces")
+    if (!workflowPieces) {
+      return
+    }
+    delete workflowPieces[id]
+    await localForage.setItem('workflowPieces', workflowPieces)
+  }, [])
+
+  const fetchWorkflowPieceById = useCallback(async (id: string) => {
+    const workflowPieces = await localForage.getItem<any>("workflowPieces")
+    if (workflowPieces !== null) {
+      return workflowPieces[id]
+    }
+  }, [])
+
 
   useEffect(() => {
     (async () => {
@@ -376,9 +426,9 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
         ui_schema['nodes'][taskName] = element
         const taskDict: any = {}
 
-        const { source, baseFolder, ...providerOptions } = storageWorkflowData || {}
+        const { storageSource, baseFolder, ...providerOptions } = storageWorkflowData || {}
         const storageDict: any = {
-          "source": source || null,
+          "source": storageSource || null,
           "base_folder": baseFolder || null,
           "mode": elementData?.storage?.storageAccessMode,
           "provider_options": providerOptions || null
@@ -481,9 +531,14 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       getForageUpstreamMap,
       setForageUpstreamMap,
       clearForageUpstreamMap,
+      removeForageUpstreamMapById,
       nodeDirection,
       setForageCheckboxStates,
       getForageCheckboxStates,
+      setForageWorkflowPieces,
+      getForageWorkflowPieces,
+      removeForageWorkflowPiecesById,
+      fetchWorkflowPieceById,
       setNameKeyUpstreamArgsMap,
       getNameKeyUpstreamArgsMap,
       clearNameKeyUpstreamArgsMap,
@@ -507,6 +562,7 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       getForageUpstreamMap,
       setForageUpstreamMap,
       clearForageUpstreamMap,
+      removeForageUpstreamMapById,
       nodeDirection,
       repositories,
       repositoriesError,
@@ -519,6 +575,10 @@ export const WorkflowsEditorProvider: FC<IWorkflowsEditorProviderProps> = ({ chi
       setNodes,
       setForageCheckboxStates,
       getForageCheckboxStates,
+      setForageWorkflowPieces,
+      getForageWorkflowPieces,
+      removeForageWorkflowPiecesById,
+      fetchWorkflowPieceById,
       setNameKeyUpstreamArgsMap,
       getNameKeyUpstreamArgsMap,
       clearNameKeyUpstreamArgsMap

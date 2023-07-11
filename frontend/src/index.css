@@ -12,7 +12,7 @@ body,
 }
 
 .sidebar-jsonforms-grid * {
-  border: none !important;
+  /* border: none !important; */
   box-shadow: none !important;
 }
 

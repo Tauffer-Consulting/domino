@@ -30,6 +30,10 @@ class WorkflowStorage(BaseModel):
     storage_source: Optional[str] # TODO use enum ?
     base_folder: Optional[str]
 
+class SelectEndDate(str, Enum):
+    never = "never"
+    user_defined = "User defined"
+
 class WorkflowBaseSettings(BaseModel):
     # TODO remove regex ?
     name: str = Field(
@@ -37,18 +41,19 @@ class WorkflowBaseSettings(BaseModel):
         example="workflow_name", 
         regex=r"^[\w]*$",
     )
-    start_date: str
-    end_date: Optional[str] # TODO add end date to UI?
-    schedule_interval: ScheduleIntervalType
+    start_date: str = Field(alias="startDateTime")
+    select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
+    end_date: Optional[str] = Field(alias='endDateTime')
+    schedule_interval: ScheduleIntervalType = Field(alias="scheduleInterval")
     catchup: Optional[bool] = False # TODO add catchup to UI?
-    generate_report: Optional[bool] = False
+    generate_report: Optional[bool] = Field(alias="generateReport", default=False) # TODO add generate report to UI?
     description: Optional[str] # TODO add description to UI?
     
 
     @validator('start_date')
     def start_date_validator(cls, v):
         try:
-            converted_date =  datetime.fromisoformat(v).date()
+            converted_date =  datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ").date()
             if converted_date < datetime.now().date():
                 raise ValueError("Start date must be in the future")
             return converted_date.isoformat()
@@ -62,7 +67,13 @@ class WorkflowBaseSettings(BaseModel):
             if 'start_date' not in values:
                 raise ValueError("Start date must be provided")
             converted_start_date =  datetime.fromisoformat(values['start_date'])
-            converted_end_date = datetime.fromisoformat(v)
+            if 'select_end_date' not in values:
+                raise ValueError("Select end date must be provided")
+            
+            if values['select_end_date'] == SelectEndDate.never.value:
+                return None
+
+            converted_end_date = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ").date()
             if converted_end_date <= converted_start_date:
                 raise ValueError("End date must greater than start date")
             return converted_end_date.isoformat()
