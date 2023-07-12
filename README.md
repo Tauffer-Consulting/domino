@@ -23,6 +23,7 @@
 - [GUI](#gui)
 - [Pieces](#pieces)
 - [REST](#rest)
+- [Credits](#credits)
 
 <br>
 
@@ -153,18 +154,21 @@ The Domino frontend service is a React application that provides the GUI for eas
 Pieces are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
 
 - :snake: can execute anything written in Python, heavy-weight (e.g. Machine Learning) as well as light-weight (e.g. sending emails) tasks
-- :+1: have well defined data models for inputs, outputs and secrets
-- :package: run in isolated execution environments (Docker containers)
-- :octocat: are organized in repositories, for easy distribution and installation
+- :traffic_light: have well defined data models for inputs, outputs and secrets
+- :package: run in self-contained and isolated execution environments (Docker containers)
+- :gear: are immutable, guaranteeing reproducibility of your workflows
+- :octocat: are organized in repositories, for easy packaging, distribution and installation
+- :bookmark_tabs: are properly versioned, tested and documented
+- :zap: are plug-and-play and versatile, can be easily incorporated in any workflow
 
-It is very easy to create and share your own Piece:
+It is very easy to create and share your own Pieces:
 
-- write your Python function
-- define its data types (input, output and secrets)
-- define its dependencies (requirements.txt or Dockerfile)
-- publish it in a repository (public or private)
+- :one: write your Python function
+- :two: define its data types (input, output and secrets)
+- :three: define its dependencies (requirements.txt or Dockerfile)
+- :four: publish it in a repository (public or private)
 
-Our [pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
+The [Pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
 
 Read more in the [Pieces documentation](https://domino-py.readthedocs.io/en/latest/pages/pieces.html).
 
@@ -181,3 +185,6 @@ The Backend service is a REST API that controls a running Apache Airflow instanc
 The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://domino-py.readthedocs.io/en/latest/pages/rest.html).
 
 <br>
+
+# Credits
+Domino is developed and maintained by [Tauffer Consulting](https://www.taufferconsulting.com/).
