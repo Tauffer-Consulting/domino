@@ -14,8 +14,8 @@ import * as yup from "yup"
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 
-import { extractDefaultValues } from 'utils'
-import PieceForm from '../piece-form.component'
+
+import PieceForm, { inputsSchema } from '../piece-form.component'
 
 import ContainerResourceForm, { ContainerResourceFormSchema, defaultContainerResources } from './container-resource-form.component';
 
@@ -32,7 +32,7 @@ interface ISidebarPieceFormProps {
   onClose: (event: any) => void,
 }
 
-const defaultValues = {
+const defaultValues: IWorkflowPieceData = {
   containerResources: defaultContainerResources,
   storage: defaultStorage,
   inputs: {},
@@ -41,8 +41,8 @@ const defaultValues = {
 const SidebarPieceFormSchema = yup.object().shape({
   storage: storageFormSchema,
   containerResources: ContainerResourceFormSchema,
-  inputs: yup.object().unknown()
-}) as unknown as ReturnType<typeof yup.object>;
+  inputs: inputsSchema,
+});
 
 const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const {
@@ -53,20 +53,12 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     title,
   } = props
 
-  const [formData, setFormData] = useState<any>({})
-  const [formJsonSchema, setFormJsonSchema] = useState<any>({ ...schema })
   const {
     setForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
-    setFormsForageData,
-    fetchForageDataById,
-    getForageUpstreamMap,
-    setForageUpstreamMap,
-    getNameKeyUpstreamArgsMap
   } = useWorkflowsEditor()
 
   const resolver = useYupValidationResolver(SidebarPieceFormSchema);
-
   const methods = useForm({
     defaultValues,
     resolver,
@@ -85,63 +77,6 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     }
   }, [formId, open, data])
 
-  // Update form data in forage
-  const handleOnChange = useCallback(async ({ errors, data }: { errors?: any, data: any }) => {
-    try {
-      var upstreamMap = await getForageUpstreamMap()
-      const nameKeyUpstreamArgsMap = await getNameKeyUpstreamArgsMap()
-      var upstreamMapFormInfo = (formId in upstreamMap) ? upstreamMap[formId] : {}
-      for (const key in data) {
-        const fromUpstream = upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].fromUpstream : false
-        const upstreamId = fromUpstream && upstreamMapFormInfo[key] ? upstreamMapFormInfo[key].upstreamId : null
-        if (key !== 'storage') {
-          var dataValue = data[key]
-          if (Array.isArray(dataValue)) {
-            const auxValue = []
-            for (const element of dataValue) {
-              const newValue: any = {}
-              if (typeof element === 'object') {
-                for (const [_key, _value] of Object.entries(element)) {
-                  newValue[_key] = {
-                    fromUpstream: fromUpstream,
-                    upstreamId: upstreamId,
-                    upstreamArgument: null,
-                    value: _value
-                  }
-                }
-                auxValue.push(newValue)
-              } else {
-                newValue[key] = {
-                  fromUpstream: fromUpstream,
-                  upstreamId: upstreamId,
-                  upstreamArgument: null,
-                  value: element
-                }
-                auxValue.push(newValue)
-              }
-            }
-            dataValue = auxValue
-          }
-          upstreamMapFormInfo[key] = {
-            fromUpstream: fromUpstream,
-            upstreamId: upstreamId,
-            upstreamArgument: fromUpstream && nameKeyUpstreamArgsMap[data[key]] ? nameKeyUpstreamArgsMap[data[key]] : null,
-            value: (dataValue === null || dataValue === undefined) ? null : dataValue
-          }
-        }
-      }
-
-      upstreamMap[formId] = upstreamMapFormInfo
-      await setFormsForageData(formId, data)
-      await setForageUpstreamMap(upstreamMap)
-    } catch (err) {
-      console.log(err)
-    }
-  }, [formId, setFormsForageData, getForageUpstreamMap, setForageUpstreamMap, getNameKeyUpstreamArgsMap])
-
-  useEffect(() => {
-    setFormJsonSchema({ ...schema })
-  }, [schema])
 
   //load forage
   useEffect(() => {
@@ -151,32 +86,6 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
       methods.reset()
     }
   }, [open, loadData])
-
-  // When opened fetch forage data and update forms data
-  useEffect(() => {
-    const fetchForage = async () => {
-      const forageData = await fetchForageDataById(formId)
-
-      if (!forageData) {
-        const defaultData = extractDefaultValues(formJsonSchema)
-        handleOnChange({ data: defaultData })
-        setFormData(defaultData)
-        return
-      }
-
-      handleOnChange({ data: forageData })
-      setFormData(forageData)
-    }
-    if (open) { fetchForage() }
-
-  }, [
-    formId,
-    formJsonSchema,
-    open,
-    fetchForageDataById,
-    setFormsForageData,
-    handleOnChange,
-  ])
 
   // save on forage
   useEffect(() => {
@@ -220,8 +129,6 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
                     <PieceForm
                       formId={formId}
                       schema={schema}
-                      initialData={formData}
-                      onChange={handleOnChange}
                     />
                   </Grid>
 
