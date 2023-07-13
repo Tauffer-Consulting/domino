@@ -322,16 +322,15 @@ class BasePiece(metaclass=abc.ABCMeta):
     @classmethod
     def dry_run(
         cls,
-        piece_input: dict, 
+        input_data: dict, 
         piece_input_model: pydantic.BaseModel,
-        piece_output_model: pydantic.BaseModel, 
         piece_secrets_model: pydantic.BaseModel = None,
-        secrets_input: dict = None,
+        secrets_data: dict = None,
         results_path: str = None,
     ):
-        # Instantiate 
-        input_model_obj = piece_input_model(**piece_input)
-        secrets_model_obj = piece_secrets_model(**secrets_input) if piece_secrets_model else None
+        # Instantiate models
+        input_model_obj = piece_input_model(**input_data)
+        secrets_model_obj = piece_secrets_model(**secrets_data) if piece_secrets_model else None
 
         class DryPiece(cls):
             def __init__(self, secrets, results_path):
