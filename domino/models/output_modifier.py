@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, FilePath, Extra
+from pydantic import BaseModel, Field
 from enum import Enum
 from typing import List
 
@@ -14,7 +14,7 @@ class OutputModifierItemType(str, Enum):
     array = 'array'
 
 
-class OutputModifierModel(BaseModel):
+class SingleOutputModifierModel(BaseModel):
     name: str = Field(
         default=None,
         description='Name of the output argument.',
@@ -30,3 +30,6 @@ class OutputModifierModel(BaseModel):
         description='Type of the output argument.',
         from_upstream="never"
     )
+
+
+OutputModifierModel: List[SingleOutputModifierModel]
