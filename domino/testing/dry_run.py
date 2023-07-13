@@ -17,17 +17,18 @@ from pathlib import Path
 import importlib
 import json
 import sys
-
-
+from typing import Optional
 
 
 def piece_dry_run(
-    repository_folder_path: str, 
     piece_name: str, 
     input_data: dict,
+    repository_folder_path: Optional[str] = None, 
     secrets_data: dict = None,
     results_path: str = None
 ):
+    if not repository_folder_path:
+        repository_folder_path = '.'
     if not results_path:
         results_path = Path('./dry_run_results')
         results_path.mkdir(parents=True, exist_ok=True)
