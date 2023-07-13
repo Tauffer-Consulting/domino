@@ -12,8 +12,7 @@ import subprocess
 import base64
 
 from domino.logger import get_configured_logger
-from domino.schemas.deploy_mode import DeployModeType
-from domino.schemas.display_result import DisplayResultFileType
+from domino.schemas import DeployModeType, DisplayResultFileType
 from domino.exceptions.exceptions import InvalidPieceOutputError
 
 

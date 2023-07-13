@@ -3,7 +3,7 @@ from airflow.utils.context import Context
 from typing import Dict, Optional
 import os
 from domino.client.domino_backend_client import DominoBackendRestClient
-from domino.schemas.shared_storage import WorkflowSharedStorage, StorageSource
+from domino.schemas import WorkflowSharedStorage, StorageSource
 
 
 class DominoDockerOperator(DockerOperator):

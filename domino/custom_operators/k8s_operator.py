@@ -7,7 +7,7 @@ import copy
 from contextlib import closing
 from kubernetes.stream import stream as kubernetes_stream
 from domino.client.domino_backend_client import DominoBackendRestClient
-from domino.schemas.shared_storage import WorkflowSharedStorage
+from domino.schemas import WorkflowSharedStorage
 
 
 # Ref: https://github.com/apache/airflow/blob/main/airflow/providers/cncf/kubernetes/operators/kubernetes_pod.py

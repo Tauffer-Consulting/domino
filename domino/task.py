@@ -6,11 +6,9 @@ from typing import Callable
 from domino.custom_operators.docker_operator import DominoDockerOperator
 from domino.custom_operators.python_operator import PythonOperator
 from domino.custom_operators.k8s_operator import DominoKubernetesPodOperator
-from domino.schemas.shared_storage import shared_storage_map
 from domino.utils import dict_deep_update
 from domino.logger import get_configured_logger
-from domino.schemas.shared_storage import StorageSource
-from domino.schemas.container_resources import ContainerResourcesModel
+from domino.schemas import ContainerResourcesModel, shared_storage_map, StorageSource
 from kubernetes import client, config
 import os
 
