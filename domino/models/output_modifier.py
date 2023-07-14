@@ -14,7 +14,7 @@ class OutputModifierItemType(str, Enum):
     array = 'array'
 
 
-class SingleOutputModifierModel(BaseModel):
+class OutputModifierModel(BaseModel):
     name: str = Field(
         default=None,
         description='Name of the output argument.',
@@ -30,6 +30,3 @@ class SingleOutputModifierModel(BaseModel):
         description='Type of the output argument.',
         from_upstream="never"
     )
-
-
-OutputModifierModel: List[SingleOutputModifierModel]
