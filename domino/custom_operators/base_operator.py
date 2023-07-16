@@ -6,29 +6,32 @@ from domino.client.domino_backend_client import DominoBackendRestClient
 
 class BaseDominoOperator:
     """
-    This Operator runs Pieces directly in a Worker.
+    This class implements common operations for all Domino Operators running under a Task.
     """
 
     def __init__(
         self, 
         dag_id: str,
         task_id: str, 
-        piece_name: str, 
-        repository_id: int, 
-        workflow_id: int,
+        piece_name: str,  
+        deploy_mode: str,
+        repository_id: int,
         piece_input_kwargs: Optional[Dict] = None, 
+        domino_client_url: Optional[str] = None,
     ):
         self.dag_id = dag_id
         self.task_id = task_id
         self.piece_name = piece_name
+        self.deploy_mode = deploy_mode
         self.repository_id = repository_id
-        self.workflow_id = workflow_id
         self.piece_input_kwargs = piece_input_kwargs
-        self.backend_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
+        if domino_client_url is None:
+            domino_client_url = "http://domino-rest:8000/"
+        self.domino_client = DominoBackendRestClient(base_url=domino_client_url)
 
     def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
         """Get piece secrets values from Domino API"""
-        secrets_response = self.backend_client.get_piece_secrets(
+        secrets_response = self.domino_client.get_piece_secrets(
             piece_repository_id=piece_repository_id,
             piece_name=piece_name
         )

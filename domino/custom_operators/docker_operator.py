@@ -17,7 +17,7 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         piece_name: str,
         deploy_mode: str, # TODO enum
         repository_id: int,
-        piece_kwargs: Optional[Dict] = None, 
+        piece_input_kwargs: Optional[Dict] = None, 
         workflow_shared_storage: WorkflowSharedStorage = None,
         **docker_operator_kwargs
     ) -> None:
@@ -27,7 +27,7 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
             piece_name=piece_name,
             deploy_mode=deploy_mode,
             repository_id=repository_id,
-            piece_input_kwargs=piece_kwargs,
+            piece_input_kwargs=piece_input_kwargs,
             domino_client_url="http://domino-rest:8000/",
         )
 
