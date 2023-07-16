@@ -19,17 +19,18 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         piece_name: str, 
         repository_id: int, 
         workflow_shared_storage: WorkflowSharedStorage,
-        *args, 
-        **kwargs
+        **k8s_operator_kwargs
     ):
-        super(KubernetesPodOperator).__init__(*args, **kwargs)
+        super(KubernetesPodOperator).__init__(**k8s_operator_kwargs)
+        
         # This is saved in the self.piece_name airflow @property
         self.running_piece_name = piece_name 
         self.repository_id = repository_id
-        self.workflow_shared_storage = workflow_shared_storage
+        
         self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
-        self.task_env_vars = kwargs.get('env_vars', [])
+        self.task_env_vars = k8s_operator_kwargs.get('env_vars', [])
         # Shared Storage variables
+        self.workflow_shared_storage = workflow_shared_storage
         self.shared_storage_base_mount_path = '/home/shared_storage'
         self.shared_storage_upstream_ids_list = list()
         # TODO change url based on DOMINO_DEPLOY_MODE

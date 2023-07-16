@@ -12,34 +12,35 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
 
     def __init__(
         self,
+        dag_id: str,
+        task_id: str,
         piece_name: str,
         deploy_mode: str, # TODO enum
-        task_id: str,
-        dag_id: str,
         repository_id: int,
-        workflow_shared_storage: WorkflowSharedStorage = None,
         piece_kwargs: Optional[Dict] = None, 
-        **kwargs
+        workflow_shared_storage: WorkflowSharedStorage = None,
+        **docker_operator_kwargs
     ) -> None:
-        self.running_piece_name = piece_name 
-        self.repository_id = repository_id
-        self.workflow_shared_storage = workflow_shared_storage
-        self.deploy_mode = deploy_mode
-        self.running_dag_id = dag_id
-        self.task_id = task_id
-        self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
-        self.piece_input_kwargs = piece_kwargs
+        super(BaseDominoOperator).__init__(
+            dag_id=dag_id,
+            task_id=task_id,
+            piece_name=piece_name,
+            deploy_mode=deploy_mode,
+            repository_id=repository_id,
+            piece_input_kwargs=piece_kwargs,
+            domino_client_url="http://domino-rest:8000/",
+        )
+
         # Shared Storage variables
+        self.workflow_shared_storage = workflow_shared_storage
         self.shared_storage_base_mount_path = '/home/shared_storage'
         self.shared_storage_upstream_ids_list = list()
-        self.backend_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
         self._set_base_env_vars()
-        docker_url = 'tcp://docker-proxy:2375'
-    
         shared_storage_host_path = os.environ.get('LOCAL_DOMINO_SHARED_DATA_PATH', '')
         shared_storage_container_path = '/home/shared_storage'
         mounts = []
-        # # TODO remove
+        
+        # TODO remove
         mounts=[
             # TODO remove
             # Mount(source='/media/luiz/storage2/Github/domino/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
@@ -51,22 +52,20 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
             )
 
         super(DockerOperator).__init__(
-            **kwargs, 
-            task_id=self.task_id,
-            docker_url=docker_url,
-            mounts=[
-                *mounts,
-            ],
+            **docker_operator_kwargs, 
+            task_id=task_id,
+            docker_url='tcp://docker-proxy:2375',
+            mounts=mounts,
             environment=self.environment,
         )
     
     def _set_base_env_vars(self):
         self.environment = {
-            "DOMINO_DOCKER_PIECE": self.running_piece_name,
+            "DOMINO_DOCKER_PIECE": self.piece_name,
             "DOMINO_DOCKER_INSTANTIATE_PIECE_KWARGS": str({
                 "deploy_mode": self.deploy_mode,
                 "task_id": self.task_id,
-                "dag_id": self.running_dag_id,
+                "dag_id": self.dag_id,
             }),
             "DOMINO_DOCKER_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
             "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
@@ -109,7 +108,7 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         # Save updated piece input kwargs with upstream data to environment variable
         upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
         self._update_piece_kwargs_with_upstream_xcom(upstream_xcoms_data=upstream_xcoms_data)
-        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.running_piece_name)
+        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.piece_name)
         self.environment['DOMINO_DOCKER_PIECE_SECRETS'] = str(piece_secrets)
         dag_id = context["dag_run"].dag_id
         dag_run_id = context['run_id']
