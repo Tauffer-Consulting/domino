@@ -17,18 +17,19 @@ class DominoWorkerOperator(BaseDominoOperator, BaseOperator):
         dag_id: str,
         task_id: str, 
         piece_name: str, 
-        repository_name: str, 
-        workflow_id: int,
+        deploy_mode: str, # TODO enum
+        repository_id: int,
         piece_input_kwargs: Optional[Dict] = None, 
     ):
-        self.dag_id = dag_id
-        self.task_id = task_id
-        self.piece_name = piece_name
-        self.repository_name = repository_name
-        self.workflow_id = workflow_id
-        self.piece_input_kwargs = piece_input_kwargs
-        self.backend_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
-
+        super(BaseDominoOperator).__init__(
+            dag_id=dag_id,
+            task_id=task_id,
+            piece_name=piece_name,
+            deploy_mode=deploy_mode,
+            repository_id=repository_id,
+            piece_input_kwargs=piece_input_kwargs,
+            domino_client_url="http://domino-rest:8000/",
+        )
         self._get_piece_class()
         self._get_piece_secrets()
         self._get_airflow_conn_id()
