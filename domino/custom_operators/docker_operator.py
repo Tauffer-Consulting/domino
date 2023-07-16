@@ -2,11 +2,13 @@ from airflow.providers.docker.operators.docker import DockerOperator, Mount
 from airflow.utils.context import Context
 from typing import Dict, Optional
 import os
+
+from domino.custom_operators.base_operator import BaseDominoOperator
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas.shared_storage import WorkflowSharedStorage, StorageSource
 
 
-class DominoDockerOperator(DockerOperator):
+class DominoDockerOperator(BaseDominoOperator, DockerOperator):
 
     def __init__(
         self,
@@ -48,7 +50,7 @@ class DominoDockerOperator(DockerOperator):
                 Mount(source=shared_storage_host_path, target=shared_storage_container_path, type='bind', read_only=False),
             )
 
-        super().__init__(
+        super(DockerOperator).__init__(
             **kwargs, 
             task_id=self.task_id,
             docker_url=docker_url,
@@ -72,13 +74,6 @@ class DominoDockerOperator(DockerOperator):
             "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
         }
 
-    @staticmethod
-    def _get_upstream_xcom_data_from_task_ids(task_ids: list, context: 'Context'):
-        upstream_xcoms_data = dict()
-        for tid in task_ids:
-            upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
-        return upstream_xcoms_data
-
     def _update_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
         #domino_docker_run_piece_kwargs = self.environment.get('DOMINO_DOCKER_RUN_PIECE_KWARGS')
         if not self.piece_input_kwargs:
@@ -99,7 +94,6 @@ class DominoDockerOperator(DockerOperator):
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE'] = str(self.shared_storage_upstream_ids_list)
         self.environment['DOMINO_DOCKER_RUN_PIECE_KWARGS'] = str(self.piece_input_kwargs)
     
-
     def _prepare_execute_environment(self, context: Context):
         """ 
         Prepare execution with the following configurations:
@@ -123,24 +117,7 @@ class DominoDockerOperator(DockerOperator):
         self.workflow_run_subpath = f"{dag_id}/{dag_run_id_path}"
         self.environment['DOMINO_WORKFLOW_RUN_SUBPATH'] = self.workflow_run_subpath
 
-
     def execute(self, context: Context) -> Optional[str]:
         # env var format = {"name": "value"}
         self._prepare_execute_environment(context=context)
         return super().execute(context=context)
-
-
-    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
-        # Get piece secrets values from api and append to env vars
-        secrets_response = self.backend_client.get_piece_secrets(
-            piece_repository_id=piece_repository_id,
-            piece_name=piece_name
-        )
-        if secrets_response.status_code != 200:
-            raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
-        piece_secrets = {
-            e.get('name'): e.get('value') 
-            for e in secrets_response.json()
-        }
-        return piece_secrets
-    

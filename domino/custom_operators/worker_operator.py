@@ -1,12 +1,13 @@
 from typing import Dict, Optional
 from airflow.models import BaseOperator
 
+from domino.custom_operators.base_operator import BaseDominoOperator
 from domino.client.domino_backend_client import DominoBackendRestClient
 
 
 # This is  WIP, not working yet.
 
-class DominoWorkerOperator(BaseOperator):
+class DominoWorkerOperator(BaseDominoOperator, BaseOperator):
     """
     This Operator runs Pieces directly in a Worker.
     """
@@ -51,21 +52,6 @@ class DominoWorkerOperator(BaseOperator):
             )
         except Exception as e:
             raise e
-        
-    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
-        # Get piece secrets values from api and append to env vars
-        # TODO
-        secrets_response = self.backend_client.get_piece_secrets(
-            piece_repository_id=piece_repository_id,
-            piece_name=piece_name
-        )
-        if secrets_response.status_code != 200:
-            raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
-        piece_secrets = {
-            e.get('name'): e.get('value') 
-            for e in secrets_response.json()
-        }
-        return piece_secrets
 
     def execute(self, context):
         """Execute the Piece."""

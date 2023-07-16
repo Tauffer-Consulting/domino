@@ -6,12 +6,14 @@ from typing import Optional
 import copy
 from contextlib import closing
 from kubernetes.stream import stream as kubernetes_stream
+
+from domino.custom_operators.base_operator import BaseDominoOperator
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas.shared_storage import WorkflowSharedStorage
 
 
 # Ref: https://github.com/apache/airflow/blob/main/airflow/providers/cncf/kubernetes/operators/kubernetes_pod.py
-class DominoKubernetesPodOperator(KubernetesPodOperator):
+class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
     def __init__(
         self, 
         piece_name: str, 
@@ -20,7 +22,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         *args, 
         **kwargs
     ):
-        super().__init__(*args, **kwargs)
+        super(KubernetesPodOperator).__init__(*args, **kwargs)
         # This is saved in the self.piece_name airflow @property
         self.running_piece_name = piece_name 
         self.repository_id = repository_id
@@ -33,7 +35,6 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         # TODO change url based on DOMINO_DEPLOY_MODE
         self.backend_client = DominoBackendRestClient(base_url="http://domino-rest-service:8000/")
     
-
     def build_pod_request_obj(self, context: Optional['Context'] = None) -> k8s.V1Pod:
         """
         We override this method to add the shared storage to the pod.
@@ -85,7 +86,6 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             )
         )
         return pod_cp
-
 
     def add_shared_storage_sidecar(self, pod: k8s.V1Pod) -> k8s.V1Pod:
         """
@@ -189,20 +189,6 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
 
         return pod_cp
 
-    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
-        # Get piece secrets values from api and append to env vars
-        secrets_response = self.backend_client.get_piece_secrets(
-            piece_repository_id=piece_repository_id,
-            piece_name=piece_name
-        )
-        if secrets_response.status_code != 200:
-            raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
-        piece_secrets = {
-            e.get('name'): e.get('value') 
-            for e in secrets_response.json()
-        }
-        return piece_secrets
-
     def _get_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
         domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_K8S_RUN_PIECE_KWARGS']
         if not domino_k8s_run_op_kwargs:
@@ -242,13 +228,6 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         })
 
         return updated_op_kwargs
-
-    @staticmethod
-    def _get_upstream_xcom_data_from_task_ids(task_ids: list, context: 'Context'):
-        upstream_xcoms_data = dict()
-        for tid in task_ids:
-            upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
-        return upstream_xcoms_data
 
     def _update_env_var_value_from_name(self, name: str, value: str):
         for env_var in self.env_vars:
