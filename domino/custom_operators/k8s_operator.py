@@ -304,7 +304,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         self._update_env_var_value_from_name(name='DOMINO_K8S_RUN_PIECE_KWARGS', value=str(domino_k8s_run_op_kwargs))
         
         # Add pieces secrets to environment variables
-        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.running_piece_name)
+        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.piece_name)
         self.env_vars.append({
             "name": "DOMINO_K8S_PIECE_SECRETS",
             "value": str(piece_secrets),
