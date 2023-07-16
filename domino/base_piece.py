@@ -288,7 +288,10 @@ class BasePiece(metaclass=abc.ABCMeta):
         self.dag_run_id = airflow_context.get("dag_run_id")
 
         # Check if Piece's necessary secrets are present in ENV
-        self.validate_and_get_env_secrets(piece_secrets_model=piece_secrets_model, secrets_values=secrets_values)
+        self.validate_and_get_env_secrets(
+            piece_secrets_model=piece_secrets_model, 
+            secrets_values=secrets_values
+        )
 
         # Generate paths
         workflow_run_subpath = os.environ.get('DOMINO_WORKFLOW_RUN_SUBPATH', '')

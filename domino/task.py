@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.models import BaseOperator
 from kubernetes.client import models as k8s
 from datetime import datetime
 from typing import Callable
@@ -6,6 +7,7 @@ from typing import Callable
 from domino.custom_operators.docker_operator import DominoDockerOperator
 from domino.custom_operators.python_operator import PythonOperator
 from domino.custom_operators.k8s_operator import DominoKubernetesPodOperator
+from domino.custom_operators.worker_operator import DominoWorkerOperator
 from domino.schemas.shared_storage import shared_storage_map
 from domino.utils import dict_deep_update
 from domino.logger import get_configured_logger
@@ -39,6 +41,7 @@ class Task(object):
         self.dag_id = self.dag.dag_id
         self.repository_id = piece["repository_id"]
         self.piece = piece
+        self.piece_input_kwargs = piece_input_kwargs
         if not workflow_shared_storage:
             workflow_shared_storage = {}
         # Shared storage
@@ -51,18 +54,26 @@ class Task(object):
         
         self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')
 
-
         if self.deploy_mode in ['local-k8s', 'local-k8s-dev', 'prod']:
             config.load_incluster_config()
             self.k8s_client = client.CoreV1Api()
 
-        # Set up piece logic
-        self._task_piece = self._set_piece(piece_input_kwargs)
+        # Set up task operator
+        self._task_operator = self._set_operator()
 
-    def _set_piece(self, piece_input_kwargs) -> None:
+    def _set_operator(self) -> BaseOperator:
         """
-        Set airflow piece based on task configuration
+        Set Airflow Operator according to deploy mode and Piece execution mode.
         """
+        if self.piece["execution_mode"] == "worker":
+            return DominoWorkerOperator(
+                dag_id=self.dag_id,
+                task_id=self.task_id,
+                piece_name=self.piece.get('name'),
+                repository_name=self.piece.get('repository_name'),
+                workflow_id=self.piece.get('workflow_id'),
+                piece_input_kwargs=self.piece_input_kwargs,
+            )
 
         if self.deploy_mode == "local-python":
             return PythonOperator(
@@ -70,7 +81,7 @@ class Task(object):
                 task_id=self.task_id,
                 start_date=datetime(2021, 1, 1), # TODO - get correct start_date
                 provide_context=True,
-                op_kwargs=piece_input_kwargs,
+                op_kwargs=self.piece_input_kwargs,
                 # queue=dependencies_group,
                 make_python_callable_kwargs=dict(
                     piece_name=self.piece_name,
@@ -94,7 +105,7 @@ class Task(object):
                     "task_id": self.task_id,
                     "dag_id": self.dag_id,
                 }),
-                "DOMINO_K8S_RUN_PIECE_KWARGS": str(piece_input_kwargs),
+                "DOMINO_K8S_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
                 "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
                 "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
                 "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
@@ -216,7 +227,7 @@ class Task(object):
                 task_id=self.task_id,
                 piece_name=self.piece.get('name'),
                 repository_id=self.repository_id,
-                piece_kwargs=piece_input_kwargs,
+                piece_kwargs=self.piece_input_kwargs,
                 dag_id=self.dag_id,
                 deploy_mode=self.deploy_mode,
                 image=self.piece["source_image"],
