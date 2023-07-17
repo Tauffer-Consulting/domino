@@ -128,7 +128,12 @@ RUN pip install --no-cache-dir -r domino/pieces_repository/dependencies/{depende
             publish_image(source_image_name=source_image_name)
 
     print('### Setting images map as env variable', pieces_images_map)
-    os.environ["PIECES_IMAGES_MAP"] = json.dumps(pieces_images_map)
+    var_value = json.dumps(pieces_images_map)
+    os.environ["PIECES_IMAGES_MAP"] = var_value
+    env_file = os.getenv('GITHUB_ENV')
+    if env_file:
+        with open(env_file, "a") as f:
+            f.write(f"PIECES_IMAGES_MAP={var_value}")
     return pieces_dependencies_map
 
 
