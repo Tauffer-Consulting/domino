@@ -10,16 +10,17 @@ class TestingHttpClient:
     docker_client = docker.from_env()
     DOMINO_HTTP_SERVER_PATH = 'domino/domino_py/domino/testing/http_server.py'
     DOMINO_INTERNAL_REPOSITORY_FOLDER_PATH = "/home/domino/pieces_repository/"
-    BASE_HTTP_SERVER_HOST_URL = "http://localhost:8080"
+    BASE_HTTP_SERVER_HOST_URL = "http://0.0.0.0:8080"
     logger = get_configured_logger("TestingHttpClient")
 
     @classmethod
     def wait_health_check(cls):
-        max_retries = 5
-        retry_delay_in_seconds = 1
+        max_retries = 10
+        retry_delay_in_seconds = 5
         url = f'{cls.BASE_HTTP_SERVER_HOST_URL}/health-check'
         for _ in range(max_retries):
             try:
+                cls.logger.info(f"Sending health check request to {url}")
                 response = requests.get(url)
                 response.raise_for_status()
                 return response
@@ -44,9 +45,10 @@ class TestingHttpClient:
                 container = cls.docker_client.containers.get(container.id)
                 container_state = container.attrs.get('State').get('Running')
                 container_status = container.attrs.get('State').get('Status')
-                print('Waiting for container to start...')
+                cls.logger.info('Waiting for container to start...')
                 time.sleep(0.2)
-            cls.wait_health_check()
+            print('CONTAINER LIST', cls.docker_client.containers.list())
+            #cls.wait_health_check()
             return container
         except Exception as e:
             container = cls.docker_client.containers.get('domino_testing_http_server')
