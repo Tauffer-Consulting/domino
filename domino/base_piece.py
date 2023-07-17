@@ -128,29 +128,15 @@ class BasePiece(metaclass=abc.ABCMeta):
     def validate_and_get_env_secrets(self, piece_secrets_model: pydantic.BaseModel = None):
         """
         Get secret variables for this Piece from ENV. The necessary secret variables to run the Piece should be defined in the Piece's SecretsModel.
-        The secrets can then be retrieved and used in the Piece's `piece_function` method as such:
-        ```
-        my_secret = self.secrets.my_secret
-        ```
+        The secrets can then be retrieved and used in the Piece's `piece_function` method.
 
         Args:
             piece_secrets_model (pydantic.BaseModel): _description_
         """
-        self.secrets = None
-        if piece_secrets_model and self.deploy_mode in ['local-k8s', 'local-k8s-dev', 'prod']:
-            secrets_names = list(piece_secrets_model.schema()["properties"].keys())
-            secrets = dict()
-            secrets_values = ast.literal_eval(os.environ.get('DOMINO_PIECE_SECRETS', '{}'))
-            if not secrets_values:
-                secrets_values = {}
-            for s in secrets_names:
-                secrets[s] = secrets_values.get(s, None)
-            return piece_secrets_model(**secrets)
-        elif piece_secrets_model and self.deploy_mode == 'local-compose':
-            secrets_names = list(piece_secrets_model.schema()["properties"].keys())
-            secrets = dict()
+        if piece_secrets_model:
             secrets_values = ast.literal_eval(os.environ.get('DOMINO_PIECE_SECRETS', '{}'))
             return piece_secrets_model(**secrets_values)
+        return None
 
 
     def format_xcom(self, output_obj: pydantic.BaseModel) -> dict:
@@ -307,10 +293,10 @@ class BasePiece(metaclass=abc.ABCMeta):
         input_model_obj = piece_input_model(**piece_input_data)
 
         # Run piece function
-        output_obj = self.piece_function(
-            input_data=input_model_obj, 
-            secrets_data=secrets_model_obj
-        )
+        call_piece_func_dict = {"input_data": input_model_obj}
+        if piece_secrets_model:
+            call_piece_func_dict['secrets_data'] = secrets_model_obj
+        output_obj = self.piece_function(**call_piece_func_dict)
 
         # Validate output data
         if isinstance(output_obj, dict):
