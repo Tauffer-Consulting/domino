@@ -10,7 +10,7 @@ class TestingHttpClient:
     docker_client = docker.from_env()
     DOMINO_HTTP_SERVER_PATH = 'domino/domino_py/domino/testing/http_server.py'
     DOMINO_INTERNAL_REPOSITORY_FOLDER_PATH = "/home/domino/pieces_repository/"
-    BASE_HTTP_SERVER_HOST_URL = "http://localhost:8080"
+    BASE_HTTP_SERVER_HOST_URL = "http://0.0.0.0:8080"
     logger = get_configured_logger("TestingHttpClient")
 
     @classmethod
