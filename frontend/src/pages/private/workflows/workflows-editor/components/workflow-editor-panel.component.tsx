@@ -187,6 +187,7 @@ const WorkflowEditorPanelComponent = () => {
         fromUpstream,
         upstreamId,
         upstreamArgument: null,
+        upstreamValue: "",
         value: (
           defaultValues === null || defaultValues === undefined
         ) ? null : defaultValues

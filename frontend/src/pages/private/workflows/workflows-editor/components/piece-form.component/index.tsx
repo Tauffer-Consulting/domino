@@ -10,7 +10,13 @@ interface PieceFormProps {
   schema: any;
 }
 
-type UpstreamOptions = Record<string, string[]>
+export type Option = {
+   id: string,
+   argument: string,
+   value: string
+}
+
+type UpstreamOptions = Record<string, Option[]>
 
 export const inputsSchema = yup.lazy((value) => {
   if (!Object.keys(value).length) {
@@ -70,8 +76,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
     const workflowPieces = await getForageWorkflowPieces();
     const workflowEdges = await fetchForageWorkflowEdges();
     const upstreamIds: string[] = []
-    const upstreamOptions = {} as Record<string, string[]>
-
+    const upstreamOptions = {} as Record<string, Option[]>
 
     for (const ed of workflowEdges) {
       if (ed.target === formId) {
@@ -79,25 +84,18 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
       }
     }
 
-    /**
-     *  TODO: fix counter
-     */
-    Object.keys(schema.properties).map(key => {
+    Object.keys(schema.properties).forEach(key => {
       const currentSchema = schema.properties[key]
       upstreamOptions[key] = upstreamIds.flatMap(upstreamId => {
         const upSchema = workflowPieces[upstreamId].output_schema.properties
         const currentType = getInputType(currentSchema)
-        const options: string[] = []
-        let counter = 0
+        const options: Option[] = []
         for (const outputs in upSchema) {
           const upType = getInputType(upSchema[outputs])
           if (upType === currentType) {
-            let value = `${workflowPieces[upstreamId]?.name} - ${upSchema[outputs].title}`
-            if (options.includes(value)) {
-              ++counter
-              value = `${value} (${counter})`
-            }
-            options.push(value)
+            const value = `${workflowPieces[upstreamId]?.name} - ${upSchema[outputs].title} (${upstreamId.substring(2, 8)})`
+            const upstreamArgument = outputs
+            options.push({ id: upstreamId, argument: upstreamArgument, value })
           }
         }
         return options
@@ -109,7 +107,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
 
   useEffect(() => {
     handleUpstreamOptions()
-  }, [])
+  }, [handleUpstreamOptions])
 
   if (!shouldRender) return null;
   return (
@@ -118,7 +116,6 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
         Object.keys(schema.properties).map(key => (
           <div key={key}>
             <PieceFormItem
-              formId={formId}
               schema={schema.properties[key]}
               itemKey={key}
               inputProperties={inputs[key]}

@@ -12,7 +12,7 @@ interface IStyleData {
   iconId: string
 }
 /**
- * @todo improve dtypes 
+ * @todo improve dtypes
  */
 export interface INodeData {
   name: string
@@ -101,6 +101,9 @@ const CustomNode = memo((data: any) => {
         {
           extendedData?.style?.label ? extendedData?.style?.label : extendedData?.name
         }
+        <p style={{ fontSize: 10, margin: 0, color: "#4E4E56" }}>
+          {data.id.substring(2, 8)}
+        </p>
       </div>
       {
         useIcon ? (
