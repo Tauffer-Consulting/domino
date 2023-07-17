@@ -92,7 +92,7 @@ def build_images_from_pieces_repository(publish: bool = False):
         if not any([dependency_dockerfile, dependency_requirements]):
             pieces_dependencies_map[group]["source_image"] = source_image_name
             # TODO change base image to domino when we have it
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
+            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:dev
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino
@@ -110,7 +110,7 @@ COPY .domino domino/pieces_repository/.domino
         elif dependency_requirements:
             pieces_dependencies_map[group]["source_image"] = source_image_name
 
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
+            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:dev
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino
@@ -225,7 +225,7 @@ RUN /usr/local/bin/python -m venv venv_domino \
 
         # Build and publish
         build_and_publish_from_tmp_dockerfile(
-            source_image_name="domino-airflow-worker-compose:latest",
+            source_image_name="domino-airflow-worker-compose:dev",
             publish=publish,
             path=tmpdirname,
             dockerfile="Dockerfile-tmp"
