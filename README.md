@@ -1,6 +1,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/media/logo.png" width="450" title="Domino">
 </p>
+<p align="center"><i>Build amazing ideas, piece by piece.</i></p>
 <p align="center">
   <a href="https://pypi.org/project/domino-py">
     <img src="https://img.shields.io/pypi/v/domino-py?color=%231BA331&label=PyPI&logo=python&logoColor=%23F7F991%20">
