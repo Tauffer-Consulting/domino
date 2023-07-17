@@ -17,7 +17,7 @@ class SharedStorageMount(object):
         self.parser = self._get_parser()
         self._set_shared_storage()
         self._set_remote_base_folder_path()
-        self.task_id = ast.literal_eval(os.environ.get("DOMINO_K8S_INSTANTIATE_PIECE_KWARGS"))["task_id"]
+        self.task_id = ast.literal_eval(os.environ.get("DOMINO_INSTANTIATE_PIECE_KWARGS"))["task_id"]
         self.workflow_run_subpath = os.environ.get("DOMINO_WORKFLOW_RUN_SUBPATH")
 
         self.shared_storage_function_map = {

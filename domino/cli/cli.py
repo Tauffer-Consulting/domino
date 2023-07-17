@@ -298,14 +298,14 @@ cli_piece.add_command(cli_create_release, name="release")
 @click.command()
 def cli_run_piece_k8s():
     """Run Piece on Kubernetes Pod"""
-    from domino.scripts.run_piece_k8s import run_piece as run_piece_in_k8s
-    
+    from domino.scripts.run_piece_docker import run_piece as run_piece_in_docker    
     console.print("Running Piece inside K8s pod...")
-    run_piece_in_k8s()
+    run_piece_in_docker()
 
 
 @click.command()
 def cli_run_piece_docker():
+    """Run Piece on Docker container"""
     from domino.scripts.run_piece_docker import run_piece as run_piece_in_docker
     console.print('Running Piece inside Docker container...')
     run_piece_in_docker()

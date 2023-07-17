@@ -7,7 +7,7 @@ import json
 
 def run_piece():
      # Import Operator from File System, already configured with metadata
-    piece_name = os.getenv("DOMINO_DOCKER_PIECE")
+    piece_name = os.getenv("DOMINO_PIECE")
 
     pieces_repository_copy_path = Path("domino/pieces_repository").resolve()
     pieces_folder_path = pieces_repository_copy_path / "pieces"
@@ -28,7 +28,7 @@ def run_piece():
     )
 
     # Instantiate Operator
-    instantiate_op_dict = ast.literal_eval(os.getenv("DOMINO_DOCKER_INSTANTIATE_PIECE_KWARGS"))
+    instantiate_op_dict = ast.literal_eval(os.getenv("DOMINO_INSTANTIATE_PIECE_KWARGS"))
     piece_object = piece_class(**instantiate_op_dict)
 
     # Get relevant airflow context from ENV
@@ -38,7 +38,7 @@ def run_piece():
     }
 
     # Run Operator
-    run_piece_input_kwargs = ast.literal_eval(os.getenv("DOMINO_DOCKER_RUN_PIECE_KWARGS"))
+    run_piece_input_kwargs = ast.literal_eval(os.getenv("DOMINO_RUN_PIECE_KWARGS"))
     piece_object.run_piece_function(
         airflow_context=airflow_context,
         piece_input_data=run_piece_input_kwargs,        

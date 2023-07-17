@@ -140,7 +140,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         if piece_secrets_model and self.deploy_mode in ['local-k8s', 'local-k8s-dev', 'prod']:
             secrets_names = list(piece_secrets_model.schema()["properties"].keys())
             secrets = dict()
-            secrets_values = ast.literal_eval(os.environ.get('DOMINO_K8S_PIECE_SECRETS', '{}'))
+            secrets_values = ast.literal_eval(os.environ.get('DOMINO_PIECE_SECRETS', '{}'))
             if not secrets_values:
                 secrets_values = {}
             for s in secrets_names:
@@ -149,7 +149,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         elif piece_secrets_model and self.deploy_mode == 'local-compose':
             secrets_names = list(piece_secrets_model.schema()["properties"].keys())
             secrets = dict()
-            secrets_values = ast.literal_eval(os.environ.get('DOMINO_DOCKER_PIECE_SECRETS', '{}'))
+            secrets_values = ast.literal_eval(os.environ.get('DOMINO_PIECE_SECRETS', '{}'))
             return piece_secrets_model(**secrets_values)
 
 
