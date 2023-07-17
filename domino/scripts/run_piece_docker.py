@@ -31,16 +31,9 @@ def run_piece():
     instantiate_op_dict = ast.literal_eval(os.getenv("DOMINO_INSTANTIATE_PIECE_KWARGS"))
     piece_object = piece_class(**instantiate_op_dict)
 
-    # Get relevant airflow context from ENV
-    airflow_context = {
-        "execution_datetime": os.getenv('AIRFLOW_CONTEXT_EXECUTION_DATETIME', "123456789"),
-        "dag_run_id": os.getenv('AIRFLOW_CONTEXT_DAG_RUN_ID', "123456789"),
-    }
-
     # Run Operator
     run_piece_input_kwargs = ast.literal_eval(os.getenv("DOMINO_RUN_PIECE_KWARGS"))
     piece_object.run_piece_function(
-        airflow_context=airflow_context,
         piece_input_data=run_piece_input_kwargs,        
         piece_input_model=piece_input_model_class, 
         piece_output_model=piece_output_model_class, 

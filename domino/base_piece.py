@@ -10,6 +10,7 @@ import pickle
 import time
 import subprocess
 import base64
+from typing import Optional
 
 from domino.logger import get_configured_logger
 from domino.schemas.deploy_mode import DeployModeType
@@ -241,21 +242,21 @@ class BasePiece(metaclass=abc.ABCMeta):
 
     def run_piece_function(
         self, 
-        airflow_context: dict,
         piece_input_data: dict,
         piece_input_model: pydantic.BaseModel,
         piece_output_model: pydantic.BaseModel, 
-        piece_secrets_model: pydantic.BaseModel = None,
+        piece_secrets_model: Optional[pydantic.BaseModel] = None,
+        airflow_context: Optional[dict] = None
     ):
         """
         _summary_
 
         Args:
-            airflow_context (dict): Dictionary containing Airflow context information
             piece_input_data (dict): Dictionary containing Piece's Input kwargs
             piece_input_model (pydantic.BaseModel): Piece's InputModel
             piece_output_model (pydantic.BaseModel): Piece's OutputModel
             piece_secrets_model (pydantic.BaseModel, optional): Piece's SecretsModel. Defaults to None.
+            airflow_context (dict, optional): Airflow context dictionary. Defaults to None.
 
         Raises:
             InvalidPieceOutputError: _description_
@@ -269,8 +270,11 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Airflow context dictionary: https://composed.blog/airflow/execute-context
         # For local-bash and kubernetes deploy modes, we assemble this ourselves and the context data is more limited
-        self.airflow_context = airflow_context
-        self.dag_run_id = airflow_context.get("dag_run_id")
+        if airflow_context is None:
+            self.airflow_context = {
+                "execution_datetime": os.getenv('AIRFLOW_CONTEXT_EXECUTION_DATETIME', "123456789"),
+                "dag_run_id": os.getenv('AIRFLOW_CONTEXT_DAG_RUN_ID', "123456789"),
+            }
 
         # Check if Piece's necessary secrets are present in ENV
         secrets_model_obj =self.validate_and_get_env_secrets(piece_secrets_model=piece_secrets_model)
