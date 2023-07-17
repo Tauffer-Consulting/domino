@@ -233,7 +233,7 @@ def cli_create_piece_repository(name, container_registry):
 @click.option(
     '--publish-images', 
     is_flag=True,
-    prompt='Publish Docker images?',
+    #prompt='Publish Docker images?',
     expose_value=True,
     default=False,
     help='If True (default), publishes Docker images to github container registry.'
@@ -256,6 +256,12 @@ def cli_organize_pieces_repository(build_images, publish_images, registry_token,
         os.environ['GHCR_PASSWORD'] = registry_token
     console.print(f"Using registry token to publish images")
     pieces_repository.organize_pieces_repository(build_images, publish_images, source_url)
+
+@click.command()
+def cli_publish_images():
+    """Publish images to github container registry from mapping."""
+    pieces_repository.publish_images()
+    
 
 
 @click.command()

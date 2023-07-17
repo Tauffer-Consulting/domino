@@ -7,9 +7,32 @@ import os
 from colorama import Fore, Style
 from rich.console import Console
 
+
 console = Console()
 
-def build_and_publish_from_tmp_dockerfile(source_image_name: str, publish: bool, path: str = ".", dockerfile: str = "Dockerfile-tmp"):
+
+def publish_image(source_image_name: str):
+    client = docker.from_env()
+
+    print(f"Publishing docker image: {source_image_name}")
+    print(Style.RESET_ALL + Style.DIM, end='')
+    try:
+        registry_url = 'https://ghcr.io'
+        ghcr_username = os.environ.get("GHCR_USERNAME", None)
+        ghcr_password = os.environ.get("GHCR_PASSWORD", None)
+        client.login(username=ghcr_username, password=ghcr_password, registry=registry_url)
+    except docker.errors.APIError:
+        console.print("Unauthorized login")
+        raise
+    response = client.images.push(repository=source_image_name)
+    print(response, end='')
+    print(Style.RESET_ALL + Fore.BLUE + f"Finished publishing: {source_image_name}")
+
+def build_image_from_tmp_dockerfile(
+    source_image_name: str, 
+    path: str = ".", 
+    dockerfile: str = "Dockerfile-tmp"
+):
     client = docker.from_env()
     try:
         os.environ["DOCKER_BUILDKIT"] = "1"
@@ -26,20 +49,6 @@ def build_and_publish_from_tmp_dockerfile(source_image_name: str, publish: bool,
             if "stream" in r and r["stream"] != "\n":
                 print(r)
         print(Style.RESET_ALL + Fore.BLUE + f"Finished building: {source_image_name}")
-        if publish:
-            print(f"Publishing docker image: {source_image_name}")
-            print(Style.RESET_ALL + Style.DIM, end='')
-            try:
-                registry_url = 'https://ghcr.io'
-                ghcr_username = os.environ.get("GHCR_USERNAME", None)
-                ghcr_password = os.environ.get("GHCR_PASSWORD", None)
-                client.login(username=ghcr_username, password=ghcr_password, registry=registry_url)
-            except docker.errors.APIError:
-                console.print("Unauthorized login")
-                raise
-            response = client.images.push(repository=source_image_name)
-            print(response, end='')
-            print(Style.RESET_ALL + Fore.BLUE + f"Finished publishing: {source_image_name}")
         print(Style.RESET_ALL)
     except Exception as e:
         raise Exception(e)
@@ -72,6 +81,7 @@ def build_images_from_pieces_repository(publish: bool = False):
     with open(domino_path / "dependencies_map.json", "r") as f:
         pieces_dependencies_map = json.load(f)
 
+    pieces_images_map = {}
     # Build docker images from unique definitions
     for group, v in pieces_dependencies_map.items():
         dependency_dockerfile = v["dependency"].get("dockerfile", None)
@@ -99,7 +109,7 @@ COPY .domino domino/pieces_repository/.domino
         # If dependency is defined as a requirements.txt
         elif dependency_requirements:
             pieces_dependencies_map[group]["source_image"] = source_image_name
-            # TODO change base image to domino when we have it
+
             dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
@@ -110,11 +120,15 @@ RUN pip install --no-cache-dir -r domino/pieces_repository/dependencies/{depende
             with open("Dockerfile-tmp", "w") as f:
                 f.write(dockerfile_str)
 
-        build_and_publish_from_tmp_dockerfile(
-            source_image_name=source_image_name, 
-            publish=publish
-        )
-    
+        for piece_name in v.get('pieces'):
+            pieces_images_map[piece_name] = source_image_name
+
+        build_image_from_tmp_dockerfile(source_image_name=source_image_name)
+        if publish:
+            publish_image(source_image_name=source_image_name)
+
+    print('### Setting images map as env variable', pieces_images_map)
+    os.environ["PIECES_IMAGES_MAP"] = json.dumps(pieces_images_map)
     return pieces_dependencies_map
 
 

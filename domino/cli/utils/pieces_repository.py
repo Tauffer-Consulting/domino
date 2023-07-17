@@ -355,6 +355,25 @@ def build_docker_images(publish_images: bool) -> None:
     updated_dependencies_map = build_images_from_pieces_repository(publish=publish_images)
     return updated_dependencies_map
 
+def publish_docker_images() -> None:
+    """
+    Load pieces to docker image map from environment variable and publish them to Container Registry.
+    This is used in the CI/CD pipeline to publish images to Container Registry after they are built and the tests pass.
+    """
+    from domino.scripts.build_docker_images_pieces import publish_image
+
+    pieces_images_map = json.loads(os.environ.get('PIECES_IMAGES_MAP', '{}'))
+    if not pieces_images_map:
+        raise ValueError("No images found to publish.")
+    
+    console.print("Publishing Docker images...")
+    all_images = set([e for e in pieces_images_map.values()])
+    for image in all_images:
+        console.print(f"Publishing image {image['image_name']}...")
+        publish_image(source_image_name=image)
+    
+
+
 
 def validate_repo_name(repo_name: str) -> None:
     """
