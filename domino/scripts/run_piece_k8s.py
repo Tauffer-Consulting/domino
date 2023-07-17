@@ -41,7 +41,7 @@ def run_piece():
     run_op_dict = ast.literal_eval(os.getenv("DOMINO_K8S_RUN_PIECE_KWARGS"))
     piece_object.run_piece_function(
         airflow_context=airflow_context,
-        op_kwargs=run_op_dict,        
+        piece_input_data=run_op_dict,        
         piece_input_model=piece_input_model_class, 
         piece_output_model=piece_output_model_class, 
         piece_secrets_model=piece_secrets_model_class,
