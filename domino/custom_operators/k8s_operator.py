@@ -61,28 +61,23 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
 
     def build_pod_request_obj(self, context: Optional['Context'] = None) -> k8s.V1Pod:
         """
-        Runs at the begining of the execute method.
         We override this method to add the shared storage to the pod.
         This function runs after our own self.execute, by super().execute()
         """
         pod = super().build_pod_request_obj(context)
-
+        # Add shared storage to pod
         self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
-
         if not self.workflow_shared_storage or self.workflow_shared_storage.mode.name == 'none':
             return pod
         if  self.workflow_shared_storage.source.name in ["aws_s3", "gcs"]:
             pod = self.add_shared_storage_sidecar(pod)
         elif self.workflow_shared_storage.source.name == "local":
             pod = self.add_local_shared_storage_volumes(pod)
-
         return pod
 
 
     def add_local_shared_storage_volumes(self, pod: k8s.V1Pod) -> k8s.V1Pod:
-        """
-        Adds local shared storage volumes to the pod.
-        """
+        """Adds local shared storage volumes to the pod."""
         pod_cp = copy.deepcopy(pod)
         pod_cp.spec.volumes = pod.spec.volumes or []
         pod_cp.spec.volumes.append(
@@ -91,7 +86,6 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
                 persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name="domino-workflow-shared-storage-volume-claim")
             )
         )
-
         # Add volume mounts for upstream tasks, using subpaths
         pod_cp.spec.containers[0].volume_mounts = pod_cp.spec.containers[0].volume_mounts or []
         for tid in self.shared_storage_upstream_ids_list:
@@ -103,7 +97,6 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
                     read_only=True,
                 )
             )
-
         # Add volume mount for this task
         pod_cp.spec.containers[0].volume_mounts.append(
             k8s.V1VolumeMount(
@@ -118,7 +111,9 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
 
     def add_shared_storage_sidecar(self, pod: k8s.V1Pod) -> k8s.V1Pod:
         """
-        Adds FUSE mounts shared storage sidecar container.
+        - add shared storage sidecar container to the pod
+        - add shared storage volume mounts to the sidecar container
+        - add FUSE mounts configuration as env vars to the sidecar container
         """
         # Set up pod Volumes and containers VolumemMounts from Upstream tasks
         volume_mounts_main_container = list()
@@ -147,7 +142,6 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
                     empty_dir=k8s.V1EmptyDirVolumeSource()
                 )
             )
-        
         # Set up pod Volumes and containers VolumemMounts for this Operator results
         volume_mounts_main_container.append(
             k8s.V1VolumeMount(
@@ -170,13 +164,11 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
                 empty_dir=k8s.V1EmptyDirVolumeSource()
             )
         )
-
         pod_cp = copy.deepcopy(pod)
         pod_cp.spec.volumes = pod.spec.volumes or []
         pod_cp.spec.volumes.extend(pod_volumes_list)
         pod_cp.spec.containers[0].volume_mounts = pod_cp.spec.containers[0].volume_mounts or []
         pod_cp.spec.containers[0].volume_mounts.extend(volume_mounts_main_container)
-
 
         # Create and add sidecar container to pod
         storage_piece_secrets = {}
@@ -185,16 +177,14 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
                 piece_repository_id=self.workflow_shared_storage.storage_repository_id,
                 piece_name=self.workflow_shared_storage.default_piece_name,
             )
-
         self.workflow_shared_storage.source = self.workflow_shared_storage.source.name
-        env_vars = {
+        sidecar_env_vars = {
             'DOMINO_WORKFLOW_SHARED_STORAGE': self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
             'DOMINO_WORKFLOW_SHARED_STORAGE_SECRETS': str(storage_piece_secrets),
             'DOMINO_INSTANTIATE_PIECE_KWARGS': str(self.pod_env_vars.get('DOMINO_INSTANTIATE_PIECE_KWARGS')),
             'DOMINO_WORKFLOW_RUN_SUBPATH': self.workflow_run_subpath,
             'AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE': str(self.shared_storage_upstream_ids_list),
         }
-
         self.shared_storage_sidecar_container_name = f"domino-shared-storage-sidecar-{self.task_id_replaced}"
         sidecar_container = k8s.V1Container(
             name=self.shared_storage_sidecar_container_name,
@@ -202,7 +192,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             image='ghcr.io/tauffer-consulting/domino-shared-storage-sidecar:latest',
             volume_mounts=volume_mounts_sidecar_container,
             security_context=k8s.V1SecurityContext(privileged=True),
-            env=[k8s.V1EnvVar(name=k, value=v) for k, v in env_vars.items()],
+            env=[k8s.V1EnvVar(name=k, value=v) for k, v in sidecar_env_vars.items()],
             resources=k8s.V1ResourceRequirements(
                 requests={
                     "cpu": "1m",
@@ -215,7 +205,6 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             ),
         )
         pod_cp.spec.containers.append(sidecar_container)
-
         return pod_cp
 
 
@@ -270,12 +259,8 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
     def _prepare_execute_environment(self, context: Context):
         """ 
         Runs at the begining of the execute method.
-        Prepare execution with the following configurations:
-        - pass extra arguments and configuration as environment variables to the pod
-        - add shared storage sidecar container to the pod - if shared storage is FUSE based
-        - add shared storage volume mounts to the pod - if shared storage is NFS based or local
+        Pass extra arguments and configuration as environment variables to the pod
         """
-
         # Fetch upstream tasks ids and save them in an ENV var
         upstream_task_ids = [t.task_id for t in self.get_direct_relatives(upstream=True)]
         self.env_vars.append({
@@ -283,13 +268,12 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             'value': str(upstream_task_ids),
             'value_from': None
         })
-
+        # Pass forward the workflow shared storage source name
         self.env_vars.append({
-            'name': 'DOMINO_WORKFLOW_SHARED_STORAGE',
+            'name': 'DOMINO_WORKFLOW_SHARED_STORAGE_SOURCE_NAME',
             'value': str(self.workflow_shared_storage.source.name) if self.workflow_shared_storage else None,
             'value_from': None
         })
-
         # Save updated piece input kwargs with upstream data to environment variable
         upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
         domino_k8s_run_op_kwargs = self._get_piece_kwargs_with_upstream_xcom(upstream_xcoms_data=upstream_xcoms_data)        

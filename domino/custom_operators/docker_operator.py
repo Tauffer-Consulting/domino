@@ -102,7 +102,7 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         # Fetch upstream tasks ids and save them in an ENV var
         upstream_task_ids = [t.task_id for t in self.get_direct_relatives(upstream=True)]
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS'] = str(upstream_task_ids)
-        self.environment['DOMINO_WORKFLOW_SHARED_STORAGE'] = str(self.workflow_shared_storage.source.name) if self.workflow_shared_storage else None
+        self.environment['DOMINO_WORKFLOW_SHARED_STORAGE_SOURCE_NAME'] = str(self.workflow_shared_storage.source.name) if self.workflow_shared_storage else None
     
         # Save updated piece input kwargs with upstream data to environment variable
         upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)

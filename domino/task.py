@@ -46,9 +46,15 @@ class Task(object):
         # Shared storage
         if not workflow_shared_storage:
             workflow_shared_storage = {}
-        workflow_shared_storage_source = StorageSource(workflow_shared_storage.pop("source", "None")).name
+        shared_storage_source_name = StorageSource(workflow_shared_storage.pop("source", "None")).name
         provider_options = workflow_shared_storage.pop("provider_options", {})
-        self.workflow_shared_storage = shared_storage_map[workflow_shared_storage_source](**workflow_shared_storage, **provider_options) if shared_storage_map[workflow_shared_storage_source] else shared_storage_map[workflow_shared_storage_source]
+        if shared_storage_map[shared_storage_source_name]:
+            self.workflow_shared_storage = shared_storage_map[shared_storage_source_name](
+                **workflow_shared_storage, 
+                **provider_options
+            ) 
+        else: 
+            self.workflow_shared_storage = shared_storage_map[shared_storage_source_name]
 
         # Container resources
         self.container_resources = container_resources if container_resources else {}
@@ -100,24 +106,16 @@ class Task(object):
         elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:
             config.load_incluster_config()
             self.k8s_client = client.CoreV1Api()
-
-            base_container_resources_model = ContainerResourcesModel(
-                requests={
-                    "cpu": "100m",
-                    "memory": "128Mi",
-                },
-                limits={
-                    "cpu": "100m",
-                    "memory": "128Mi",
-                }
-            )
             
             # Container resources
+            base_container_resources_model = ContainerResourcesModel(
+                requests={"cpu": "100m", "memory": "128Mi",},
+                limits={"cpu": "100m", "memory": "128Mi"}
+            )
             basic_container_resources = base_container_resources_model.dict()
             basic_container_resources = dict_deep_update(basic_container_resources, self.container_resources)
             if self.provide_gpu:
                 basic_container_resources["limits"]["nvidia.com/gpu"] = "1"
-            #self.container_resources = ContainerResourcesModel(**self.container_resources)
             container_resources_obj = k8s.V1ResourceRequirements(**basic_container_resources)
 
             # Volumes

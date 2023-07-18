@@ -287,8 +287,8 @@ class BasePiece(metaclass=abc.ABCMeta):
         self.results_path = f"{self.workflow_shared_storage}/{self.task_id}/results"
         self.xcom_path = f"{self.workflow_shared_storage}/{self.task_id}/xcom"
         self.report_path = f"{self.workflow_shared_storage}/{self.task_id}/report"
-        shared_storage_source = os.environ.get('DOMINO_WORKFLOW_SHARED_STORAGE', None)
-        if not shared_storage_source or shared_storage_source == "none" or self.deploy_mode == "local-compose":
+        shared_storage_source_name = os.environ.get('DOMINO_WORKFLOW_SHARED_STORAGE_SOURCE_NAME', None)
+        if not shared_storage_source_name or shared_storage_source_name == "none" or self.deploy_mode == "local-compose":
             self.generate_paths()
         else:
             self._wait_for_sidecar_paths()
