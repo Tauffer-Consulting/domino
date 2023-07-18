@@ -9,20 +9,13 @@ class RepositorySource(str, enum.Enum):
         use_enum_values = True
 
 
-class PieceExecutionMode(str, enum.Enum):
-    docker = 'docker'
-    worker = 'worker'
-
-    class Config:
-        use_enum_values = True
-
-
 class Permission(str, enum.Enum):
     owner = 'owner'
     read = 'read'
 
     class Config:
         use_enum_values = True
+
 
 class UserWorkspaceStatus(str, enum.Enum):
     pending = 'pending'
