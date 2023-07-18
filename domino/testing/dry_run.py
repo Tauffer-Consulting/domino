@@ -30,7 +30,7 @@ def piece_dry_run(
     repository_folder_path: Optional[str] = None, 
     secrets_data: dict = None,
     results_path: str = None
-):
+) -> dict:
     logger = get_configured_logger("piece_dry_run")
 
     # TODO finish adding the pieces images map to docker build images
@@ -93,4 +93,4 @@ def piece_dry_run(
         secrets_data=secrets_data,
         results_path=str(results_path)
     )
-    return output
+    return json.loads(output.json())

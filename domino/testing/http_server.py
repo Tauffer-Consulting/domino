@@ -9,7 +9,6 @@ app = Bottle()
 def run_test():
     dry_run_args = json.loads(request.body.read())
     output_data = piece_dry_run(**dry_run_args)
-    output_data = output_data.json()
     return output_data
 
 
