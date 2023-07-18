@@ -8,7 +8,6 @@ from contextlib import closing
 from kubernetes.stream import stream as kubernetes_stream
 
 from domino.custom_operators.base_operator import BaseDominoOperator
-from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas.shared_storage import WorkflowSharedStorage
 
 
@@ -32,27 +31,43 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             deploy_mode=deploy_mode,
             repository_id=repository_id,
             piece_input_kwargs=piece_kwargs,
+            workflow_shared_storage=workflow_shared_storage,
             domino_client_url="http://domino-rest-service:8000/",  # TODO change url based on platform configuration
         )
+
+        self.pod_env_vars = {
+            "DOMINO_PIECE": self.piece_name,
+            "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
+                "deploy_mode": self.deploy_mode,
+                "task_id": self.task_id,
+                "dag_id": self.dag_id,
+            }),
+            "DOMINO_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
+            "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
+            "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
+            "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
+        }
+
         super(KubernetesPodOperator).__init__(
             task_id=task_id,
+            env_vars=self.pod_env_vars,
             **k8s_operator_kwargs
         )
         
-        self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
-        self.task_env_vars = k8s_operator_kwargs.get('env_vars', [])
-        
         # Shared Storage variables
-        self.workflow_shared_storage = workflow_shared_storage
         self.shared_storage_base_mount_path = '/home/shared_storage'
         self.shared_storage_upstream_ids_list = list()
-    
+
+
     def build_pod_request_obj(self, context: Optional['Context'] = None) -> k8s.V1Pod:
         """
+        Runs at the begining of the execute method.
         We override this method to add the shared storage to the pod.
         This function runs after our own self.execute, by super().execute()
         """
         pod = super().build_pod_request_obj(context)
+
+        self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
 
         if not self.workflow_shared_storage or self.workflow_shared_storage.mode.name == 'none':
             return pod
@@ -62,6 +77,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             pod = self.add_local_shared_storage_volumes(pod)
 
         return pod
+
 
     def add_local_shared_storage_volumes(self, pod: k8s.V1Pod) -> k8s.V1Pod:
         """
@@ -98,6 +114,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             )
         )
         return pod_cp
+
 
     def add_shared_storage_sidecar(self, pod: k8s.V1Pod) -> k8s.V1Pod:
         """
@@ -173,7 +190,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         env_vars = {
             'DOMINO_WORKFLOW_SHARED_STORAGE': self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
             'DOMINO_WORKFLOW_SHARED_STORAGE_SECRETS': str(storage_piece_secrets),
-            'DOMINO_INSTANTIATE_PIECE_KWARGS': str(self.task_env_vars.get('DOMINO_INSTANTIATE_PIECE_KWARGS')),
+            'DOMINO_INSTANTIATE_PIECE_KWARGS': str(self.pod_env_vars.get('DOMINO_INSTANTIATE_PIECE_KWARGS')),
             'DOMINO_WORKFLOW_RUN_SUBPATH': self.workflow_run_subpath,
             'AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE': str(self.shared_storage_upstream_ids_list),
         }
@@ -200,6 +217,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         pod_cp.spec.containers.append(sidecar_container)
 
         return pod_cp
+
 
     def _get_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
         domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
@@ -241,55 +259,17 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
 
         return updated_op_kwargs
 
+
     def _update_env_var_value_from_name(self, name: str, value: str):
         for env_var in self.env_vars:
             if env_var.name == name:
                 env_var.value = value
                 break
 
-    def execute(self, context: Context):
-        self._prepare_execute_environment(context=context)
-        remote_pod = None
-        try:
-            self.pod_request_obj = self.build_pod_request_obj(context)
-            self.pod = self.get_or_create_pod(  # must set `self.pod` for `on_kill`
-                pod_request_obj=self.pod_request_obj,
-                context=context,
-            )
-            # get remote pod for use in cleanup methods
-            remote_pod = self.find_pod(self.pod.metadata.namespace, context=context)
-            self.await_pod_start(pod=self.pod)
-
-            if self.get_logs:
-                self.pod_manager.fetch_container_logs(
-                    pod=self.pod,
-                    container_name=self.BASE_CONTAINER_NAME,
-                    follow=True,
-                )
-            else:
-                self.pod_manager.await_container_completion(
-                    pod=self.pod, container_name=self.BASE_CONTAINER_NAME
-                )
-
-            if self.do_xcom_push:
-                result = self.extract_xcom(pod=self.pod)
-
-            if self.workflow_shared_storage and self.workflow_shared_storage.mode.name != 'none':
-                self._kill_shared_storage_sidecar(pod=self.pod)
-            remote_pod = self.pod_manager.await_pod_completion(self.pod)
-        finally:
-            self.cleanup(
-                pod=self.pod or self.pod_request_obj,
-                remote_pod=remote_pod,
-            )
-        ti = context['ti']
-        ti.xcom_push(key='pod_name', value=self.pod.metadata.name)
-        ti.xcom_push(key='pod_namespace', value=self.pod.metadata.namespace)
-        if self.do_xcom_push:
-            return result
 
     def _prepare_execute_environment(self, context: Context):
         """ 
+        Runs at the begining of the execute method.
         Prepare execution with the following configurations:
         - pass extra arguments and configuration as environment variables to the pod
         - add shared storage sidecar container to the pod - if shared storage is FUSE based
@@ -333,6 +313,49 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             'value': self.workflow_run_subpath,
             'value_from': None
         })
+
+
+    def execute(self, context: Context):
+        self._prepare_execute_environment(context=context)
+        remote_pod = None
+        try:
+            self.pod_request_obj = self.build_pod_request_obj(context)
+            self.pod = self.get_or_create_pod(  # must set `self.pod` for `on_kill`
+                pod_request_obj=self.pod_request_obj,
+                context=context,
+            )
+            # get remote pod for use in cleanup methods
+            remote_pod = self.find_pod(self.pod.metadata.namespace, context=context)
+            self.await_pod_start(pod=self.pod)
+
+            if self.get_logs:
+                self.pod_manager.fetch_container_logs(
+                    pod=self.pod,
+                    container_name=self.BASE_CONTAINER_NAME,
+                    follow=True,
+                )
+            else:
+                self.pod_manager.await_container_completion(
+                    pod=self.pod, container_name=self.BASE_CONTAINER_NAME
+                )
+
+            if self.do_xcom_push:
+                result = self.extract_xcom(pod=self.pod)
+
+            if self.workflow_shared_storage and self.workflow_shared_storage.mode.name != 'none':
+                self._kill_shared_storage_sidecar(pod=self.pod)
+            remote_pod = self.pod_manager.await_pod_completion(self.pod)
+        finally:
+            self.cleanup(
+                pod=self.pod or self.pod_request_obj,
+                remote_pod=remote_pod,
+            )
+        ti = context['ti']
+        ti.xcom_push(key='pod_name', value=self.pod.metadata.name)
+        ti.xcom_push(key='pod_namespace', value=self.pod.metadata.namespace)
+        if self.do_xcom_push:
+            return result
+
 
     def _kill_shared_storage_sidecar(self, pod: k8s.V1Pod):
         """

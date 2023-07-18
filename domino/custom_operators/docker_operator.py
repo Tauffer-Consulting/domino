@@ -4,7 +4,6 @@ from typing import Dict, Optional
 import os
 
 from domino.custom_operators.base_operator import BaseDominoOperator
-from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas.shared_storage import WorkflowSharedStorage, StorageSource
 
 
@@ -28,11 +27,11 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
             deploy_mode=deploy_mode,
             repository_id=repository_id,
             piece_input_kwargs=piece_input_kwargs,
+            workflow_shared_storage=workflow_shared_storage,
             domino_client_url="http://domino-rest:8000/",
         )
 
         # Shared Storage variables
-        self.workflow_shared_storage = workflow_shared_storage
         self.shared_storage_base_mount_path = '/home/shared_storage'
         self.shared_storage_upstream_ids_list = list()
         self._set_base_env_vars()

@@ -42,24 +42,24 @@ class Task(object):
         self.repository_id = piece["repository_id"]
         self.piece = piece
         self.piece_input_kwargs = piece_input_kwargs
+
+        # Shared storage
         if not workflow_shared_storage:
             workflow_shared_storage = {}
-        # Shared storage
         workflow_shared_storage_source = StorageSource(workflow_shared_storage.pop("source", "None")).name
         provider_options = workflow_shared_storage.pop("provider_options", {})
         self.workflow_shared_storage = shared_storage_map[workflow_shared_storage_source](**workflow_shared_storage, **provider_options) if shared_storage_map[workflow_shared_storage_source] else shared_storage_map[workflow_shared_storage_source]
+
         # Container resources
         self.container_resources = container_resources if container_resources else {}
         self.provide_gpu = self.container_resources.pop("use_gpu", False)
         
-        self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')
-
-        if self.deploy_mode in ['local-k8s', 'local-k8s-dev', 'prod']:
-            config.load_incluster_config()
-            self.k8s_client = client.CoreV1Api()
+        # Get deploy mode
+        self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')            
 
         # Set up task operator
         self._task_operator = self._set_operator()
+
 
     def _set_operator(self) -> BaseOperator:
         """
@@ -98,18 +98,9 @@ class Task(object):
         # - good example: https://github.com/apache/airflow/blob/main/tests/system/providers/cncf/kubernetes/example_kubernetes.py
         # - commands HAVE to go in a list object: https://stackoverflow.com/a/55149915/11483674
         elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:
-            container_env_vars = {
-                "DOMINO_PIECE": self.piece["name"],
-                "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
-                    "deploy_mode": self.deploy_mode,
-                    "task_id": self.task_id,
-                    "dag_id": self.dag_id,
-                }),
-                "DOMINO_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
-                "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
-                "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
-                "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
-            }
+            config.load_incluster_config()
+            self.k8s_client = client.CoreV1Api()
+
             base_container_resources_model = ContainerResourcesModel(
                 requests={
                     "cpu": "100m",
@@ -201,10 +192,14 @@ class Task(object):
 
             pod_startup_timeout_in_seconds = 600
             return DominoKubernetesPodOperator(
+                dag_id=self.dag_id,
                 task_id=self.task_id,
                 piece_name=self.piece.get('name'),
+                deploy_mode=self.deploy_mode,
                 repository_id=self.repository_id,
+                piece_kwargs=self.piece_input_kwargs,
                 workflow_shared_storage=self.workflow_shared_storage,
+                # ----------------- Kubernetes -----------------
                 namespace='default',  # TODO - separate namespace by User or Workspace?
                 image=self.piece["source_image"],
                 image_pull_policy='IfNotPresent',
@@ -214,7 +209,7 @@ class Task(object):
                 #arguments=["-c", "sleep 120;"],
                 cmds=["domino"],
                 arguments=["run-piece-k8s"],
-                env_vars=container_env_vars,
+                # env_vars=container_env_vars,
                 do_xcom_push=True,
                 in_cluster=True,
                 volumes=all_volumes,
@@ -231,6 +226,7 @@ class Task(object):
                 repository_id=self.repository_id,
                 piece_kwargs=self.piece_input_kwargs,
                 workflow_shared_storage=self.workflow_shared_storage,
+                # ----------------- Docker -----------------
                 image=self.piece["source_image"],
                 do_xcom_push=True,
                 mount_tmp_dir=False,

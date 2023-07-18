@@ -2,6 +2,7 @@ from typing import Dict, Optional
 from airflow.utils.context import Context
 
 from domino.client.domino_backend_client import DominoBackendRestClient
+from domino.schemas.shared_storage import WorkflowSharedStorage
 
 
 class BaseDominoOperator:
@@ -17,6 +18,7 @@ class BaseDominoOperator:
         deploy_mode: str,
         repository_id: int,
         piece_input_kwargs: Optional[Dict] = None, 
+        workflow_shared_storage: WorkflowSharedStorage = None,
         domino_client_url: Optional[str] = None,
     ):
         self.dag_id = dag_id
@@ -25,6 +27,7 @@ class BaseDominoOperator:
         self.deploy_mode = deploy_mode
         self.repository_id = repository_id
         self.piece_input_kwargs = piece_input_kwargs
+        self.workflow_shared_storage = workflow_shared_storage
         if domino_client_url is None:
             domino_client_url = "http://domino-rest:8000/"
         self.domino_client = DominoBackendRestClient(base_url=domino_client_url)
