@@ -158,16 +158,15 @@ Pieces are the secret sauce of Domino, they are functional units that can be dis
 - :traffic_light: have well defined data models for inputs, outputs and secrets
 - :package: run in self-contained and isolated execution environments (Docker containers)
 - :gear: are immutable, guaranteeing reproducibility of your workflows
-- :octocat: are organized in repositories, for easy packaging, distribution and installation
+- :octocat: are organized in git repositories, for easy packaging, distribution and installation
 - :bookmark_tabs: are properly versioned, tested and documented
 - :zap: are plug-and-play and versatile, can be easily incorporated in any workflow
 
 It is very easy to create and share your own Pieces:
 
-- :one: write your Python function
-- :two: define its data types (input, output and secrets)
-- :three: define its dependencies (requirements.txt or Dockerfile)
-- :four: publish it in a repository (public or private)
+1️⃣ write your Python function as a Piece <br>
+2️⃣ define the data types, dependencies, metadata and tests <br>
+3️⃣ publish in a git repository (public or private)
 
 The [Pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
 

@@ -86,13 +86,13 @@ class Task(object):
         # - commands HAVE to go in a list object: https://stackoverflow.com/a/55149915/11483674
         elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:
             container_env_vars = {
-                "DOMINO_K8S_PIECE": self.piece["name"],
-                "DOMINO_K8S_INSTANTIATE_PIECE_KWARGS": str({
+                "DOMINO_PIECE": self.piece["name"],
+                "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
                     "deploy_mode": self.deploy_mode,
                     "task_id": self.task_id,
                     "dag_id": self.dag_id,
                 }),
-                "DOMINO_K8S_RUN_PIECE_KWARGS": str(piece_input_kwargs),
+                "DOMINO_RUN_PIECE_KWARGS": str(piece_input_kwargs),
                 "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
                 "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
                 "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",

@@ -345,15 +345,34 @@ def create_dependencies_map(save_map_as_file: bool = True) -> None:
             json.dump(pieces_images_map, outfile, indent=4, cls=SetEncoder)
 
 
-def build_docker_images(publish_images: bool) -> None:
+def build_docker_images() -> None:
     """
     Convenience function to build Docker images from the repository dependencies and publish them to Docker Hub
     """
     from domino.scripts.build_docker_images_pieces import build_images_from_pieces_repository
 
     console.print("Building Docker images and generating map file...")
-    updated_dependencies_map = build_images_from_pieces_repository(publish=publish_images)
+    updated_dependencies_map = build_images_from_pieces_repository()
     return updated_dependencies_map
+
+def publish_docker_images() -> None:
+    """
+    Load pieces to docker image map from environment variable and publish them to Container Registry.
+    This is used in the CI/CD pipeline to publish images to Container Registry after they are built and the tests pass.
+    """
+    from domino.scripts.build_docker_images_pieces import publish_image
+
+    pieces_images_map = json.loads(os.environ.get('PIECES_IMAGES_MAP', '{}'))
+    if not pieces_images_map:
+        raise ValueError("No images found to publish.")
+    
+    console.print("Publishing Docker images...")
+    all_images = set([e for e in pieces_images_map.values()])
+    for image in all_images:
+        console.print(f"Publishing image {image}...")
+        publish_image(source_image_name=image)
+    
+
 
 
 def validate_repo_name(repo_name: str) -> None:
@@ -366,7 +385,7 @@ def validate_repo_name(repo_name: str) -> None:
         raise ValueError("Repository name should not contain special characters")
 
 
-def organize_pieces_repository(build_images: bool, publish_images: bool, source_url: str) -> None:
+def organize_pieces_repository(build_images: bool, source_url: str) -> None:
     """
     Organize Piece's repository for Domino. This will: 
     - validate the folder structure, and create the pieces compiled_metadata.json and dependencies_map.json files
@@ -394,7 +413,7 @@ def organize_pieces_repository(build_images: bool, publish_images: bool, source_
 
     # Build and publish the images
     if build_images:
-        updated_dependencies_map = build_docker_images(publish_images=publish_images)
+        updated_dependencies_map = build_docker_images()
         map_file_path = Path(".") / ".domino/dependencies_map.json"
         with open(map_file_path, "w") as outfile:
             json.dump(updated_dependencies_map, outfile, indent=4)
