@@ -158,7 +158,7 @@ Pieces are the secret sauce of Domino, they are functional units that can be dis
 - :traffic_light: have well defined data models for inputs, outputs and secrets
 - :package: run in self-contained and isolated execution environments (Docker containers)
 - :gear: are immutable, guaranteeing reproducibility of your workflows
-- :octocat: are organized in repositories, for easy packaging, distribution and installation
+- :octocat: are organized in git repositories, for easy packaging, distribution and installation
 - :bookmark_tabs: are properly versioned, tested and documented
 - :zap: are plug-and-play and versatile, can be easily incorporated in any workflow
 
