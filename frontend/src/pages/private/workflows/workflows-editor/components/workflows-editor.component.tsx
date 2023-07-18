@@ -92,38 +92,38 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
   const handleSaveWorkflow = useCallback(async () => {
     try {
-      setBackdropIsOpen(true)
+      //setBackdropIsOpen(true)
       const payload = await workflowsEditorBodyFromFlowchart()
       console.log('payload', payload)
 
-      if ((!payload.tasks)) {
-        setBackdropIsOpen(false)
-        return toast.error('Please add tasks to the workflow')
-      }
-      try {
-        await validateWorkflowForms(payload)
-        await validateTasksForms(payload)
-      }
-      catch (err: any) {
-        setBackdropIsOpen(false)
-        return toast.error(err.message)
-      }
+      // if ((!payload.tasks)) {
+      //   setBackdropIsOpen(false)
+      //   return toast.error('Please add tasks to the workflow')
+      // }
+      // // try {
+      // //   await validateWorkflowForms(payload)
+      // //   await validateTasksForms(payload)
+      // // }
+      // // catch (err: any) {
+      // //   setBackdropIsOpen(false)
+      // //   return toast.error(err.message)
+      // // }
 
-      handleCreateWorkflow(payload)
-        .then((response) => {
-          toast.success('Workflow created successfully.')
-          setBackdropIsOpen(false)
-        })
-        .catch((err) => {
-          if (err.response?.status === 422) {
-            setBackdropIsOpen(false)
-            console.log('response', err.response)
-            toast.error('Error while creating workflow, check your workflow settings and tasks.')
-            return
-          }
-          setBackdropIsOpen(false)
-          toast.error(err.response.data.detail)
-        })
+      // handleCreateWorkflow(payload)
+      //   .then((response) => {
+      //     toast.success('Workflow created successfully.')
+      //     setBackdropIsOpen(false)
+      //   })
+      //   .catch((err) => {
+      //     if (err.response?.status === 422) {
+      //       setBackdropIsOpen(false)
+      //       console.log('response', err.response)
+      //       toast.error('Error while creating workflow, check your workflow settings and tasks.')
+      //       return
+      //     }
+      //     setBackdropIsOpen(false)
+      //     toast.error(err.response.data.detail)
+      //   })
     } catch (err) {
       setBackdropIsOpen(false)
       console.log(err)
