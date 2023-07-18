@@ -317,7 +317,37 @@ Optionally, you can also include in the metadata:
 test_mynewpiece.py
 -----------------------
 
+To guarantee that your Piece is working as expected, you should always write tests for it. You can name the test file as you desire, as long as it starts with :code:`test_` and is unique among the other test files in the same repository, e.g. :code:`test_mynewpiece.py`.
 
+.. code-block:: python
+    :caption: test_mynewpiece.py
+
+    from domino.testing import piece_dry_run
+
+    def test_mynewpiece():
+        # Define input and secrets data
+        input_data = dict(
+            in_argument_1=10.5,
+            in_argument_2='test string',
+            in_argument_3=True,
+        )
+        secrets_data = dict(
+            SECRET_VAR="secret_value"
+        )
+
+        # Dry-run the Piece
+        piece_output = piece_dry_run(
+            piece_name="MyNewPiece",
+            input_data=input_data,
+            secrets_data=secrets_data
+        )
+
+        # Compare the output with the expected output
+        assert piece_output["out_argument_1"] == "a string result"
+        assert piece_output["out_argument_2"].split("/")[-1] == "msg.txt"
+
+
+All tests files will be automatically run by the repository's actions before the Pieces production images are released.
 
 
 Add the Piece to a repository
