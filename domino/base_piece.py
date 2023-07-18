@@ -334,11 +334,13 @@ class BasePiece(metaclass=abc.ABCMeta):
         dry_instance = DryPiece(results_path=results_path)
 
         # Run piece function
-        return cls.piece_function(
-            self=dry_instance, 
-            input_data=input_model_obj,
-            secrets_data=secrets_model_obj
-        )
+        call_piece_func_dict = {
+            "self": dry_instance, 
+            "input_data": input_model_obj
+        }
+        if piece_secrets_model:
+            call_piece_func_dict['secrets_data'] = secrets_model_obj
+        return cls.piece_function(**call_piece_func_dict)
 
 
     @staticmethod
