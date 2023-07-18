@@ -33,11 +33,6 @@ def piece_dry_run(
 ) -> dict:
     logger = get_configured_logger("piece_dry_run")
 
-    # TODO finish adding the pieces images map to docker build images
-    # By now to test you should export this env variable , you can use a local image if you want to test a piece built with local version of domino
-    # To build a piece with local version of domino you can build the pod dockerfile locally and 
-    # then use the local pod image in the build_docker_images_pieces.py in temporary Dockerfile generation to use this local image
-    # Example: export PIECES_IMAGES_MAP='{"SimpleLogPiece": "local/default_domino_pieces:0.3.9-group0"}'
     pieces_images_map = os.environ.get("PIECES_IMAGES_MAP", {})
     if pieces_images_map and piece_name in pieces_images_map:
         try:
