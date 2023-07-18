@@ -17,18 +17,19 @@ A Domino Pieces repository should contain:
    :caption: Repository folders and files structure
 
     dependencies/
-    ├── Dockerfile_1
-    ├── requirements_1.txt
-    └── requirements_2.txt
+    ├── Dockerfile_2
+    └── requirements_1.txt
     pieces/
     └── FirstPiece/
         ├── metadata.json
         ├── models.py
-        └── piece.py
+        ├── piece.py
+        └── test_firstpiece.py
     └── SecondPiece/
         ├── metadata.json
         ├── models.py
-        └── piece.py
+        ├── piece.py
+        └── test_secondpiece.py
     config.toml
 
 

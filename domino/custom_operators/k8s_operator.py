@@ -173,7 +173,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         env_vars = {
             'DOMINO_WORKFLOW_SHARED_STORAGE': self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
             'DOMINO_WORKFLOW_SHARED_STORAGE_SECRETS': str(storage_piece_secrets),
-            'DOMINO_K8S_INSTANTIATE_PIECE_KWARGS': str(self.task_env_vars.get('DOMINO_K8S_INSTANTIATE_PIECE_KWARGS')),
+            'DOMINO_INSTANTIATE_PIECE_KWARGS': str(self.task_env_vars.get('DOMINO_INSTANTIATE_PIECE_KWARGS')),
             'DOMINO_WORKFLOW_RUN_SUBPATH': self.workflow_run_subpath,
             'AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE': str(self.shared_storage_upstream_ids_list),
         }
@@ -202,16 +202,16 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         return pod_cp
 
     def _get_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
-        domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_K8S_RUN_PIECE_KWARGS']
+        domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
         if not domino_k8s_run_op_kwargs:
             domino_k8s_run_op_kwargs = {
-                "name": "DOMINO_K8S_RUN_PIECE_KWARGS",
+                "name": "DOMINO_RUN_PIECE_KWARGS",
                 "value": {}
             }
         else:
             domino_k8s_run_op_kwargs = domino_k8s_run_op_kwargs[0]
             domino_k8s_run_op_kwargs = {
-                "name": "DOMINO_K8S_RUN_PIECE_KWARGS",
+                "name": "DOMINO_RUN_PIECE_KWARGS",
                 "value": ast.literal_eval(domino_k8s_run_op_kwargs.value)
             }
         
@@ -313,12 +313,12 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         # Save updated piece input kwargs with upstream data to environment variable
         upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
         domino_k8s_run_op_kwargs = self._get_piece_kwargs_with_upstream_xcom(upstream_xcoms_data=upstream_xcoms_data)        
-        self._update_env_var_value_from_name(name='DOMINO_K8S_RUN_PIECE_KWARGS', value=str(domino_k8s_run_op_kwargs))
+        self._update_env_var_value_from_name(name='DOMINO_RUN_PIECE_KWARGS', value=str(domino_k8s_run_op_kwargs))
         
         # Add pieces secrets to environment variables
         piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.piece_name)
         self.env_vars.append({
-            "name": "DOMINO_K8S_PIECE_SECRETS",
+            "name": "DOMINO_PIECE_SECRETS",
             "value": str(piece_secrets),
             "value_from": None
         })

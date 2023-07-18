@@ -10,6 +10,7 @@ import pickle
 import time
 import subprocess
 import base64
+from typing import Optional
 
 from domino.logger import get_configured_logger
 from domino.schemas.deploy_mode import DeployModeType
@@ -125,32 +126,18 @@ class BasePiece(metaclass=abc.ABCMeta):
             raise NotImplementedError(f"Get upstream XCOM not implemented for deploy_mode=={self.deploy_mode}")
 
     
-    def validate_and_get_env_secrets(self, piece_secrets_model: pydantic.BaseModel = None, secrets_values=None):
+    def validate_and_get_env_secrets(self, piece_secrets_model: pydantic.BaseModel = None):
         """
         Get secret variables for this Piece from ENV. The necessary secret variables to run the Piece should be defined in the Piece's SecretsModel.
-        The secrets can then be retrieved and used in the Piece's `piece_function` method as such:
-        ```
-        my_secret = self.secrets.my_secret
-        ```
+        The secrets can then be retrieved and used in the Piece's `piece_function` method.
 
         Args:
             piece_secrets_model (pydantic.BaseModel): _description_
         """
-        self.secrets = None
-        if piece_secrets_model and self.deploy_mode in ['local-k8s', 'local-k8s-dev', 'prod']:
-            secrets_names = list(piece_secrets_model.schema()["properties"].keys())
-            secrets = dict()
-            secrets_values = ast.literal_eval(os.environ.get('DOMINO_K8S_PIECE_SECRETS', '{}'))
-            if not secrets_values:
-                secrets_values = {}
-            for s in secrets_names:
-                secrets[s] = secrets_values.get(s, None)
-            self.secrets = piece_secrets_model(**secrets)
-        elif piece_secrets_model and self.deploy_mode == 'local-compose':
-            secrets_names = list(piece_secrets_model.schema()["properties"].keys())
-            secrets = dict()
-            secrets_values = ast.literal_eval(os.environ.get('DOMINO_DOCKER_PIECE_SECRETS', '{}'))
-            self.secrets = piece_secrets_model(**secrets_values)
+        if piece_secrets_model:
+            secrets_values = ast.literal_eval(os.environ.get('DOMINO_PIECE_SECRETS', '{}'))
+            return piece_secrets_model(**secrets_values)
+        return None
 
 
     def format_xcom(self, output_obj: pydantic.BaseModel) -> dict:
@@ -255,22 +242,21 @@ class BasePiece(metaclass=abc.ABCMeta):
 
     def run_piece_function(
         self, 
-        airflow_context: dict,
-        op_kwargs: dict,
+        piece_input_data: dict,
         piece_input_model: pydantic.BaseModel,
         piece_output_model: pydantic.BaseModel, 
-        piece_secrets_model: pydantic.BaseModel = None,
-        secrets_values: dict = None
+        piece_secrets_model: Optional[pydantic.BaseModel] = None,
+        airflow_context: Optional[dict] = None
     ):
         """
         _summary_
 
         Args:
-            airflow_context (dict): Dictionary containing Airflow context information
-            op_kwargs (dict): Dictionary containing Piece's kwargs
+            piece_input_data (dict): Dictionary containing Piece's Input kwargs
             piece_input_model (pydantic.BaseModel): Piece's InputModel
             piece_output_model (pydantic.BaseModel): Piece's OutputModel
             piece_secrets_model (pydantic.BaseModel, optional): Piece's SecretsModel. Defaults to None.
+            airflow_context (dict, optional): Airflow context dictionary. Defaults to None.
 
         Raises:
             InvalidPieceOutputError: _description_
@@ -284,14 +270,14 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Airflow context dictionary: https://composed.blog/airflow/execute-context
         # For local-bash and kubernetes deploy modes, we assemble this ourselves and the context data is more limited
-        self.airflow_context = airflow_context
-        self.dag_run_id = airflow_context.get("dag_run_id")
+        if airflow_context is None:
+            self.airflow_context = {
+                "execution_datetime": os.getenv('AIRFLOW_CONTEXT_EXECUTION_DATETIME', "123456789"),
+                "dag_run_id": os.getenv('AIRFLOW_CONTEXT_DAG_RUN_ID', "123456789"),
+            }
 
         # Check if Piece's necessary secrets are present in ENV
-        self.validate_and_get_env_secrets(
-            piece_secrets_model=piece_secrets_model, 
-            secrets_values=secrets_values
-        )
+        secrets_model_obj =self.validate_and_get_env_secrets(piece_secrets_model=piece_secrets_model)
 
         # Generate paths
         workflow_run_subpath = os.environ.get('DOMINO_WORKFLOW_RUN_SUBPATH', '')
@@ -308,12 +294,17 @@ class BasePiece(metaclass=abc.ABCMeta):
             self._wait_for_sidecar_paths()
             
         # Using pydantic to validate input data
-        input_model_obj = piece_input_model(**op_kwargs)
+        input_model_obj = piece_input_model(**piece_input_data)
 
         # Run piece function
-        output_obj = self.piece_function(input_model=input_model_obj)
+        call_piece_func_dict = {"input_data": input_model_obj}
+        if piece_secrets_model:
+            call_piece_func_dict['secrets_data'] = secrets_model_obj
+        output_obj = self.piece_function(**call_piece_func_dict)
 
         # Validate output data
+        if isinstance(output_obj, dict):
+            output_obj = piece_output_model(**output_obj)
         if not isinstance(output_obj, piece_output_model):
             raise InvalidPieceOutputError(piece_name=self.__class__.__name__)
 
@@ -325,30 +316,40 @@ class BasePiece(metaclass=abc.ABCMeta):
     @classmethod
     def dry_run(
         cls,
-        piece_input: dict, 
+        input_data: dict, 
         piece_input_model: pydantic.BaseModel,
-        piece_output_model: pydantic.BaseModel, 
+        piece_output_model: pydantic.BaseModel,
         piece_secrets_model: pydantic.BaseModel = None,
-        secrets_input: dict = None,
+        secrets_data: dict = None,
         results_path: str = None,
     ):
-        # Instantiate 
-        input_model_obj = piece_input_model(**piece_input)
-        secrets_model_obj = piece_secrets_model(**secrets_input) if piece_secrets_model else None
+        # Instantiate models
+        input_model_obj = piece_input_model(**input_data)
+        secrets_model_obj = piece_secrets_model(**secrets_data) if piece_secrets_model else None
 
         class DryPiece(cls):
-            def __init__(self, secrets, results_path):
+            def __init__(self, results_path):
                 self.results_path = results_path
-                self.secrets = secrets
                 self.logger = get_configured_logger(f"{self.__class__.__name__ }-dry-run")
 
-        dry_instance = DryPiece(
-            secrets=secrets_model_obj,
-            results_path=results_path
-        )
+        dry_instance = DryPiece(results_path=results_path)
 
         # Run piece function
-        return cls.piece_function(self=dry_instance, input_model=input_model_obj)
+        call_piece_func_dict = {
+            "self": dry_instance, 
+            "input_data": input_model_obj
+        }
+        if piece_secrets_model:
+            call_piece_func_dict['secrets_data'] = secrets_model_obj
+        output_obj = cls.piece_function(**call_piece_func_dict)
+        
+        # Validate output data
+        if isinstance(output_obj, dict):
+            output_obj = piece_output_model(**output_obj)
+        if not isinstance(output_obj, piece_output_model):
+            raise InvalidPieceOutputError(piece_name=cls.__name__)
+        
+        return output_obj
 
 
     @staticmethod
