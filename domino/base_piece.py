@@ -318,6 +318,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         cls,
         input_data: dict, 
         piece_input_model: pydantic.BaseModel,
+        piece_output_model: pydantic.BaseModel,
         piece_secrets_model: pydantic.BaseModel = None,
         secrets_data: dict = None,
         results_path: str = None,
@@ -340,7 +341,15 @@ class BasePiece(metaclass=abc.ABCMeta):
         }
         if piece_secrets_model:
             call_piece_func_dict['secrets_data'] = secrets_model_obj
-        return cls.piece_function(**call_piece_func_dict)
+        output_obj = cls.piece_function(**call_piece_func_dict)
+        
+        # Validate output data
+        if isinstance(output_obj, dict):
+            output_obj = piece_output_model(**output_obj)
+        if not isinstance(output_obj, piece_output_model):
+            raise InvalidPieceOutputError(piece_name=cls.__name__)
+        
+        return output_obj
 
 
     @staticmethod

@@ -88,8 +88,9 @@ def piece_dry_run(
     output = piece_class.dry_run(
         input_data=input_data,
         piece_input_model=piece_input_model_class,
+        piece_output_model=piece_output_model_class,
         piece_secrets_model=piece_secrets_model_class,
         secrets_data=secrets_data,
         results_path=str(results_path)
     )
-    return output.dict()
+    return output
