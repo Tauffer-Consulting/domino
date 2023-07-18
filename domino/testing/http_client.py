@@ -16,7 +16,7 @@ class TestingHttpClient:
     @classmethod
     def wait_health_check(cls):
         max_retries = 10
-        retry_delay_in_seconds = 5
+        retry_delay_in_seconds = 1
         url = f'{cls.BASE_HTTP_SERVER_HOST_URL}/health-check'
         for _ in range(max_retries):
             try:
@@ -47,8 +47,7 @@ class TestingHttpClient:
                 container_status = container.attrs.get('State').get('Status')
                 cls.logger.info('Waiting for container to start...')
                 time.sleep(0.2)
-            print('CONTAINER LIST', cls.docker_client.containers.list())
-            #cls.wait_health_check()
+            cls.wait_health_check()
             return container
         except Exception as e:
             container = cls.docker_client.containers.get('domino_testing_http_server')
@@ -71,6 +70,7 @@ class TestingHttpClient:
             secrets_data=secrets_data,
             repository_folder_path=cls.DOMINO_INTERNAL_REPOSITORY_FOLDER_PATH
         )
+        cls.logger.info(f'Sending dry run request - \n{body_data}')
 
         response = requests.post(url, json=body_data)
         return response

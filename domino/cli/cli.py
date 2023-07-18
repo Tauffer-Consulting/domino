@@ -251,7 +251,7 @@ def cli_create_piece_repository(name, container_registry):
     help='The base url for this Pieces repository.'
 )
 def cli_organize_pieces_repository(build_images, publish_images, registry_token, source_url):
-    """Prepare local folder for running a Domino platform."""
+    """Organize Pieces repository."""
     if registry_token:
         os.environ['GHCR_PASSWORD'] = registry_token
     console.print(f"Using registry token to publish images")
@@ -262,8 +262,6 @@ def cli_publish_images():
     """Publish images to github container registry from mapping."""
     pieces_repository.publish_images()
     
-
-
 @click.command()
 def cli_create_release():
     """
@@ -289,6 +287,7 @@ def cli_piece(ctx):
 cli_piece.add_command(cli_organize_pieces_repository, name="organize")
 cli_piece.add_command(cli_create_piece_repository, name="create")
 cli_piece.add_command(cli_create_release, name="release")
+cli_piece.add_command(cli_publish_images, name="publish-images")
 
 
 ###############################################################################
@@ -298,14 +297,14 @@ cli_piece.add_command(cli_create_release, name="release")
 @click.command()
 def cli_run_piece_k8s():
     """Run Piece on Kubernetes Pod"""
-    from domino.scripts.run_piece_k8s import run_piece as run_piece_in_k8s
-    
+    from domino.scripts.run_piece_docker import run_piece as run_piece_in_docker    
     console.print("Running Piece inside K8s pod...")
-    run_piece_in_k8s()
+    run_piece_in_docker()
 
 
 @click.command()
 def cli_run_piece_docker():
+    """Run Piece on Docker container"""
     from domino.scripts.run_piece_docker import run_piece as run_piece_in_docker
     console.print('Running Piece inside Docker container...')
     run_piece_in_docker()
