@@ -207,7 +207,6 @@ class Task(object):
                 #arguments=["-c", "sleep 120;"],
                 cmds=["domino"],
                 arguments=["run-piece-k8s"],
-                # env_vars=container_env_vars,
                 do_xcom_push=True,
                 in_cluster=True,
                 volumes=all_volumes,

@@ -35,7 +35,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             domino_client_url="http://domino-rest-service:8000/",  # TODO change url based on platform configuration
         )
 
-        self.pod_env_vars = {
+        pod_env_vars = {
             "DOMINO_PIECE": self.piece_name,
             "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
                 "deploy_mode": self.deploy_mode,
@@ -50,7 +50,7 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
 
         super(KubernetesPodOperator).__init__(
             task_id=task_id,
-            env_vars=self.pod_env_vars,
+            env_vars=pod_env_vars,
             **k8s_operator_kwargs
         )
         
@@ -181,7 +181,11 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         sidecar_env_vars = {
             'DOMINO_WORKFLOW_SHARED_STORAGE': self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
             'DOMINO_WORKFLOW_SHARED_STORAGE_SECRETS': str(storage_piece_secrets),
-            'DOMINO_INSTANTIATE_PIECE_KWARGS': str(self.pod_env_vars.get('DOMINO_INSTANTIATE_PIECE_KWARGS')),
+            'DOMINO_INSTANTIATE_PIECE_KWARGS': str({
+                "deploy_mode": self.deploy_mode,
+                "task_id": self.task_id,
+                "dag_id": self.dag_id,
+            }),
             'DOMINO_WORKFLOW_RUN_SUBPATH': self.workflow_run_subpath,
             'AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE': str(self.shared_storage_upstream_ids_list),
         }
@@ -209,6 +213,10 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
 
 
     def _get_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
+        """
+        Update Operator kwargs with upstream tasks XCOM data
+        Also updates the list of upstream tasks for which we need to mount the results path
+        """
         domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
         if not domino_k8s_run_op_kwargs:
             domino_k8s_run_op_kwargs = {
@@ -221,9 +229,6 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
                 "name": "DOMINO_RUN_PIECE_KWARGS",
                 "value": ast.literal_eval(domino_k8s_run_op_kwargs.value)
             }
-        
-        # Update Operator kwargs with upstream tasks XCOM data
-        # Also updates the list of upstream tasks for which we need to mount the results path
         updated_op_kwargs = dict()
         for k, v in domino_k8s_run_op_kwargs.get('value').items():
             if isinstance(v, dict) and v.get("type", None) == "fromUpstream":
@@ -239,13 +244,11 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
                     self.shared_storage_upstream_ids_list.append(upstream_task_id)
             else:
                 updated_op_kwargs[k] = v
-
         self.env_vars.append({
             'name': 'AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE',
             'value': str(self.shared_storage_upstream_ids_list),
             'value_from': None
         })
-
         return updated_op_kwargs
 
 
