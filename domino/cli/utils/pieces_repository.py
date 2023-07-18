@@ -169,7 +169,7 @@ def validate_pieces_folders() -> None:
     """
     Validate the Pieces folders from an Pieces repository.
     """
-    from domino.schemas.piece_metadata import PieceMetadata
+    from domino.schemas import PieceMetadata
 
     pieces_path = Path(".") / "pieces"
     dependencies_path = Path(".") / "dependencies"
