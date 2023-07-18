@@ -81,6 +81,7 @@ Here's a list of the main resources for Domino:
    :caption: Pieces
 
    pages/pieces.rst
+   pages/pieces_create.rst
    pages/pieces_repository.rst
    pages/pieces_unit_testing.md
 

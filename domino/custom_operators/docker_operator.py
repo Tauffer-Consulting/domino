@@ -60,13 +60,13 @@ class DominoDockerOperator(DockerOperator):
     
     def _set_base_env_vars(self):
         self.environment = {
-            "DOMINO_DOCKER_PIECE": self.running_piece_name,
-            "DOMINO_DOCKER_INSTANTIATE_PIECE_KWARGS": str({
+            "DOMINO_PIECE": self.running_piece_name,
+            "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
                 "deploy_mode": self.deploy_mode,
                 "task_id": self.task_id,
                 "dag_id": self.running_dag_id,
             }),
-            "DOMINO_DOCKER_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
+            "DOMINO_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
             "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
             "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
             "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
@@ -80,7 +80,7 @@ class DominoDockerOperator(DockerOperator):
         return upstream_xcoms_data
 
     def _update_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
-        #domino_docker_run_piece_kwargs = self.environment.get('DOMINO_DOCKER_RUN_PIECE_KWARGS')
+        #domino_run_piece_kwargs = self.environment.get('DOMINO_RUN_PIECE_KWARGS')
         if not self.piece_input_kwargs:
             self.piece_input_kwargs = dict()
         
@@ -97,7 +97,7 @@ class DominoDockerOperator(DockerOperator):
             updated_op_kwargs[k] = v
         self.piece_input_kwargs = updated_op_kwargs
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE'] = str(self.shared_storage_upstream_ids_list)
-        self.environment['DOMINO_DOCKER_RUN_PIECE_KWARGS'] = str(self.piece_input_kwargs)
+        self.environment['DOMINO_RUN_PIECE_KWARGS'] = str(self.piece_input_kwargs)
     
 
     def _prepare_execute_environment(self, context: Context):
@@ -116,7 +116,7 @@ class DominoDockerOperator(DockerOperator):
         upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
         self._update_piece_kwargs_with_upstream_xcom(upstream_xcoms_data=upstream_xcoms_data)
         piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.running_piece_name)
-        self.environment['DOMINO_DOCKER_PIECE_SECRETS'] = str(piece_secrets)
+        self.environment['DOMINO_PIECE_SECRETS'] = str(piece_secrets)
         dag_id = context["dag_run"].dag_id
         dag_run_id = context['run_id']
         dag_run_id_path = dag_run_id.replace("-", "_").replace(".", "_").replace(" ", "_").replace(":", "_").replace("+", "_")

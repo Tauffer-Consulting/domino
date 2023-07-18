@@ -73,8 +73,8 @@ class DominoExternalPythonOperator(AirflowExternalPythonOperator):
         return piece_secrets
 
     def _update_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
-        #domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_K8S_RUN_PIECE_KWARGS']
-        #domino_k8s_run_piece_kwargs = self.piece_kwargs
+        #domino_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
+        #domino_run_piece_kwargs = self.piece_kwargs
         if not self.piece_kwargs:
             self.piece_kwargs = dict()
 
