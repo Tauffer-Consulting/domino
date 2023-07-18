@@ -40,19 +40,25 @@ def piece_dry_run(
     # Example: export PIECES_IMAGES_MAP='{"SimpleLogPiece": "local/default_domino_pieces:0.3.9-group0"}'
     pieces_images_map = os.environ.get("PIECES_IMAGES_MAP", {})
     if pieces_images_map and piece_name in pieces_images_map:
-        from domino.testing.http_client import TestingHttpClient
-        
-        logger.info('Running pieces dry run with http client')
-        http_client = TestingHttpClient()
-        pieces_images_map = json.loads(pieces_images_map)
-        piece_image = pieces_images_map.get(piece_name, None)
-        if not piece_image:
-            raise Exception(f"Piece {piece_name} not found in PIECES_IMAGES_MAP")
-        http_server = http_client.start_http_server(image=piece_image)
-        dry_run_response = http_client.send_dry_run_request(piece_name, input_data, secrets_data)
-        http_server.stop()
-        http_server.remove()
-        return dry_run_response.json()
+        try:
+            from domino.testing.http_client import TestingHttpClient
+            
+            logger.info('Running pieces dry run with http client')
+            http_client = TestingHttpClient()
+            pieces_images_map = json.loads(pieces_images_map)
+            piece_image = pieces_images_map.get(piece_name, None)
+            if not piece_image:
+                raise Exception(f"Piece {piece_name} not found in PIECES_IMAGES_MAP")
+            http_server = http_client.start_http_server(image=piece_image)
+            dry_run_response = http_client.send_dry_run_request(piece_name, input_data, secrets_data)
+            http_server.stop()
+            http_server.remove()
+            return dry_run_response.json()
+        except Exception as e:
+            logger.error(f"Error running dry run with http client: {e}")
+            http_server.stop()
+            http_server.remove()
+            raise e
 
     if not repository_folder_path:
         repository_folder_path = '.'
