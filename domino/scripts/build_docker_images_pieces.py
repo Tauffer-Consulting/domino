@@ -92,7 +92,7 @@ def build_images_from_pieces_repository():
         if not any([dependency_dockerfile, dependency_requirements]):
             pieces_dependencies_map[group]["source_image"] = source_image_name
             # TODO change base image to domino when we have it
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:dev
+            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino
@@ -110,7 +110,7 @@ COPY .domino domino/pieces_repository/.domino
         elif dependency_requirements:
             pieces_dependencies_map[group]["source_image"] = source_image_name
 
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:dev
+            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino
