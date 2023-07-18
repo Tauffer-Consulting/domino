@@ -38,8 +38,8 @@ def piece_dry_run(
     # To build a piece with local version of domino you can build the pod dockerfile locally and 
     # then use the local pod image in the build_docker_images_pieces.py in temporary Dockerfile generation to use this local image
     # Example: export PIECES_IMAGES_MAP='{"SimpleLogPiece": "local/default_domino_pieces:0.3.9-group0"}'
-    pieces_images_map = os.environ.get("PIECES_IMAGES_MAP", None)
-    if pieces_images_map:
+    pieces_images_map = os.environ.get("PIECES_IMAGES_MAP", {})
+    if pieces_images_map and piece_name in pieces_images_map:
         from domino.testing.http_client import TestingHttpClient
         
         logger.info('Running pieces dry run with http client')
