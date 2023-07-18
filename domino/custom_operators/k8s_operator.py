@@ -1,17 +1,17 @@
-import ast
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 from airflow.utils.context import Context
 from kubernetes.client import models as k8s
-from typing import Dict, Optional
-import copy
-from contextlib import closing
+from kubernetes import client, config
 from kubernetes.stream import stream as kubernetes_stream
+from typing import Dict, Optional
+from contextlib import closing
+import ast
+import copy
 
 from domino.custom_operators.base_operator import BaseDominoOperator
 from domino.schemas.shared_storage import WorkflowSharedStorage
 
 
-# Ref: https://github.com/apache/airflow/blob/main/airflow/providers/cncf/kubernetes/operators/kubernetes_pod.py
 class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
     def __init__(
         self, 
@@ -48,15 +48,98 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
             "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
         }
 
+        # For DEV mode only
+        volumes_dev, volume_mounts_dev = None, None
+        if self.deploy_mode == 'local-k8s-dev':
+            volumes_dev, volume_mounts_dev = self._make_volumes_and_volume_mounts_dev()
+
         super(KubernetesPodOperator).__init__(
             task_id=task_id,
             env_vars=pod_env_vars,
+            volumes=volumes_dev,
+            volume_mounts=volume_mounts_dev,
             **k8s_operator_kwargs
         )
         
         # Shared Storage variables
         self.shared_storage_base_mount_path = '/home/shared_storage'
         self.shared_storage_upstream_ids_list = list()
+
+
+    def _make_volumes_and_volume_mounts_dev(self):
+        """ 
+        Make volumes and volume mounts for the pod when in DEVELOPMENT mode.
+        """
+        config.load_incluster_config()
+        k8s_client = client.CoreV1Api()
+        
+        all_volumes = []
+        all_volume_mounts = []
+      
+        source_image = self.piece.get('source_image')
+        repository_raw_project_name = str(source_image).split('/')[2].split(':')[0]
+        persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
+
+        persistent_volume_name = 'pv-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
+        persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
+
+        pvc_exists = False
+        try:
+            k8s_client.read_namespaced_persistent_volume_claim(name=persistent_volume_claim_name, namespace='default')
+            pvc_exists = True
+        except client.rest.ApiException as e:
+            if e.status != 404:
+                raise e
+
+        pv_exists = False
+        try:
+            k8s_client.read_persistent_volume(name=persistent_volume_name)
+            pv_exists = True
+        except client.rest.ApiException as e:
+            if e.status != 404:
+                raise e
+
+        if pv_exists and pvc_exists:
+            volume_dev_pieces = k8s.V1Volume(
+                name='dev-op-{path_name}'.format(path_name=str(repository_raw_project_name.lower().replace('_', '-'))),
+                persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
+                    claim_name=persistent_volume_claim_name
+                ),
+            )
+            volume_mount_dev_pieces = k8s.V1VolumeMount(
+                name='dev-op-{path_name}'.format(path_name=str(repository_raw_project_name.lower().replace('_', '-'))), 
+                mount_path=f'/home/domino/pieces_repository',
+                sub_path=None, 
+                read_only=True
+            )
+            all_volumes.append(volume_dev_pieces)
+            all_volume_mounts.append(volume_mount_dev_pieces)
+        
+        ######################## For local domino-py dev ###############################################
+        domino_package_local_claim_name = 'domino-dev-volume-claim'
+        pvc_exists = False
+        try:
+            k8s_client.read_namespaced_persistent_volume_claim(name=domino_package_local_claim_name, namespace='default')
+            pvc_exists = True
+        except client.rest.ApiException as e:
+            if e.status != 404:
+                raise e
+
+        if pvc_exists:
+            volume_dev = k8s.V1Volume(
+                name='jobs-persistent-storage-dev',
+                persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name=domino_package_local_claim_name),
+            )
+            volume_mount_dev = k8s.V1VolumeMount(
+                name='jobs-persistent-storage-dev', 
+                mount_path='/home/domino/domino_py', 
+                sub_path=None,
+                read_only=True
+            )
+            all_volumes.append(volume_dev)
+            all_volume_mounts.append(volume_mount_dev)
+
+        return all_volumes, all_volume_mounts
 
 
     def build_pod_request_obj(self, context: Optional['Context'] = None) -> k8s.V1Pod:

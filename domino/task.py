@@ -13,7 +13,6 @@ from domino.utils import dict_deep_update
 from domino.logger import get_configured_logger
 from domino.schemas.shared_storage import StorageSource
 from domino.schemas.container_resources import ContainerResourcesModel
-from kubernetes import client, config
 import os
 
 
@@ -97,15 +96,13 @@ class Task(object):
                 )
             )
 
-        # References: 
-        # - https://airflow.apache.org/docs/apache-airflow/1.10.14/_api/airflow/contrib/operators/kubernetes_pod_operator/index.html
-        # - https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
-        # - https://www.astronomer.io/guides/templating/
-        # - good example: https://github.com/apache/airflow/blob/main/tests/system/providers/cncf/kubernetes/example_kubernetes.py
-        # - commands HAVE to go in a list object: https://stackoverflow.com/a/55149915/11483674
-        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:
-            config.load_incluster_config()
-            self.k8s_client = client.CoreV1Api()
+        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:            
+            # References: 
+            # - https://airflow.apache.org/docs/apache-airflow/1.10.14/_api/airflow/contrib/operators/kubernetes_pod_operator/index.html
+            # - https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
+            # - https://www.astronomer.io/guides/templating/
+            # - good example: https://github.com/apache/airflow/blob/main/tests/system/providers/cncf/kubernetes/example_kubernetes.py
+            # - commands HAVE to go in a list object: https://stackoverflow.com/a/55149915/11483674
             
             # Container resources
             base_container_resources_model = ContainerResourcesModel(
@@ -118,76 +115,6 @@ class Task(object):
                 basic_container_resources["limits"]["nvidia.com/gpu"] = "1"
             container_resources_obj = k8s.V1ResourceRequirements(**basic_container_resources)
 
-            # Volumes
-            all_volumes = []
-            all_volume_mounts = []
-
-            ######################## For local DOMINO_DEPLOY_MODE Operators dev ###########################################
-            if self.deploy_mode == 'local-k8s-dev':
-                source_image = self.piece.get('source_image')
-                repository_raw_project_name = str(source_image).split('/')[2].split(':')[0]
-                persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-
-                persistent_volume_name = 'pv-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-                persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-
-                pvc_exists = False
-                try:
-                    self.k8s_client.read_namespaced_persistent_volume_claim(name=persistent_volume_claim_name, namespace='default')
-                    pvc_exists = True
-                except client.rest.ApiException as e:
-                    if e.status != 404:
-                        raise e
-
-                pv_exists = False
-                try:
-                    self.k8s_client.read_persistent_volume(name=persistent_volume_name)
-                    pv_exists = True
-                except client.rest.ApiException as e:
-                    if e.status != 404:
-                        raise e
-
-                if pv_exists and pvc_exists:
-                    volume_dev_pieces = k8s.V1Volume(
-                        name='dev-op-{path_name}'.format(path_name=str(repository_raw_project_name.lower().replace('_', '-'))),
-                        persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
-                            claim_name=persistent_volume_claim_name
-                        ),
-                    )
-                    volume_mount_dev_pieces = k8s.V1VolumeMount(
-                        name='dev-op-{path_name}'.format(path_name=str(repository_raw_project_name.lower().replace('_', '-'))), 
-                        mount_path=f'/home/domino/pieces_repository',
-                        sub_path=None, 
-                        read_only=True
-                    )
-                    all_volumes.append(volume_dev_pieces)
-                    all_volume_mounts.append(volume_mount_dev_pieces)
-                
-                ######################## For local Domino dev ###############################################
-                domino_package_local_claim_name = 'domino-dev-volume-claim'
-                pvc_exists = False
-                try:
-                    self.k8s_client.read_namespaced_persistent_volume_claim(name=domino_package_local_claim_name, namespace='default')
-                    pvc_exists = True
-                except client.rest.ApiException as e:
-                    if e.status != 404:
-                        raise e
-
-                if pvc_exists:
-                    volume_dev = k8s.V1Volume(
-                        name='jobs-persistent-storage-dev',
-                        persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name=domino_package_local_claim_name),
-                    )
-                    volume_mount_dev = k8s.V1VolumeMount(
-                        name='jobs-persistent-storage-dev', 
-                        mount_path='/home/domino/domino_py', 
-                        sub_path=None,
-                        read_only=True
-                    )
-                    all_volumes.append(volume_dev)
-                    all_volume_mounts.append(volume_mount_dev)
-            ############################################################################################
-
             pod_startup_timeout_in_seconds = 600
             return DominoKubernetesPodOperator(
                 dag_id=self.dag_id,
@@ -199,7 +126,7 @@ class Task(object):
                 workflow_shared_storage=self.workflow_shared_storage,
                 # ----------------- Kubernetes -----------------
                 namespace='default',  # TODO - separate namespace by User or Workspace?
-                image=self.piece["source_image"],
+                image=self.piece.get("source_image"),
                 image_pull_policy='IfNotPresent',
                 name=f"airflow-worker-pod-{self.task_id}",
                 startup_timeout_seconds=pod_startup_timeout_in_seconds,
@@ -209,8 +136,6 @@ class Task(object):
                 arguments=["run-piece-k8s"],
                 do_xcom_push=True,
                 in_cluster=True,
-                volumes=all_volumes,
-                volume_mounts=all_volume_mounts,
                 container_resources=container_resources_obj,
             )
         
