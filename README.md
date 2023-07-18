@@ -164,10 +164,9 @@ Pieces are the secret sauce of Domino, they are functional units that can be dis
 
 It is very easy to create and share your own Pieces:
 
-- :one: write your Python function
-- :two: define its data types (input, output and secrets)
-- :three: define its dependencies (requirements.txt or Dockerfile)
-- :four: publish it in a repository (public or private)
+1️⃣ write your Python function as a Piece <br>
+2️⃣ define the data types, dependencies, metadata and tests <br>
+3️⃣ publish in a git repository (public or private)
 
 The [Pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
 
