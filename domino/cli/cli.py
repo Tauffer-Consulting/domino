@@ -251,7 +251,7 @@ def cli_create_piece_repository(name, container_registry):
     help='The base url for this Pieces repository.'
 )
 def cli_organize_pieces_repository(build_images, publish_images, registry_token, source_url):
-    """Prepare local folder for running a Domino platform."""
+    """Organize Pieces repository."""
     if registry_token:
         os.environ['GHCR_PASSWORD'] = registry_token
     console.print(f"Using registry token to publish images")
@@ -262,8 +262,6 @@ def cli_publish_images():
     """Publish images to github container registry from mapping."""
     pieces_repository.publish_images()
     
-
-
 @click.command()
 def cli_create_release():
     """
@@ -289,6 +287,7 @@ def cli_piece(ctx):
 cli_piece.add_command(cli_organize_pieces_repository, name="organize")
 cli_piece.add_command(cli_create_piece_repository, name="create")
 cli_piece.add_command(cli_create_release, name="release")
+cli_piece.add_command(cli_publish_images, name="publish-images")
 
 
 ###############################################################################
