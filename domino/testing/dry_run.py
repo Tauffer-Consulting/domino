@@ -4,7 +4,6 @@ import json
 import sys
 import os
 from typing import Optional
-from domino.testing.http_client import TestingHttpClient
 from domino.logger import get_configured_logger
 
 """
@@ -41,6 +40,8 @@ def piece_dry_run(
     # Example: export PIECES_IMAGES_MAP='{"SimpleLogPiece": "local/default_domino_pieces:0.3.9-group0"}'
     pieces_images_map = os.environ.get("PIECES_IMAGES_MAP", None)
     if pieces_images_map:
+        from domino.testing.http_client import TestingHttpClient
+        
         logger.info('Running pieces dry run with http client')
         http_client = TestingHttpClient()
         pieces_images_map = json.loads(pieces_images_map)

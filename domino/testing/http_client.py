@@ -48,7 +48,7 @@ class TestingHttpClient:
                 cls.logger.info('Waiting for container to start...')
                 time.sleep(0.2)
             print('CONTAINER LIST', cls.docker_client.containers.list())
-            #cls.wait_health_check()
+            cls.wait_health_check()
             return container
         except Exception as e:
             container = cls.docker_client.containers.get('domino_testing_http_server')
