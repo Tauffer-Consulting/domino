@@ -201,13 +201,13 @@ class Task(object):
 
             pod_startup_timeout_in_seconds = 600
             return DominoKubernetesPodOperator(
+                task_id=self.task_id,
                 piece_name=self.piece.get('name'),
                 repository_id=self.repository_id,
                 workflow_shared_storage=self.workflow_shared_storage,
                 namespace='default',  # TODO - separate namespace by User or Workspace?
                 image=self.piece["source_image"],
                 image_pull_policy='IfNotPresent',
-                task_id=self.task_id,
                 name=f"airflow-worker-pod-{self.task_id}",
                 startup_timeout_seconds=pod_startup_timeout_in_seconds,
                 #cmds=["/bin/bash"],
@@ -224,14 +224,14 @@ class Task(object):
         
         elif self.deploy_mode == 'local-compose':
             return DominoDockerOperator(
+                dag_id=self.dag_id,
                 task_id=self.task_id,
                 piece_name=self.piece.get('name'),
+                deploy_mode=self.deploy_mode,
                 repository_id=self.repository_id,
                 piece_kwargs=self.piece_input_kwargs,
-                dag_id=self.dag_id,
-                deploy_mode=self.deploy_mode,
-                image=self.piece["source_image"],
                 workflow_shared_storage=self.workflow_shared_storage,
+                image=self.piece["source_image"],
                 do_xcom_push=True,
                 mount_tmp_dir=False,
                 tty=True,

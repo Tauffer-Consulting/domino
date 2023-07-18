@@ -2,38 +2,51 @@ import ast
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 from airflow.utils.context import Context
 from kubernetes.client import models as k8s
-from typing import Optional
+from typing import Dict, Optional
 import copy
 from contextlib import closing
 from kubernetes.stream import stream as kubernetes_stream
+
+from domino.custom_operators.base_operator import BaseDominoOperator
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas.shared_storage import WorkflowSharedStorage
 
 
 # Ref: https://github.com/apache/airflow/blob/main/airflow/providers/cncf/kubernetes/operators/kubernetes_pod.py
-class DominoKubernetesPodOperator(KubernetesPodOperator):
+class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
     def __init__(
         self, 
+        dag_id: str,
+        task_id: str,
         piece_name: str, 
+        deploy_mode: str, # TODO enum
         repository_id: int, 
-        workflow_shared_storage: WorkflowSharedStorage,
-        *args, 
-        **kwargs
+        piece_kwargs: Optional[Dict] = None, 
+        workflow_shared_storage: WorkflowSharedStorage = None,
+        **k8s_operator_kwargs
     ):
-        super().__init__(*args, **kwargs)
-        # This is saved in the self.piece_name airflow @property
-        self.running_piece_name = piece_name 
-        self.repository_id = repository_id
-        self.workflow_shared_storage = workflow_shared_storage
+        super(BaseDominoOperator).__init__(
+            dag_id=dag_id,
+            task_id=task_id,
+            piece_name=piece_name,
+            deploy_mode=deploy_mode,
+            repository_id=repository_id,
+            piece_input_kwargs=piece_kwargs,
+            domino_client_url="http://domino-rest-service:8000/",  # TODO change url based on platform configuration
+        )
+        super(KubernetesPodOperator).__init__(
+            task_id=task_id,
+            **k8s_operator_kwargs
+        )
+        
         self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
-        self.task_env_vars = kwargs.get('env_vars', [])
+        self.task_env_vars = k8s_operator_kwargs.get('env_vars', [])
+        
         # Shared Storage variables
+        self.workflow_shared_storage = workflow_shared_storage
         self.shared_storage_base_mount_path = '/home/shared_storage'
         self.shared_storage_upstream_ids_list = list()
-        # TODO change url based on DOMINO_DEPLOY_MODE
-        self.backend_client = DominoBackendRestClient(base_url="http://domino-rest-service:8000/")
     
-
     def build_pod_request_obj(self, context: Optional['Context'] = None) -> k8s.V1Pod:
         """
         We override this method to add the shared storage to the pod.
@@ -85,7 +98,6 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             )
         )
         return pod_cp
-
 
     def add_shared_storage_sidecar(self, pod: k8s.V1Pod) -> k8s.V1Pod:
         """
@@ -189,20 +201,6 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
 
         return pod_cp
 
-    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
-        # Get piece secrets values from api and append to env vars
-        secrets_response = self.backend_client.get_piece_secrets(
-            piece_repository_id=piece_repository_id,
-            piece_name=piece_name
-        )
-        if secrets_response.status_code != 200:
-            raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
-        piece_secrets = {
-            e.get('name'): e.get('value') 
-            for e in secrets_response.json()
-        }
-        return piece_secrets
-
     def _get_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
         domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
         if not domino_k8s_run_op_kwargs:
@@ -242,13 +240,6 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         })
 
         return updated_op_kwargs
-
-    @staticmethod
-    def _get_upstream_xcom_data_from_task_ids(task_ids: list, context: 'Context'):
-        upstream_xcoms_data = dict()
-        for tid in task_ids:
-            upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
-        return upstream_xcoms_data
 
     def _update_env_var_value_from_name(self, name: str, value: str):
         for env_var in self.env_vars:
@@ -325,7 +316,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self._update_env_var_value_from_name(name='DOMINO_RUN_PIECE_KWARGS', value=str(domino_k8s_run_op_kwargs))
         
         # Add pieces secrets to environment variables
-        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.running_piece_name)
+        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.piece_name)
         self.env_vars.append({
             "name": "DOMINO_PIECE_SECRETS",
             "value": str(piece_secrets),
