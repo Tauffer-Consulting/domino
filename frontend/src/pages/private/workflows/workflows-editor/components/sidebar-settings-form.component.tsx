@@ -15,12 +15,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 //import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
 //import { JsonForms } from '@jsonforms/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
-import { IWorkflowSettings } from 'context/workflows/types/settings';
+import { IWorkflowSettings, endDateTypes, scheduleIntervals } from 'context/workflows/types/settings';
 import { endDateTypeType, scheduleIntervalType, storageSourceType } from 'context/workflows/types/settings';
-import { Controller, useFormContext, useForm } from 'react-hook-form';
-
+import { Controller, useForm } from 'react-hook-form';
+import * as yup from "yup";
+import useYupValidationResolver from 'utils/validationResolver';
 
 interface ISidebarSettingsFormProps {
   open: boolean,
@@ -30,18 +31,44 @@ interface ISidebarSettingsFormProps {
 const defaultSettingsData: IWorkflowSettings = {
   name: '',
   scheduleInterval: "None",
-  startDate: '',
-  endDate: '',
+  startDate: "",
+  endDate: "",
   endDateType: "Never",
   storageSource: "None",
   baseFolder: '',
   bucket: ''
 }
 
+const storageSourceOptions = process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local-compose" ? [
+  {
+    "label": "None",
+    "value": "None"
+  },
+  {
+    "label": "Local",
+    "value": "Local"
+  }
+] : [
+  {
+    "label": "None",
+    "value": "None"
+  },
+  {
+    "label": "AWS S3",
+    "value": "AWSS3"
+  }
+]
 
-
-// TODO - Refactor this to use react-hook-form 
-// TODO - must save data in workflowSettings forageKey
+// TODO check yup validation
+export const WorkflowSettingsFormSchema = yup.object().shape({
+  name: yup.string().required(),
+  scheduleInterval: yup.mixed().oneOf(Object.values(scheduleIntervals)).required(),
+  startDate: yup.date().required(),
+  endDate: yup.date(),
+  endDateType: yup.mixed().oneOf(Object.values(endDateTypes)).required(),
+  storageSource: yup.string(),
+  baseFolder: yup.string(),
+});
 
 const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   const {
@@ -49,119 +76,42 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
     onClose,
   } = props
 
-  const storageSourceOptions = process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local-compose" ? [
-    "None", "Local"
-  ] : [
-    "None", "AWS S3"
-  ]
-  const [configFormData, setConfigFormData] = useState(defaultSettingsData);
-  const [isEndDateTimeDisabled, setIsEndDateTimeDisabled] = useState(true);
+  
   const {
     fetchWorkflowSettingsData,
     setWorkflowSettingsData,
-    clearWorkflowSettingsData
   } = useWorkflowsEditor()
 
-  // const methods = useForm({
-  //   defaultValues,
-  //   resolver,
-  //   mode: "onChange"
-  // })
+  const resolver = useYupValidationResolver(WorkflowSettingsFormSchema);
+  const { register, watch, control, reset } = useForm<IWorkflowSettings>({ mode: "onChange", resolver })
+  const formData = watch()
 
-  const {register}  =  useForm()
 
-  //const data = methods.watch()
+  const loadData = useCallback(async () => {
+    const data = await fetchWorkflowSettingsData()
+    if (Object.keys(data).length === 0) {
+      reset(defaultSettingsData)
+    }else{
+      reset(data)
+    }
+  }, [reset, fetchWorkflowSettingsData])
 
-  //console.log('data', data)
-  console.log('aq')
+  const saveData = useCallback(async () => {
+    if (open){
+      await setWorkflowSettingsData(formData)
+    }
+  }, [formData, open, setWorkflowSettingsData])
 
-  //const { register, formState, control } = useFormContext<IWorkflowSettings>();
+  useEffect(() => {
+    if (open) {
+      loadData()
+    }
+  }, [open, loadData])
 
-  // const handleOnChangeStorage = useCallback(async (event: any) => {
-  //   const { name, value, type, checked } = event.target;
-  //   const fieldValue = type === 'checkbox' ? checked : value;
+  useEffect(() => {
+    saveData()
+  }, [saveData])
 
-  //   const newStorageFormData = {
-  //     ...storageFormData,
-  //     [name]: fieldValue,
-  //   }
-
-  //   const currentData = await fetchWorkflowSettingsData()
-
-  //   // //const currentData = await fetchForageDataById(formId)
-  //   // const outputData = {
-  //   //   ...currentData,
-  //   //   storage: newStorageFormData
-  //   // }
-  //   // await setFormsForageData(formId, outputData);
-  //   // setStorageFormData(newStorageFormData);
-
-  // }, [storageFormData])
-
-  // const handleChangeConfig = useCallback(async (event: any, source: string) => {
-  //   // console.log('aqui', event?.target?.value)
-  //   // console.log('aqui', event?.target?.name)
-  //   // let name = event?.target?.name || "";
-  //   // let fieldValue = event?.target?.value || "";
-  //   // if (source === 'endDateTime' || source === 'startDateTime') {
-  //   //   const newDate = event;
-  //   //   fieldValue = new Date(newDate).toISOString();
-  //   //   name = source;
-  //   // } else {
-  //   //   const { name, value, type, checked } = event.target;
-  //   //   fieldValue = type === 'checkbox' ? checked : value;
-  //   // }
-
-  //   // const newFormData = {
-  //   //   ...configFormData,
-  //   //   [name]: fieldValue,
-  //   // }
-
-  //   // // // changes the disable state of the selectEndDateTime
-  //   // if (name === 'endDateType') {
-  //   //   setIsEndDateTimeDisabled(fieldValue === 'never')
-  //   //   newFormData.endDateType = null
-  //   // }
-
-  //   // // const currentData = await fetchForageDataById(formId)
-  //   // // const outputData = {
-  //   // //   ...currentData,
-  //   // //   config: newFormData
-  //   // // }
-  //   // // await setFormsForageData(formId, outputData)
-  //   //  setConfigFormData(newFormData);
-
-  // }, [configFormData])
-
-  // // On load fetch data from forage and set it to the form data 
-  // // If data is not present then set default data to the forage
-  // useEffect(() => {
-  //   if (!open) return
-
-  //   const fetchData = async () => {
-  //     // let data = await fetchWorkflowSettingsData()
-  //     // if (data === undefined || data === null){
-  //     //   data = {}
-  //     // }
-  //     // const newData: any = {}
-  //     // if ('config' in data) {
-  //     //   newData['config'] = data.config
-  //     // } else {
-  //     //   newData['config'] = defaultSettingsData
-  //     // }
-  //     // if ('storage' in data) {
-  //     //   newData['storage'] = data.storage
-  //     // } else {
-  //     //   newData['storage'] = defaultStorageData
-  //     // }
-  //     // await setWorkflowSettingsData(newData)
-  //     // setConfigFormData(newData.config)
-  //     // setStorageFormData(newData.storage)
-  //   }
-  //   fetchData()
-  // }, [open, fetchWorkflowSettingsData, setWorkflowSettingsData])
-
-  console.log("AQUI")
 
   return (
     <Drawer
@@ -181,7 +131,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
               <Grid item xs={12}>
                 <TextField
                   label="Name"
-                  value={configFormData.name}
+                  defaultValue={defaultSettingsData.name}
                   required
                   fullWidth
                   {...register("name")}
@@ -190,7 +140,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
               <Grid item xs={12}>
                 <FormControl fullWidth>
                   <InputLabel>Schedule Interval</InputLabel>
-                  {/* <Controller
+                  <Controller
                     name="scheduleInterval"
                     control={control}
                     defaultValue="None"
@@ -210,50 +160,73 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                           <MenuItem value="Yearly">Yearly</MenuItem>
                       </Select>
                     )}
-                  >
-                    
-                  </Controller> */}
+                  />      
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
-                    <DateTimePicker
-                      label="Start Date/Time"
-                      value={dayjs(configFormData.startDate)}
-                      ampm={false}
-                      format='DD/MM/YYYY HH:mm'
-                      sx={{ width: "100%" }}
-                    />
-                  </DemoContainer>
-                </LocalizationProvider>
+                <Controller
+                  name='startDate'
+                  control={control}
+                  defaultValue={dayjs(defaultSettingsData.startDate, 'YYYY-MM-DD HH:mm')}
+                  render={({ field: { onChange, value, ...rest } }) => (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={['DateTimePicker']}>
+                        <DateTimePicker
+                          label="Start Date/Time"
+                          ampm={false}
+                          format='DD/MM/YYYY HH:mm'
+                          value={dayjs(value, 'YYYY-MM-DD HH:mm')}
+                          onChange={(e) => { onChange(dayjs(e).format('YYYY-MM-DD HH:mm')) }}
+                          {...rest}
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
+                  )}
+                />
               </Grid>
               <Grid container spacing={2} sx={{ margin: "0px" }}>
                 <Grid item xs={4}>
                   <FormControl fullWidth sx={{ paddingTop: "8px" }}>
                     <InputLabel>End Date/Time</InputLabel>
-                    <Select
+                    <Controller
                       name="endDateType"
-                      value={configFormData.endDateType}
-                    >
-                      <MenuItem value="never">Never</MenuItem>
-                      <MenuItem value="user-defined">User defined</MenuItem>
-                    </Select>
+                      control={control}
+                      defaultValue={defaultSettingsData.endDateType}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          onChange={(event) =>
+                            field.onChange(event.target.value as endDateTypeType)
+                          }
+                        >
+                          <MenuItem value="Never">Never</MenuItem>
+                          <MenuItem value="UserDefined">User defined</MenuItem>
+                        </Select>
+                      )}
+                    />
                   </FormControl>
                 </Grid>
                 <Grid item xs={8}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
-                      <DateTimePicker
-                        disabled={isEndDateTimeDisabled}
-                        label="End Date/Time"
-                        value={dayjs(configFormData.endDate)}
-                        ampm={false}
-                        format='DD/MM/YYYY HH:mm'
-                        sx={{ width: "100%" }}
-                      />
-                    </DemoContainer>
-                  </LocalizationProvider>
+                  <Controller
+                    name='endDate'
+                    control={control}
+                    defaultValue={dayjs(defaultSettingsData.endDate, 'YYYY-MM-DD HH:mm')}
+                    render={({ field: { onChange, value, ...rest } }) => (
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
+                          <DateTimePicker
+                            label="End Date/Time"
+                            ampm={false}
+                            format='DD/MM/YYYY HH:mm'
+                            value={dayjs(value, 'YYYY-MM-DD HH:mm')}
+                            onChange={(e) => { onChange(dayjs(e).format('YYYY-MM-DD HH:mm')) }}
+                            sx={{ width: "100%" }}
+                            {...rest}
+                          />
+                        </DemoContainer>
+                      </LocalizationProvider>
+                    )}
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -267,43 +240,50 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel>Schedule Interval</InputLabel>
-                  <Select
+                  <InputLabel>Storage Source</InputLabel>
+                  <Controller
                     name="storageSource"
-                    value={configFormData.storageSource}
-                    required
-                  >
-                    {
-                      storageSourceOptions.map((option: string, index: number) => (
-                        <MenuItem key={index} value={option}>{option}</MenuItem>
-                      ))
-                    }
-                  </Select>
+                    control={control}
+                    defaultValue={defaultSettingsData.storageSource}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        onChange={(event) =>
+                          field.onChange(event.target.value as storageSourceType)
+                        }
+                      >
+                        {
+                          storageSourceOptions.map((option: any, index: number) => (
+                            <MenuItem key={index} value={option.value}>{option.label}</MenuItem>
+                          ))
+                        }
+                      </Select>
+                    )}
+                    />
                 </FormControl>
               </Grid>
               {
-                configFormData.storageSource === 'AWSS3' ? (
+                formData.storageSource === 'AWSS3' ? (
                   <>
                     <Grid item xs={12}>
                       <TextField
-                        name="bucket"
                         label="Bucket"
-                        value={configFormData.bucket}
+                        defaultValue={defaultSettingsData.bucket}
                         required
                         fullWidth
+                        {...register("bucket")}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
-                        name="baseFolder"
                         label="Base Folder"
-                        value={configFormData.baseFolder}
+                        defaultValue={defaultSettingsData.baseFolder}
                         required
                         fullWidth
+                        {...register("baseFolder")}
                       />
                     </Grid>
                   </>
-
                 ) : null
               }
             </Grid>

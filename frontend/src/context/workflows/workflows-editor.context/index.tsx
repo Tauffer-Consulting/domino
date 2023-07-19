@@ -253,13 +253,13 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
   // }, [fetchFormsForageData, getForageUpstreamMap, fetchForageWorkflowNodes, fetchForageWorkflowEdges])
 
   const clearForageData = useCallback(async () => {
-    await clearForageFormsData()
-
+    // TODO remove old clear methods
     await clearForageCheckboxStates()
 
     await clearForageWorkflowPieces()
     await clearForageWorkflowPiecesData()
-  }, [clearForageCheckboxStates, clearForageWorkflowPieces, clearForageFormsData, clearForageWorkflowPiecesData])
+    clearWorkflowSettingsData()
+  }, [clearForageCheckboxStates, clearForageWorkflowPieces, clearForageWorkflowPiecesData, clearWorkflowSettingsData])
 
   const value: IWorkflowsEditorContext = {
     repositories,

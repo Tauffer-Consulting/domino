@@ -1,3 +1,5 @@
+import { Dayjs } from "dayjs";
+
 export enum scheduleIntervals {
     None = "None",
     Once = "Once",
@@ -25,9 +27,9 @@ export type scheduleIntervalType = keyof typeof scheduleIntervals;
 export interface IWorkflowSettings {
     name: string,
     scheduleInterval: scheduleIntervalType,
-    startDate: string,
-    endDate?: string,
-    endDateType?: endDateTypeType | null,
+    startDate: Dayjs | string,
+    endDate?: Dayjs | string,
+    endDateType: endDateTypeType,
     storageSource: storageSourceType,
     baseFolder: string,
     bucket: string

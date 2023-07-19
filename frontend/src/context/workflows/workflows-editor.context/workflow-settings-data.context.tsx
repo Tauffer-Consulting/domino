@@ -23,11 +23,7 @@ const WorkflowSettingsDataProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [])
 
     const setWorkflowSettingsData = useCallback(async (data: any) => {
-        var currentData = await localForage.getItem<any>('workflowSettingsData')
-        if (!currentData) {
-            currentData = {}
-        }
-        await localForage.setItem('workflowSettingsData', currentData)
+        await localForage.setItem('workflowSettingsData', data)
     }, [])
 
     const clearWorkflowSettingsData = useCallback(async () => {

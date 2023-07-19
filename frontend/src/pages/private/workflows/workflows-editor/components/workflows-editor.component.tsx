@@ -249,7 +249,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
             handleClose={() => setMenuOpen(!menuOpen)}
           />
         </Grid>
-        {/* <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} /> */}
         <SidebarSettingsForm
           onClose={toggleDrawer(false)}
           open={drawerState}
