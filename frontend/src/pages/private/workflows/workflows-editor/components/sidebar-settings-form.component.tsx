@@ -17,7 +17,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 //import { JsonForms } from '@jsonforms/react'
 import { useCallback, useEffect } from 'react'
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
-import { IWorkflowSettings, endDateTypes, scheduleIntervals } from 'context/workflows/types/settings';
+import { IWorkflowSettings, endDateTypes, scheduleIntervals, storageSources } from 'context/workflows/types/settings';
 import { endDateTypeType, scheduleIntervalType, storageSourceType } from 'context/workflows/types/settings';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from "yup";
@@ -29,14 +29,18 @@ interface ISidebarSettingsFormProps {
 }
 
 const defaultSettingsData: IWorkflowSettings = {
-  name: '',
-  scheduleInterval: "None",
-  startDate: "",
-  endDate: "",
-  endDateType: "Never",
-  storageSource: "None",
-  baseFolder: '',
-  bucket: ''
+  config: {
+    name: '',
+    scheduleInterval: "None",
+    startDate: "",
+    endDate: "",
+    endDateType: "Never",
+  },
+  storage: {
+    storageSource: "None",
+    baseFolder: '',
+    bucket: ''
+  }
 }
 
 const storageSourceOptions = process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local-compose" ? [
@@ -61,13 +65,18 @@ const storageSourceOptions = process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local
 
 // TODO check yup validation
 export const WorkflowSettingsFormSchema = yup.object().shape({
-  name: yup.string().required(),
-  scheduleInterval: yup.mixed().oneOf(Object.values(scheduleIntervals)).required(),
-  startDate: yup.date().required(),
-  endDate: yup.date(),
-  endDateType: yup.mixed().oneOf(Object.values(endDateTypes)).required(),
-  storageSource: yup.string(),
-  baseFolder: yup.string(),
+  config: yup.object().shape({
+    name: yup.string().required(),
+    scheduleInterval: yup.mixed().oneOf(Object.values(scheduleIntervals)).required(),
+    startDate: yup.date().required(),
+    endDate: yup.date(),
+    endDateType: yup.mixed().oneOf(Object.values(endDateTypes)).required(),
+  }),
+  storage: yup.object().shape({
+    storageSource: yup.mixed().oneOf(Object.values(storageSources)).required(),
+    baseFolder: yup.string(),
+    bucket: yup.string(),
+  })
 });
 
 const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
@@ -98,6 +107,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
 
   const saveData = useCallback(async () => {
     if (open){
+      console.log(formData)
       await setWorkflowSettingsData(formData)
     }
   }, [formData, open, setWorkflowSettingsData])
@@ -112,6 +122,10 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
     saveData()
   }, [saveData])
 
+
+  if (Object.keys(formData).length === 0) {
+    return null
+  }
 
   return (
     <Drawer
@@ -131,19 +145,19 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
               <Grid item xs={12}>
                 <TextField
                   label="Name"
-                  defaultValue={defaultSettingsData.name}
+                  defaultValue={defaultSettingsData.config.name}
                   required
                   fullWidth
-                  {...register("name")}
+                  {...register("config.name")}
                 />
               </Grid>
               <Grid item xs={12}>
                 <FormControl fullWidth>
                   <InputLabel>Schedule Interval</InputLabel>
                   <Controller
-                    name="scheduleInterval"
+                    name="config.scheduleInterval"
                     control={control}
-                    defaultValue="None"
+                    defaultValue={defaultSettingsData.config.scheduleInterval}
                     render={({ field }) => (
                       <Select
                         {...field}
@@ -165,9 +179,9 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
               </Grid>
               <Grid item xs={12}>
                 <Controller
-                  name='startDate'
+                  name='config.startDate'
                   control={control}
-                  defaultValue={dayjs(defaultSettingsData.startDate, 'YYYY-MM-DD HH:mm')}
+                  defaultValue={dayjs(defaultSettingsData.config.startDate, 'YYYY-MM-DD HH:mm')}
                   render={({ field: { onChange, value, ...rest } }) => (
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={['DateTimePicker']}>
@@ -189,9 +203,9 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   <FormControl fullWidth sx={{ paddingTop: "8px" }}>
                     <InputLabel>End Date/Time</InputLabel>
                     <Controller
-                      name="endDateType"
+                      name="config.endDateType"
                       control={control}
-                      defaultValue={defaultSettingsData.endDateType}
+                      defaultValue={defaultSettingsData.config.endDateType}
                       render={({ field }) => (
                         <Select
                           {...field}
@@ -208,9 +222,9 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                 </Grid>
                 <Grid item xs={8}>
                   <Controller
-                    name='endDate'
+                    name='config.endDate'
                     control={control}
-                    defaultValue={dayjs(defaultSettingsData.endDate, 'YYYY-MM-DD HH:mm')}
+                    defaultValue={dayjs(defaultSettingsData.config.endDate, 'YYYY-MM-DD HH:mm')}
                     render={({ field: { onChange, value, ...rest } }) => (
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DemoContainer components={['DateTimePicker']} sx={{ width: "100%" }}>
@@ -242,9 +256,9 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                 <FormControl fullWidth>
                   <InputLabel>Storage Source</InputLabel>
                   <Controller
-                    name="storageSource"
+                    name="storage.storageSource"
                     control={control}
-                    defaultValue={defaultSettingsData.storageSource}
+                    defaultValue={defaultSettingsData.storage.storageSource}
                     render={({ field }) => (
                       <Select
                         {...field}
@@ -263,24 +277,24 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                 </FormControl>
               </Grid>
               {
-                formData.storageSource === 'AWSS3' ? (
+                formData.storage.storageSource === 'AWSS3' ? (
                   <>
                     <Grid item xs={12}>
                       <TextField
                         label="Bucket"
-                        defaultValue={defaultSettingsData.bucket}
+                        defaultValue={defaultSettingsData.storage.bucket}
                         required
                         fullWidth
-                        {...register("bucket")}
+                        {...register("storage.bucket")}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
                         label="Base Folder"
-                        defaultValue={defaultSettingsData.baseFolder}
+                        defaultValue={defaultSettingsData.storage.baseFolder}
                         required
                         fullWidth
-                        {...register("baseFolder")}
+                        {...register("storage.baseFolder")}
                       />
                     </Grid>
                   </>

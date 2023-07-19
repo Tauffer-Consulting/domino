@@ -24,13 +24,21 @@ export type storageSourceType = keyof typeof storageSources;
 export type endDateTypeType = keyof typeof endDateTypes;
 export type scheduleIntervalType = keyof typeof scheduleIntervals;
 
-export interface IWorkflowSettings {
+
+export interface IWorkflowSettingsConfig {
     name: string,
     scheduleInterval: scheduleIntervalType,
     startDate: Dayjs | string,
     endDate?: Dayjs | string,
     endDateType: endDateTypeType,
+}
+
+export interface IWorkflowSettingsStorage {
     storageSource: storageSourceType,
     baseFolder: string,
     bucket: string
+}
+export interface IWorkflowSettings {
+    config: IWorkflowSettingsConfig
+    storage: IWorkflowSettingsStorage
 }
