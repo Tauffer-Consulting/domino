@@ -61,11 +61,11 @@ class DominoDockerOperator(DockerOperator):
             )
 
         super().__init__(
+            **docker_operator_kwargs, 
             task_id=task_id,
             docker_url='tcp://docker-proxy:2375',
             mounts=mounts,
             environment=self.environment,
-            **docker_operator_kwargs, 
         )
     
 

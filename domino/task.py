@@ -150,7 +150,7 @@ class Task(object):
                 piece_name=self.piece.get('name'),
                 deploy_mode=self.deploy_mode,
                 repository_id=self.repository_id,
-                piece_kwargs=self.piece_input_kwargs,
+                piece_input_kwargs=self.piece_input_kwargs,
                 workflow_shared_storage=self.workflow_shared_storage,
                 # ----------------- Docker -----------------
                 image=self.piece["source_image"],
@@ -165,4 +165,4 @@ class Task(object):
 
 
     def __call__(self) -> Callable:
-        return self._task_piece
+        return self._task_operator
