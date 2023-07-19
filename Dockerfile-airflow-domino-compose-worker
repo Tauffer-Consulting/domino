@@ -29,7 +29,7 @@
 # create compiled_metadata for all pieces
 
 # provisory dockerfile
-FROM apache/airflow:2.5.3-python3.9
+FROM apache/airflow:2.6.3-python3.9
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
