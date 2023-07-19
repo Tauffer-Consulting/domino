@@ -3,17 +3,15 @@ from airflow.models import BaseOperator
 from kubernetes.client import models as k8s
 from datetime import datetime
 from typing import Callable
+import os
 
 from domino.custom_operators.docker_operator import DominoDockerOperator
 from domino.custom_operators.python_operator import PythonOperator
 from domino.custom_operators.k8s_operator import DominoKubernetesPodOperator
 from domino.custom_operators.worker_operator import DominoWorkerOperator
 from domino.schemas.shared_storage import shared_storage_map
-from domino.utils import dict_deep_update
 from domino.logger import get_configured_logger
 from domino.schemas.shared_storage import StorageSource
-from domino.schemas.container_resources import ContainerResourcesModel
-import os
 
 
 class Task(object):
@@ -60,8 +58,7 @@ class Task(object):
             self.workflow_shared_storage = shared_storage_map[shared_storage_source_name]
 
         # Container resources
-        self.container_resources = container_resources if container_resources else {}
-        self.provide_gpu = self.container_resources.pop("use_gpu", False)
+        self.container_resources = container_resources
         
         # Get deploy mode
         self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')            
@@ -107,40 +104,27 @@ class Task(object):
             # - https://www.astronomer.io/guides/templating/
             # - good example: https://github.com/apache/airflow/blob/main/tests/system/providers/cncf/kubernetes/example_kubernetes.py
             # - commands HAVE to go in a list object: https://stackoverflow.com/a/55149915/11483674
-            
-            # Container resources
-            base_container_resources_model = ContainerResourcesModel(
-                requests={"cpu": "100m", "memory": "128Mi",},
-                limits={"cpu": "100m", "memory": "128Mi"}
-            )
-            basic_container_resources = base_container_resources_model.dict()
-            basic_container_resources = dict_deep_update(basic_container_resources, self.container_resources)
-            if self.provide_gpu:
-                basic_container_resources["limits"]["nvidia.com/gpu"] = "1"
-            container_resources_obj = k8s.V1ResourceRequirements(**basic_container_resources)
-
-            pod_startup_timeout_in_seconds = 600
             return DominoKubernetesPodOperator(
                 dag_id=self.dag_id,
                 task_id=self.task_id,
                 piece_name=self.piece.get('name'),
                 deploy_mode=self.deploy_mode,
                 repository_id=self.repository_id,
-                piece_kwargs=self.piece_input_kwargs,
+                piece_input_kwargs=self.piece_input_kwargs,
                 workflow_shared_storage=self.workflow_shared_storage,
+                container_resources=self.container_resources,
                 # ----------------- Kubernetes -----------------
                 namespace='default',  # TODO - separate namespace by User or Workspace?
                 image=self.piece.get("source_image"),
                 image_pull_policy='IfNotPresent',
                 name=f"airflow-worker-pod-{self.task_id}",
-                startup_timeout_seconds=pod_startup_timeout_in_seconds,
+                startup_timeout_seconds=600,
                 #cmds=["/bin/bash"],
                 #arguments=["-c", "sleep 120;"],
                 cmds=["domino"],
                 arguments=["run-piece-k8s"],
                 do_xcom_push=True,
                 in_cluster=True,
-                container_resources=container_resources_obj,
             )
         
         elif self.deploy_mode == 'local-compose':

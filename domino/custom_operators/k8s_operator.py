@@ -8,11 +8,13 @@ from contextlib import closing
 import ast
 import copy
 
-from domino.custom_operators.base_operator import BaseDominoOperator
+from domino.utils import dict_deep_update
+from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas.shared_storage import WorkflowSharedStorage
+from domino.schemas.container_resources import ContainerResourcesModel
 
 
-class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
+class DominoKubernetesPodOperator(KubernetesPodOperator):
     def __init__(
         self, 
         dag_id: str,
@@ -20,52 +22,61 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         piece_name: str, 
         deploy_mode: str, # TODO enum
         repository_id: int, 
-        piece_kwargs: Optional[Dict] = None, 
+        piece_input_kwargs: Optional[Dict] = None, 
         workflow_shared_storage: WorkflowSharedStorage = None,
+        container_resources: Optional[Dict] = None,
         **k8s_operator_kwargs
     ):
-        BaseDominoOperator.__init__(
-            self,
-            dag_id=dag_id,
-            task_id=task_id,
-            piece_name=piece_name,
-            deploy_mode=deploy_mode,
-            repository_id=repository_id,
-            piece_input_kwargs=piece_kwargs,
-            workflow_shared_storage=workflow_shared_storage,
-            domino_client_url="http://domino-rest-service:8000/",  # TODO change url based on platform configuration
-        )
+        self.task_id = task_id
+        self.piece_name = piece_name
+        self.deploy_mode = deploy_mode
+        self.repository_id = repository_id
+        self.piece_input_kwargs = piece_input_kwargs
+        self.workflow_shared_storage = workflow_shared_storage
+        self.domino_client = DominoBackendRestClient(base_url="http://domino-rest-service:8000/")  # TODO change url based on platform configuration
 
+        # Environment variables
         pod_env_vars = {
-            "DOMINO_PIECE": self.piece_name,
+            "DOMINO_PIECE": piece_name,
             "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
-                "deploy_mode": self.deploy_mode,
-                "task_id": self.task_id,
-                "dag_id": self.dag_id,
+                "deploy_mode": deploy_mode,
+                "task_id": task_id,
+                "dag_id": dag_id,
             }),
-            "DOMINO_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
-            "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
+            "DOMINO_RUN_PIECE_KWARGS": str(piece_input_kwargs),
+            "DOMINO_WORKFLOW_SHARED_STORAGE": workflow_shared_storage.json() if workflow_shared_storage else "",
             "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
             "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
         }
 
-        # For DEV mode only
+        # Container resources
+        if container_resources is None:
+            container_resources = {}
+        base_container_resources_model = ContainerResourcesModel(
+            requests={"cpu": "100m", "memory": "128Mi",},
+            limits={"cpu": "100m", "memory": "128Mi"},
+            use_gpu=False,
+        )
+        basic_container_resources = base_container_resources_model.dict()
+        updated_container_resources = dict_deep_update(basic_container_resources, container_resources)
+        use_gpu = updated_container_resources.pop("use_gpu", False)
+        if use_gpu:
+            updated_container_resources["limits"]["nvidia.com/gpu"] = "1"
+        container_resources_obj = k8s.V1ResourceRequirements(**updated_container_resources)
+
+        # Extra volume and volume mounts - for DEV mode only
         volumes_dev, volume_mounts_dev = None, None
         if self.deploy_mode == 'local-k8s-dev':
             volumes_dev, volume_mounts_dev = self._make_volumes_and_volume_mounts_dev()
 
-        KubernetesPodOperator.__init__(
-            self,
+        super().__init__(
             task_id=task_id,
             env_vars=pod_env_vars,
+            container_resources=container_resources_obj,
             volumes=volumes_dev,
             volume_mounts=volume_mounts_dev,
             **k8s_operator_kwargs
         )
-        
-        # Shared Storage variables
-        self.shared_storage_base_mount_path = '/home/shared_storage'
-        self.shared_storage_upstream_ids_list = list()
 
 
     def _make_volumes_and_volume_mounts_dev(self):
@@ -150,8 +161,9 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         This function runs after our own self.execute, by super().execute()
         """
         pod = super().build_pod_request_obj(context)
-        # Add shared storage to pod
         self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
+        self.shared_storage_base_mount_path = '/home/shared_storage'
+        self.shared_storage_upstream_ids_list = list()
         if not self.workflow_shared_storage or self.workflow_shared_storage.mode.name == 'none':
             return pod
         if  self.workflow_shared_storage.source.name in ["aws_s3", "gcs"]:
@@ -295,6 +307,29 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         )
         pod_cp.spec.containers.append(sidecar_container)
         return pod_cp
+
+
+    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
+        """Get piece secrets values from Domino API"""
+        secrets_response = self.domino_client.get_piece_secrets(
+            piece_repository_id=piece_repository_id,
+            piece_name=piece_name
+        )
+        if secrets_response.status_code != 200:
+            raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
+        piece_secrets = {
+            e.get('name'): e.get('value') 
+            for e in secrets_response.json()
+        }
+        return piece_secrets
+
+
+    @staticmethod
+    def _get_upstream_xcom_data_from_task_ids(task_ids: list, context: Context):
+        upstream_xcoms_data = dict()
+        for tid in task_ids:
+            upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
+        return upstream_xcoms_data
 
 
     def _get_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):

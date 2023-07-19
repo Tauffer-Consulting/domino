@@ -8,6 +8,7 @@ from domino.schemas.shared_storage import WorkflowSharedStorage
 class BaseDominoOperator:
     """
     This class implements common operations for all Domino Operators running under a Task.
+    DEPRECATED - delete this later 
     """
 
     def __init__(
