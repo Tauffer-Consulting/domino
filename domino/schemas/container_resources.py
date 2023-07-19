@@ -9,3 +9,4 @@ class SystemRequirementsModel(BaseModel):
 class ContainerResourcesModel(BaseModel):
     requests: SystemRequirementsModel = Field(default=SystemRequirementsModel(cpu="100m", memory="128Mi"))
     limits: SystemRequirementsModel = Field(default=SystemRequirementsModel(cpu="100m", memory="128Mi"))
+    use_gpu: bool = False
