@@ -24,6 +24,7 @@ class Permission(str, enum.Enum):
     class Config:
         use_enum_values = True
 
+
 class UserWorkspaceStatus(str, enum.Enum):
     pending = 'pending'
     accepted = 'accepted'
