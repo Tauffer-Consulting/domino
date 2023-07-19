@@ -60,8 +60,7 @@ class DominoDockerOperator(DockerOperator):
                 Mount(source=shared_storage_host_path, target=shared_storage_container_path, type='bind', read_only=False),
             )
 
-        DockerOperator.__init__(
-            self,
+        super().__init__(
             task_id=task_id,
             docker_url='tcp://docker-proxy:2375',
             mounts=mounts,

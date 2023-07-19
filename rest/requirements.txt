@@ -5,7 +5,6 @@ Jinja2==2.11.3
 psycopg2-binary==2.9.3
 pydantic[email]==1.10.11
 MarkupSafe==2.0.1
-pydantic==1.9.1
 PyGithub==1.55
 PyJWT==2.4.0
 pytzdata==2020.1
