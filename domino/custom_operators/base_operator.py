@@ -12,7 +12,6 @@ class BaseDominoOperator:
 
     def __init__(
         self, 
-        dag_id: str,
         task_id: str, 
         piece_name: str,  
         deploy_mode: str,
@@ -21,7 +20,6 @@ class BaseDominoOperator:
         workflow_shared_storage: WorkflowSharedStorage = None,
         domino_client_url: Optional[str] = None,
     ):
-        self.dag_id = dag_id
         self.task_id = task_id
         self.piece_name = piece_name
         self.deploy_mode = deploy_mode

@@ -3,11 +3,11 @@ from airflow.utils.context import Context
 from typing import Dict, Optional
 import os
 
-from domino.custom_operators.base_operator import BaseDominoOperator
+from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas.shared_storage import WorkflowSharedStorage, StorageSource
 
 
-class DominoDockerOperator(BaseDominoOperator, DockerOperator):
+class DominoDockerOperator(DockerOperator):
 
     def __init__(
         self,
@@ -20,22 +20,31 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         workflow_shared_storage: WorkflowSharedStorage = None,
         **docker_operator_kwargs
     ) -> None:
-        BaseDominoOperator.__init__(
-            self, 
-            dag_id=dag_id,
-            task_id=task_id,
-            piece_name=piece_name,
-            deploy_mode=deploy_mode,
-            repository_id=repository_id,
-            piece_input_kwargs=piece_input_kwargs,
-            workflow_shared_storage=workflow_shared_storage,
-            domino_client_url="http://domino-rest:8000/",
-        )
+        self.task_id = task_id
+        self.piece_name = piece_name
+        self.deploy_mode = deploy_mode
+        self.repository_id = repository_id
+        self.piece_input_kwargs = piece_input_kwargs
+        self.workflow_shared_storage = workflow_shared_storage
+        self.domino_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
+
+        # Environment variables
+        self.environment = {
+            "DOMINO_PIECE": piece_name,
+            "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
+                "deploy_mode": deploy_mode,
+                "task_id": task_id,
+                "dag_id": dag_id,
+            }),
+            "DOMINO_RUN_PIECE_KWARGS": str(piece_input_kwargs),
+            "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
+            "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
+            "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
+        }
 
         # Shared Storage variables
         self.shared_storage_base_mount_path = '/home/shared_storage'
         self.shared_storage_upstream_ids_list = list()
-        self._set_base_env_vars()
         shared_storage_host_path = os.environ.get('LOCAL_DOMINO_SHARED_DATA_PATH', '')
         shared_storage_container_path = '/home/shared_storage'
         mounts = []
@@ -43,7 +52,7 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         # TODO remove
         mounts=[
             # TODO remove
-            # Mount(source='/media/luiz/storage2/Github/domino/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
+            Mount(source='/media/luiz/storage2/Github/domino/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
             # Mount(source='/media/luiz/storage2/Github/default_domino_pieces', target='/home/domino/pieces_repository/', type='bind', read_only=True),
         ]
         if self.workflow_shared_storage and str(self.workflow_shared_storage.source.value).lower() == str(getattr(StorageSource, 'local').value).lower():
@@ -60,19 +69,29 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
             **docker_operator_kwargs, 
         )
     
-    def _set_base_env_vars(self):
-        self.environment = {
-            "DOMINO_PIECE": self.piece_name,
-            "DOMINO_INSTANTIATE_PIECE_KWARGS": str({
-                "deploy_mode": self.deploy_mode,
-                "task_id": self.task_id,
-                "dag_id": self.dag_id,
-            }),
-            "DOMINO_RUN_PIECE_KWARGS": str(self.piece_input_kwargs),
-            "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
-            "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
-            "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
+
+    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
+        """Get piece secrets values from Domino API"""
+        secrets_response = self.domino_client.get_piece_secrets(
+            piece_repository_id=piece_repository_id,
+            piece_name=piece_name
+        )
+        if secrets_response.status_code != 200:
+            raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
+        piece_secrets = {
+            e.get('name'): e.get('value') 
+            for e in secrets_response.json()
         }
+        return piece_secrets
+    
+
+    @staticmethod
+    def _get_upstream_xcom_data_from_task_ids(task_ids: list, context: Context):
+        upstream_xcoms_data = dict()
+        for tid in task_ids:
+            upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
+        return upstream_xcoms_data
+    
 
     def _update_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
         #domino_run_piece_kwargs = self.environment.get('DOMINO_RUN_PIECE_KWARGS')
@@ -93,7 +112,8 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         self.piece_input_kwargs = updated_op_kwargs
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE'] = str(self.shared_storage_upstream_ids_list)
         self.environment['DOMINO_RUN_PIECE_KWARGS'] = str(self.piece_input_kwargs)
-    
+
+
     def _prepare_execute_environment(self, context: Context):
         """ 
         Prepare execution with the following configurations:
@@ -118,6 +138,7 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         dag_run_id_path = dag_run_id.replace("-", "_").replace(".", "_").replace(" ", "_").replace(":", "_").replace("+", "_")
         self.workflow_run_subpath = f"{dag_id}/{dag_run_id_path}"
         self.environment['DOMINO_WORKFLOW_RUN_SUBPATH'] = self.workflow_run_subpath
+
 
     def execute(self, context: Context) -> Optional[str]:
         # env var format = {"name": "value"}

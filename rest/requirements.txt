@@ -3,7 +3,7 @@ bcrypt==3.2.2
 fastapi-utils==0.2.1
 Jinja2==2.11.3
 psycopg2-binary==2.9.3
-pydantic[email]
+pydantic[email]==1.10.11
 MarkupSafe==2.0.1
 pydantic==1.9.1
 PyGithub==1.55
