@@ -39,6 +39,7 @@ services:
       - "2376:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  
   postgres:
     image: postgres:13
     environment:
@@ -313,7 +314,7 @@ services:
 
   # Domino Postgres
   domino_postgres:
-    image: postgres
+    image: postgres:13
     container_name: domino-postgres
     environment:
       - POSTGRES_DB=postgres

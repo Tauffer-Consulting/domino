@@ -327,7 +327,7 @@ services:
 
   # Domino Postgres
   domino_postgres:
-    image: postgres
+    image: postgres:13
     container_name: domino-postgres
     environment:
       - POSTGRES_DB=postgres
@@ -362,7 +362,7 @@ services:
     environment:
       - REACT_APP_DOMINO_DEPLOY_MODE=local-compose
     ports:
-      - "3000:3000"
+      - "3000:80"
     # volumes:
     #   - ./frontend:/usr/src/app # Enable hot reload for frontend
     depends_on:
