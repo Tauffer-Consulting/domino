@@ -41,6 +41,10 @@ class Task(object):
         self.repository_id = piece["repository_id"]
         self.piece = piece
         self.piece_input_kwargs = piece_input_kwargs
+        if "execution_mode" not in self.piece:
+            self.execution_mode = "docker"
+        else:
+            self.execution_mode = self.piece["execution_mode"]
 
         # Shared storage
         if not workflow_shared_storage:
@@ -70,7 +74,7 @@ class Task(object):
         """
         Set Airflow Operator according to deploy mode and Piece execution mode.
         """
-        if self.piece["execution_mode"] == "worker":
+        if self.execution_mode == "worker":
             return DominoWorkerOperator(
                 dag_id=self.dag_id,
                 task_id=self.task_id,

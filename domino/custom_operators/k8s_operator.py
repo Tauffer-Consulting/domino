@@ -24,7 +24,8 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         workflow_shared_storage: WorkflowSharedStorage = None,
         **k8s_operator_kwargs
     ):
-        super(BaseDominoOperator).__init__(
+        BaseDominoOperator.__init__(
+            self,
             dag_id=dag_id,
             task_id=task_id,
             piece_name=piece_name,
@@ -53,7 +54,8 @@ class DominoKubernetesPodOperator(BaseDominoOperator, KubernetesPodOperator):
         if self.deploy_mode == 'local-k8s-dev':
             volumes_dev, volume_mounts_dev = self._make_volumes_and_volume_mounts_dev()
 
-        super(KubernetesPodOperator).__init__(
+        KubernetesPodOperator.__init__(
+            self,
             task_id=task_id,
             env_vars=pod_env_vars,
             volumes=volumes_dev,

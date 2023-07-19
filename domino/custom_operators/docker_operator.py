@@ -20,7 +20,8 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
         workflow_shared_storage: WorkflowSharedStorage = None,
         **docker_operator_kwargs
     ) -> None:
-        super(BaseDominoOperator).__init__(
+        BaseDominoOperator.__init__(
+            self, 
             dag_id=dag_id,
             task_id=task_id,
             piece_name=piece_name,
@@ -50,12 +51,13 @@ class DominoDockerOperator(BaseDominoOperator, DockerOperator):
                 Mount(source=shared_storage_host_path, target=shared_storage_container_path, type='bind', read_only=False),
             )
 
-        super(DockerOperator).__init__(
-            **docker_operator_kwargs, 
+        DockerOperator.__init__(
+            self,
             task_id=task_id,
             docker_url='tcp://docker-proxy:2375',
             mounts=mounts,
             environment=self.environment,
+            **docker_operator_kwargs, 
         )
     
     def _set_base_env_vars(self):
