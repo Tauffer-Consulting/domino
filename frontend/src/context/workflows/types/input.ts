@@ -9,7 +9,7 @@ interface BaseInput {
   value: Value
 }
 
-interface ObjectInput {
+export interface ObjectInput {
   fromUpstream: boolean, //? allowed | never | always
   upstreamArgument: string | null,
   upstreamId: string | null,
@@ -18,7 +18,7 @@ interface ObjectInput {
 }
 
 export type InputArray = BaseInput & {
-  value: Record<string,BaseInput | ObjectInput>[]
+  value: Record<string,BaseInput>[] | Record<string,ObjectInput>[]
 }
 
 export type Input = BaseInput

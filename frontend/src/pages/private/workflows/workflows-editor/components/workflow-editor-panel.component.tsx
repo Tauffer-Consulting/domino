@@ -157,25 +157,43 @@ const WorkflowEditorPanelComponent = () => {
       const upstreamId = null
 
       var defaultValues = defaultData[key]
-      if (Array.isArray(defaultData[key])){
+      if (Array.isArray(defaultData[key])) {
         const auxDefaultValues = []
         for (const element of defaultData[key]) {
-          const newValue: any = {}
+          let newValue: any = {}
           if (typeof element === 'object') {
+            newValue = {
+              fromUpstream: fromUpstream,
+              upstreamId: {},
+              upstreamArgument: {},
+              upstreamValue: {},
+              value: {}
+            }
             for (const [_key, _value] of Object.entries(element)) {
-              newValue[_key] = {
-                fromUpstream: fromUpstream,
-                upstreamId: upstreamId,
-                upstreamArgument: null,
-                value: _value
+              newValue.upstreamId = {
+                ...newValue.upstreamId,
+                [_key]: _value
+              }
+              newValue.upstreamArgument = {
+                ...newValue.upstreamArgument,
+                [_key]: _value
+              }
+              newValue.upstreamValue = {
+                ...newValue.upstreamValue,
+                [_key]: _value
+              }
+              newValue.value = {
+                ...newValue.value,
+                [_key]: _value
               }
             }
             auxDefaultValues.push(newValue)
-          }else{
-            newValue[key] = {
+          } else {
+            newValue = {
               fromUpstream: fromUpstream,
               upstreamId: upstreamId,
               upstreamArgument: null,
+              upstreamValue: "",
               value: element
             }
             auxDefaultValues.push(newValue)
@@ -198,16 +216,16 @@ const WorkflowEditorPanelComponent = () => {
 
     // TODO: refactor types here
     const defaultWorkflowPieceData = {
-      storage: {storageAccessMode: storageAccessModes.ReadWrite},
+      storage: { storageAccessMode: storageAccessModes.ReadWrite },
       containerResources: containerResourcesDefaultData,
       inputs: upstreamMapFormInfo
     } as unknown as IWorkflowPieceData
 
-    await setForageWorkflowPiecesData(newNode.id,defaultWorkflowPieceData)
+    await setForageWorkflowPiecesData(newNode.id, defaultWorkflowPieceData)
 
     defaultData['storage'] = {
-        "storageAccessMode": 'Read/Write',
-      }
+      "storageAccessMode": 'Read/Write',
+    }
     defaultData['containerResources'] = containerResourcesDefaultData
     // Set default data for the node form - used in json-forms
     await setFormsForageData(newNode.id, defaultData)

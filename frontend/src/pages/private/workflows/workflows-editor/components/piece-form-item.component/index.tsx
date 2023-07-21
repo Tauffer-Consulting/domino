@@ -1,13 +1,11 @@
 import React, { useMemo } from 'react';
 import {
-  Checkbox,
   Box,
   Grid,
 } from '@mui/material';
-import { UseFormRegister, Control, Controller, useFormContext } from 'react-hook-form';
+import { UseFormRegister, Control, useFormContext } from 'react-hook-form';
 
 import { Input, IWorkflowPieceData, InputArray } from 'context/workflows/types';
-import { Option } from '../piece-form.component';
 
 import SelectUpstreamInput from './select-upstream-input';
 import NumberInput from './number-input';
@@ -17,56 +15,65 @@ import DatetimeInput from './datetime-input';
 import CodeEditorInput from './codeeditor-input';
 import TextInput from './text-input';
 
+import ArrayInput from './array-input';
+import { ArrayOption, Option } from '../piece-form.component/upstream-options';
 
 interface PieceFormItemProps {
   schema: any;
   itemKey: string;
-  inputProperties: Input | InputArray;
-  register: UseFormRegister<IWorkflowPieceData>
   control: Control<IWorkflowPieceData, any>
   definitions?: any
-  upstreamOptions: Option[]
+  upstreamOptions: Option[] | ArrayOption
 }
 
-const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey, inputProperties, schema, definitions, register, control }) => {
-  const [checkedFromUpstreamAllowed, checkedFromUpstreamEditable] = useMemo(() => {
+const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey, schema, definitions, control }) => {
+  const [checkedFromUpstreamDefault, checkedFromUpstreamEditable] = useMemo(() => {
     // from_upstream condition, if "never" or "always"
-    let allowed: boolean = true;
+    let defaultChecked: boolean = true;
     let editable: boolean = true;
-    let arrayItems: string = "allowed";
     if (schema?.from_upstream === "never") {
-      allowed = false;
+      defaultChecked = false;
       editable = false;
-      if (schema.type === 'array') {
-        arrayItems = "never";
-      }
     } else if (schema?.from_upstream === "always") {
-      allowed = true;
+      defaultChecked = true;
       editable = false;
-      if (schema.type === 'array') {
-        allowed = false;
-        arrayItems = "always";
-      }
     }
-    return [allowed, editable, arrayItems]
-  }, [schema])
+
+    if (schema?.allOf && schema.allOf.length > 0) {
+      defaultChecked = true;
+      editable = false;
+    }
+
+    if (!(upstreamOptions as Option[])?.length) {
+      editable = false;
+    }
+
+    if ((upstreamOptions as ArrayOption)?.array?.length) {
+      editable = true;
+    }
+
+    return [defaultChecked, editable]
+  }, [schema, upstreamOptions])
 
   const { watch } = useFormContext()
   const data = watch()
   const checkedFromUpstream = data.inputs[itemKey]?.fromUpstream
 
-  if (!inputProperties || !Object.keys(inputProperties).length) {
-    return null
-  }
-
   let inputElement: React.ReactNode = null
 
-  if (checkedFromUpstream && upstreamOptions.length) {
+  if (checkedFromUpstream) {
+    let options: Option[] = []
+    if (schema.type === 'array') {
+      options = (upstreamOptions as ArrayOption).array
+    } else {
+      options = upstreamOptions as Option[]
+    }
+
     inputElement = (
       <SelectUpstreamInput
-        itemKey={itemKey}
+        name={`inputs.${itemKey}`}
         label={schema?.title}
-        options={upstreamOptions}
+        options={options}
       />);
   } else if (schema?.allOf && schema.allOf.length > 0) {
     const typeClass = schema.allOf[0]['$ref'].split("/").pop();
@@ -75,13 +82,13 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
       <SelectInput
         label={itemKey}
         defaultValue={schema?.default}
-        itemKey={itemKey}
+        name={`inputs.${itemKey}.value`}
         options={valuesOptions}
       />
   } else if ((schema.type === 'number') && !schema.format) {
     inputElement =
       <NumberInput
-        itemKey={itemKey}
+        name={`inputs.${itemKey}.value`}
         type="float"
         label={schema.title}
         defaultValue={schema?.default ?? 10.5}
@@ -89,57 +96,57 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
   } else if (schema.type === 'integer' && !schema.format) {
     inputElement =
       <NumberInput
-        itemKey={itemKey}
+        name={`inputs.${itemKey}.value`}
         type="int"
         label={schema.title}
         defaultValue={schema?.default ?? 10}
       />
   } else if (schema.type === 'boolean' && !schema.format) {
-    inputElement = <CheckboxInput label={schema.title} itemKey={itemKey} />
+    inputElement = <CheckboxInput
+      name={`inputs.${itemKey}.value`}
+      label={schema.title}
+    />
   } else if (schema.type === 'array') {
-    inputElement = null
-      // <ArrayInput
-      //   itemKey={itemKey}
-      //   schema={schema}
-      //   definitions={schema.definitions}
-      //   upstreamOptions={upstreamOptions}
-      //   control={control}
-      //   register={register}
-      //   inputProperties={inputProperties as InputArray}
-      // />
+    inputElement =
+      <ArrayInput
+        inputKey={itemKey}
+        schema={schema}
+        definitions={definitions}
+        upstreamOptions={upstreamOptions as ArrayOption}
+        control={control}
+      />
   } else if (schema.type === 'string' && schema.format === 'date') {
     inputElement =
       <DatetimeInput
-        itemKey={itemKey}
+        name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date"
-        defaultValue={inputProperties.value as string}
       />;
   } else if (schema.type === 'string' && schema?.format === 'time') {
     inputElement =
       <DatetimeInput
-        itemKey={itemKey}
+        name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="time"
-        defaultValue={inputProperties.value as string}
       />;
   } else if (schema.type === 'string' && schema?.format === 'date-time') {
     inputElement =
       <DatetimeInput
-        itemKey={itemKey}
+        name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date-time"
-        defaultValue={inputProperties.value as string}
       />;
-  }
-  else if (schema.type === 'string' && schema?.widget === 'codeeditor') {
+  } else if (schema.type === 'string' && schema?.widget === 'codeeditor') {
     inputElement =
       <CodeEditorInput
-        itemKey={itemKey}
+        name={`inputs.${itemKey}.value`}
       />
   } else if (schema.type === 'string' && !schema.format) {
     inputElement =
-      <TextInput  itemKey={itemKey} label={schema.title}/>;
+      <TextInput
+        name={`inputs.${itemKey}.value`}
+        label={schema.title}
+      />;
   } else {
     inputElement = <div style={{ color: "red", fontWeight: "bold" }}>
       Unknown widget type for {schema.title}
@@ -156,25 +163,16 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
       <Grid item xs={12}>
         {inputElement}
       </Grid>
-      {checkedFromUpstreamAllowed ? (
-        <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Controller
-            name={`inputs.${itemKey}.fromUpstream`}
-            control={control}
-            defaultValue={inputProperties?.fromUpstream}
-            render={({ field }) => (
-              <Checkbox
-                {...field}
-                disabled={!checkedFromUpstreamEditable || !upstreamOptions.length}
-                checked={field.value ?? false}
-                onChange={field.onChange}
-              />
-            )}
-          />
-        </Grid>
-      ) : null}
+
+      <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+        <CheckboxInput
+          name={`inputs.${itemKey}.fromUpstream`}
+          defaultChecked={checkedFromUpstreamDefault}
+          disabled={!checkedFromUpstreamEditable}
+        />
+      </Grid>
     </Box>
   );
 };
 
-export default PieceFormItem;
+export default React.memo(PieceFormItem);

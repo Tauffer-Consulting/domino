@@ -23,11 +23,11 @@ const CodeEditorItem = React.forwardRef(({ ...register }) => (
   />
 ))
 
-const CodeEditorInput: React.FC<{ itemKey: string }> = ({ itemKey }) => {
+const CodeEditorInput: React.FC<{ name: `inputs.${string}.value` }> = ({ name }) => {
   const { control } = useFormContext<IWorkflowPieceData>()
 
   return (<Controller
-    name={`inputs.${itemKey}.value`}
+    name={name}
     control={control}
     render={({ field }) => (
       <CodeEditorItem
@@ -37,4 +37,4 @@ const CodeEditorInput: React.FC<{ itemKey: string }> = ({ itemKey }) => {
   />);
 }
 
-export default CodeEditorInput;
+export default React.memo(CodeEditorInput);

@@ -5,12 +5,12 @@ import { useFormContext } from 'react-hook-form';
 
 interface Props {
   label: string
-  itemKey: string
+  name: `inputs.${string}.value`
   defaultValue: number
   type: "float" | "int"
 }
 
-const NumberInput: React.FC<Props> = ({ itemKey, label, type="int", defaultValue}) => {
+const NumberInput: React.FC<Props> = ({ name, label, type = "int", defaultValue }) => {
   const { register } = useFormContext<IWorkflowPieceData>()
 
   return (
@@ -21,12 +21,12 @@ const NumberInput: React.FC<Props> = ({ itemKey, label, type="int", defaultValue
       label={label}
       defaultValue={defaultValue}
       inputProps={{
-        step: type==="int" ? 1 : 0.1,
+        step: type === "int" ? 1 : 0.1,
       }}
-      {...register(`inputs.${itemKey}.value`, {
+      {...register(name, {
         valueAsNumber: true
       })}
-  />);
+    />);
 }
 
-export default NumberInput;
+export default React.memo(NumberInput);

@@ -5,12 +5,12 @@ import { IWorkflowPieceData } from 'context/workflows/types';
 
 interface Props {
   label: string
-  itemKey: string
+  name: `inputs.${string}.value`
   defaultValue: string
   options: string[]
 }
 
-const SelectInput: React.FC<Props> = ({ options, label, itemKey, defaultValue }) => {
+const SelectInput: React.FC<Props> = ({ options, label, name, defaultValue }) => {
   const { register } = useFormContext<IWorkflowPieceData>()
 
   return (
@@ -18,7 +18,7 @@ const SelectInput: React.FC<Props> = ({ options, label, itemKey, defaultValue })
       <InputLabel>{label}</InputLabel>
       <Select
         defaultValue={defaultValue ?? ""}
-        {...register(`inputs.${itemKey}.value`)}
+        {...register(name)}
       >
         <MenuItem value="" disabled>
           <em>None</em>
@@ -32,4 +32,4 @@ const SelectInput: React.FC<Props> = ({ options, label, itemKey, defaultValue })
     </FormControl>);
 }
 
-export default SelectInput;
+export default React.memo(SelectInput);

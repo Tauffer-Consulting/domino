@@ -1,22 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import PieceFormItem from '../piece-form-item.component';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { IWorkflowPieceData } from 'context/workflows/types';
 import * as yup from "yup"
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context';
+import { UpstreamOptions, getUpstreamOptions } from './upstream-options';
 
 interface PieceFormProps {
   formId: string;
   schema: any;
 }
-
-export type Option = {
-   id: string,
-   argument: string,
-   value: string
-}
-
-type UpstreamOptions = Record<string, Option[]>
 
 export const inputsSchema = yup.lazy((value) => {
   if (!Object.keys(value).length) {
@@ -52,21 +45,12 @@ export const inputsSchema = yup.lazy((value) => {
 
 const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
   const { fetchForageWorkflowEdges, getForageWorkflowPieces } = useWorkflowsEditor()
-  const { register, control, watch } = useFormContext<IWorkflowPieceData>()
-  const { inputs } = watch()
+  const { control } = useFormContext<IWorkflowPieceData>()
   const [upstreamOptions, setUpstreamOptions] = useState<UpstreamOptions>({})
 
   const shouldRender = useMemo(() => {
-    return schema.properties && Object.keys(inputs).length
-  }, [schema, inputs])
-
-  const getInputType = useCallback((schema: Record<string, any>) => {
-    let type = schema.format ? schema.format : schema.type
-    if ('allOf' in schema || "oneOf" in schema || "anyOf" in schema) {
-      type = 'enum'
-    }
-    return type as string
-  }, [])
+    return schema?.properties
+  }, [schema])
 
   const handleUpstreamOptions = useCallback(async () => {
     if (!shouldRender) {
@@ -75,35 +59,11 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
 
     const workflowPieces = await getForageWorkflowPieces();
     const workflowEdges = await fetchForageWorkflowEdges();
-    const upstreamIds: string[] = []
-    const upstreamOptions = {} as Record<string, Option[]>
 
-    for (const ed of workflowEdges) {
-      if (ed.target === formId) {
-        upstreamIds.push(ed.source)
-      }
-    }
+    const upstreamOptions = getUpstreamOptions(formId, schema, workflowPieces, workflowEdges)
+    setUpstreamOptions(upstreamOptions)
 
-    Object.keys(schema.properties).forEach(key => {
-      const currentSchema = schema.properties[key]
-      upstreamOptions[key] = upstreamIds.flatMap(upstreamId => {
-        const upSchema = workflowPieces[upstreamId].output_schema.properties
-        const currentType = getInputType(currentSchema)
-        const options: Option[] = []
-        for (const outputs in upSchema) {
-          const upType = getInputType(upSchema[outputs])
-          if (upType === currentType) {
-            const value = `${workflowPieces[upstreamId]?.name} - ${upSchema[outputs].title} (${upstreamId.substring(2, 8)})`
-            const upstreamArgument = outputs
-            options.push({ id: upstreamId, argument: upstreamArgument, value })
-          }
-        }
-        return options
-      })
-
-      setUpstreamOptions(upstreamOptions)
-    })
-  }, [fetchForageWorkflowEdges, formId, getForageWorkflowPieces, getInputType, schema.properties, shouldRender])
+  }, [fetchForageWorkflowEdges, formId, getForageWorkflowPieces, schema, shouldRender])
 
   useEffect(() => {
     handleUpstreamOptions()
@@ -118,8 +78,6 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
             <PieceFormItem
               schema={schema.properties[key]}
               itemKey={key}
-              inputProperties={inputs[key]}
-              register={register}
               control={control}
               definitions={schema?.definitions}
               upstreamOptions={upstreamOptions[key] ?? []}

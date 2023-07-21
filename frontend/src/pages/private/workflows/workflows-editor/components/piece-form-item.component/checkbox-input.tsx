@@ -1,33 +1,35 @@
 import { Checkbox, FormControlLabel } from '@mui/material';
 import { IWorkflowPieceData } from 'context/workflows/types';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
 
 interface Props {
-  label: string
-  itemKey: string
+  name: `inputs.${string}.value` | `inputs.${string}.fromUpstream`
+  label?: string
+  defaultChecked?: boolean
+  disabled?: boolean
 }
 
-const CheckboxInput: React.FC<Props> = ({ itemKey, label}) => {
+const CheckboxInput: React.FC<Props> = ({ label, name, defaultChecked = false, disabled = false }) => {
   const { control } = useFormContext<IWorkflowPieceData>()
 
   return <FormControlLabel
-  control={
-    <Controller
-      name={`inputs.${itemKey}.value`}
-      control={control}
-      render={({ field }) => (
-        <Checkbox
-          {...field}
-          checked={!!field.value}
-          onChange={(e) => field.onChange(!!e.target.checked)}
-        />
-      )}
-    />
-  }
-  labelPlacement="start"
-  label={label}
-/>;
+    control={
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Checkbox
+            {...field}
+            checked={!!field.value}
+            disabled={disabled}
+          />
+        )}
+      />
+    }
+    labelPlacement={label ? "start" : undefined}
+    label={label ? label : undefined}
+  />;
 }
 
-export default CheckboxInput;
+export default React.memo(CheckboxInput);

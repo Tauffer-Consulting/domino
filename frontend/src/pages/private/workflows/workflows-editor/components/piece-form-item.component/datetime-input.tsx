@@ -9,39 +9,40 @@ import { IWorkflowPieceData } from 'context/workflows/types';
 
 interface Props {
   label: string
-  itemKey: string
-  defaultValue: string
+  name: `inputs.${string}.value`
   type?: "time" | "date" | "date-time"
 }
 
-const DatetimeInput: React.FC<Props> = ({ label, itemKey, defaultValue, type="date" }) => {
+const DatetimeInput: React.FC<Props> = ({ label, name, type = "date" }) => {
 
   const { control } = useFormContext<IWorkflowPieceData>()
+
+  const defaultValue = new Date().toISOString()
 
   switch (type) {
     case "date-time":
       return <Controller
-      name={`inputs.${itemKey}.value`}
-      control={control}
-      defaultValue={dayjs(defaultValue as string, 'YYYY-MM-DD HH:mm')}
-      render={({ field: { onChange, value, ...rest } }) => (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DemoContainer components={['DateTimePicker']}>
-            <DateTimePicker
-              label={label}
-              ampm={false}
-              format='DD/MM/YYYY HH:mm'
-              value={dayjs(value as string, 'YYYY-MM-DD HH:mm')}
-              onChange={(e) => { onChange(dayjs(e).format('YYYY-MM-DD HH:mm')) }}
-              {...rest}
-            />
-          </DemoContainer>
-        </LocalizationProvider>
-      )}
-    />;
+        name={name}
+        control={control}
+        defaultValue={dayjs(defaultValue as string, 'YYYY-MM-DD HH:mm')}
+        render={({ field: { onChange, value, ...rest } }) => (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={['DateTimePicker']}>
+              <DateTimePicker
+                label={label}
+                ampm={false}
+                format='DD/MM/YYYY HH:mm'
+                value={dayjs(value as string, 'YYYY-MM-DD HH:mm')}
+                onChange={(e) => { onChange(dayjs(e).format('YYYY-MM-DD HH:mm')) }}
+                {...rest}
+              />
+            </DemoContainer>
+          </LocalizationProvider>
+        )}
+      />;
     case 'time':
       return <Controller
-        name={`inputs.${itemKey}.value`}
+        name={name}
         control={control}
         defaultValue={dayjs(defaultValue as string, 'HH:mm')}
         render={({ field: { onChange, value, ...rest } }) => (
@@ -63,7 +64,7 @@ const DatetimeInput: React.FC<Props> = ({ label, itemKey, defaultValue, type="da
     case 'date':
     default:
       return <Controller
-        name={`inputs.${itemKey}.value`}
+        name={name}
         control={control}
         defaultValue={dayjs(defaultValue as string, 'YYYY-MM-DD')}
         render={({ field: { value, onChange, ...rest } }) => (
@@ -85,4 +86,4 @@ const DatetimeInput: React.FC<Props> = ({ label, itemKey, defaultValue, type="da
   }
 }
 
-export default DatetimeInput;
+export default React.memo(DatetimeInput);

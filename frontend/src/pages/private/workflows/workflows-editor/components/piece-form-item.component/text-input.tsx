@@ -5,11 +5,11 @@ import { useFormContext } from 'react-hook-form';
 
 interface Props {
   label: string
-  itemKey: string
+  name: `inputs.${string}.value`
   defaultValue?: string
 }
 
-const TextInput: React.FC<Props> = ({ itemKey, label, defaultValue =""}) => {
+const TextInput: React.FC<Props> = ({ name, label, defaultValue = "" }) => {
   const { register } = useFormContext<IWorkflowPieceData>()
 
   return (
@@ -18,8 +18,8 @@ const TextInput: React.FC<Props> = ({ itemKey, label, defaultValue =""}) => {
       variant="outlined"
       label={label}
       defaultValue={defaultValue}
-      {...register(`inputs.${itemKey}.value`)}
-  />);
+      {...register(name)}
+    />);
 }
 
-export default TextInput;
+export default React.memo(TextInput);

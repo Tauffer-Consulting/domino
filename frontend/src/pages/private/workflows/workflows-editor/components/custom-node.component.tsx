@@ -102,7 +102,7 @@ const CustomNode = memo((data: any) => {
           extendedData?.style?.label ? extendedData?.style?.label : extendedData?.name
         }
         <p style={{ fontSize: 10, margin: 0, color: "#4E4E56" }}>
-          {data.id.substring(2, 8)}
+          {data.id.split("_")[1].substring(0, 6)}
         </p>
       </div>
       {
