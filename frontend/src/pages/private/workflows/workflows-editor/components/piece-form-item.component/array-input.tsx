@@ -14,6 +14,7 @@ import CheckboxInput from './checkbox-input';
 import DatetimeInput from './datetime-input';
 import CodeEditorInput from './codeeditor-input';
 import SelectUpstreamInput from './select-upstream-input';
+import ObjectInputComponent from './object-input';
 
 interface ArrayInputItemProps {
   inputKey: string
@@ -106,7 +107,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
       </div>
       <CardContent  >
         {fields && fields.map((fieldWithId, index) => {
-          const {id} = fieldWithId
+          const { id } = fieldWithId
           const fromUpstream = getFromUpstream(index)
           return (
             <Box
@@ -208,6 +209,18 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
                   Unknown widget type for {subItemSchema?.title}
                 </div>)
               }
+
+              {elementType === "ObjectInput" && (
+                <ObjectInputComponent
+                  key={id}
+                  name={`${name}.${index}`}
+                  schema={schema}
+                  definitions={definitions}
+                  upstreamOptions={upstreamOptions.items}
+                  fromUpstream={fromUpstream}
+                />)
+              }
+
               <Grid
                 item xs={2}
                 sx={{ display: 'flex', justifyContent: 'center', marginLeft: 2 }}

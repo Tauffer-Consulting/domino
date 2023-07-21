@@ -172,15 +172,15 @@ const WorkflowEditorPanelComponent = () => {
             for (const [_key, _value] of Object.entries(element)) {
               newValue.upstreamId = {
                 ...newValue.upstreamId,
-                [_key]: _value
+                [_key]: ""
               }
               newValue.upstreamArgument = {
                 ...newValue.upstreamArgument,
-                [_key]: _value
+                [_key]: ""
               }
               newValue.upstreamValue = {
                 ...newValue.upstreamValue,
-                [_key]: _value
+                [_key]: ""
               }
               newValue.value = {
                 ...newValue.value,

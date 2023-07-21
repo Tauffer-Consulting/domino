@@ -5,7 +5,7 @@ import { useFormContext } from 'react-hook-form';
 
 interface Props {
   label: string
-  name: `inputs.${string}.value`
+  name: `inputs.${string}`
   defaultValue?: string
 }
 

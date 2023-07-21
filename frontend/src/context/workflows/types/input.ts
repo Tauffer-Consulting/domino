@@ -22,4 +22,3 @@ export type InputArray = BaseInput & {
 }
 
 export type Input = BaseInput
-

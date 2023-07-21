@@ -33,7 +33,7 @@ const getOptions = (upstreamPieces: Record<string, any>, type: string): Option[]
 
         const upType = getInputType(upSchema[property])
 
-        if (upType === type) {
+        if ((upType === type) || (upType==="string" && type==="object")) {
           const value = `${upPiece?.name} (${upPiece.id.split("_")[1].substring(0, 6)}) - ${upSchema[property].title}`
           const upstreamArgument = property
           options.push({ id: upstreamId, argument: upstreamArgument, value })
@@ -74,6 +74,9 @@ export const getUpstreamOptions = (formId: string, schema: any, workflowPieces: 
       }
 
       const itemsType = getInputType(itemsSchema)
+
+
+      console.log("itemsType",itemsType)
 
       const array = getOptions(upstreamPieces, currentType)
       const items = getOptions(upstreamPieces, itemsType)

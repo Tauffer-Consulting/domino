@@ -8,9 +8,10 @@ interface Props {
   label: string
   name: `inputs.${string}`
   options: Option[]
+  object?: boolean
 }
 
-const SelectUpstreamInput: React.FC<Props> = ({ options, label, name }) => {
+const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) => {
   const { getValues, setValue, control } = useFormContext<IWorkflowPieceData>()
 
   const handleSelectChange = useCallback((event: SelectChangeEvent<string | null>, onChange: (e: any) => void) => {
@@ -31,7 +32,7 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name }) => {
       <InputLabel>{label}</InputLabel>
       <Controller
         control={control}
-        name={`${name}.upstreamValue`}
+        name={object ? name as `inputs.${string}.upstreamValue` : `${name}.upstreamValue`}
         render={({ field }) => (
           <Select
             fullWidth
