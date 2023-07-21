@@ -360,18 +360,18 @@ services:
 
   # Domino Frontend
   domino_frontend:
-    image: ghcr.io/tauffer-consulting/domino-frontend:compose
-    # build:
-    #   context: ./frontend
-    #   dockerfile: Dockerfile
+    # image: ghcr.io/tauffer-consulting/domino-frontend:compose
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: domino-frontend
-    # command: yarn start:local
+    command: yarn start:local
     environment:
       - REACT_APP_DOMINO_DEPLOY_MODE=local-compose
     ports:
-      - "3000:80"
-    # volumes:
-    #   - ./frontend:/usr/src/app # Enable hot reload for frontend
+      - "3000:3000"
+    volumes:
+      - ./frontend:/usr/src/app # Enable hot reload for frontend
     depends_on:
       domino_rest:
         condition: service_started
