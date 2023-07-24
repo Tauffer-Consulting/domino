@@ -163,13 +163,17 @@ const WorkflowEditorPanelComponent = () => {
           let newValue: any = {}
           if (typeof element === 'object') {
             newValue = {
-              fromUpstream: fromUpstream,
+              fromUpstream: {},
               upstreamId: {},
               upstreamArgument: {},
               upstreamValue: {},
               value: {}
             }
             for (const [_key, _value] of Object.entries(element)) {
+              newValue.fromUpstream = {
+                ...newValue.fromUpstream,
+                [_key]: ""
+              }
               newValue.upstreamId = {
                 ...newValue.upstreamId,
                 [_key]: ""

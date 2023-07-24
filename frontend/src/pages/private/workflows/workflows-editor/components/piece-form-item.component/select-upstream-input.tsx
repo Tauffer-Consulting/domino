@@ -4,27 +4,42 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { Option } from '../piece-form.component/upstream-options';
 import { IWorkflowPieceData } from 'context/workflows/types';
 
-interface Props {
+type ObjectName = `inputs.${string}.value.${number}.upstreamValue.${string}`
+type Name = `inputs.${string}`
+type Props = {
   label: string
-  name: `inputs.${string}`
+  name: Name
   options: Option[]
-  object?: boolean
+  object?: false
+} | {
+  label: string
+  name: ObjectName
+  options: Option[]
+  object: true
 }
 
 const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) => {
-  const { getValues, setValue, control } = useFormContext<IWorkflowPieceData>()
+  const { setValue, control } = useFormContext<IWorkflowPieceData>()
 
   const handleSelectChange = useCallback((event: SelectChangeEvent<string | null>, onChange: (e: any) => void) => {
     const value = event.target.value
     const upstream = options.find(op => op?.value === value) as Option
-    const data = getValues(name)
-    setValue(name, {
-      ...data,
-      upstreamArgument: upstream.argument,
-      upstreamId: upstream.id
-    })
+    let nameArgument = ""
+    let nameId = ""
+
+    if (object) {
+      nameArgument = name.replace(`.upstreamValue.`, ".upstreamArgument.")
+      nameId = name.replace(`.upstreamValue.`, ".upstreamId.")
+
+    } else {
+      nameArgument = `${name}.upstreamArgument`
+      nameId = `${name}.upstreamId`
+    }
+
+    setValue(nameArgument as `inputs.${string}.upstreamArgument`, upstream.argument)
+    setValue(nameId as `inputs.${string}.upstreamId`, upstream.id)
     onChange(event)
-  }, [getValues, name, options, setValue]);
+  }, [name, object, options, setValue]);
 
 
   return (
@@ -32,7 +47,7 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) 
       <InputLabel>{label}</InputLabel>
       <Controller
         control={control}
-        name={object ? name as `inputs.${string}.upstreamValue` : `${name}.upstreamValue`}
+        name={object ? name as ObjectName : `${name}.upstreamValue`}
         render={({ field }) => (
           <Select
             fullWidth

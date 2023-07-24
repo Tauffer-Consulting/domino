@@ -34,7 +34,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
   const formsData = watch()
   const fields = data as unknown as FieldArrayWithId<InputArray>[]
 
-  const [valuesOptions, setValuesOptions] = useState<string[]>([])
+  const [enumOptions, setEnumOptions] = useState<string[]>([])
 
   const subItemSchema = useMemo(() => {
     let subItemSchema: any = schema?.items;
@@ -60,14 +60,14 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
   }, [subItemSchema])
 
   const getFromUpstream = useCallback((index: number) => {
-    return formsData?.inputs?.[inputKey]?.value?.[index]?.fromUpstream
+    return formsData?.inputs?.[inputKey]?.value?.[index]?.fromUpstream ?? false
   }, [formsData?.inputs, inputKey])
 
   const elementType = useMemo(() => {
     if (subItemSchema?.allOf && subItemSchema.allOf.length > 0) {
       const typeClass = subItemSchema.allOf[0]['$ref'].split("/").pop();
       const valuesOptions: Array<string> = definitions?.[typeClass].enum;
-      setValuesOptions(valuesOptions)
+      setEnumOptions(valuesOptions)
       return "SelectInput"
     } else if ((subItemSchema?.type === 'number') && !subItemSchema?.format) {
       return "NumberInput"
@@ -94,8 +94,18 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
 
   const handleAddInput = useCallback(() => {
 
-    append(subItemSchema?.default)
-  }, [append, subItemSchema?.default])
+    const defaultValue = [{
+      fromUpstream: false,
+      upstreamArgument: "",
+      upstreamId: "",
+      upstreamValue: "",
+      value: ""
+    }]
+
+    console.log(defaultValue)
+
+    append(defaultValue as any)
+  }, [append])
 
   return (
     <Card sx={{ width: "100%", paddingTop: 0 }}>
@@ -106,13 +116,15 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
         {schema?.title}
       </div>
       <CardContent  >
+
         {fields && fields.map((fieldWithId, index) => {
           const { id } = fieldWithId
           const fromUpstream = getFromUpstream(index)
           return (
-            <Box
-              key={`${inputKey}${index}`}
-              display="flex"
+            <Grid
+              key={id}
+              container
+              direction="row"
               justifyContent="space-between"
               alignItems="center"
               sx={{
@@ -121,119 +133,173 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
                 borderRadius: "6px",
               }}
             >
-              <IconButton onClick={() => { remove(index) }} aria-label="Delete">
-                <DeleteIcon />
-              </IconButton>
+              <Grid
+                item
+                xs={1}
+              >
+                <IconButton onClick={() => { remove(index) }} aria-label="Delete">
+                  <DeleteIcon />
+                </IconButton>
+              </Grid>
+
+
               {fromUpstream && elementType !== "ObjectInput" && (
-                <SelectUpstreamInput
-                  name={`${name}.${index}`}
-                  label={schema?.title}
-                  options={upstreamOptions.items}
-                />)}
-              {!fromUpstream && elementType === "SelectInput" && (
-                <SelectInput
-                  key={id}
-                  label={schema.title}
-                  defaultValue={""}
-                  name={`${name}.${index}.value`}
-                  options={valuesOptions}
-                />)
-              }
-              {!fromUpstream && elementType === "NumberInput" && (
-                <NumberInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                  type="float"
-                  label={schema.title}
-                  defaultValue={subItemSchema?.default ?? 10.5}
-                />)
-              }
-              {!fromUpstream && elementType === "NumberInputInt" && (
-                <NumberInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                  type="int"
-                  label={schema.title}
-                  defaultValue={subItemSchema?.default ?? 10}
-                />)
-              }
-              {!fromUpstream && elementType === "CheckboxInput" && (
-                <CheckboxInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                  label={schema.title}
-                />)
-              }
-              {!fromUpstream && elementType === "TextInput" && (
-                <TextInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                  label={schema.title}
-                />)
-              }
-              {!fromUpstream && elementType === "DateInput" && (
-                <DatetimeInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                  label={schema.title}
-                  type="date"
-                />)
-              }
-              {!fromUpstream && elementType === "TimeInput" && (
-                <DatetimeInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                  label={schema.title}
-                  type="time"
-                />)
-              }
-              {!fromUpstream && elementType === "DatetimeInput" && (
-                <DatetimeInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                  label={schema.title}
-                  type="date-time"
-                />)
-              }
-              {!fromUpstream && elementType === "CodeEditorInput" && (
-                <CodeEditorInput
-                  key={id}
-                  name={`${name}.${index}.value`}
-                />)
-              }
-              {!fromUpstream && elementType === "Unknown" && (
-                <div
-                  key={id}
-                  style={{ color: "red", fontWeight: "bold" }}
+                <Grid
+                  item
+                  xs={9}
                 >
-                  Unknown widget type for {subItemSchema?.title}
-                </div>)
-              }
+                  <SelectUpstreamInput
+                    name={`${name}.${index}`}
+                    label={schema?.title}
+                    options={upstreamOptions.items}
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "SelectInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <SelectInput
+                    label={schema.title}
+                    defaultValue={""}
+                    name={`${name}.${index}.value`}
+                    options={enumOptions}
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "NumberInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <NumberInput
+                    name={`${name}.${index}.value`}
+                    type="float"
+                    label={schema.title}
+                    defaultValue={subItemSchema?.default ?? 10.5}
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "NumberInputInt" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <NumberInput
+                    name={`${name}.${index}.value`}
+                    type="int"
+                    label={schema.title}
+                    defaultValue={subItemSchema?.default ?? 10}
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "CheckboxInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <CheckboxInput
+                    name={`${name}.${index}.value`}
+                    label={schema.title}
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "TextInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <TextInput
+                    name={`${name}.${index}.value`}
+                    label={schema.title}
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "DateInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <DatetimeInput
+                    name={`${name}.${index}.value`}
+                    label={schema.title}
+                    type="date"
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "TimeInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <DatetimeInput
+                    name={`${name}.${index}.value`}
+                    label={schema.title}
+                    type="time"
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "DatetimeInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <DatetimeInput
+                    name={`${name}.${index}.value`}
+                    label={schema.title}
+                    type="date-time"
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "CodeEditorInput" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <CodeEditorInput
+                    name={`${name}.${index}.value`}
+                  />
+                </Grid>
+              )}
+              {!fromUpstream && elementType === "Unknown" && (
+                <Grid
+                  item
+                  xs={9}
+                >
+                  <div
+                    style={{ color: "red", fontWeight: "bold" }}
+                  >
+                    Unknown widget type for {subItemSchema?.title}
+                  </div>
+                </Grid>
+              )}
+
+              {elementType !== "ObjectInput" && (
+                <Grid item xs={1}>
+                  <CheckboxInput
+                    name={`${name}.${index}.fromUpstream`}
+                    defaultChecked={checkedFromUpstreamDefault}
+                    disabled={!checkedFromUpstreamEditable}
+                  />
+                </Grid>
+              )}
 
               {elementType === "ObjectInput" && (
-                <ObjectInputComponent
-                  key={id}
-                  name={`${name}.${index}`}
-                  schema={schema}
-                  definitions={definitions}
-                  upstreamOptions={upstreamOptions.items}
-                  fromUpstream={fromUpstream}
-                />)
-              }
+                <Grid item xs={11}>
+                  <ObjectInputComponent
+                    name={`${name}.${index}`}
+                    schema={schema}
+                    definitions={definitions}
+                    upstreamOptions={upstreamOptions.items}
+                    checkedFromUpstreamDefault={checkedFromUpstreamDefault}
+                    checkedFromUpstreamEditable={checkedFromUpstreamEditable}
+                  />
+                </Grid>
+              )}
 
-              <Grid
-                item xs={2}
-                sx={{ display: 'flex', justifyContent: 'center', marginLeft: 2 }}
-              >
-                <CheckboxInput
-                  name={`${name}.${index}.fromUpstream`}
-                  defaultChecked={checkedFromUpstreamDefault}
-                  disabled={!checkedFromUpstreamEditable}
-                />
-              </Grid>
-            </Box>
+            </Grid>
           );
-
         })}
       </CardContent>
     </Card>

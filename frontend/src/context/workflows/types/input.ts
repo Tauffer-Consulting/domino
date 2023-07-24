@@ -10,10 +10,10 @@ interface BaseInput {
 }
 
 export interface ObjectInput {
-  fromUpstream: boolean, //? allowed | never | always
-  upstreamArgument: string | null,
-  upstreamId: string | null,
-  upstreamValue: string | null,
+  fromUpstream: Record<string, boolean>
+  upstreamArgument: Record<string, string>,
+  upstreamId: Record<string, string>,
+  upstreamValue: Record<string, string>,
   value: Record<string, Value>
 }
 
