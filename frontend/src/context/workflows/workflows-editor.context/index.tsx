@@ -10,7 +10,6 @@ import { useWorkspaces } from 'context/workspaces/workspaces.context';
 
 import { createCustomContext } from 'utils'
 
-import { useFormsData, IFormsDataContext } from './forms-data.context';
 import { usesPieces, IPiecesContext } from './pieces.context';
 import { useWorkflowsEdges, IWorkflowsEdgesContext } from './workflow-edges.context';
 import { useWorkflowsNodes, IWorkflowsNodesContext } from './workflow-nodes.context';
@@ -18,7 +17,7 @@ import { useWorkflowPiece, IWorkflowPieceContext } from './workflow-pieces.conte
 import { useWorkflowPiecesData, IWorkflowPiecesDataContext } from './workflow-pieces-data.context';
 import { IWorkflowSettingsContext, useWorkflowSettings } from './workflow-settings-data.context';
 
-interface IWorkflowsEditorContext extends IFormsDataContext, IPiecesContext, IWorkflowsEdgesContext, IWorkflowSettingsContext, IWorkflowsNodesContext, IWorkflowPieceContext, IWorkflowPiecesDataContext {
+interface IWorkflowsEditorContext extends IPiecesContext, IWorkflowsEdgesContext, IWorkflowSettingsContext, IWorkflowsNodesContext, IWorkflowPieceContext, IWorkflowPiecesDataContext {
 
   workflowsEditorBodyFromFlowchart: () => any // TODO add type
   handleCreateWorkflow: (params: IPostWorkflowParams) => Promise<IPostWorkflowResponseInterface>
@@ -31,18 +30,6 @@ export const [WorkflowsEditorContext, useWorkflowsEditor] =
 export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { workspace } = useWorkspaces()
   const postWorkflow = useAuthenticatedPostWorkflow()
-
-  const {
-    fetchFormsForageData,
-    fetchForageDataById,
-    setFormsForageData,
-    removeFormsForageDataById,
-    removeFormsForageDataNotInIds,
-    getForageCheckboxStates,
-    setForageCheckboxStates,
-    clearForageCheckboxStates,
-    clearForageFormsData,
-  } = useFormsData()
 
   const {
     repositories,
@@ -104,13 +91,13 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
       edges: []
     }
 
-    const settingsData = await fetchFormsForageData()
+    const settingsData = await fetchWorkflowSettingsData()
     const workflowPiecesData = await fetchForageWorkflowPiecesData()
 
     console.log('settingsData', settingsData)
 
     return {}
-  }, [fetchForageWorkflowPiecesData, fetchFormsForageData])
+  }, [fetchForageWorkflowPiecesData, fetchWorkflowSettingsData])
 
   // const workflowsEditorBodyFromFlowchart = useCallback(async () => {
 
@@ -254,12 +241,11 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
 
   const clearForageData = useCallback(async () => {
     // TODO remove old clear methods
-    await clearForageCheckboxStates()
 
     await clearForageWorkflowPieces()
     await clearForageWorkflowPiecesData()
     clearWorkflowSettingsData()
-  }, [clearForageCheckboxStates, clearForageWorkflowPieces, clearForageWorkflowPiecesData, clearWorkflowSettingsData])
+  }, [clearForageWorkflowPieces, clearForageWorkflowPiecesData, clearWorkflowSettingsData])
 
   const value: IWorkflowsEditorContext = {
     repositories,
@@ -274,25 +260,18 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     handleSearch,
     fetchRepoById,
     fetchForagePieceById,
-    setFormsForageData,
-    fetchForageDataById,
-    removeFormsForageDataById,
-    removeFormsForageDataNotInIds,
     handleCreateWorkflow,
     fetchForageWorkflowEdges,
     fetchForageWorkflowNodes,
     workflowsEditorBodyFromFlowchart,
 
     nodeDirection,
-    setForageCheckboxStates,
-    getForageCheckboxStates,
     setForageWorkflowPieces,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
     fetchWorkflowPieceById,
 
     toggleNodeDirection,
-    fetchFormsForageData,
 
     fetchForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
@@ -300,8 +279,6 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
 
     clearForageData,
     clearForageWorkflowPiecesData,
-    clearForageFormsData,
-    clearForageCheckboxStates,
     clearForageWorkflowPieces,
     fetchWorkflowSettingsData,
     setWorkflowSettingsData,

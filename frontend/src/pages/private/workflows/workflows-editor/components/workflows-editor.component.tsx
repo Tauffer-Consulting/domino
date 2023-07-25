@@ -23,10 +23,6 @@ import { toast } from "react-toastify"
  */
 export const WorkflowsEditorComponent: React.FC = () => {
 
-  const [formSchema, setFormSchema] = useState<any>({})
-  const [formUiSchema, setFormUiSchema] = useState<any>({})
-  const [formModuleName, setFormModuleName] = useState('')
-  //const [formTitle, setFormTitle] = useState('')
   const [drawerState, setDrawerState] = useState(false)
   const [backgropIsOpen, setBackdropIsOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -34,8 +30,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const {
     clearForageData,
     workflowsEditorBodyFromFlowchart,
-    setFormsForageData,
-    fetchForageDataById,
     setNodes,
     setEdges,
     handleCreateWorkflow,
@@ -153,15 +147,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const handleConfigWorkflow = useCallback(() => {
     setDrawerState(true)
   }, [])
-
-  useEffect(
-    () => {
-      setFormModuleName(workflowFormName)
-        ; (async () => {
-          setFormSchema(workflowFormSchema)
-          setFormUiSchema(workflowFormUISchema)
-        })()
-    }, [setFormsForageData, fetchForageDataById])
 
   const handleClear = useCallback(async () => {
     setNodes([])
