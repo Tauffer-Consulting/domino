@@ -23,10 +23,6 @@ import { toast } from "react-toastify"
  */
 export const WorkflowsEditorComponent: React.FC = () => {
 
-  const [formSchema, setFormSchema] = useState<any>({})
-  const [formUiSchema, setFormUiSchema] = useState<any>({})
-  const [formModuleName, setFormModuleName] = useState('')
-  //const [formTitle, setFormTitle] = useState('')
   const [drawerState, setDrawerState] = useState(false)
   const [backgropIsOpen, setBackdropIsOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -34,8 +30,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const {
     clearForageData,
     workflowsEditorBodyFromFlowchart,
-    setFormsForageData,
-    fetchForageDataById,
     setNodes,
     setEdges,
     handleCreateWorkflow,
@@ -92,38 +86,38 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
   const handleSaveWorkflow = useCallback(async () => {
     try {
-      setBackdropIsOpen(true)
+      //setBackdropIsOpen(true)
       const payload = await workflowsEditorBodyFromFlowchart()
       console.log('payload', payload)
 
-      if ((!payload.tasks)) {
-        setBackdropIsOpen(false)
-        return toast.error('Please add tasks to the workflow')
-      }
-      try {
-        await validateWorkflowForms(payload)
-        await validateTasksForms(payload)
-      }
-      catch (err: any) {
-        setBackdropIsOpen(false)
-        return toast.error(err.message)
-      }
+      // if ((!payload.tasks)) {
+      //   setBackdropIsOpen(false)
+      //   return toast.error('Please add tasks to the workflow')
+      // }
+      // // try {
+      // //   await validateWorkflowForms(payload)
+      // //   await validateTasksForms(payload)
+      // // }
+      // // catch (err: any) {
+      // //   setBackdropIsOpen(false)
+      // //   return toast.error(err.message)
+      // // }
 
-      handleCreateWorkflow(payload)
-        .then((response) => {
-          toast.success('Workflow created successfully.')
-          setBackdropIsOpen(false)
-        })
-        .catch((err) => {
-          if (err.response?.status === 422) {
-            setBackdropIsOpen(false)
-            console.log('response', err.response)
-            toast.error('Error while creating workflow, check your workflow settings and tasks.')
-            return
-          }
-          setBackdropIsOpen(false)
-          toast.error(err.response.data.detail)
-        })
+      // handleCreateWorkflow(payload)
+      //   .then((response) => {
+      //     toast.success('Workflow created successfully.')
+      //     setBackdropIsOpen(false)
+      //   })
+      //   .catch((err) => {
+      //     if (err.response?.status === 422) {
+      //       setBackdropIsOpen(false)
+      //       console.log('response', err.response)
+      //       toast.error('Error while creating workflow, check your workflow settings and tasks.')
+      //       return
+      //     }
+      //     setBackdropIsOpen(false)
+      //     toast.error(err.response.data.detail)
+      //   })
     } catch (err) {
       setBackdropIsOpen(false)
       console.log(err)
@@ -153,15 +147,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const handleConfigWorkflow = useCallback(() => {
     setDrawerState(true)
   }, [])
-
-  useEffect(
-    () => {
-      setFormModuleName(workflowFormName)
-        ; (async () => {
-          setFormSchema(workflowFormSchema)
-          setFormUiSchema(workflowFormUISchema)
-        })()
-    }, [setFormsForageData, fetchForageDataById])
 
   const handleClear = useCallback(async () => {
     setNodes([])
@@ -249,7 +234,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
             handleClose={() => setMenuOpen(!menuOpen)}
           />
         </Grid>
-        {/* <SidebarForm onClose={toggleDrawer(false)} uiSchema={formUiSchema} formSchema={formSchema} formId={formModuleName} open={drawerState} isPieceForm={false} /> */}
         <SidebarSettingsForm
           onClose={toggleDrawer(false)}
           open={drawerState}

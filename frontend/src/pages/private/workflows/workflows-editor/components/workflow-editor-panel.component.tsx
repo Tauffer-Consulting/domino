@@ -53,8 +53,6 @@ const WorkflowEditorPanelComponent = () => {
     nodes,
     setNodes,
     fetchForagePieceById,
-    setFormsForageData,
-    removeFormsForageDataById,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
     setForageWorkflowPieces,
@@ -67,10 +65,9 @@ const WorkflowEditorPanelComponent = () => {
   // Removing flowchart elements
   const onNodesDelete = useCallback(async (nodes: any) => {
     for (const node of nodes) {
-      await removeFormsForageDataById(node.id)
       await removeForageWorkflowPiecesById(node.id)
     }
-  }, [removeFormsForageDataById, removeForageWorkflowPiecesById])
+  }, [removeForageWorkflowPiecesById])
 
 
   // Node double click open drawer with forms
@@ -225,11 +222,9 @@ const WorkflowEditorPanelComponent = () => {
     }
     defaultData['containerResources'] = containerResourcesDefaultData
     // Set default data for the node form - used in json-forms
-    await setFormsForageData(newNode.id, defaultData)
   }, [
     fetchForagePieceById,
     nodeDirection,
-    setFormsForageData,
     reactFlowInstance,
     setNodes,
     setForageWorkflowPieces,
