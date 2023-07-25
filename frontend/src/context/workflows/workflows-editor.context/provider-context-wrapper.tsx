@@ -1,6 +1,5 @@
 import FormsDataProvider from "./forms-data.context";
 import PiecesProvider from "./pieces.context";
-import UpstreamMapProvider from "./upstream-map.context";
 import WorkflowsEdgesProvider from "./workflow-edges.context";
 import WorkflowsNodesProvider from "./workflow-nodes.context";
 import WorkflowPiecesProvider from "./workflow-pieces.context";
@@ -10,17 +9,15 @@ const ProviderContextWrapper: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <FormsDataProvider>
       <PiecesProvider>
-        <UpstreamMapProvider>
-          <WorkflowsEdgesProvider>
-            <WorkflowsNodesProvider>
-              <WorkflowPiecesProvider>
-                <WorkflowPiecesDataProvider>
-                  {children}
-                </WorkflowPiecesDataProvider>
-              </WorkflowPiecesProvider>
-            </WorkflowsNodesProvider>
-          </WorkflowsEdgesProvider>
-        </UpstreamMapProvider>
+        <WorkflowsEdgesProvider>
+          <WorkflowsNodesProvider>
+            <WorkflowPiecesProvider>
+              <WorkflowPiecesDataProvider>
+                {children}
+              </WorkflowPiecesDataProvider>
+            </WorkflowPiecesProvider>
+          </WorkflowsNodesProvider>
+        </WorkflowsEdgesProvider>
       </PiecesProvider>
     </FormsDataProvider>
   );

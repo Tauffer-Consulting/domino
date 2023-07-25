@@ -12,13 +12,12 @@ import { createCustomContext } from 'utils'
 
 import { useFormsData, IFormsDataContext } from './forms-data.context';
 import { usesPieces, IPiecesContext } from './pieces.context';
-import { useUpstreamMap, IUpstreamMapContext } from './upstream-map.context';
 import { useWorkflowsEdges, IWorkflowsEdgesContext } from './workflow-edges.context';
 import { useWorkflowsNodes, IWorkflowsNodesContext } from './workflow-nodes.context';
 import { useWorkflowPiece, IWorkflowPieceContext } from './workflow-pieces.context';
 import { useWorkflowPiecesData, IWorkflowPiecesDataContext } from './workflow-pieces-data.context';
 
-interface IWorkflowsEditorContext extends IFormsDataContext, IPiecesContext, IUpstreamMapContext, IWorkflowsEdgesContext, IWorkflowsNodesContext, IWorkflowPieceContext, IWorkflowPiecesDataContext {
+interface IWorkflowsEditorContext extends IFormsDataContext, IPiecesContext,  IWorkflowsEdgesContext, IWorkflowsNodesContext, IWorkflowPieceContext, IWorkflowPiecesDataContext {
 
   workflowsEditorBodyFromFlowchart: () => any // TODO add type
   handleCreateWorkflow: (params: IPostWorkflowParams) => Promise<IPostWorkflowResponseInterface>
@@ -70,16 +69,6 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
   } = useWorkflowsNodes()
 
   const {
-    getForageUpstreamMap,
-    getNameKeyUpstreamArgsMap,
-    setForageUpstreamMap,
-    setNameKeyUpstreamArgsMap,
-    removeForageUpstreamMapById,
-    clearForageUpstreamMap,
-    clearNameKeyUpstreamArgsMap,
-  } = useUpstreamMap()
-
-  const {
     fetchWorkflowPieceById,
     setForageWorkflowPieces,
     getForageWorkflowPieces,
@@ -113,7 +102,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
 
     const data = await fetchFormsForageData()
     const workflowPiecesData = await fetchForageWorkflowPiecesData()
-    const upstreamMap = await getForageUpstreamMap()
+
     const nodes = await fetchForageWorkflowNodes()
     const edges = await fetchForageWorkflowEdges()
 
@@ -179,16 +168,9 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
           name: element.data.name
         }
         const pieceInputKwargs: any = {}
-        if (nodeId in upstreamMap) {
-          for (const key in upstreamMap[nodeId]) {
-            const value = upstreamMap[nodeId][key]
-            const fromUpstream = value['fromUpstream']
-            pieceInputKwargs[key] = {
-              fromUpstream: fromUpstream,
-              upstreamTaskId: fromUpstream ? nodeId2taskName[value['upstreamId']] : null,
-              upstreamArgument: fromUpstream ? value['upstreamArgument'] : null,
-              value: value['value']
-            }
+        if (nodeId in workflowPiecesData) {
+          for (const key in workflowPiecesData[nodeId]) {
+            pieceInputKwargs[key] = (workflowPiecesData[nodeId]as any)[key]
           }
         }
         //console.log(pieceInputKwargs)
@@ -227,16 +209,16 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     dag_dict['ui_schema'] = ui_schema
 
     return dag_dict
-  }, [fetchFormsForageData, getForageUpstreamMap, fetchForageWorkflowNodes, fetchForageWorkflowEdges])
+  }, [fetchFormsForageData, fetchForageWorkflowPiecesData, fetchForageWorkflowNodes, fetchForageWorkflowEdges])
 
   const clearForageData = useCallback(async () => {
     await clearForageFormsData()
-    await clearForageUpstreamMap()
+
     await clearForageCheckboxStates()
-    await clearNameKeyUpstreamArgsMap()
+
     await clearForageWorkflowPieces()
     await clearForageWorkflowPiecesData()
-  }, [clearForageUpstreamMap, clearForageCheckboxStates, clearNameKeyUpstreamArgsMap, clearForageWorkflowPieces, clearForageFormsData, clearForageWorkflowPiecesData])
+  }, [clearForageCheckboxStates, clearForageWorkflowPieces, clearForageFormsData, clearForageWorkflowPiecesData])
 
   const value: IWorkflowsEditorContext = {
     repositories,
@@ -259,9 +241,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     fetchForageWorkflowEdges,
     fetchForageWorkflowNodes,
     workflowsEditorBodyFromFlowchart,
-    getForageUpstreamMap,
-    setForageUpstreamMap,
-    removeForageUpstreamMapById,
+
     nodeDirection,
     setForageCheckboxStates,
     getForageCheckboxStates,
@@ -269,8 +249,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
     fetchWorkflowPieceById,
-    setNameKeyUpstreamArgsMap,
-    getNameKeyUpstreamArgsMap,
+
     toggleNodeDirection,
     fetchFormsForageData,
 
@@ -280,8 +259,6 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
 
     clearForageData,
     clearForageWorkflowPiecesData,
-    clearForageUpstreamMap,
-    clearNameKeyUpstreamArgsMap,
     clearForageFormsData,
     clearForageCheckboxStates,
     clearForageWorkflowPieces

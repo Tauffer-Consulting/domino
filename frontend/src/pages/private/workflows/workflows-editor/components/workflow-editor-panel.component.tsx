@@ -55,11 +55,8 @@ const WorkflowEditorPanelComponent = () => {
     fetchForagePieceById,
     setFormsForageData,
     removeFormsForageDataById,
-    removeForageUpstreamMapById,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
-    getForageUpstreamMap,
-    setForageUpstreamMap,
     setForageWorkflowPieces,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
@@ -71,10 +68,9 @@ const WorkflowEditorPanelComponent = () => {
   const onNodesDelete = useCallback(async (nodes: any) => {
     for (const node of nodes) {
       await removeFormsForageDataById(node.id)
-      await removeForageUpstreamMapById(node.id)
       await removeForageWorkflowPiecesById(node.id)
     }
-  }, [removeFormsForageDataById, removeForageUpstreamMapById, removeForageWorkflowPiecesById])
+  }, [removeFormsForageDataById, removeForageWorkflowPiecesById])
 
 
   // Node double click open drawer with forms
@@ -150,7 +146,6 @@ const WorkflowEditorPanelComponent = () => {
     await setForageWorkflowPieces(newWorkflowPieces)
 
     // Set default data for upstream mapping - used in dags
-    var upstreamMap = await getForageUpstreamMap()
     var upstreamMapFormInfo: any = {}
     for (const key in defaultData) {
       const fromUpstream = false // TODO - If someday we allow default upstream true we should change this
@@ -215,8 +210,6 @@ const WorkflowEditorPanelComponent = () => {
         ) ? null : defaultValues
       }
     }
-    upstreamMap[newNode.id] = upstreamMapFormInfo
-    await setForageUpstreamMap(upstreamMap)
 
     // TODO: refactor types here
     const defaultWorkflowPieceData = {
@@ -237,8 +230,6 @@ const WorkflowEditorPanelComponent = () => {
     fetchForagePieceById,
     nodeDirection,
     setFormsForageData,
-    setForageUpstreamMap,
-    getForageUpstreamMap,
     reactFlowInstance,
     setNodes,
     setForageWorkflowPieces,
