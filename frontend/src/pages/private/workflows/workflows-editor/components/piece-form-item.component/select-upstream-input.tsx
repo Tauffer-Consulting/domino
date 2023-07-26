@@ -1,8 +1,9 @@
-import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Option } from '../piece-form.component/upstream-options';
 import { IWorkflowPieceData } from 'context/workflows/types';
+import fetchFromObject from 'utils/fetch-from-object';
 
 type ObjectName = `inputs.${string}.value.${number}.upstreamValue.${string}`
 type Name = `inputs.${string}`
@@ -19,7 +20,7 @@ type Props = {
 }
 
 const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) => {
-  const { setValue, control } = useFormContext<IWorkflowPieceData>()
+  const { setValue, control, formState: { errors } } = useFormContext<IWorkflowPieceData>()
 
   const handleSelectChange = useCallback((event: SelectChangeEvent<string | null>, onChange: (e: any) => void) => {
     const value = event.target.value
@@ -41,6 +42,7 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) 
     onChange(event)
   }, [name, object, options, setValue]);
 
+  const error = fetchFromObject(errors, name)
 
   return (
     <FormControl fullWidth>
@@ -70,6 +72,9 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) 
           </Select>
         )}
       />
+      <FormHelperText error>
+        {error?.message}
+      </FormHelperText>
     </FormControl>
   );
 }

@@ -199,8 +199,8 @@ const WorkflowEditorPanelComponent = () => {
       }
       upstreamMapFormInfo[key] = {
         fromUpstream,
-        upstreamId,
-        upstreamArgument: null,
+        upstreamId: upstreamId ?? "",
+        upstreamArgument: "",
         upstreamValue: "",
         value: (
           defaultValues === null || defaultValues === undefined

@@ -1,7 +1,8 @@
-import { Checkbox, FormControlLabel } from '@mui/material';
+import { Checkbox, FormControlLabel, FormHelperText } from '@mui/material';
 import { IWorkflowPieceData } from 'context/workflows/types';
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
+import fetchFromObject from 'utils/fetch-from-object';
 
 interface Props {
   name: `inputs.${string}.value` | `inputs.${string}.fromUpstream` | `inputs.${string}.fromUpstream.${string}`
@@ -11,7 +12,9 @@ interface Props {
 }
 
 const CheckboxInput: React.FC<Props> = ({ label, name, defaultChecked = false, disabled = false }) => {
-  const { control } = useFormContext<IWorkflowPieceData>()
+  const { control, formState: { errors } } = useFormContext<IWorkflowPieceData>()
+
+  const error = fetchFromObject(errors, name)
 
   return (
     <>
@@ -45,6 +48,9 @@ const CheckboxInput: React.FC<Props> = ({ label, name, defaultChecked = false, d
           )}
         />
       }
+      <FormHelperText error>
+        {error?.message}
+      </FormHelperText>
     </>
   );
 }

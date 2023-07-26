@@ -75,9 +75,6 @@ export const getUpstreamOptions = (formId: string, schema: any, workflowPieces: 
 
       const itemsType = getInputType(itemsSchema)
 
-
-      console.log("itemsType",itemsType)
-
       const array = getOptions(upstreamPieces, currentType)
       const items = getOptions(upstreamPieces, itemsType)
 
