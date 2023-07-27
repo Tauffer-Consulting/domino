@@ -1,83 +1,207 @@
 import * as yup from "yup"
 
-export const inputsSchema = yup.lazy((value) => {
-
-  if (Object.keys(value).length) {
-    const valueValidation = yup.lazy(value => {
-      switch (typeof value) {
-        case 'string':
-          return yup.string().required();
-        case 'number':
-          return yup.number().required();
-        default:
-          return yup.mixed(); // decide what is the default
-      }
-    })
-
-    const defaultValidation = {
-      fromUpstream: yup.boolean(), //? allowed | never | always
-      upstreamArgument: yup.string().nullable(),
-      upstreamId: yup.string().nullable(),
-      value: valueValidation
+const defaultValidation = {
+  fromUpstream: yup.boolean(), //? allowed | never | always
+  upstreamArgument: yup.string().when("fromUpstream", ([fromUpstream]) => {
+    if (fromUpstream) {
+      return yup.string().required()
     }
+    return yup.string()
+  }),
+  upstreamId: yup.string().when("fromUpstream", ([fromUpstream]) => {
+    if (fromUpstream) {
+      return yup.string().required()
+    }
+    return yup.string()
+  }),
+  upstreamValue: yup.string().when("fromUpstream", ([fromUpstream]) => {
+    if (fromUpstream) {
+      return yup.string().required()
+    }
+    return yup.string()
+  }),
+}
 
-    const validationObject = {
-      fromUpstream: yup.lazy(obj=>{
-        return yup.object().shape(Object.keys(obj).reduce((acc,val)=>({
-          ...acc,
-          [val]: yup.boolean().required()
-        }),{}))
-      }),
-      upstreamArgument: yup.lazy(obj=>{
-        return yup.object().shape(Object.keys(obj).reduce((acc,val)=>({
-          ...acc,
-          [val]: yup.string().nullable()
-        }),{}))
-      }),
-      upstreamId: yup.lazy(obj=>{
-        return yup.object().shape(Object.keys(obj).reduce((acc,val)=>({
-          ...acc,
-          [val]: yup.string().nullable()
-        }),{}))
-      }),
-      value: yup.lazy(obj=>{
-        return yup.object().shape(Object.keys(obj).reduce((acc,val)=>({
-          ...acc,
-          [val]: valueValidation
-        }),{}))
+const validationObject = {
+  fromUpstream: yup.lazy(obj => {
+    return yup.object().shape(Object.keys(obj).reduce((acc, val) => ({
+      ...acc,
+      [val]: yup.boolean().required()
+    }), {}))
+  }),
+  upstreamArgument: yup.lazy(obj => {
+    return yup.object().shape(Object.keys(obj).reduce((acc, val) => ({
+      ...acc,
+      [val]: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (!fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.string().required()
+      })
+    }), {}))
+  }),
+  upstreamId: yup.lazy(obj => {
+    return yup.object().shape(Object.keys(obj).reduce((acc, val) => ({
+      ...acc,
+      [val]: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (!fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.string().required()
+      })
+    }), {}))
+  }),
+  value: yup.lazy(obj => {
+    return yup.object().shape(Object.keys(obj).reduce((acc, val) => {
+      console.log(obj)
+
+      return ({
+        ...acc,
+        [val]: yup.string().when("fromUpstream", ([fromUpstream]) => {
+          if (fromUpstream) {
+            return yup.mixed().notRequired()
+          }
+          return yup.string().required()
+        })
+      })
+    }, {}))
+  }),
+}
+
+function getValidationValueBySchemaType(schema: any) {
+  let inputSchema = {}
+
+  if ((schema.type === 'number') && !schema.format) {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.number().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.number().required()
       })
     }
-
-    const validationArray = {
-      fromUpstream: yup.boolean(), //? allowed | never | always
-      upstreamArgument: yup.string().nullable(),
-      upstreamId: yup.string().nullable(),
-      value: yup.array().of(yup.lazy(item=>{
-        if(typeof item.value==="object"){
-          return yup.object(validationObject)
+  }
+  else if (schema.type === 'integer' && !schema.format) {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.number().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
         }
-        return yup.object(defaultValidation)
-      }))
+        return yup.number().integer().required()
+      })
     }
+  }
+  else if (schema.type === 'boolean' && !schema.format) {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.boolean().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.boolean().required()
+      })
+    }
+  }
+  else if (schema.type === 'string' && schema.format === 'date') {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.string().required()
+      })
+    }
+  }
+  else if (schema.type === 'string' && schema?.format === 'time') {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.string().required()
+      })
+    }
+  }
+  else if (schema.type === 'string' && schema?.format === 'date-time') {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.string().required()
+      })
+    }
+  }
+  else if (schema.type === 'string' && schema?.widget === 'codeeditor') {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.string()
+      })
+    }
+  }
+  else if (schema.type === 'string' && !schema.format) {
+    inputSchema = {
+      ...defaultValidation,
+      value: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired()
+        }
+        return yup.string().required()
+      })
+    }
+  }
+  else if (schema.type === 'object') {
+    inputSchema = validationObject
+  }
+  else {
+    inputSchema = {}
+  }
 
-    const newEntries = Object.keys(value).reduce(
-      (acc, val) => {
-        if (Array.isArray(value[val].value)) {
-          return {
-            ...acc,
-            [val]: yup.object(validationArray)
+  return inputSchema
+}
+
+export function createInputsSchemaValidation(schema: any) {
+  if (!schema?.properties) {
+    return yup.mixed().notRequired()
+  }
+
+  const validationSchema = yup.lazy(() => {
+    const validationSchema =
+      Object.entries(schema.properties).reduce((acc, cur: [string, any]) => {
+        const [key, subSchema] = cur
+        let inputSchema: any = {}
+
+        if (subSchema.type === 'array') {
+          let subItemSchema: any = subSchema?.items;
+          if (subSchema?.items?.$ref) {
+            const subItemSchemaName = subSchema.items.$ref.split('/').pop();
+            subItemSchema = schema.definitions?.[subItemSchemaName];
+          }
+          inputSchema = {}
+          inputSchema = {
+            ...defaultValidation,
+            value: yup.array().of(
+              yup.object(getValidationValueBySchemaType(subItemSchema))
+            )
           }
         } else {
-          return {
-            ...acc,
-            [val]: yup.object(defaultValidation),
-          }
+          inputSchema = getValidationValueBySchemaType(subSchema)
         }
-      },
-      {}
-    )
 
-    return yup.object().shape(newEntries)
-  }
-  return yup.mixed().notRequired()
-})
+        return { ...acc, [key]: yup.object(inputSchema) }
+      }, {})
+
+    return yup.object().shape(validationSchema)
+  })
+
+  return validationSchema
+}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import {
   Drawer,
   Grid,
@@ -16,7 +16,7 @@ import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 
 
 import PieceForm from '../piece-form.component'
-import {inputsSchema} from '../piece-form.component/validation'
+import { createInputsSchemaValidation } from '../piece-form.component/validation'
 
 import ContainerResourceForm, { ContainerResourceFormSchema, defaultContainerResources } from './container-resource-form.component';
 
@@ -39,11 +39,7 @@ const defaultValues: IWorkflowPieceData = {
   inputs: {},
 }
 
-const SidebarPieceFormSchema = yup.object().shape({
-  storage: storageFormSchema,
-  containerResources: ContainerResourceFormSchema,
-  inputs: inputsSchema,
-});
+
 
 const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const {
@@ -59,6 +55,14 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     fetchForageWorkflowPiecesDataById,
   } = useWorkflowsEditor()
 
+  const SidebarPieceFormSchema = useMemo(() => {
+    return yup.object().shape({
+      storage: storageFormSchema,
+      containerResources: ContainerResourceFormSchema,
+      inputs: createInputsSchemaValidation(schema),
+    });
+  }, [schema])
+
   const resolver = useYupValidationResolver(SidebarPieceFormSchema);
   const methods = useForm({
     defaultValues,
@@ -66,6 +70,8 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     mode: "onChange"
   })
   const data = methods.watch()
+
+  // console.log("ERRORS: ", methods.formState.errors)
 
   const loadData = useCallback(async () => {
     const data = await fetchForageWorkflowPiecesDataById(formId)
