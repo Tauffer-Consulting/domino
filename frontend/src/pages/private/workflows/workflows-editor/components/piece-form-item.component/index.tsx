@@ -3,19 +3,20 @@ import {
   Box,
   Grid,
 } from '@mui/material';
-import { UseFormRegister, Control, useFormContext } from 'react-hook-form';
+import { Control, useFormContext } from 'react-hook-form';
 
-import { Input, IWorkflowPieceData, InputArray } from 'context/workflows/types';
+import { IWorkflowPieceData } from 'context/workflows/types';
+
+import NumberInput from 'components/number-input';
+import CheckboxInput from 'components/checkbox-input';
+import SelectInput from 'components/select-input';
+import DatetimeInput from 'components/datetime-input';
+import CodeEditorInput from 'components/codeeditor-input';
+import TextInput from 'components/text-input';
 
 import SelectUpstreamInput from './select-upstream-input';
-import NumberInput from './number-input';
-import CheckboxInput from './checkbox-input';
-import SelectInput from './select-input';
-import DatetimeInput from './datetime-input';
-import CodeEditorInput from './codeeditor-input';
-import TextInput from './text-input';
-
 import ArrayInput from './array-input';
+
 import { ArrayOption, Option } from '../piece-form.component/upstream-options';
 
 interface PieceFormItemProps {
@@ -55,7 +56,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
     return [defaultChecked, editable]
   }, [schema, upstreamOptions])
 
-  const { watch } = useFormContext()
+  const { watch } = useFormContext<IWorkflowPieceData>()
   const data = watch()
   const checkedFromUpstream = data.inputs[itemKey]?.fromUpstream
 
@@ -79,7 +80,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
     const typeClass = schema.allOf[0]['$ref'].split("/").pop();
     const valuesOptions: Array<string> = definitions?.[typeClass].enum;
     inputElement =
-      <SelectInput
+      <SelectInput<IWorkflowPieceData>
         label={itemKey}
         defaultValue={schema?.default}
         name={`inputs.${itemKey}.value`}
@@ -87,7 +88,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
       />
   } else if ((schema.type === 'number') && !schema.format) {
     inputElement =
-      <NumberInput
+      <NumberInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         type="float"
         label={schema.title}
@@ -95,14 +96,14 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
       />
   } else if (schema.type === 'integer' && !schema.format) {
     inputElement =
-      <NumberInput
+      <NumberInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         type="int"
         label={schema.title}
         defaultValue={schema?.default ?? 10}
       />
   } else if (schema.type === 'boolean' && !schema.format) {
-    inputElement = <CheckboxInput
+    inputElement = <CheckboxInput<IWorkflowPieceData>
       name={`inputs.${itemKey}.value`}
       label={schema.title}
     />
@@ -117,33 +118,33 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
       />
   } else if (schema.type === 'string' && schema.format === 'date') {
     inputElement =
-      <DatetimeInput
+      <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date"
       />;
   } else if (schema.type === 'string' && schema?.format === 'time') {
     inputElement =
-      <DatetimeInput
+      <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="time"
       />;
   } else if (schema.type === 'string' && schema?.format === 'date-time') {
     inputElement =
-      <DatetimeInput
+      <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date-time"
       />;
   } else if (schema.type === 'string' && schema?.widget === 'codeeditor') {
     inputElement =
-      <CodeEditorInput
+      <CodeEditorInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
       />
   } else if (schema.type === 'string' && !schema.format) {
     inputElement =
-      <TextInput
+      <TextInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
       />;

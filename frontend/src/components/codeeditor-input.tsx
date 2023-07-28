@@ -1,7 +1,6 @@
 import React from 'react';
 import CodeEditor from '@uiw/react-textarea-code-editor';
-import { Controller, useFormContext } from 'react-hook-form';
-import { IWorkflowPieceData } from 'context/workflows/types';
+import { Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
 
 const CodeEditorItem = React.forwardRef(({ ...register }) => (
   <CodeEditor
@@ -23,8 +22,12 @@ const CodeEditorItem = React.forwardRef(({ ...register }) => (
   />
 ))
 
-const CodeEditorInput: React.FC<{ name: `inputs.${string}.value` }> = ({ name }) => {
-  const { control } = useFormContext<IWorkflowPieceData>()
+interface Props<T> {
+  name: Path<T>
+}
+
+function CodeEditorInput<T extends FieldValues>({ name }: Props<T>) {
+  const { control } = useFormContext()
 
   return (<Controller
     name={name}
@@ -37,4 +40,4 @@ const CodeEditorInput: React.FC<{ name: `inputs.${string}.value` }> = ({ name })
   />);
 }
 
-export default React.memo(CodeEditorInput);
+export default CodeEditorInput;

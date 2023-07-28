@@ -6,15 +6,17 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import { IWorkflowPieceData, InputArray } from 'context/workflows/types';
-import { ArrayOption } from '../piece-form.component/upstream-options';
-import TextInput from './text-input';
-import SelectInput from './select-input';
-import NumberInput from './number-input';
-import CheckboxInput from './checkbox-input';
-import DatetimeInput from './datetime-input';
-import CodeEditorInput from './codeeditor-input';
+
+import TextInput from 'components/text-input';
+import SelectInput from 'components/select-input';
+import NumberInput from 'components/number-input';
+import CheckboxInput from 'components/checkbox-input';
+import DatetimeInput from 'components/datetime-input';
+import CodeEditorInput from 'components/codeeditor-input';
+
 import SelectUpstreamInput from './select-upstream-input';
 import ObjectInputComponent from './object-input';
+import { ArrayOption } from '../piece-form.component/upstream-options';
 
 interface ArrayInputItemProps {
   inputKey: string

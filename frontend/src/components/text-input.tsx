@@ -1,17 +1,16 @@
-import { TextField } from '@mui/material';
-import { IWorkflowPieceData } from 'context/workflows/types';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { TextField } from '@mui/material';
+import { FieldValues, Path, useFormContext } from 'react-hook-form';
 import fetchFromObject from 'utils/fetch-from-object';
 
-interface Props {
+interface Props<T> {
   label: string
-  name: `inputs.${string}`
+  name: Path<T>
   defaultValue?: string
 }
 
-const TextInput: React.FC<Props> = ({ name, label, defaultValue = "" }) => {
-  const { register, formState:{errors} } = useFormContext<IWorkflowPieceData>()
+function TextInput<T extends FieldValues>({ name, label, defaultValue = "" }:Props<T>) {
+  const { register, formState:{errors} } = useFormContext()
 
   const error = fetchFromObject(errors,name)
 
@@ -27,4 +26,4 @@ const TextInput: React.FC<Props> = ({ name, label, defaultValue = "" }) => {
     />);
 }
 
-export default React.memo(TextInput);
+export default TextInput;

@@ -1,10 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
-import { Option } from '../piece-form.component/upstream-options';
-import TextInput from './text-input';
-import SelectUpstreamInput from './select-upstream-input';
-import { Box, Container, Grid } from '@mui/material';
-import CheckboxInput from './checkbox-input';
 import { useWatch } from 'react-hook-form';
+import { Grid } from '@mui/material';
+
+import TextInput from 'components/text-input';
+import CheckboxInput from 'components/checkbox-input';
+
+import SelectUpstreamInput from './select-upstream-input';
+import { Option } from '../piece-form.component/upstream-options';
 
 interface Prop {
   name: `inputs.${string}.value.${number}`

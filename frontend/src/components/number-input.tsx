@@ -1,18 +1,17 @@
 import { TextField } from '@mui/material';
-import { IWorkflowPieceData } from 'context/workflows/types';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { FieldValues, Path, useFormContext } from 'react-hook-form';
 import fetchFromObject from 'utils/fetch-from-object';
 
-interface Props {
+interface Props<T> {
   label: string
-  name: `inputs.${string}.value`
+  name: Path<T>
   defaultValue: number
   type: "float" | "int"
 }
 
-const NumberInput: React.FC<Props> = ({ name, label, type = "int", defaultValue }) => {
-  const { register, formState:{errors} } = useFormContext<IWorkflowPieceData>()
+function NumberInput<T extends FieldValues>({ name, label, type = "int", defaultValue }:Props<T>) {
+  const { register, formState:{errors} } = useFormContext()
 
   const error = fetchFromObject(errors,name)
 
@@ -34,4 +33,4 @@ const NumberInput: React.FC<Props> = ({ name, label, type = "int", defaultValue 
     />);
 }
 
-export default React.memo(NumberInput);
+export default NumberInput;

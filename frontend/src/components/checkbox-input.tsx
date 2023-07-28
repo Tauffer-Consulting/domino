@@ -1,18 +1,17 @@
 import { Checkbox, FormControlLabel, FormHelperText } from '@mui/material';
-import { IWorkflowPieceData } from 'context/workflows/types';
 import React from 'react';
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext, Controller, FieldValues, Path } from 'react-hook-form';
 import fetchFromObject from 'utils/fetch-from-object';
 
-interface Props {
-  name: `inputs.${string}.value` | `inputs.${string}.fromUpstream` | `inputs.${string}.fromUpstream.${string}`
+interface Props<T> {
+  name: Path<T>
   label?: string
   defaultChecked?: boolean
   disabled?: boolean
 }
 
-const CheckboxInput: React.FC<Props> = ({ label, name, defaultChecked = false, disabled = false }) => {
-  const { control, formState: { errors } } = useFormContext<IWorkflowPieceData>()
+function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = false, disabled = false }:Props<T>) {
+  const { control, formState: { errors } } = useFormContext<T>()
 
   const error = fetchFromObject(errors, name)
 
@@ -55,4 +54,4 @@ const CheckboxInput: React.FC<Props> = ({ label, name, defaultChecked = false, d
   );
 }
 
-export default React.memo(CheckboxInput);
+export default CheckboxInput;
