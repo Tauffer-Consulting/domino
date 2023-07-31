@@ -133,7 +133,7 @@ const WorkflowEditorPanelComponent = () => {
     const piece = await fetchForagePieceById(data.id)
     const inputSchema = piece?.input_schema
     const defaultData: any = extractDefaultValues(inputSchema)
-    const containerResourcesDefaultData: unknown = extractDefaultValues(containerResourcesSchema)
+    const defaultContainerResources: unknown = extractDefaultValues(containerResourcesSchema)
 
     const currentWorkflowPieces = await getForageWorkflowPieces()
     const newWorkflowPieces = {
@@ -143,7 +143,7 @@ const WorkflowEditorPanelComponent = () => {
     await setForageWorkflowPieces(newWorkflowPieces)
 
     // Set default data for upstream mapping - used in dags
-    var upstreamMapFormInfo: any = {}
+    const defaultInputs: any = {}
     for (const key in defaultData) {
       const fromUpstream = false // TODO - If someday we allow default upstream true we should change this
       const upstreamId = null
@@ -164,7 +164,7 @@ const WorkflowEditorPanelComponent = () => {
             for (const [_key, _value] of Object.entries(element)) {
               newValue.fromUpstream = {
                 ...newValue.fromUpstream,
-                [_key]: ""
+                [_key]: fromUpstream
               }
               newValue.upstreamId = {
                 ...newValue.upstreamId,
@@ -187,8 +187,8 @@ const WorkflowEditorPanelComponent = () => {
           } else {
             newValue = {
               fromUpstream: fromUpstream,
-              upstreamId: upstreamId,
-              upstreamArgument: null,
+              upstreamId: upstreamId ?? "",
+              upstreamArgument: "",
               upstreamValue: "",
               value: element
             }
@@ -197,7 +197,7 @@ const WorkflowEditorPanelComponent = () => {
         }
         defaultValues = auxDefaultValues
       }
-      upstreamMapFormInfo[key] = {
+      defaultInputs[key] = {
         fromUpstream,
         upstreamId: upstreamId ?? "",
         upstreamArgument: "",
@@ -211,17 +211,11 @@ const WorkflowEditorPanelComponent = () => {
     // TODO: refactor types here
     const defaultWorkflowPieceData = {
       storage: { storageAccessMode: storageAccessModes.ReadWrite },
-      containerResources: containerResourcesDefaultData,
-      inputs: upstreamMapFormInfo
+      containerResources: defaultContainerResources,
+      inputs: defaultInputs
     } as unknown as IWorkflowPieceData
 
     await setForageWorkflowPiecesData(newNode.id, defaultWorkflowPieceData)
-
-    defaultData['storage'] = {
-      "storageAccessMode": 'Read/Write',
-    }
-    defaultData['containerResources'] = containerResourcesDefaultData
-    // Set default data for the node form - used in json-forms
   }, [
     fetchForagePieceById,
     nodeDirection,

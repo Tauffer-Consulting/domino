@@ -2,13 +2,13 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import * as yup from 'yup'
 import { FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
-import { IWorkflowPieceData, storageAccessModeType, storageAccessModes } from 'context/workflows/types';
+import { IStorageFormData, IWorkflowPieceData, storageAccessModeType, storageAccessModes } from 'context/workflows/types';
 
 export const storageFormSchema = yup.object().shape({
   storageAccessMode: yup.mixed().oneOf(Object.values(storageAccessModes)).required(),
 });
 
-export const defaultStorage = {
+export const defaultStorage: IStorageFormData = {
   storageAccessMode: storageAccessModes.None as storageAccessModeType
 }
 

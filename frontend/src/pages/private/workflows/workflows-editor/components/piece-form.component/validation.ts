@@ -52,10 +52,7 @@ const validationObject = {
     }), {}))
   }),
   value: yup.lazy(obj => {
-    return yup.object().shape(Object.keys(obj).reduce((acc, val) => {
-      console.log(obj)
-
-      return ({
+    return yup.object().shape(Object.keys(obj).reduce((acc, val) => ({
         ...acc,
         [val]: yup.string().when("fromUpstream", ([fromUpstream]) => {
           if (fromUpstream) {
@@ -64,7 +61,7 @@ const validationObject = {
           return yup.string().required()
         })
       })
-    }, {}))
+    , {}))
   }),
 }
 

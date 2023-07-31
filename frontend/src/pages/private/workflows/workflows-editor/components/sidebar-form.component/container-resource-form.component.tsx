@@ -9,7 +9,7 @@ import {
 
 import * as yup from "yup";
 import { useFormContext } from "react-hook-form";
-import { IWorkflowPieceData } from "context/workflows/types";
+import { IContainerResourceFormData, IWorkflowPieceData } from "context/workflows/types";
 
 // TODO check if these values make sense
 const minAcceptedMemory = 128
@@ -17,19 +17,28 @@ const minAcceptedCpu = 100
 const maxAcceptedMemory = 12800
 const maxAcceptedCpu = 10000
 
-export const defaultContainerResources = {
+export const defaultContainerResources: IContainerResourceFormData = {
   useGpu: false,
-  memoryMin: 128,
-  memoryMax: 128,
-  cpuMin: 100,
-  cpuMax: 100
+  memory: {
+    min: 128,
+    max: 128,
+  },
+  cpu: {
+    min: 100,
+    max: 100
+  }
 }
 
-export const ContainerResourceFormSchema = yup.object().shape({
-  cpuMin: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required(),
-  cpuMax: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required(),
-  memoryMin: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required(),
-  memoryMax: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required(),
+export const ContainerResourceFormSchema: yup.ObjectSchema<IContainerResourceFormData> = yup.object().shape({
+  cpu: yup.object().shape({
+    min: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required(),
+    max: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required()
+  }),
+  memory: yup.object().shape({
+    min: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required(),
+    max: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required()
+  }),
+  useGpu: yup.boolean().required(),
 });
 
 const ContainerResourceForm: React.FC = () => {
@@ -50,9 +59,9 @@ const ContainerResourceForm: React.FC = () => {
             min: minAcceptedCpu,
             max: maxAcceptedCpu
           }}
-          error={!!formState.errors.containerResources?.cpuMin?.message}
-          helperText={formState.errors.containerResources?.cpuMin?.message}
-          {...register("containerResources.cpuMin")}
+          error={!!formState.errors.containerResources?.cpu?.min?.message}
+          helperText={formState.errors.containerResources?.cpu?.min?.message}
+          {...register("containerResources.cpu.min")}
         />
       </Grid>
       <Grid item xs={6}>
@@ -65,9 +74,9 @@ const ContainerResourceForm: React.FC = () => {
             min: minAcceptedCpu,
             max: maxAcceptedCpu
           }}
-          error={!!formState.errors.containerResources?.cpuMax?.message}
-          helperText={formState.errors.containerResources?.cpuMax?.message}
-          {...register(`containerResources.${"cpuMax"}`)}
+          error={!!formState.errors.containerResources?.cpu?.max?.message}
+          helperText={formState.errors.containerResources?.cpu?.max?.message}
+          {...register(`containerResources.cpu.max`)}
         />
       </Grid>
       <Grid item xs={6}>
@@ -80,9 +89,9 @@ const ContainerResourceForm: React.FC = () => {
             min: minAcceptedMemory,
             max: maxAcceptedMemory
           }}
-          error={!!formState.errors.containerResources?.memoryMin?.message}
-          helperText={formState.errors.containerResources?.memoryMin?.message}
-          {...register("containerResources.memoryMin")}
+          error={!!formState.errors.containerResources?.memory?.min?.message}
+          helperText={formState.errors.containerResources?.memory?.min?.message}
+          {...register("containerResources.memory.min")}
         />
       </Grid>
       <Grid item xs={6}>
@@ -95,9 +104,9 @@ const ContainerResourceForm: React.FC = () => {
             min: minAcceptedMemory,
             max: maxAcceptedMemory
           }}
-          error={!!formState.errors.containerResources?.memoryMax?.message}
-          helperText={formState.errors.containerResources?.memoryMax?.message}
-          {...register("containerResources.memoryMax")}
+          error={!!formState.errors.containerResources?.memory?.max?.message}
+          helperText={formState.errors.containerResources?.memory?.max?.message}
+          {...register("containerResources.memory.max")}
         />
       </Grid>
       <Grid item xs={12}>

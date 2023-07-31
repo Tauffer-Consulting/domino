@@ -12,12 +12,12 @@ export enum scheduleIntervals {
 
 export enum endDateTypes {
     Never = "Never",
-    UserDefined = "User Defined",
+    UserDefined = "UserDefined",
 }
 
 export enum storageSources {
     None = "None",
-    AWSS3 = "AWS S3",
+    AWSS3 = "AWSS3",
 }
 
 export type storageSourceType = keyof typeof storageSources;
@@ -35,8 +35,8 @@ export interface IWorkflowSettingsConfig {
 
 export interface IWorkflowSettingsStorage {
     storageSource: storageSourceType,
-    baseFolder: string,
-    bucket: string
+    baseFolder?: string,
+    bucket?: string
 }
 export interface IWorkflowSettings {
     config: IWorkflowSettingsConfig

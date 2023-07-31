@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Drawer,
   Grid,
@@ -9,7 +9,6 @@ import {
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { FormProvider, useForm } from 'react-hook-form';
-
 import * as yup from "yup"
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
@@ -38,8 +37,6 @@ const defaultValues: IWorkflowPieceData = {
   storage: defaultStorage,
   inputs: {},
 }
-
-
 
 const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const {
@@ -71,11 +68,12 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   })
   const data = methods.watch()
 
-  // console.log("ERRORS: ", methods.formState.errors)
+  const [loaded,setLoaded] = useState(false)
 
   const loadData = useCallback(async () => {
     const data = await fetchForageWorkflowPiecesDataById(formId)
     methods.reset(data) // put forage data on form if exist
+    setLoaded(true)
   }, [formId, methods.reset])
 
   const saveData = useCallback(async () => {
@@ -84,6 +82,12 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     }
   }, [formId, open, data])
 
+  const validate = useCallback(()=>{
+    if(loaded)
+      methods.trigger()
+  },[loaded,methods.trigger])
+
+  useEffect(()=>{validate()},[validate])
 
   //load forage
   useEffect(() => {

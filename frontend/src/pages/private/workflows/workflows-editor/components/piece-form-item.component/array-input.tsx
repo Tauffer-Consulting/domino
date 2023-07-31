@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Control, FieldArrayWithId, useFieldArray, useFormContext } from 'react-hook-form';
 
-import { Card, CardContent, IconButton, Box, Grid } from '@mui/material';
+import { Card, CardContent, IconButton, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
