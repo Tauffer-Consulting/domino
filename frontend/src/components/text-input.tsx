@@ -1,15 +1,16 @@
 import React from 'react';
-import { TextField } from '@mui/material';
-import { FieldValues, Path, useFormContext } from 'react-hook-form';
+import { TextField, TextFieldProps } from '@mui/material';
+import { FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
 import fetchFromObject from 'utils/fetch-from-object';
 
-interface Props<T> {
+type Props<T> = Omit<TextFieldProps, "variant" | "type"> & {
   label: string
   name: Path<T>
   defaultValue?: string
+  registerOptions?: RegisterOptions<FieldValues>
 }
 
-function TextInput<T extends FieldValues>({ name, label, defaultValue = "" }:Props<T>) {
+function TextInput<T extends FieldValues>({ name, label, defaultValue = "",registerOptions, ...rest }:Props<T>) {
   const { register, formState:{errors} } = useFormContext()
 
   const error = fetchFromObject(errors,name)
@@ -22,7 +23,8 @@ function TextInput<T extends FieldValues>({ name, label, defaultValue = "" }:Pro
       defaultValue={defaultValue}
       error={!!error?.message}
       helperText={error?.message}
-      {...register(name)}
+      {...rest}
+      {...register(name,registerOptions)}
     />);
 }
 

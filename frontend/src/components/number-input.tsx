@@ -1,19 +1,32 @@
-import { TextField } from '@mui/material';
-import React from 'react';
-import { FieldValues, Path, useFormContext } from 'react-hook-form';
+import { TextField, TextFieldProps } from '@mui/material';
+import React, { useMemo } from 'react';
+import { FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
 import fetchFromObject from 'utils/fetch-from-object';
 
-interface Props<T> {
+type Props<T> = Omit<TextFieldProps,"variant"> & {
   label: string
   name: Path<T>
-  defaultValue: number
+  defaultValue?: number
   type: "float" | "int"
+  registerOptions?: RegisterOptions<FieldValues>
 }
 
-function NumberInput<T extends FieldValues>({ name, label, type = "int", defaultValue }:Props<T>) {
+function NumberInput<T extends FieldValues>({ name, label, type = "int", defaultValue = 0, inputProps, registerOptions , ...rest }:Props<T>) {
   const { register, formState:{errors} } = useFormContext()
 
   const error = fetchFromObject(errors,name)
+
+  const options = useMemo<RegisterOptions<FieldValues>>(()=>{
+   if(registerOptions){
+    return {
+      ...registerOptions,
+      valueAsNumber: true
+    } as RegisterOptions<FieldValues>
+   }
+   return {
+    valueAsNumber: true
+  }
+  },[registerOptions])
 
   return (
     <TextField
@@ -25,11 +38,11 @@ function NumberInput<T extends FieldValues>({ name, label, type = "int", default
       error={!!error?.message}
       helperText={error?.message}
       inputProps={{
+        ...inputProps,
         step: type === "int" ? 1 : 0.1,
       }}
-      {...register(name, {
-        valueAsNumber: true
-      })}
+      {...rest}
+      {...register(name, options)}
     />);
 }
 

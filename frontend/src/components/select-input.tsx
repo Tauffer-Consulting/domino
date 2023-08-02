@@ -1,25 +1,27 @@
 import React from 'react';
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
-import { FieldValues, Path, useFormContext } from 'react-hook-form';
+import { FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectProps } from '@mui/material';
+import { FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
 import fetchFromObject from 'utils/fetch-from-object';
 
-type Props<T> = {
+type Props<T> = SelectProps & {
   name: Path<T>
   label: string
   options: string[] | {label:string,value:string}[]
 
   emptyValue: true
   defaultValue?: string
-} | {
+  registerOptions?: RegisterOptions<FieldValues, (string | undefined) & Path<T>> | undefined
+} | SelectProps & {
   name: Path<T>
   label: string
   options: string[] | {label:string,value:string}[]
 
   emptyValue?: boolean
   defaultValue: string
+  registerOptions?: RegisterOptions<FieldValues>
 }
 
-function SelectInput<T extends FieldValues>({ options, label, name, defaultValue, emptyValue }:Props<T>) {
+function SelectInput<T extends FieldValues>({ options, label, name, defaultValue, emptyValue, registerOptions, ...rest }:Props<T>) {
   const { register, formState:{errors} } = useFormContext()
 
   const error = fetchFromObject(errors,name)
@@ -29,7 +31,8 @@ function SelectInput<T extends FieldValues>({ options, label, name, defaultValue
       <InputLabel>{label}</InputLabel>
       <Select
         defaultValue={emptyValue ? "" : defaultValue}
-        {...register(name)}
+        {...rest}
+        {...register(name,registerOptions)}
       >
         {emptyValue && <MenuItem value="" disabled>
           <em>None</em>
