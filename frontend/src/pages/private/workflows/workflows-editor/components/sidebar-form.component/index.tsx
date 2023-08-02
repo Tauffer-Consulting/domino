@@ -22,7 +22,7 @@ import ContainerResourceForm, { ContainerResourceFormSchema, defaultContainerRes
 import StorageForm, { defaultStorage, storageFormSchema } from './storage-form.component';
 
 import { IWorkflowPieceData } from 'context/workflows/types';
-import useYupValidationResolver from 'utils/validationResolver';
+import yupResolver from 'utils/validationResolver';
 
 interface ISidebarPieceFormProps {
   formId: string,
@@ -60,7 +60,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     });
   }, [schema])
 
-  const resolver = useYupValidationResolver(SidebarPieceFormSchema);
+  const resolver = yupResolver(SidebarPieceFormSchema);
   const methods = useForm({
     defaultValues,
     resolver,

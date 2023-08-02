@@ -69,7 +69,7 @@ export const toNestError = <TFieldValues extends FieldValues>(
   return fieldErrors;
 };
 
-const useYupValidationResolver = (
+const yupResolver = (
   validationSchema: ObjectSchema<Record<string, any>>
 ) => async (data: any) => {
   try {
@@ -109,4 +109,4 @@ const useYupValidationResolver = (
   }
 }
 
-export default useYupValidationResolver;
+export default yupResolver;
