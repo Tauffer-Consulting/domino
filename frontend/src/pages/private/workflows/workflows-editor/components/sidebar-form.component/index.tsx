@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import {
   Drawer,
   Grid,
@@ -66,37 +66,33 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     resolver,
     mode: "onChange"
   })
+  const { trigger, reset } = methods
   const data = methods.watch()
-
-  const [loaded,setLoaded] = useState(false)
 
   const loadData = useCallback(async () => {
     const data = await fetchForageWorkflowPiecesDataById(formId)
-    methods.reset(data) // put forage data on form if exist
-    setLoaded(true)
-  }, [formId, methods.reset])
+    if(data){
+      reset(data) // put forage data on form if exist
+    } else {
+      reset()
+    }
+    trigger()
+  }, [formId,fetchForageWorkflowPiecesDataById, reset, trigger])
 
   const saveData = useCallback(async () => {
     if (formId && open) {
       await setForageWorkflowPiecesData(formId, data as IWorkflowPieceData)
     }
-  }, [formId, open, data])
-
-  const validate = useCallback(()=>{
-    if(loaded)
-      methods.trigger()
-  },[loaded,methods.trigger])
-
-  useEffect(()=>{validate()},[validate])
+  }, [formId, open, data, setForageWorkflowPiecesData])
 
   //load forage
   useEffect(() => {
     if (open) {
       loadData()
     } else {
-      methods.reset()
+      reset()
     }
-  }, [open, loadData])
+  }, [open,reset,loadData])
 
   // save on forage
   useEffect(() => {
