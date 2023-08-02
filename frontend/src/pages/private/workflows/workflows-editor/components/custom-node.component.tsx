@@ -18,6 +18,7 @@ export interface INodeData {
   name: string
   style: IStyleData
   handleOriantation: "horizontal" | "vertical"
+  error: boolean
 }
 
 
@@ -84,6 +85,12 @@ const CustomNode = memo((data: any) => {
   if (extendedData?.style.hasOwnProperty('nodeStyle')) {
     customStyle = Object.assign(customStyle, extendedData.style.nodeStyle)
   }
+
+  if(extendedData?.error){
+    console.log("erro no node", extendedData)
+    customStyle = Object.assign(customStyle, {backgroundColor:"red"})
+  }
+
 
   return (
     <div className={extendedClass} style={customStyle}>

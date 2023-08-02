@@ -5,7 +5,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { Button, Grid, Paper, Backdrop, CircularProgress } from '@mui/material'
 import { withContext } from 'common/hocs/with-context.hoc'
 import { WorkflowsEditorProvider } from 'context/workflows/workflows-editor.context'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import WorkflowEditorPanelComponent from './workflow-editor-panel.component'
 import { PermanentDrawerRightWorkflows } from './drawer-menu-component'
@@ -14,6 +14,14 @@ import { workflowFormSchema, workflowFormUISchema } from 'common/schemas/workflo
 import { useWorkflowsEditor } from "context/workflows/workflows-editor.context"
 import { workflowFormName } from "../../../../../constants"
 import { toast } from "react-toastify"
+
+import * as yup from "yup"
+
+import { createInputsSchemaValidation } from './piece-form.component/validation';
+import yupResolver from 'utils/validationResolver';
+import { storageFormSchema } from './sidebar-form.component/storage-form.component';
+import { ContainerResourceFormSchema } from './sidebar-form.component/container-resource-form.component';
+import { IWorkflowElement } from 'services/requests/workflow';
 /**
  * Create workflow tab
  // TODO refactor/simplify inner files
@@ -84,11 +92,41 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
   }, [fetchForagePieceById])
 
+  const [nodesWithErros,setNodesWithErros] = useState<string[]>([])
+
   const handleSaveWorkflow = useCallback(async () => {
     try {
       //setBackdropIsOpen(true)
       const payload = await workflowsEditorBodyFromFlowchart()
-      console.log('payload', payload)
+
+      const validationSchema = yup.object().shape(Object.entries(payload.workflowPieces).reduce((acc, [key, value]) => {
+        return {
+          [key]: yup.object({
+            storage: storageFormSchema,
+            containerResources: ContainerResourceFormSchema,
+            inputs: createInputsSchemaValidation((value as any).input_schema)
+          }),
+          ...acc
+        }
+      }, {})) as any
+
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const resolver = yupResolver(validationSchema)
+
+      const validatedData = await resolver(payload.workflowPiecesData)
+
+      if (!Object.keys(validatedData.errors).length) {
+        console.log("isValid: ", true)
+        console.log("values: ", validatedData.values)
+        setNodesWithErros([])
+      } else {
+        console.log("isValid: ", false)
+        console.log("errors: ", validatedData.errors)
+        const nodeIds = Object.keys(validatedData.errors)
+        setNodesWithErros(nodeIds)
+        return toast.error('Please review the errors on your workflow')
+      }
+
 
       // if ((!payload.tasks)) {
       //   setBackdropIsOpen(false)
@@ -227,7 +265,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
               </Grid>
             </Grid>
             <Paper>
-              <WorkflowEditorPanelComponent />
+              <WorkflowEditorPanelComponent nodesWithErros={nodesWithErros} />
             </Paper>
           </Grid>
           <PermanentDrawerRightWorkflows

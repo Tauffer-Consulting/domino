@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 import ReactFlow, {
@@ -38,7 +38,11 @@ const getId = (module_name) => {
   return `${module_name}_${uuidv4()}`
 }
 
-const WorkflowEditorPanelComponent = () => {
+interface Props {
+  nodesWithErros: string[]
+}
+
+const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
   const [formSchema, setFormSchema] = useState<any>({})
   const [formId, setFormId] = useState<string>("")
   const [formTitle, setFormTitle] = useState<string>('')
@@ -120,6 +124,7 @@ const WorkflowEditorPanelComponent = () => {
       name: data.name,
       style: data.style,
       handleOriantation: nodeDirection,
+      error: false,
     }
 
     const newNode = {
@@ -250,6 +255,35 @@ const WorkflowEditorPanelComponent = () => {
   const onConnect = useCallback((connection: Connection) => {
     setEdges((eds: Edge[]) => addEdge(connection, eds))
   }, [setEdges]);
+
+  const setNodeErrors = useCallback((nodeIds: string[]) => {
+    setNodes((nds) =>
+      nds.map(n => {
+        if (nodeIds.includes(n.id)) {
+          n = {
+            ...n,
+            data: {
+              ...n.data,
+              error: true,
+            }
+          }
+        } else {
+          n = {
+            ...n,
+            data: {
+              ...n.data,
+              error: false,
+            }
+          }
+        }
+        return n
+      })
+    )
+  }, [setNodes])
+
+  useEffect(()=>{
+    setNodeErrors(nodesWithErros)
+  },[nodesWithErros, setNodeErrors])
 
   return (
     <ReactFlowProvider>
