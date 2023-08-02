@@ -2,14 +2,13 @@ import React from "react";
 import {
   Grid,
   Typography,
-  TextField,
-  FormControlLabel,
-  Checkbox,
 } from '@mui/material'
 
 import * as yup from "yup";
+import { IContainerResourceFormData } from "context/workflows/types";
+import NumberInput from "components/number-input";
+import CheckboxInput from "components/checkbox-input";
 import { useFormContext } from "react-hook-form";
-import { IContainerResourceFormData, IWorkflowPieceData } from "context/workflows/types";
 
 // TODO check if these values make sense
 const minAcceptedMemory = 128
@@ -32,17 +31,16 @@ export const defaultContainerResources: IContainerResourceFormData = {
 export const ContainerResourceFormSchema: yup.ObjectSchema<IContainerResourceFormData> = yup.object().shape({
   cpu: yup.object().shape({
     min: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required(),
-    max: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required()
+    max: yup.number().integer().max(maxAcceptedCpu).when("min",([min],schema)=>schema.min(min)).required()
   }),
   memory: yup.object().shape({
     min: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required(),
-    max: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required()
+    max: yup.number().integer().max(maxAcceptedMemory).when("min",([min],schema)=>schema.min(min)).required()
   }),
   useGpu: yup.boolean().required(),
 });
 
 const ContainerResourceForm: React.FC = () => {
-  const { register, formState } = useFormContext<IWorkflowPieceData>();
 
   return (
     <Grid container spacing={2}>
@@ -50,72 +48,56 @@ const ContainerResourceForm: React.FC = () => {
         <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
       </Grid>
       <Grid item xs={6}>
-        <TextField
+        <NumberInput
           label="CPU Min"
-          type="number"
+          name="containerResources.cpu.min"
           required
-          fullWidth
+          type="int"
           inputProps={{
             min: minAcceptedCpu,
             max: maxAcceptedCpu
           }}
-          error={!!formState.errors.containerResources?.cpu?.min?.message}
-          helperText={formState.errors.containerResources?.cpu?.min?.message}
-          {...register("containerResources.cpu.min")}
         />
       </Grid>
       <Grid item xs={6}>
-        <TextField
+        <NumberInput
           label="CPU Max"
-          type="number"
+          name="containerResources.cpu.max"
+          type="int"
           required
-          fullWidth
           inputProps={{
             min: minAcceptedCpu,
             max: maxAcceptedCpu
           }}
-          error={!!formState.errors.containerResources?.cpu?.max?.message}
-          helperText={formState.errors.containerResources?.cpu?.max?.message}
-          {...register(`containerResources.cpu.max`)}
         />
       </Grid>
       <Grid item xs={6}>
-        <TextField
+        <NumberInput
           label="Memory Min"
-          type="number"
+          name="containerResources.memory.min"
+          type="int"
           required
-          fullWidth
           inputProps={{
             min: minAcceptedMemory,
             max: maxAcceptedMemory
           }}
-          error={!!formState.errors.containerResources?.memory?.min?.message}
-          helperText={formState.errors.containerResources?.memory?.min?.message}
-          {...register("containerResources.memory.min")}
         />
       </Grid>
       <Grid item xs={6}>
-        <TextField
+        <NumberInput
           label="Memory Max"
-          type="number"
+          name="containerResources.memory.max"
+          type="int"
           required
-          fullWidth
           inputProps={{
             min: minAcceptedMemory,
             max: maxAcceptedMemory
           }}
-          error={!!formState.errors.containerResources?.memory?.max?.message}
-          helperText={formState.errors.containerResources?.memory?.max?.message}
-          {...register("containerResources.memory.max")}
         />
       </Grid>
       <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              {...register("containerResources.useGpu")}
-            />
-          }
+        <CheckboxInput
+          name="containerResources.useGpu"
           label="Use GPU"
         />
       </Grid>
