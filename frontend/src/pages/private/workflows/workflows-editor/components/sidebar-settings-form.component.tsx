@@ -11,7 +11,7 @@ import {
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 import { IWorkflowSettings, endDateTypes, scheduleIntervals, storageSources } from 'context/workflows/types/settings';
 
-import yupResolver from 'utils/validationResolver';
+import { yupResolver } from 'utils';
 
 import TextInput from 'components/text-input';
 import SelectInput from 'components/select-input';

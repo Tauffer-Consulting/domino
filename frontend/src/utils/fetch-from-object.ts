@@ -1,4 +1,4 @@
-function fetchFromObject(obj: any, prop: string): any {
+export function fetchFromObject(obj: any, prop: string): any {
 
   if (typeof obj === 'undefined') {
     return;
@@ -13,5 +13,3 @@ function fetchFromObject(obj: any, prop: string): any {
 
   return obj[prop];
 }
-
-export default fetchFromObject

@@ -54,7 +54,7 @@ function set(
   return object;
 }
 
-export const toNestError = <TFieldValues extends FieldValues>(
+const toNestError = <TFieldValues extends FieldValues>(
   errors: FieldErrors,
 ): FieldErrors => {
   const fieldErrors = {} as FieldErrors<TFieldValues>;
@@ -69,7 +69,7 @@ export const toNestError = <TFieldValues extends FieldValues>(
   return fieldErrors;
 };
 
-const yupResolver = (
+export const yupResolver = (
   validationSchema: ObjectSchema<Record<string, any>>
 ) => async (data: any) => {
   try {
@@ -108,5 +108,3 @@ const yupResolver = (
     throw new Error('Error trying to validate form schema');
   }
 }
-
-export default yupResolver;

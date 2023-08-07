@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Option } from '../piece-form.component/upstream-options';
 import { IWorkflowPieceData } from 'context/workflows/types';
-import fetchFromObject from 'utils/fetch-from-object';
+import { fetchFromObject } from 'utils';
 
 type ObjectName = `inputs.${string}.value.${number}.upstreamValue.${string}`
 type Name = `inputs.${string}`

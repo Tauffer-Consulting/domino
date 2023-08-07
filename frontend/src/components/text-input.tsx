@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextField, TextFieldProps } from '@mui/material';
 import { FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
-import fetchFromObject from 'utils/fetch-from-object';
+import { fetchFromObject } from 'utils';
 
 type Props<T> = Omit<TextFieldProps, "variant" | "type"> & {
   label: string

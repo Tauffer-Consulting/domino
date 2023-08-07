@@ -22,7 +22,7 @@ import ContainerResourceForm, { ContainerResourceFormSchema, defaultContainerRes
 import StorageForm, { defaultStorage, storageFormSchema } from './storage-form.component';
 
 import { IWorkflowPieceData } from 'context/workflows/types';
-import yupResolver from 'utils/validationResolver';
+import { yupResolver } from 'utils';
 
 interface ISidebarPieceFormProps {
   formId: string,

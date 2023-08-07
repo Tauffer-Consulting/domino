@@ -18,7 +18,7 @@ import { toast } from "react-toastify"
 import * as yup from "yup"
 
 import { createInputsSchemaValidation } from './piece-form.component/validation';
-import yupResolver from 'utils/validationResolver';
+import { yupResolver } from 'utils';
 import { storageFormSchema } from './sidebar-form.component/storage-form.component';
 import { ContainerResourceFormSchema } from './sidebar-form.component/container-resource-form.component';
 import { IWorkflowElement } from 'services/requests/workflow';

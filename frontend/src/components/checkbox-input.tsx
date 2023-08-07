@@ -1,7 +1,7 @@
 import { Checkbox, FormControlLabel, FormHelperText } from '@mui/material';
 import React from 'react';
 import { useFormContext, Controller, FieldValues, Path } from 'react-hook-form';
-import fetchFromObject from 'utils/fetch-from-object';
+import { fetchFromObject } from 'utils';
 
 interface Props<T> {
   name: Path<T>
@@ -10,7 +10,7 @@ interface Props<T> {
   disabled?: boolean
 }
 
-function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = false, disabled = false }:Props<T>) {
+function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = false, disabled = false }: Props<T>) {
   const { control, formState: { errors } } = useFormContext<T>()
 
   const error = fetchFromObject(errors, name)

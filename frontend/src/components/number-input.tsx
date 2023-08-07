@@ -1,9 +1,9 @@
 import { TextField, TextFieldProps } from '@mui/material';
 import React, { useMemo } from 'react';
 import { FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
-import fetchFromObject from 'utils/fetch-from-object';
+import { fetchFromObject } from 'utils';
 
-type Props<T> = Omit<TextFieldProps,"variant"> & {
+type Props<T> = Omit<TextFieldProps, "variant"> & {
   label: string
   name: Path<T>
   defaultValue?: number
@@ -11,22 +11,22 @@ type Props<T> = Omit<TextFieldProps,"variant"> & {
   registerOptions?: RegisterOptions<FieldValues>
 }
 
-function NumberInput<T extends FieldValues>({ name, label, type = "int", defaultValue = 0, inputProps, registerOptions , ...rest }:Props<T>) {
-  const { register, formState:{errors} } = useFormContext()
+function NumberInput<T extends FieldValues>({ name, label, type = "int", defaultValue = 0, inputProps, registerOptions, ...rest }: Props<T>) {
+  const { register, formState: { errors } } = useFormContext()
 
-  const error = fetchFromObject(errors,name)
+  const error = fetchFromObject(errors, name)
 
-  const options = useMemo<RegisterOptions<FieldValues>>(()=>{
-   if(registerOptions){
+  const options = useMemo<RegisterOptions<FieldValues>>(() => {
+    if (registerOptions) {
+      return {
+        ...registerOptions,
+        valueAsNumber: true
+      } as RegisterOptions<FieldValues>
+    }
     return {
-      ...registerOptions,
       valueAsNumber: true
-    } as RegisterOptions<FieldValues>
-   }
-   return {
-    valueAsNumber: true
-  }
-  },[registerOptions])
+    }
+  }, [registerOptions])
 
   return (
     <TextField
