@@ -88,7 +88,7 @@ const CustomNode = memo((data: any) => {
 
   if(extendedData?.error){
     console.log("erro no node", extendedData)
-    customStyle = Object.assign(customStyle, {backgroundColor:"red"})
+    customStyle = Object.assign(customStyle, {backgroundColor:"#f44336",color:"#e6e6e6"})
   }
 
 
