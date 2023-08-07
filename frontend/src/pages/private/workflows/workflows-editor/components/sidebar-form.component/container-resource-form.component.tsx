@@ -30,12 +30,35 @@ export const defaultContainerResources: IContainerResourceFormData = {
 
 export const ContainerResourceFormSchema: yup.ObjectSchema<IContainerResourceFormData> = yup.object().shape({
   cpu: yup.object().shape({
-    min: yup.number().integer().max(maxAcceptedCpu).min(minAcceptedCpu).required(),
-    max: yup.number().integer().max(maxAcceptedCpu).when("min",([min],schema)=>schema.min(min)).required()
+    min: yup
+      .number()
+      .integer()
+      .typeError('Must must be a number')
+      .max(maxAcceptedCpu)
+      .min(minAcceptedCpu)
+      .required(),
+    max: yup
+      .number()
+      .integer()
+      .typeError('Must be a number')
+      .max(maxAcceptedCpu)
+      .when("min",([min],schema)=>schema.min(min))
+      .required()
   }),
   memory: yup.object().shape({
-    min: yup.number().integer().max(maxAcceptedMemory).min(minAcceptedMemory).required(),
-    max: yup.number().integer().max(maxAcceptedMemory).when("min",([min],schema)=>schema.min(min)).required()
+    min: yup
+      .number()
+      .integer()
+      .max(maxAcceptedMemory)
+      .min(minAcceptedMemory)
+      .required(),
+    max: yup
+      .number()
+      .integer()
+      .typeError('Must be a number')
+      .max(maxAcceptedMemory)
+      .when("min",([min],schema)=>schema.min(min))
+      .required()
   }),
   useGpu: yup.boolean().required(),
 });

@@ -75,7 +75,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired()
         }
-        return yup.number().required()
+        return yup.number().typeError('Must must be a number').required()
       })
     }
   }
@@ -86,7 +86,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired()
         }
-        return yup.number().integer().required()
+        return yup.number().integer().typeError('Must must be a number').required()
       })
     }
   }
