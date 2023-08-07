@@ -79,6 +79,9 @@ class WorkflowBaseSettings(BaseModel):
             return converted_end_date.isoformat()
         except ValueError:
             raise ValueError(f"Invalid end date: {v}")
+    
+    class Config:
+        allow_population_by_field_name = True
 
 
 storage_default_piece_model_map = {
@@ -134,7 +137,7 @@ class TasksDataModel(BaseModel):
 class CreateWorkflowRequest(BaseModel):
     workflow: WorkflowBaseSettings
     tasks: Dict[
-        str,
+        str, # str === TasksDataModel['task_id']
         TasksDataModel
     ]
     ui_schema: UiSchema
