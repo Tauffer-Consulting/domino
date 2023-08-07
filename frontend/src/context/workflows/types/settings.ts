@@ -1,40 +1,46 @@
-import { Dayjs } from "dayjs";
-
 export enum scheduleIntervals {
-    None = "None",
-    Once = "Once",
-    Hourly = "Hourly",
-    Daily = "Daily",
-    Weekly = "Weekly",
-    Monthly = "Monthly",
-    Yearly = "Yearly",
+    None = "none",
+    Once = "once",
+    Hourly = "hourly",
+    Daily = "daily",
+    Weekly = "weekly",
+    Monthly = "monthly",
+    Yearly = "yearly",
 }
+
+export type ScheduleIntervals = `${scheduleIntervals}`
 
 export enum endDateTypes {
-    Never = "Never",
-    UserDefined = "UserDefined",
+    Never = "never",
+    UserDefined = "User defined",
 }
 
-export enum storageSources {
+export type EndDateTypes = `${endDateTypes}`
+
+export enum storageSourcesAWS {
     None = "None",
-    AWSS3 = "AWSS3",
+    AWSS3 = "AWS S3",
 }
 
-export type storageSourceType = keyof typeof storageSources;
-export type endDateTypeType = keyof typeof endDateTypes;
-export type scheduleIntervalType = keyof typeof scheduleIntervals;
+export type StorageSourcesAWS = `${storageSourcesAWS}`
 
+export enum storageSourcesLocal {
+    None = "None",
+    Local = "Local",
+}
+
+export type StorageSourcesLocal = `${storageSourcesLocal}`
 
 export interface IWorkflowSettingsConfig {
     name: string,
-    scheduleInterval: scheduleIntervalType,
-    startDate: Dayjs | string,
-    endDate?: Dayjs | string,
-    endDateType: endDateTypeType,
+    scheduleInterval: ScheduleIntervals,
+    startDate: string,
+    endDate?: string,
+    endDateType: EndDateTypes,
 }
 
 export interface IWorkflowSettingsStorage {
-    storageSource: storageSourceType,
+    storageSource: StorageSourcesAWS | StorageSourcesLocal,
     baseFolder?: string,
     bucket?: string
 }

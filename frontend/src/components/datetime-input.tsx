@@ -10,20 +10,21 @@ interface Props<T> {
   label: string
   name: Path<T>
   type?: "time" | "date" | "date-time"
+  defaultValue?: Date
 }
 
-function DatetimeInput<T extends FieldValues>({ label, name, type = "date" }: Props<T>) {
+function DatetimeInput<T extends FieldValues>({ label, name, type = "date", defaultValue=new Date() }: Props<T>) {
 
   const { control } = useFormContext()
 
-  const defaultValue = new Date().toISOString()
-
   switch (type) {
     case "date-time":
+      const defaultDateTime = dayjs(defaultValue ?? new Date(), 'YYYY-MM-DD HH:mm')
+
       return <Controller
         name={name}
         control={control}
-        defaultValue={dayjs(defaultValue as string, 'YYYY-MM-DD HH:mm') as any}
+        defaultValue={defaultDateTime as any}
         render={({ field: { onChange, value, ...rest } }) => (
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DemoContainer components={['DateTimePicker']}>
@@ -31,8 +32,8 @@ function DatetimeInput<T extends FieldValues>({ label, name, type = "date" }: Pr
                 label={label}
                 ampm={false}
                 format='DD/MM/YYYY HH:mm'
-                value={dayjs(value as string, 'YYYY-MM-DD HH:mm')}
-                onChange={(e) => { onChange(dayjs(e).format('YYYY-MM-DD HH:mm') as any) }}
+                value={dayjs(value)}
+                onChange={(e) => { onChange(dayjs(e).toISOString() as any) }}
                 {...rest}
               />
             </DemoContainer>
@@ -40,10 +41,12 @@ function DatetimeInput<T extends FieldValues>({ label, name, type = "date" }: Pr
         )}
       />;
     case 'time':
+      const defaultTime = dayjs(defaultValue ?? new Date(), 'HH:mm')
+
       return <Controller
         name={name}
         control={control}
-        defaultValue={dayjs(defaultValue as string, 'HH:mm') as any}
+        defaultValue={dayjs(defaultTime, 'HH:mm') as any}
         render={({ field: { onChange, value, ...rest } }) => (
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DemoContainer components={['TimePicker']} sx={{ width: "100%" }} >
@@ -62,10 +65,12 @@ function DatetimeInput<T extends FieldValues>({ label, name, type = "date" }: Pr
       />;
     case 'date':
     default:
+      const defaultDate = dayjs(defaultValue ?? new Date(), 'YYYY-MM-DD')
+
       return <Controller
         name={name}
         control={control}
-        defaultValue={dayjs(defaultValue as string, 'YYYY-MM-DD') as any}
+        defaultValue={dayjs(defaultDate, 'YYYY-MM-DD') as any}
         render={({ field: { value, onChange, ...rest } }) => (
           <DemoContainer components={['DatePicker']} sx={{ width: "100%" }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -74,7 +79,7 @@ function DatetimeInput<T extends FieldValues>({ label, name, type = "date" }: Pr
                 views={['day', 'month', 'year']}
                 format="DD/MM/YYYY"
                 sx={{ width: "100%" }}
-                value={dayjs(value as string, 'YYYY-MM-DD')}
+                value={dayjs(value as string)}
                 onChange={(e) => { onChange(dayjs(e).format('YYYY-MM-DD') as any) }}
                 {...rest}
               />

@@ -9,13 +9,14 @@ import {
 } from '@mui/material'
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
-import { IWorkflowSettings, endDateTypes, scheduleIntervals, storageSources } from 'context/workflows/types/settings';
+import { EndDateTypes, IWorkflowSettings, ScheduleIntervals, StorageSourcesAWS, StorageSourcesLocal, endDateTypes, scheduleIntervals, storageSourcesAWS, storageSourcesLocal } from 'context/workflows/types/settings';
 
 import { yupResolver } from 'utils';
 
 import TextInput from 'components/text-input';
 import SelectInput from 'components/select-input';
 import DatetimeInput from 'components/datetime-input';
+import dayjs from 'dayjs';
 
 interface ISidebarSettingsFormProps {
   open: boolean,
@@ -25,13 +26,12 @@ interface ISidebarSettingsFormProps {
 const defaultSettingsData: IWorkflowSettings = {
   config: {
     name: '',
-    scheduleInterval: "None",
-    startDate: "",
-    endDate: "",
-    endDateType: "Never",
+    scheduleInterval: scheduleIntervals.None,
+    startDate: dayjs(new Date()).toISOString(),
+    endDateType: endDateTypes.Never,
   },
   storage: {
-    storageSource: "None",
+    storageSource: storageSourcesLocal.None,
     baseFolder: '',
     bucket: ''
   }
@@ -62,14 +62,27 @@ type ValidationSchema = yup.ObjectSchema<IWorkflowSettings>
 // TODO check yup validation
 export const WorkflowSettingsFormSchema: ValidationSchema = yup.object().shape({
   config: yup.object().shape({
-    name: yup.string().required(),
-    scheduleInterval: yup.mixed<scheduleIntervals>().oneOf(Object.values(scheduleIntervals)).required(),
+    name: yup.string().matches(/^[\w]*$/, 'Name can only have letters and numbers.').required(),
+    scheduleInterval: yup
+      .mixed<ScheduleIntervals>()
+      .oneOf(Object.values(scheduleIntervals))
+      .required(),
     startDate: yup.string().required(),
     endDate: yup.string(),
-    endDateType: yup.mixed<endDateTypes>().oneOf(Object.values(endDateTypes)).required(),
+    endDateType: yup
+      .mixed<EndDateTypes>()
+      .oneOf(Object.values(endDateTypes))
+      .required(),
   }),
   storage: yup.object().shape({
-    storageSource: yup.mixed<storageSources>().oneOf(Object.values(storageSources)).required(),
+    storageSource: yup.lazy(
+      value => {
+        if (value === storageSourcesAWS.AWSS3) {
+          return yup.mixed<StorageSourcesAWS>().oneOf(Object.values(storageSourcesAWS)).required()
+        }
+        return yup.mixed<StorageSourcesLocal>().oneOf(Object.values(storageSourcesLocal)).required()
+      }
+    ),
     baseFolder: yup.string(),
     bucket: yup.string()
   })
@@ -89,7 +102,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
 
   const resolver = yupResolver(WorkflowSettingsFormSchema);
   const methods = useForm<IWorkflowSettings>({ mode: "onChange", resolver })
-  const { register, watch, reset, trigger } = methods
+  const { register, watch, reset, trigger, getValues } = methods
   const formData = watch()
 
   const [loaded, setLoaded] = useState(false)
@@ -113,7 +126,6 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
 
   const saveData = useCallback(async () => {
     if (open) {
-      console.log(formData)
       await setWorkflowSettingsData(formData)
     }
   }, [formData, open, setWorkflowSettingsData])
@@ -170,7 +182,12 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   type='date-time'
                 />
               </Grid>
-              <Grid container spacing={2} sx={{ margin: "0px" }}>
+              <Grid
+                container
+                spacing={2}
+                alignItems="center"
+                sx={{ margin: "0px" }}
+              >
                 <Grid item xs={4}>
                   <SelectInput
                     name="config.endDateType"
@@ -179,13 +196,15 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                     defaultValue={defaultSettingsData.config.endDateType}
                   />
                 </Grid>
-                <Grid item xs={8}>
-                  <DatetimeInput
-                    name='config.endDate'
-                    label="End Date/Time"
-                    type='date-time'
-                  />
-                </Grid>
+                {getValues().config.endDateType === endDateTypes.UserDefined &&
+                  <Grid item xs={8}>
+                    <DatetimeInput
+                      name='config.endDate'
+                      label="End Date/Time"
+                      type='date-time'
+                    />
+                  </Grid>
+                }
               </Grid>
             </Grid>
           </FormProvider>
@@ -205,7 +224,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                 />
               </Grid>
               {
-                formData.storage.storageSource === 'AWSS3' ? (
+                formData.storage.storageSource === storageSourcesAWS.AWSS3 ? (
                   <>
                     <Grid item xs={12}>
                       <TextField

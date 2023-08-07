@@ -1,11 +1,11 @@
 import { Dayjs } from "dayjs";
 
-type Value = string | number | boolean | Dayjs | null
+type Value = string | number | boolean | Dayjs
 interface BaseInput {
   fromUpstream: boolean, //? allowed | never | always
-  upstreamArgument: string | null,
-  upstreamId: string | null,
-  upstreamValue: string | null,
+  upstreamArgument: string,
+  upstreamId: string,
+  upstreamValue: string,
   value: Value
 }
 
@@ -18,7 +18,7 @@ export interface ObjectInput {
 }
 
 export type InputArray = BaseInput & {
-  value: Record<string,BaseInput>[] | Record<string,ObjectInput>[]
+  value: BaseInput[] | ObjectInput[]
 }
 
 export type Input = BaseInput

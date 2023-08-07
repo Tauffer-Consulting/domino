@@ -3,13 +3,9 @@ export enum storageAccessModes {
   Read = "Read",
   ReadWrite = "Read/Write",
 }
- 
-/**
- * This is equivalent to:
- * type storageAccessModeType = 'None' | 'Read' | 'Read/Write';
- */
-export type storageAccessModeType = keyof typeof storageAccessModes;
+// Equivalent to type StorageAccessModes = "None" | "Read" | "Read/Write"
+export type StorageAccessModes = `${storageAccessModes}`
 
 export interface IStorageFormData {
-  storageAccessMode: storageAccessModeType,
+  storageAccessMode: StorageAccessModes,
 }
