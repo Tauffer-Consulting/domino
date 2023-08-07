@@ -3,16 +3,12 @@ import ClearIcon from '@mui/icons-material/Clear'
 import DownloadIcon from '@mui/icons-material/Download'
 import SaveIcon from '@mui/icons-material/Save';
 import { Button, Grid, Paper, Backdrop, CircularProgress } from '@mui/material'
-import { withContext } from 'common/hocs/with-context.hoc'
-import { WorkflowsEditorProvider } from 'context/workflows/workflows-editor.context'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import WorkflowEditorPanelComponent from './workflow-editor-panel.component'
 import { PermanentDrawerRightWorkflows } from './drawer-menu-component'
-import SidebarSettingsForm from './sidebar-settings-form.component'
-import { workflowFormSchema, workflowFormUISchema } from 'common/schemas/workflowFormSchema'
+import SidebarSettingsForm, { WorkflowSettingsFormSchema } from './sidebar-settings-form.component'
 import { useWorkflowsEditor } from "context/workflows/workflows-editor.context"
-import { workflowFormName } from "../../../../../constants"
 import { toast } from "react-toastify"
 
 import * as yup from "yup"
@@ -21,7 +17,7 @@ import { createInputsSchemaValidation } from './piece-form.component/validation'
 import { yupResolver } from 'utils';
 import { storageFormSchema } from './sidebar-form.component/storage-form.component';
 import { ContainerResourceFormSchema } from './sidebar-form.component/container-resource-form.component';
-import { IWorkflowElement } from 'services/requests/workflow';
+import { AxiosError } from 'axios';
 /**
  * Create workflow tab
  // TODO refactor/simplify inner files
@@ -32,141 +28,99 @@ import { IWorkflowElement } from 'services/requests/workflow';
 export const WorkflowsEditorComponent: React.FC = () => {
 
   const [drawerState, setDrawerState] = useState(false)
-  const [backgropIsOpen, setBackdropIsOpen] = useState(false)
+  const [backdropIsOpen, setBackdropIsOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
   const {
     clearForageData,
     workflowsEditorBodyFromFlowchart,
+    fetchWorkflowForage,
     setNodes,
     setEdges,
     handleCreateWorkflow,
-    fetchForagePieceById
   } = useWorkflowsEditor();
 
-  const validateWorkflowForms = useCallback(async (payload: any) => {
-    const workflowData = payload.workflow
-    const workflowRequiredFields: any = {
-      "name": "Name",
-      "scheduleInterval": "Schedule Interval",
-      "startDate": "Start Date",
-    }
+  const validateWorkflowSettings = useCallback(async (payload: any) => {
+    const resolver = yupResolver(WorkflowSettingsFormSchema)
+    const validatedData = await resolver(payload.workflowSettingsData)
+    if (!Object.keys(validatedData.errors).length) {
+      console.log("WorkflowSettings isValid: ", true)
+      console.log("WorkflowSettings values: ", validatedData.values)
 
-    if (!workflowData || workflowData === undefined) {
-      throw new Error('Workflow settings are missing.')
-    }
+      setNodesWithErros([])
+    } else {
+      console.log("WorkflowSettings isValid: ", false)
+      console.log("WorkflowSettings errors: ", validatedData.errors)
 
-    for (const fieldKey in workflowData) {
-      if (fieldKey in workflowRequiredFields) {
-        if (!(fieldKey in workflowData) || !workflowData[fieldKey]) {
-          throw new Error(`Please fill the ${workflowRequiredFields[fieldKey]} field in Settings.`)
-        }
-      }
+      throw new Error("Please review your workflow settings.");
     }
-
   }, [])
 
-  const validateTasksForms = useCallback(async (payload: any) => {
-    const tasksData: any = payload.tasks
-    //const storageSchema = workflowFormSchema.properties.storage
-    for (const entry of Object.entries(tasksData)) {
-      const [taskId, taskData]: [string, any] = entry;
-      const taskPieceId = taskData.piece.id;
-      const pieceGroundTruth: any = await fetchForagePieceById(taskPieceId)
-      const pieceLabel = pieceGroundTruth?.style?.label ? pieceGroundTruth.style.label : pieceGroundTruth.name
-      if (!pieceGroundTruth) {
-        throw new Error(`Task ${taskId} has an invalid piece.`)
+  const validateWorkflowPiecesData = useCallback(async (payload: any) => {
+    const validationSchema = yup.object().shape(Object.entries(payload.workflowPieces).reduce((acc, [key, value]) => {
+      return {
+        [key]: yup.object({
+          storage: storageFormSchema,
+          containerResources: ContainerResourceFormSchema,
+          inputs: createInputsSchemaValidation((value as any).input_schema)
+        }),
+        ...acc
       }
-      const pieceInputSchema: any = pieceGroundTruth.input_schema
-      const taskPieceInputData = taskData.piece_input_kwargs
-      const requiredFields = pieceInputSchema.required ? pieceInputSchema.required : []
+    }, {})) as any
 
-      for (const required of requiredFields) {
-        if (!(required in taskPieceInputData)) {
-          throw new Error(`${pieceLabel} is missing required input fields.`)
-        }
-      }
+    const resolver = yupResolver(validationSchema)
+
+    const validatedData = await resolver(payload.workflowPiecesData)
+
+    if (!Object.keys(validatedData.errors).length) {
+      console.log("WorkflowPiecesData isValid: ", true)
+      console.log("WorkflowPiecesData values: ", validatedData.values)
+
+      setNodesWithErros([])
+    } else {
+      console.log("WorkflowPiecesData isValid: ", false)
+      console.log("WorkflowPiecesData errors: ", validatedData.errors)
+
+      const nodeIds = Object.keys(validatedData.errors)
+      setNodesWithErros(nodeIds)
+
+      throw new Error("Please review the errors on your workflow.");
     }
-    return
+  }, [])
 
-
-  }, [fetchForagePieceById])
-
-  const [nodesWithErros,setNodesWithErros] = useState<string[]>([])
+  const [nodesWithErros, setNodesWithErros] = useState<string[]>([])
 
   const handleSaveWorkflow = useCallback(async () => {
     try {
-      //setBackdropIsOpen(true)
-      const payload = await workflowsEditorBodyFromFlowchart()
+      setBackdropIsOpen(true)
+      const payload = await fetchWorkflowForage()
 
-      const validationSchema = yup.object().shape(Object.entries(payload.workflowPieces).reduce((acc, [key, value]) => {
-        return {
-          [key]: yup.object({
-            storage: storageFormSchema,
-            containerResources: ContainerResourceFormSchema,
-            inputs: createInputsSchemaValidation((value as any).input_schema)
-          }),
-          ...acc
-        }
-      }, {})) as any
+      await validateWorkflowPiecesData(payload)
+      await validateWorkflowSettings(payload)
 
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const resolver = yupResolver(validationSchema)
+      const data = await workflowsEditorBodyFromFlowchart()
 
-      const validatedData = await resolver(payload.workflowPiecesData)
+      //TODO fill workspace id correctly
+      await handleCreateWorkflow({ workspace_id: "1", ...data })
 
-      if (!Object.keys(validatedData.errors).length) {
-        console.log("isValid: ", true)
-        console.log("values: ", validatedData.values)
-        setNodesWithErros([])
-      } else {
-        console.log("isValid: ", false)
-        console.log("errors: ", validatedData.errors)
-        const nodeIds = Object.keys(validatedData.errors)
-        setNodesWithErros(nodeIds)
-        return toast.error('Please review the errors on your workflow')
-      }
-
-
-      // if ((!payload.tasks)) {
-      //   setBackdropIsOpen(false)
-      //   return toast.error('Please add tasks to the workflow')
-      // }
-      // // try {
-      // //   await validateWorkflowForms(payload)
-      // //   await validateTasksForms(payload)
-      // // }
-      // // catch (err: any) {
-      // //   setBackdropIsOpen(false)
-      // //   return toast.error(err.message)
-      // // }
-
-      // handleCreateWorkflow(payload)
-      //   .then((response) => {
-      //     toast.success('Workflow created successfully.')
-      //     setBackdropIsOpen(false)
-      //   })
-      //   .catch((err) => {
-      //     if (err.response?.status === 422) {
-      //       setBackdropIsOpen(false)
-      //       console.log('response', err.response)
-      //       toast.error('Error while creating workflow, check your workflow settings and tasks.')
-      //       return
-      //     }
-      //     setBackdropIsOpen(false)
-      //     toast.error(err.response.data.detail)
-      //   })
+      toast.success('Workflow created successfully.')
+      setBackdropIsOpen(false)
     } catch (err) {
       setBackdropIsOpen(false)
-      console.log(err)
+      if (err instanceof Error) {
+        toast.error(err.message)
+      } else if (err instanceof AxiosError) {
+        console.log(err.response)
+        toast.error('Error while creating workflow, check your workflow settings and tasks.')
+      }
     }
   },
     [
-      workflowsEditorBodyFromFlowchart,
+      fetchWorkflowForage,
       handleCreateWorkflow,
-      setBackdropIsOpen,
-      validateTasksForms,
-      validateWorkflowForms
+      validateWorkflowPiecesData,
+      validateWorkflowSettings,
+      workflowsEditorBodyFromFlowchart
     ]
   )
 
@@ -195,7 +149,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
   return (
     <>
       <div className='reactflow-parent-div'>
-        <Backdrop open={backgropIsOpen} sx={{ zIndex: 9999 }}>
+        <Backdrop open={backdropIsOpen} sx={{ zIndex: 9999 }}>
           <CircularProgress />
         </Backdrop>
         <Grid
