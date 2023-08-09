@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Grid } from '@mui/material';
 
@@ -6,7 +6,7 @@ import TextInput from 'components/text-input';
 import CheckboxInput from 'components/checkbox-input';
 
 import SelectUpstreamInput from './select-upstream-input';
-import { Option } from '../piece-form.component/upstream-options';
+import { Option } from '../../piece-form.component/upstream-options';
 
 interface Prop {
   name: `inputs.${string}.value.${number}`
@@ -17,26 +17,7 @@ interface Prop {
   checkedFromUpstreamEditable: boolean
 }
 
-const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, checkedFromUpstreamDefault, checkedFromUpstreamEditable }) => {
-  /**
-   * {
-   * "id":"1ef601c7-9b67-409f-98f3-937de10d83dc"}
-   * "fromUpstream":false,
-   * "upstreamId":{
-   *    "arg_name":"",
-   *    "arg_value":""
-   * },
-   * "upstreamArgument":{
-   *    "arg_name":"",
-   *    "arg_value":""
-   * },
-   * "upstreamValue":"",
-   * "value": {
-   *    "arg_name":"country",
-   *    "arg_value":"Brazil"
-   * },
-   */
-
+const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, checkedFromUpstreamDefault, checkedFromUpstreamEditable,definitions }) => {
   const formsData = useWatch({ name })
 
   const getFromUpstream = useCallback((key: string) => {
@@ -49,7 +30,13 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, c
     return (defaultValues ?? {}) as Record<string, unknown>
   }, [schema])
 
-
+  // useEffect(()=>{
+  //   if(schema.items["$ref"] === "#/definitions/OutputModifierModel"){
+  //     console.log("Aqui")
+  //     // Alterar o output_schema
+  //   }
+  //   // Não fazer nada
+  // },[schema,definitions])
 
   return (
     <>

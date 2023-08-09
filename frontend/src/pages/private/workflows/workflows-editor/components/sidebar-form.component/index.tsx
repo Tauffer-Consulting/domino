@@ -14,8 +14,8 @@ import * as yup from "yup"
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 
 
-import PieceForm from '../piece-form.component'
-import { createInputsSchemaValidation } from '../piece-form.component/validation'
+import PieceForm from './piece-form.component'
+import { createInputsSchemaValidation } from './piece-form.component/validation'
 
 import ContainerResourceForm, { ContainerResourceFormSchema, defaultContainerResources } from './container-resource-form.component';
 

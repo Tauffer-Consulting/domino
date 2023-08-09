@@ -16,7 +16,7 @@ import CodeEditorInput from 'components/codeeditor-input';
 
 import SelectUpstreamInput from './select-upstream-input';
 import ObjectInputComponent from './object-input';
-import { ArrayOption } from '../piece-form.component/upstream-options';
+import { ArrayOption } from '../../piece-form.component/upstream-options';
 
 interface ArrayInputItemProps {
   inputKey: string

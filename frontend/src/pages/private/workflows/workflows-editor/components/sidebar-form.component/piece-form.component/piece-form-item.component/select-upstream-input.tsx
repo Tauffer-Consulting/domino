@@ -1,7 +1,7 @@
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Option } from '../piece-form.component/upstream-options';
+import { Option } from '../../piece-form.component/upstream-options';
 import { IWorkflowPieceData } from 'context/workflows/types';
 import { fetchFromObject } from 'utils';
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import PieceFormItem from '../piece-form-item.component';
+import PieceFormItem from './piece-form-item.component';
 import { useFormContext } from 'react-hook-form';
 import { IWorkflowPieceData } from 'context/workflows/types';
 

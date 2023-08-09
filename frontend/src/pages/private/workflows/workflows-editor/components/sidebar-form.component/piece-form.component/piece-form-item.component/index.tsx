@@ -17,7 +17,7 @@ import TextInput from 'components/text-input';
 import SelectUpstreamInput from './select-upstream-input';
 import ArrayInput from './array-input';
 
-import { ArrayOption, Option } from '../piece-form.component/upstream-options';
+import { ArrayOption, Option } from '../../piece-form.component/upstream-options';
 
 interface PieceFormItemProps {
   schema: any;
