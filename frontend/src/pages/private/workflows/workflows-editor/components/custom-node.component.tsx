@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { Handle, Position } from 'reactflow'
+import { getUuidSlice } from 'utils'
 
 interface IStyleData {
   iconClassName: string
@@ -109,7 +110,7 @@ const CustomNode = memo((data: any) => {
           extendedData?.style?.label ? extendedData?.style?.label : extendedData?.name
         }
         <p style={{ fontSize: 10, margin: 0, color: "#4E4E56" }}>
-          {data.id.split("_")[1].substring(0, 6)}
+          {getUuidSlice(data.id)}
         </p>
       </div>
       {
