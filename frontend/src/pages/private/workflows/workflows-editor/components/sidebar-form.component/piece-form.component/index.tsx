@@ -44,6 +44,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
         Object.keys(schema.properties).map(key => (
           <div key={key}>
             <PieceFormItem
+              formId={formId}
               schema={schema.properties[key]}
               itemKey={key}
               control={control}

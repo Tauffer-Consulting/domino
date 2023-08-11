@@ -46,7 +46,7 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) 
 
   return (
     <FormControl fullWidth>
-      <InputLabel>{label}</InputLabel>
+      <InputLabel id={name}>{label}</InputLabel>
       <Controller
         control={control}
         name={object ? name as ObjectName : `${name}.upstreamValue`}
@@ -54,6 +54,8 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) 
           <Select
             fullWidth
             defaultValue={""}
+            labelId={name}
+            label={label}
             {...field}
             onChange={event =>
               handleSelectChange(event, field.onChange)

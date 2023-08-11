@@ -3,7 +3,7 @@ import {
   Box,
   Grid,
 } from '@mui/material';
-import { Control, useFormContext } from 'react-hook-form';
+import { Control, useFormContext, useWatch } from 'react-hook-form';
 
 import { IWorkflowPieceData } from 'context/workflows/types';
 
@@ -18,8 +18,10 @@ import SelectUpstreamInput from './select-upstream-input';
 import ArrayInput from './array-input';
 
 import { ArrayOption, Option } from '../../piece-form.component/upstream-options';
+import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
 
 interface PieceFormItemProps {
+  formId: string
   schema: any;
   itemKey: string;
   control: Control<IWorkflowPieceData, any>
@@ -27,38 +29,10 @@ interface PieceFormItemProps {
   upstreamOptions: Option[] | ArrayOption
 }
 
-const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey, schema, definitions, control }) => {
-  const [checkedFromUpstreamDefault, checkedFromUpstreamEditable] = useMemo(() => {
-    // from_upstream condition, if "never" or "always"
-    let defaultChecked: boolean = true;
-    let editable: boolean = true;
-    if (schema?.from_upstream === "never") {
-      defaultChecked = false;
-      editable = false;
-    } else if (schema?.from_upstream === "always") {
-      defaultChecked = true;
-      editable = false;
-    }
+const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, itemKey, schema, definitions, control }) => {
+  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(schema,upstreamOptions)
 
-    if (schema?.allOf && schema.allOf.length > 0) {
-      defaultChecked = true;
-      editable = false;
-    }
-
-    if (!(upstreamOptions as Option[])?.length) {
-      editable = false;
-    }
-
-    if ((upstreamOptions as ArrayOption)?.array?.length) {
-      editable = true;
-    }
-
-    return [defaultChecked, editable]
-  }, [schema, upstreamOptions])
-
-  const { watch } = useFormContext<IWorkflowPieceData>()
-  const data = watch()
-  const checkedFromUpstream = data.inputs[itemKey]?.fromUpstream
+  const checkedFromUpstream = useWatch({name:`inputs.${itemKey}.fromUpstream`})
 
   let inputElement: React.ReactNode = null
 
@@ -110,6 +84,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
   } else if (schema.type === 'array') {
     inputElement =
       <ArrayInput
+        formId={formId}
         inputKey={itemKey}
         schema={schema}
         definitions={definitions}
@@ -168,8 +143,8 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ upstreamOptions, itemKey,
       <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
         <CheckboxInput
           name={`inputs.${itemKey}.fromUpstream`}
-          defaultChecked={checkedFromUpstreamDefault}
-          disabled={!checkedFromUpstreamEditable}
+          defaultChecked={checkedUpstream}
+          disabled={disableUpstream}
         />
       </Grid>
     </Box>

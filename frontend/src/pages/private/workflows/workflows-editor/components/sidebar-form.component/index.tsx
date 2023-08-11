@@ -62,7 +62,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
 
   const resolver = yupResolver(SidebarPieceFormSchema);
   const methods = useForm({
-    defaultValues,
+    defaultValues: async ()=>fetchForageWorkflowPiecesDataById(formId),
     resolver,
     mode: "onChange"
   })

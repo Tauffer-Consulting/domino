@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectProps } from '@mui/material';
-import { FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
+import { Controller, FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
 import { fetchFromObject } from 'utils';
 
 type Props<T> = SelectProps & {
@@ -22,38 +22,46 @@ type Props<T> = SelectProps & {
 }
 
 function SelectInput<T extends FieldValues>({ options, label, name, defaultValue, emptyValue, registerOptions, ...rest }: Props<T>) {
-  const { register, formState: { errors } } = useFormContext()
+  const { control, formState: { errors } } = useFormContext()
 
   const error = fetchFromObject(errors, name)
 
   return (
     <FormControl fullWidth>
       <InputLabel id={name}>{label}</InputLabel>
-      <Select
-        labelId={name}
-        label={label}
-        defaultValue={emptyValue ? "" : defaultValue}
-        {...rest}
-        {...register(name, registerOptions)}
-      >
-        {emptyValue && <MenuItem value="" disabled>
-          <em>None</em>
-        </MenuItem>}
-        {options.map((option) => {
-          if (typeof option === "object") {
-            return (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            )
-          }
-          return (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          )
-        })}
-      </Select>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Select
+            labelId={name}
+            label={label}
+            defaultValue={emptyValue ? "" : defaultValue}
+            {...rest}
+            {...field}
+            onChange={(e)=>field.onChange(e.target.value as any)}
+          >
+            {emptyValue && <MenuItem value="" disabled>
+              <em>None</em>
+            </MenuItem>}
+            {options.map((option) => {
+              if (typeof option === "object") {
+                return (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                )
+              }
+              return (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              )
+            })}
+          </Select>
+        )}
+      />
+
       <FormHelperText error>
         {error?.message}
       </FormHelperText>

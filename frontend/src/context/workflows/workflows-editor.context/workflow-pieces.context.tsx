@@ -5,10 +5,11 @@ import { createCustomContext } from 'utils';
 
 export interface IWorkflowPieceContext {
   setForageWorkflowPieces: (workflowPieces: any) => Promise<void> // TODO add type
-  getForageWorkflowPieces: () => Promise<any> // TODO add type
+  getForageWorkflowPieces: () => Promise<Record<string,IOperator>> // TODO add type
   removeForageWorkflowPiecesById: (id: string) => Promise<void>
   fetchWorkflowPieceById: (id: string) => Promise<IOperator> // TODO add type
   clearForageWorkflowPieces: () => Promise<void>
+  setForageWorkflowPiecesOutputSchema: (id: string, properties: any) => Promise<void>
 }
 
 export const [WorkflowPiecesContext, useWorkflowPiece] =
@@ -18,6 +19,14 @@ const WorkflowPiecesProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const setForageWorkflowPieces = useCallback(async (workflowPieces: any) => {
     await localForage.setItem('workflowPieces', workflowPieces)
+  }, [])
+
+  const setForageWorkflowPiecesOutputSchema = useCallback(async (id: any, properties: any) => {
+    const workflowPieces = await localForage.getItem<any>("workflowPieces")
+    if (workflowPieces?.[id]) {
+      workflowPieces[id].output_schema.properties = properties
+      localForage.setItem('workflowPieces', workflowPieces)
+    }
   }, [])
 
   const clearForageWorkflowPieces = useCallback(async () => {
@@ -54,6 +63,7 @@ const WorkflowPiecesProvider: React.FC<{ children: React.ReactNode }> = ({ child
     removeForageWorkflowPiecesById,
     setForageWorkflowPieces,
     clearForageWorkflowPieces,
+    setForageWorkflowPiecesOutputSchema,
   }
 
   return (

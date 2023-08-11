@@ -30,6 +30,7 @@ function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = fa
                   {...field}
                   checked={!!field.value}
                   disabled={disabled}
+                  defaultChecked={defaultChecked}
                 />
               )}
             />}
@@ -38,11 +39,13 @@ function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = fa
         <Controller
           name={name}
           control={control}
+          defaultValue={defaultChecked as any}
           render={({ field }) => (
             <Checkbox
               {...field}
               checked={!!field.value}
               disabled={disabled}
+              defaultChecked={defaultChecked}
             />
           )}
         />
