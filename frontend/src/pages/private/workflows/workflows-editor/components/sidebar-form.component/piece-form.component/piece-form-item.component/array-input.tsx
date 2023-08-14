@@ -201,6 +201,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 >
                   <SelectInput
                     label={schema.title}
+                    emptyValue
                     defaultValue={""}
                     name={`${name}.${index}.value`}
                     options={enumOptions}

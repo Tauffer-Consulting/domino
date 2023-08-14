@@ -56,6 +56,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, i
     inputElement =
       <SelectInput<IWorkflowPieceData>
         label={itemKey}
+        emptyValue
         defaultValue={schema?.default}
         name={`inputs.${itemKey}.value`}
         options={valuesOptions}
