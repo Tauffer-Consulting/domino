@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { Handle, Position } from 'reactflow'
+import { getUuidSlice } from 'utils'
 
 interface IStyleData {
   iconClassName: string
@@ -12,12 +13,13 @@ interface IStyleData {
   iconId: string
 }
 /**
- * @todo improve dtypes 
+ * @todo improve dtypes
  */
 export interface INodeData {
   name: string
   style: IStyleData
   handleOriantation: "horizontal" | "vertical"
+  error: boolean
 }
 
 
@@ -85,6 +87,12 @@ const CustomNode = memo((data: any) => {
     customStyle = Object.assign(customStyle, extendedData.style.nodeStyle)
   }
 
+  if(extendedData?.error){
+    console.log("erro no node", extendedData)
+    customStyle = Object.assign(customStyle, {backgroundColor:"#f44336",color:"#e6e6e6"})
+  }
+
+
   return (
     <div className={extendedClass} style={customStyle}>
       {
@@ -101,6 +109,9 @@ const CustomNode = memo((data: any) => {
         {
           extendedData?.style?.label ? extendedData?.style?.label : extendedData?.name
         }
+        <p style={{ fontSize: 10, margin: 0, color: "#4E4E56" }}>
+          {getUuidSlice(data.id)}
+        </p>
       </div>
       {
         useIcon ? (

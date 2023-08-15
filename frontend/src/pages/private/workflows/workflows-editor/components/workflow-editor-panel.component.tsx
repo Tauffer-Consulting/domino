@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 import ReactFlow, {
@@ -21,8 +21,9 @@ import SidebarForm from './sidebar-form.component'
 import { useWorkflowsEditor } from "context/workflows/workflows-editor.context"
 import { INodeData } from './custom-node.component'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
+import { IWorkflowPieceData, storageAccessModes } from 'context/workflows/types'
 /**
- * @todo When change the workspace should we clear the forage ? 
+ * @todo When change the workspace should we clear the forage ?
  * @todo Solve any types
  */
 
@@ -37,7 +38,11 @@ const getId = (module_name) => {
   return `${module_name}_${uuidv4()}`
 }
 
-const WorkflowEditorPanelComponent = () => {
+interface Props {
+  nodesWithErros: string[]
+}
+
+const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
   const [formSchema, setFormSchema] = useState<any>({})
   const [formId, setFormId] = useState<string>("")
   const [formTitle, setFormTitle] = useState<string>('')
@@ -52,27 +57,21 @@ const WorkflowEditorPanelComponent = () => {
     nodes,
     setNodes,
     fetchForagePieceById,
-    setFormsForageData,
-    removeFormsForageDataById,
-    removeForageUpstreamMapById,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
-    getForageUpstreamMap,
-    setForageUpstreamMap,
     setForageWorkflowPieces,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
-    fetchWorkflowPieceById
+    fetchWorkflowPieceById,
+    setForageWorkflowPiecesData,
   } = useWorkflowsEditor()
 
   // Removing flowchart elements
   const onNodesDelete = useCallback(async (nodes: any) => {
     for (const node of nodes) {
-      await removeFormsForageDataById(node.id)
-      await removeForageUpstreamMapById(node.id)
       await removeForageWorkflowPiecesById(node.id)
     }
-  }, [removeFormsForageDataById, removeForageUpstreamMapById, removeForageWorkflowPiecesById])
+  }, [removeForageWorkflowPiecesById])
 
 
   // Node double click open drawer with forms
@@ -125,6 +124,7 @@ const WorkflowEditorPanelComponent = () => {
       name: data.name,
       style: data.style,
       handleOriantation: nodeDirection,
+      error: false,
     }
 
     const newNode = {
@@ -138,7 +138,7 @@ const WorkflowEditorPanelComponent = () => {
     const piece = await fetchForagePieceById(data.id)
     const inputSchema = piece?.input_schema
     const defaultData: any = extractDefaultValues(inputSchema)
-    const containerResourcesDefaultData: unknown = extractDefaultValues(containerResourcesSchema)
+    const defaultContainerResources: unknown = extractDefaultValues(containerResourcesSchema)
 
     const currentWorkflowPieces = await getForageWorkflowPieces()
     const newWorkflowPieces = {
@@ -148,66 +148,87 @@ const WorkflowEditorPanelComponent = () => {
     await setForageWorkflowPieces(newWorkflowPieces)
 
     // Set default data for upstream mapping - used in dags
-    var upstreamMap = await getForageUpstreamMap()
-    var upstreamMapFormInfo: any = {}
+    const defaultInputs: any = {}
     for (const key in defaultData) {
       const fromUpstream = false // TODO - If someday we allow default upstream true we should change this
       const upstreamId = null
-      
+
       var defaultValues = defaultData[key]
-      if (Array.isArray(defaultData[key])){
+      if (Array.isArray(defaultData[key])) {
         const auxDefaultValues = []
         for (const element of defaultData[key]) {
-          const newValue: any = {}
+          let newValue: any = {}
           if (typeof element === 'object') {
+            newValue = {
+              fromUpstream: {},
+              upstreamId: {},
+              upstreamArgument: {},
+              upstreamValue: {},
+              value: {}
+            }
             for (const [_key, _value] of Object.entries(element)) {
-              newValue[_key] = {
-                fromUpstream: fromUpstream,
-                upstreamId: upstreamId,
-                upstreamArgument: null,
-                value: _value
+              newValue.fromUpstream = {
+                ...newValue.fromUpstream,
+                [_key]: fromUpstream
+              }
+              newValue.upstreamId = {
+                ...newValue.upstreamId,
+                [_key]: ""
+              }
+              newValue.upstreamArgument = {
+                ...newValue.upstreamArgument,
+                [_key]: ""
+              }
+              newValue.upstreamValue = {
+                ...newValue.upstreamValue,
+                [_key]: ""
+              }
+              newValue.value = {
+                ...newValue.value,
+                [_key]: _value
               }
             }
             auxDefaultValues.push(newValue)
-          }else{
-            newValue[key] = {
+          } else {
+            newValue = {
               fromUpstream: fromUpstream,
-              upstreamId: upstreamId,
-              upstreamArgument: null,
+              upstreamId: upstreamId ?? "",
+              upstreamArgument: "",
+              upstreamValue: "",
               value: element
-            } 
+            }
             auxDefaultValues.push(newValue)
           }
         }
         defaultValues = auxDefaultValues
-      } 
-      upstreamMapFormInfo[key] = {
+      }
+      defaultInputs[key] = {
         fromUpstream,
-        upstreamId,
-        upstreamArgument: null,
+        upstreamId: upstreamId ?? "",
+        upstreamArgument: "",
+        upstreamValue: "",
         value: (
           defaultValues === null || defaultValues === undefined
         ) ? null : defaultValues
       }
     }
-    upstreamMap[newNode.id] = upstreamMapFormInfo
-    await setForageUpstreamMap(upstreamMap)
-    defaultData['storage'] = {
-      "storageAccessMode": 'Read/Write',
-    }
-    defaultData['containerResources'] = containerResourcesDefaultData
-    // Set default data for the node form - used in json-forms
-    await setFormsForageData(newNode.id, defaultData)
+
+    // TODO: refactor types here
+    const defaultWorkflowPieceData = {
+      storage: { storageAccessMode: storageAccessModes.ReadWrite },
+      containerResources: defaultContainerResources,
+      inputs: defaultInputs
+    } as unknown as IWorkflowPieceData
+
+    await setForageWorkflowPiecesData(newNode.id, defaultWorkflowPieceData)
   }, [
     fetchForagePieceById,
     nodeDirection,
-    setFormsForageData,
-    setForageUpstreamMap,
-    getForageUpstreamMap,
     reactFlowInstance,
     setNodes,
     setForageWorkflowPieces,
-    getForageWorkflowPieces 
+    getForageWorkflowPieces,
+    setForageWorkflowPiecesData,
   ])
 
   // Left drawer controls
@@ -235,6 +256,35 @@ const WorkflowEditorPanelComponent = () => {
     setEdges((eds: Edge[]) => addEdge(connection, eds))
   }, [setEdges]);
 
+  const setNodeErrors = useCallback((nodeIds: string[]) => {
+    setNodes((nds) =>
+      nds.map(n => {
+        if (nodeIds.includes(n.id)) {
+          n = {
+            ...n,
+            data: {
+              ...n.data,
+              error: true,
+            }
+          }
+        } else {
+          n = {
+            ...n,
+            data: {
+              ...n.data,
+              error: false,
+            }
+          }
+        }
+        return n
+      })
+    )
+  }, [setNodes])
+
+  useEffect(()=>{
+    setNodeErrors(nodesWithErros)
+  },[nodesWithErros, setNodeErrors])
+
   return (
     <ReactFlowProvider>
       <div
@@ -260,7 +310,7 @@ const WorkflowEditorPanelComponent = () => {
           <Background color='#aaa' gap={16} />
         </ReactFlow>
       </div>
-      <SidebarForm formSchema={formSchema} formId={formId} onClose={toggleDrawer(false)} open={drawerState} title={formTitle} />
+      <SidebarForm schema={formSchema} formId={formId} onClose={toggleDrawer(false)} open={drawerState} title={formTitle} />
 
     </ReactFlowProvider>
   )

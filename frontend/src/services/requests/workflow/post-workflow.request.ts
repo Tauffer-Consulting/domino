@@ -1,10 +1,10 @@
 import { AxiosResponse } from 'axios'
 import { dominoApiClient } from '../../clients/domino.client'
-import { IPostWorkflowResponseInterface, IWorkflowSchema } from './workflow.interface'
+import { IPostWorkflowResponseInterface } from './workflow.interface'
+import { CreateWorkflowRequest } from 'context/workflows/types'
 
-export interface IPostWorkflowParams {
+export interface IPostWorkflowParams extends CreateWorkflowRequest {
   workspace_id: string
-  data: IWorkflowSchema
 }
 
 /**
@@ -19,7 +19,7 @@ const postWorkflow: (
 }
 
 /**
- * Create authenticated workflow 
+ * Create authenticated workflow
  * @param params `{ id: string, data: Record<string, unknown> }``
  * @returns crate workflow function
  */

@@ -440,6 +440,27 @@ class WorkflowService(object):
                     input_kwargs[input_key]['type'] = 'fromUpstream'
                     input_kwargs[input_key]['upstream_task_id'] = input_value['upstreamTaskId']
                     input_kwargs[input_key]['output_arg'] = input_value['upstreamArgument']
+                elif isinstance(input_value['value'], list):
+                    array_input_kwargs = []
+                    for element_idx, element in enumerate(input_value['value']):
+                        element_from_upstream = element['fromUpstream']
+                        # simple array
+                        # TODO we must handle fromUpstream at item level in Task domino class
+                        if isinstance(element_from_upstream, bool):
+                            if element_from_upstream:
+                                array_input_kwargs.append({
+                                    'type': 'fromUpstream',
+                                    'upstream_task_id': element['upstreamTaskId'],
+                                    'output_arg': element['upstreamArgument'],
+                                })
+                                continue
+                            array_input_kwargs.append(element['value'])
+
+                        # TODO composite array
+                        elif isinstance(element_from_upstream, dict):
+                            ...
+
+                    input_kwargs[input_key] = array_input_kwargs
                 else:
                     input_kwargs[input_key] = input_value['value']
 
