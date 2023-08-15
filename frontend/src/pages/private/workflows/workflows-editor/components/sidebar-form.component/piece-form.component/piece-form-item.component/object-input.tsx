@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Grid } from '@mui/material';
 
@@ -6,7 +6,9 @@ import TextInput from 'components/text-input';
 import CheckboxInput from 'components/checkbox-input';
 
 import SelectUpstreamInput from './select-upstream-input';
-import { Option } from '../piece-form.component/upstream-options';
+import { Option } from '../../piece-form.component/upstream-options';
+import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
+import SelectInput from 'components/select-input';
 
 interface Prop {
   name: `inputs.${string}.value.${number}`
@@ -17,27 +19,11 @@ interface Prop {
   checkedFromUpstreamEditable: boolean
 }
 
-const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, checkedFromUpstreamDefault, checkedFromUpstreamEditable }) => {
-  /**
-   * {
-   * "id":"1ef601c7-9b67-409f-98f3-937de10d83dc"}
-   * "fromUpstream":false,
-   * "upstreamId":{
-   *    "arg_name":"",
-   *    "arg_value":""
-   * },
-   * "upstreamArgument":{
-   *    "arg_name":"",
-   *    "arg_value":""
-   * },
-   * "upstreamValue":"",
-   * "value": {
-   *    "arg_name":"country",
-   *    "arg_value":"Brazil"
-   * },
-   */
-
+const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, definitions }) => {
   const formsData = useWatch({ name })
+  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(schema, upstreamOptions)
+
+  const [enumOptions, setEnumOptions] = useState<string[]>([])
 
   const getFromUpstream = useCallback((key: string) => {
     return (formsData?.fromUpstream[key] ?? false) as boolean
@@ -49,6 +35,23 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, c
     return (defaultValues ?? {}) as Record<string, unknown>
   }, [schema])
 
+  const elementType = useMemo(() => {
+    const getElementType = function (key: string) {
+      if (schema?.items?.["$ref"] === '#/definitions/OutputModifierModel' && key === "type") {
+        const valuesOptions: Array<string> = definitions?.["OutputModifierItemType"].enum;
+        setEnumOptions(valuesOptions)
+        return "SelectInput"
+      } else {
+        return "TextInput";
+      }
+    }
+
+    return Object.keys(defaultValues).reduce<Record<string, string>>((acc, cur) => {
+      acc[cur] = getElementType(cur)
+      return acc
+    }, {})
+
+  }, [schema?.items, defaultValues, definitions])
 
 
   return (
@@ -63,7 +66,7 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, c
             direction="row"
             alignItems="center"
             justifyContent="space-between"
-            sx={{marginBottom:1}}
+            sx={{ marginBottom: 1 }}
           >
             {fromUpstream ?
               <Grid item xs={10}>
@@ -76,11 +79,20 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, c
               </Grid>
               :
               <Grid item xs={10}>
-                <TextInput
-                  label={key}
-                  name={`${name}.value.${key}`}
-                  defaultValue={value as string}
-                />
+                {elementType[key] === 'TextInput' &&
+                  <TextInput
+                    label={key}
+                    name={`${name}.value.${key}`}
+                  />
+                }
+                {elementType[key] === 'SelectInput' &&
+                  <SelectInput
+                    emptyValue
+                    label={key}
+                    name={`${name}.value.${key}`}
+                    options={enumOptions}
+                  />
+                }
               </Grid>
             }
             <Grid
@@ -89,8 +101,8 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, c
             >
               <CheckboxInput
                 name={`${name}.fromUpstream.${key}`}
-                defaultChecked={checkedFromUpstreamDefault}
-                disabled={!checkedFromUpstreamEditable}
+                defaultChecked={checkedUpstream}
+                disabled={disableUpstream}
               />
             </Grid>
           </Grid>

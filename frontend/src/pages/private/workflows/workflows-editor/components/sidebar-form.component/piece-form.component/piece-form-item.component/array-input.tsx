@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Control, FieldArrayWithId, useFieldArray, useFormContext } from 'react-hook-form';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Control, FieldArrayWithId, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 
 import { Card, CardContent, IconButton, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -16,9 +16,12 @@ import CodeEditorInput from 'components/codeeditor-input';
 
 import SelectUpstreamInput from './select-upstream-input';
 import ObjectInputComponent from './object-input';
-import { ArrayOption } from '../piece-form.component/upstream-options';
+import { ArrayOption } from '../../piece-form.component/upstream-options';
+import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
+import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context';
 
 interface ArrayInputItemProps {
+  formId: string
   inputKey: string
   schema: any;
   control: Control<IWorkflowPieceData, any>
@@ -26,15 +29,17 @@ interface ArrayInputItemProps {
   upstreamOptions: ArrayOption
 }
 
-const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamOptions, definitions, control }) => {
+const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, upstreamOptions, definitions, control }) => {
+
   const name = `inputs.${inputKey}.value` as `inputs.${string}.value`
   const { fields: data, append, remove } = useFieldArray({
     name,
     control,
   })
-  const { watch } = useFormContext()
-  const formsData = watch()
   const fields = data as unknown as FieldArrayWithId<InputArray>[]
+  const formsData = useWatch({ name })
+
+  const { setForageWorkflowPiecesOutputSchema } = useWorkflowsEditor()
 
   const [enumOptions, setEnumOptions] = useState<string[]>([])
 
@@ -47,23 +52,11 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
     return subItemSchema
   }, [definitions, schema])
 
-  const [checkedFromUpstreamDefault, checkedFromUpstreamEditable] = useMemo(() => {
-    // from_upstream condition, if "never" or "always"
-    let defaultChecked: boolean = true;
-    let editable: boolean = true;
-    if (subItemSchema?.from_upstream === "never") {
-      defaultChecked = false;
-      editable = false;
-    } else if (subItemSchema?.from_upstream === "always") {
-      defaultChecked = true;
-      editable = false;
-    }
-    return [defaultChecked, editable]
-  }, [subItemSchema])
+  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(subItemSchema, upstreamOptions)
 
   const getFromUpstream = useCallback((index: number) => {
-    return formsData?.inputs?.[inputKey]?.value?.[index]?.fromUpstream ?? false
-  }, [formsData?.inputs, inputKey])
+    return formsData?.[index]?.fromUpstream ?? false
+  }, [formsData])
 
   const elementType = useMemo(() => {
     if (subItemSchema?.allOf && subItemSchema.allOf.length > 0) {
@@ -108,6 +101,50 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
 
     append(defaultValue as any)
   }, [append])
+
+  const updateOutputSchema = useCallback(async () => {
+    if (schema?.items?.["$ref"] === '#/definitions/OutputModifierModel' && formsData) {
+      const newProperties = formsData.reduce((acc: any, cur: { value: { type: string; name: string; description: any; }; }) => {
+        let defaultValue: any = ""
+        let newProperties = {}
+
+        if (cur.value.type === "integer") {
+          defaultValue = 1
+        } else if (cur.value.type === "float") {
+          defaultValue = 1.1
+        } else if (cur.value.type === "boolean") {
+          defaultValue = false
+        }
+
+        if (cur.value.type === "array") {
+          newProperties = {
+            [cur.value.name as string]: {
+              items: {
+                type: "string"
+              },
+              description: cur.value.description,
+              title: cur.value.name,
+              type: cur.value.type,
+            }
+          }
+        } else {
+          newProperties = {
+            [cur.value.name as string]: {
+              default: defaultValue,
+              description: cur.value.description,
+              title: cur.value.name,
+              type: cur.value.type,
+            }
+          }
+        }
+        return { ...acc, ...newProperties }
+      }, {})
+
+      await setForageWorkflowPiecesOutputSchema(formId, newProperties)
+    }
+  }, [formsData, schema?.items, setForageWorkflowPiecesOutputSchema, formId])
+
+  useEffect(() => { updateOutputSchema() }, [updateOutputSchema])
 
   return (
     <Card sx={{ width: "100%", paddingTop: 0 }}>
@@ -164,6 +201,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
                 >
                   <SelectInput
                     label={schema.title}
+                    emptyValue
                     defaultValue={""}
                     name={`${name}.${index}.value`}
                     options={enumOptions}
@@ -281,8 +319,8 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
                 <Grid item xs={1}>
                   <CheckboxInput
                     name={`${name}.${index}.fromUpstream`}
-                    defaultChecked={checkedFromUpstreamDefault}
-                    disabled={!checkedFromUpstreamEditable}
+                    defaultChecked={checkedUpstream}
+                    disabled={disableUpstream}
                   />
                 </Grid>
               )}
@@ -294,8 +332,8 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ inputKey, schema, upstreamO
                     schema={schema}
                     definitions={definitions}
                     upstreamOptions={upstreamOptions.items}
-                    checkedFromUpstreamDefault={checkedFromUpstreamDefault}
-                    checkedFromUpstreamEditable={checkedFromUpstreamEditable}
+                    checkedFromUpstreamDefault={checkedUpstream}
+                    checkedFromUpstreamEditable={disableUpstream}
                   />
                 </Grid>
               )}

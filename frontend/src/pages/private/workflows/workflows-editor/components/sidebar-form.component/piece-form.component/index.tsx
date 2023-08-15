@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import PieceFormItem from '../piece-form-item.component';
+import PieceFormItem from './piece-form-item.component';
 import { useFormContext } from 'react-hook-form';
 import { IWorkflowPieceData } from 'context/workflows/types';
 
@@ -44,6 +44,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
         Object.keys(schema.properties).map(key => (
           <div key={key}>
             <PieceFormItem
+              formId={formId}
               schema={schema.properties[key]}
               itemKey={key}
               control={control}
