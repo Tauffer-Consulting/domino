@@ -3,8 +3,9 @@ import { ArrayOption, Option } from "../upstream-options";
 
 export function useUpstreamCheckboxOptions(schema: any, upstreamOptions: Option[] | ArrayOption) {
   return useMemo(() => {
-    let defaultChecked: boolean = true;
+    let defaultChecked: boolean = false;
     let disable: boolean = false;
+
     if (schema?.from_upstream === "never") {
       defaultChecked = false;
       disable = true;

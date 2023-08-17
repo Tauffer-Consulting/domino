@@ -458,8 +458,17 @@ class WorkflowService(object):
 
                         # TODO composite array
                         elif isinstance(element_from_upstream, dict):
-                            ...
-
+                            value_dict = {}
+                            for _key, from_upstream in element_from_upstream.items():
+                                if from_upstream:
+                                    value_dict[_key] = {
+                                        'type': 'fromUpstream',
+                                        'upstream_task_id': element['upstreamTaskId'][_key],
+                                        'output_arg': element['upstreamArgument'][_key],
+                                    }
+                                else:
+                                    value_dict[_key] = element['value'][_key]
+                            array_input_kwargs.append(value_dict)
                     input_kwargs[input_key] = array_input_kwargs
                 else:
                     input_kwargs[input_key] = input_value['value']

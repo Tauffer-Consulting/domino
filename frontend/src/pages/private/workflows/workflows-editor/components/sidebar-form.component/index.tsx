@@ -13,13 +13,12 @@ import * as yup from "yup"
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 
-
 import PieceForm from './piece-form.component'
 import { createInputsSchemaValidation } from './piece-form.component/validation'
 
-import ContainerResourceForm, { ContainerResourceFormSchema, defaultContainerResources } from './container-resource-form.component';
+import ContainerResourceForm, { ContainerResourceFormSchema } from './container-resource-form.component';
 
-import StorageForm, { defaultStorage, storageFormSchema } from './storage-form.component';
+import StorageForm, { storageFormSchema } from './storage-form.component';
 
 import { IWorkflowPieceData } from 'context/workflows/types';
 import { yupResolver } from 'utils';
@@ -30,12 +29,6 @@ interface ISidebarPieceFormProps {
   title: string,
   open: boolean,
   onClose: (event: any) => void,
-}
-
-const defaultValues: IWorkflowPieceData = {
-  containerResources: defaultContainerResources,
-  storage: defaultStorage,
-  inputs: {},
 }
 
 const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {

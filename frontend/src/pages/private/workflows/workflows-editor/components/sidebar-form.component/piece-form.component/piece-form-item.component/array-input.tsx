@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Control, FieldArrayWithId, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { Control, FieldArrayWithId, useFieldArray, useWatch } from 'react-hook-form';
 
 import { Card, CardContent, IconButton, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -88,19 +88,39 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
   }, [subItemSchema, definitions])
 
   const handleAddInput = useCallback(() => {
+    function empty(object: Record<string,any>) {
+      Object.keys(object).forEach(function (k){
+          if (object[k] && typeof object[k] === 'object') {
+              return empty(object[k]);
+          }
+          object[k] = '';
+      });
+      return object
+    }
 
-    const defaultValue = [{
+    const defaultValue = schema.default[0]
+    const isObject = typeof defaultValue === "object"
+    let defaultObj = {
       fromUpstream: false,
       upstreamArgument: "",
       upstreamId: "",
       upstreamValue: "",
       value: ""
-    }]
+    } as unknown
 
-    console.log(defaultValue)
+    if(isObject){
+      const emptyObjValue = empty(defaultValue)
+      defaultObj = {
+        fromUpstream: false,
+        upstreamArgument: emptyObjValue,
+        upstreamId: emptyObjValue,
+        upstreamValue: emptyObjValue,
+        value: defaultValue
+      } as unknown
+    }
 
-    append(defaultValue as any)
-  }, [append])
+    append([defaultObj] as any)
+  }, [append, schema.default])
 
   const updateOutputSchema = useCallback(async () => {
     if (schema?.items?.["$ref"] === '#/definitions/OutputModifierModel' && formsData) {

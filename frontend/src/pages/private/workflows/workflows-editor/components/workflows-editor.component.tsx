@@ -44,14 +44,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
     const resolver = yupResolver(WorkflowSettingsFormSchema)
     const validatedData = await resolver(payload.workflowSettingsData)
     if (!Object.keys(validatedData.errors).length) {
-      console.log("WorkflowSettings isValid: ", true)
-      console.log("WorkflowSettings values: ", validatedData.values)
-
       setNodesWithErros([])
     } else {
-      console.log("WorkflowSettings isValid: ", false)
-      console.log("WorkflowSettings errors: ", validatedData.errors)
-
       throw new Error("Please review your workflow settings.");
     }
   }, [])
@@ -73,14 +67,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
     const validatedData = await resolver(payload.workflowPiecesData)
 
     if (!Object.keys(validatedData.errors).length) {
-      console.log("WorkflowPiecesData isValid: ", true)
-      console.log("WorkflowPiecesData values: ", validatedData.values)
-
       setNodesWithErros([])
     } else {
-      console.log("WorkflowPiecesData isValid: ", false)
-      console.log("WorkflowPiecesData errors: ", validatedData.errors)
-
       const nodeIds = Object.keys(validatedData.errors)
       setNodesWithErros(nodeIds)
 
@@ -135,7 +123,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     setDrawerState(open)
   }
 
-  // Open Config Worflow Form
+  // Open Config Workflow Form
   const handleConfigWorkflow = useCallback(() => {
     setDrawerState(true)
   }, [])
