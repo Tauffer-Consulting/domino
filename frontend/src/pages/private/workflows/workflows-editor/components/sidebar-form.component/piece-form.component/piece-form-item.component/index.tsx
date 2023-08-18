@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   Box,
   Grid,
 } from '@mui/material';
-import { Control, useFormContext, useWatch } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
 
 import { IWorkflowPieceData } from 'context/workflows/types';
 

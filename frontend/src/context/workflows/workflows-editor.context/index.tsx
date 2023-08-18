@@ -180,8 +180,6 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
         return acc
       }, {} as Record<string, any>)
 
-      console.log("pieceInputKwargs", pieceInputKwargs)
-
       const taskDataModel: TasksDataModel = {
         task_id: taskName,
         piece: {

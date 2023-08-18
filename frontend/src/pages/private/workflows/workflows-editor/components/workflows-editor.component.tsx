@@ -95,10 +95,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
       setBackdropIsOpen(false)
     } catch (err) {
       setBackdropIsOpen(false)
-      if (err instanceof Error) {
-        toast.error(err.message)
-      } else if (err instanceof AxiosError) {
-        console.log(err.response)
+      if (err instanceof AxiosError) {
+        toast.error(JSON.stringify(err?.response?.data))
+      } else if (err instanceof Error) {
+        console.log(err)
         toast.error('Error while creating workflow, check your workflow settings and tasks.')
       }
     }
