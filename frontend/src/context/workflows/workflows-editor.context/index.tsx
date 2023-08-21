@@ -73,6 +73,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     fetchForageWorkflowPiecesDataById,
     setForageWorkflowPiecesData,
     clearForageWorkflowPiecesData,
+    removeForageWorkflowPieceDataById,
   } = useWorkflowPiecesData()
 
 
@@ -251,6 +252,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     setForageWorkflowPieces,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
+    removeForageWorkflowPieceDataById,
     fetchWorkflowPieceById,
 
     toggleNodeDirection,

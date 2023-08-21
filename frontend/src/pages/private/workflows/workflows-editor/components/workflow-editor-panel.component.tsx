@@ -62,6 +62,7 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
     setForageWorkflowPieces,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
+    removeForageWorkflowPieceDataById,
     fetchWorkflowPieceById,
     setForageWorkflowPiecesData,
   } = useWorkflowsEditor()
@@ -70,8 +71,9 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
   const onNodesDelete = useCallback(async (nodes: any) => {
     for (const node of nodes) {
       await removeForageWorkflowPiecesById(node.id)
+      await removeForageWorkflowPieceDataById(node.id)
     }
-  }, [removeForageWorkflowPiecesById])
+  }, [removeForageWorkflowPieceDataById, removeForageWorkflowPiecesById])
 
 
   // Node double click open drawer with forms
