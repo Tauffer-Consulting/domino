@@ -18,6 +18,7 @@ import { yupResolver } from 'utils';
 import { storageFormSchema } from './sidebar-form.component/storage-form.component';
 import { ContainerResourceFormSchema } from './sidebar-form.component/container-resource-form.component';
 import { AxiosError } from 'axios';
+import { useWorkspaces } from 'context/workspaces/workspaces.context';
 /**
  * Create workflow tab
  // TODO refactor/simplify inner files
@@ -30,6 +31,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const [drawerState, setDrawerState] = useState(false)
   const [backdropIsOpen, setBackdropIsOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const { workspace } = useWorkspaces()
 
   const {
     clearForageData,
@@ -81,6 +83,9 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const handleSaveWorkflow = useCallback(async () => {
     try {
       setBackdropIsOpen(true)
+      if (!workspace?.id) {
+        throw new Error("No selected Workspace")
+      }
       const payload = await fetchWorkflowForage()
 
       await validateWorkflowPiecesData(payload)
@@ -89,7 +94,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       const data = await workflowsEditorBodyFromFlowchart()
 
       //TODO fill workspace id correctly
-      await handleCreateWorkflow({ workspace_id: "1", ...data })
+      await handleCreateWorkflow({ workspace_id: workspace?.id, ...data })
 
       toast.success('Workflow created successfully.')
       setBackdropIsOpen(false)
@@ -103,13 +108,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       }
     }
   },
-    [
-      fetchWorkflowForage,
-      handleCreateWorkflow,
-      validateWorkflowPiecesData,
-      validateWorkflowSettings,
-      workflowsEditorBodyFromFlowchart
-    ]
+    [fetchWorkflowForage, handleCreateWorkflow, validateWorkflowPiecesData, validateWorkflowSettings, workflowsEditorBodyFromFlowchart, workspace?.id]
   )
 
   // @ts-ignore: Unreachable code error
