@@ -38,7 +38,7 @@ const getOptions = (upstreamPieces: Record<string, any>, type: string): Option[]
         if ((upType === type) || (upType==="string" && type==="object")) {
           const value = `${upPiece?.name} (${getUuidSlice(upPiece.id)}) - ${upSchema[property].title}`
           const upstreamArgument = property
-          options.push({ id: upstreamId, argument: upstreamArgument, value })
+          options.push({ id: upPiece.id, argument: upstreamArgument, value })
         }
       }
     }
