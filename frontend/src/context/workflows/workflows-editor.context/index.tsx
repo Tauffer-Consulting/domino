@@ -4,12 +4,11 @@ import {
   IPostWorkflowParams,
   useAuthenticatedPostWorkflow,
   IPostWorkflowResponseInterface,
-  IWorkflowElement
 } from 'services/requests/workflow'
 
 import { useWorkspaces } from 'context/workspaces/workspaces.context';
 
-import { createCustomContext, getIdSlice, getUuidSlice } from 'utils'
+import { createCustomContext, generateTaskName, getIdSlice } from 'utils'
 
 import { usesPieces, IPiecesContext } from './pieces.context';
 import { useWorkflowsEdges, IWorkflowsEdgesContext } from './workflow-edges.context';
@@ -102,12 +101,6 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
   }, [fetchForageWorkflowPiecesData, fetchWorkflowSettingsData, getForageWorkflowPieces])
 
   const workflowsEditorBodyFromFlowchart = useCallback(async () => {
-    function getTaskName(element: IWorkflowElement) {
-      const hashId = getUuidSlice(element.id)
-      const taskName = `${element.data.name}_${hashId}`
-      return taskName
-    }
-
     const workflowPiecesData = await fetchForageWorkflowPiecesData()
     const workflowSettingsData = await fetchWorkflowSettingsData()
     const workflowNodes = await fetchForageWorkflowNodes()
@@ -133,16 +126,15 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
       const elementData = workflowPiecesData[element.id]
 
       const numberId = getIdSlice(element.id)
-      const taskName = getTaskName(element)
+      const taskName = generateTaskName(element.data.name, element.id)
 
       ui_schema['nodes'][taskName] = element
 
       const dependencies = workflowEdges.reduce<string[]>((acc, edge) => {
         if (edge.target === element.id) {
           const task = workflowNodes.find(n => n.id === edge.source)
-
           if (task) {
-            const upTaskName = getTaskName(task)
+            const upTaskName = generateTaskName(task.data.name,task.id)
             acc.push(upTaskName)
           }
         }
