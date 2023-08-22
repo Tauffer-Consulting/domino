@@ -3,7 +3,7 @@ import { TextField, TextFieldProps } from '@mui/material';
 import { FieldValues, Path, RegisterOptions, useFormContext } from 'react-hook-form';
 import { fetchFromObject } from 'utils';
 
-type Props<T> = Omit<TextFieldProps, "type"> & {
+type Props<T> = TextFieldProps & {
   label: string
   name: Path<T>
   defaultValue?: string

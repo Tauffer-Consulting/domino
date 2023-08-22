@@ -21,6 +21,7 @@ import {
   IAuthenticationStore
 } from './authentication.interface'
 import { DOMINO_LOGOUT } from './authentication.logout'
+import { AxiosError } from 'axios'
 
 
 export const [AuthenticationContext, useAuthentication] =
@@ -80,8 +81,10 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
             login(res.data.access_token, res.data.user_id as string)
           }
         })
-        .catch(() => {
-          toast.error(`Error while authenticating`)
+        .catch((e ) => {
+          if(e instanceof AxiosError){
+            toast.error(e.response?.data?.detail ?? "Error on login, please review your inputs and try again")
+          }
         })
         .finally(() => {
           setAuthLoading(false)
