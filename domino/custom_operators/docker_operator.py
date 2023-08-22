@@ -1,6 +1,6 @@
 from airflow.providers.docker.operators.docker import DockerOperator, Mount
 from airflow.utils.context import Context
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 import os
 
 from domino.client.domino_backend_client import DominoBackendRestClient
@@ -52,7 +52,7 @@ class DominoDockerOperator(DockerOperator):
         # TODO remove
         mounts=[
             # TODO remove
-            # Mount(source='/media/luiz/storage2/Github/domino/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
+            # Mount(source='/home/vinicius/Documents/work/tauffer/domino/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
             # Mount(source='/media/luiz/storage2/Github/default_domino_pieces', target='/home/domino/pieces_repository/', type='bind', read_only=True),
         ]
         if self.workflow_shared_storage and str(self.workflow_shared_storage.source.value).lower() == str(getattr(StorageSource, 'local').value).lower():
@@ -90,76 +90,38 @@ class DominoDockerOperator(DockerOperator):
         for tid in task_ids:
             upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
         return upstream_xcoms_data
-    
 
-    def _update_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
+    def _get_piece_kwargs_value_from_upstream_xcom(
+        self, 
+        value: Any
+    ):
+        if isinstance(value, dict) and value.get("type") == "fromUpstream":
+            upstream_task_id = value["upstream_task_id"]
+            output_arg = value["output_arg"]
+            if upstream_task_id not in self.shared_storage_upstream_ids_list:
+                self.shared_storage_upstream_ids_list.append(upstream_task_id)
+            return self.upstream_xcoms_data[upstream_task_id][output_arg]
+        elif isinstance(value, list):
+            return [self._get_piece_kwargs_value_from_upstream_xcom(item) for item in value]
+        elif isinstance(value, dict):
+            return {
+                k: self._get_piece_kwargs_value_from_upstream_xcom(v) 
+                for k, v in value.items()
+            }
+        return value
+
+    def _update_piece_kwargs_with_upstream_xcom(self):
         if not self.piece_input_kwargs:
             self.piece_input_kwargs = dict()
         
-        # TODO this logic can be improved, remove verbosity and repetition
-        updated_op_kwargs = dict()
-        for k, v in self.piece_input_kwargs.items():
-            if isinstance(v, dict) and v.get("type", None) == "fromUpstream":
-                upstream_task_id = v.get("upstream_task_id")
-                output_arg = v.get("output_arg")
-                output_value = upstream_xcoms_data[upstream_task_id][output_arg]
-                updated_op_kwargs[k] = output_value
-                if upstream_task_id not in self.shared_storage_upstream_ids_list:
-                    self.shared_storage_upstream_ids_list.append(upstream_task_id)
-                continue
-            if isinstance(v, list):
-                upstream_element_type_keys = ["type", "upstream_task_id", "output_arg"]
-                updated_list_kwargs = list()
-                for e in v:
-                    # if value is of type from upstream
-                    if isinstance(e, dict) and all(key in e for key in upstream_element_type_keys):
-                        upstream_task_id = e.get("upstream_task_id")
-                        output_arg = e.get("output_arg")
-                        output_value = upstream_xcoms_data[upstream_task_id][output_arg]
-                        updated_list_kwargs.append(output_value)
-                        if upstream_task_id not in self.shared_storage_upstream_ids_list:
-                            self.shared_storage_upstream_ids_list.append(upstream_task_id)
-                    # if value is a dict but not type from upstream - composite array
-                    elif isinstance(e, dict):
-                        """
-                        example: args: [
-                            {
-                                "arg_name": "xxx", 
-                                "arg_value": "yyy"
-                            }, 
-                            {
-                                "arg_name": "xxx", 
-                                "arg_value": {
-                                    'type': 'fromUpstream', 
-                                    'upstream_task_id': '<ID>_<UUID>', 
-                                    'output_arg': 'zzzz'
-                                }
-                            }
-                        ]
-                        """
-                        updated_list_dict_kwargs = dict()
-                        for k, v in e.items():
-                            if isinstance(v, dict) and v.get("type", None) == "fromUpstream":
-                                upstream_task_id = v.get("upstream_task_id")
-                                output_arg = v.get("output_arg")
-                                output_value = upstream_xcoms_data[upstream_task_id][output_arg]
-                                updated_list_dict_kwargs[k] = output_value
-                                if upstream_task_id not in self.shared_storage_upstream_ids_list:
-                                    self.shared_storage_upstream_ids_list.append(upstream_task_id)
-                            else:
-                                updated_list_dict_kwargs[k] = v
-                        updated_list_kwargs.append(updated_list_dict_kwargs)
-                    else:
-                        # if value is not a dict, just append it to the list
-                        updated_list_kwargs.append(e)
-                updated_op_kwargs[k] = updated_list_kwargs
-                continue
-            updated_op_kwargs[k] = v
-
-        self.piece_input_kwargs = updated_op_kwargs
+        updated_piece_kwargs = {
+            k: self._get_piece_kwargs_value_from_upstream_xcom(
+                value=v
+            ) for k, v in self.piece_input_kwargs.items()
+        }
+        self.piece_input_kwargs = updated_piece_kwargs
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE'] = str(self.shared_storage_upstream_ids_list)
         self.environment['DOMINO_RUN_PIECE_KWARGS'] = str(self.piece_input_kwargs)
-
 
     def _prepare_execute_environment(self, context: Context):
         """ 
@@ -174,8 +136,8 @@ class DominoDockerOperator(DockerOperator):
         self.environment['DOMINO_WORKFLOW_SHARED_STORAGE_SOURCE_NAME'] = str(self.workflow_shared_storage.source.name) if self.workflow_shared_storage else None
     
         # Save updated piece input kwargs with upstream data to environment variable
-        upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
-        self._update_piece_kwargs_with_upstream_xcom(upstream_xcoms_data=upstream_xcoms_data)
+        self.upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
+        self._update_piece_kwargs_with_upstream_xcom()
 
         piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.piece_name)
         self.environment['DOMINO_PIECE_SECRETS'] = str(piece_secrets)
