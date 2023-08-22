@@ -1,9 +1,9 @@
-alembic==1.8.0
+alembic==1.11.3
 bcrypt==3.2.2
 fastapi-utils==0.2.1
 Jinja2==2.11.3
 psycopg2-binary==2.9.3
-pydantic[email]==1.10.11
+pydantic[email]<2.0.0
 MarkupSafe==2.0.1
 PyGithub==1.55
 PyJWT==2.4.0
