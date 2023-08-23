@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import localForage from "services/config/local-forage.config";
-import { createCustomContext } from "utils";
+import { createCustomContext, getUuid } from "utils";
 import { IWorkflowPieceData } from "../types";
 
 type ForagePiecesData = Record<string, IWorkflowPieceData>
@@ -51,16 +51,18 @@ const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
     delete workflowPieceData[id]
 
+    const hashId = getUuid(id).replaceAll('-', '')
+
     Object.values(workflowPieceData).forEach(wpd => {
       Object.values(wpd.inputs).forEach(input => {
-        if (input.upstreamId === id) {
+        if (input.upstreamId.includes(hashId)) {
           input.fromUpstream = false
           input.upstreamArgument = ""
           input.upstreamId = ""
           input.upstreamValue = ""
         } else if (Array.isArray(input.value)) {
           input.value.forEach(item => {
-            if (item.upstreamId === id) {
+            if (typeof item.upstreamId === "string" && item.upstreamId.includes(hashId)) {
               item.fromUpstream = false
               item.upstreamArgument = ""
               item.upstreamId = ""
@@ -68,7 +70,7 @@ const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({ c
             } else if (typeof item.upstreamId === "object") {
               Object.keys(item.upstreamId).forEach(key => {
                 const obj = item as any
-                if (obj.upstreamId[key] === id) {
+                if (obj.upstreamId[key].includes(hashId)) {
                   obj.fromUpstream[key] = false
                   obj.upstreamArgument[key] = ""
                   obj.upstreamId[key] = ""
