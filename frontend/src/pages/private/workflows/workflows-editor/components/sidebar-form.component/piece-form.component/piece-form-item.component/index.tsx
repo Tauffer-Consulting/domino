@@ -121,6 +121,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, i
   } else if (schema.type === 'string' && !schema.format) {
     inputElement =
       <TextInput<IWorkflowPieceData>
+        variant='outlined'
         name={`inputs.${itemKey}.value`}
         label={schema.title}
       />;

@@ -88,12 +88,12 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
   }, [subItemSchema, definitions])
 
   const handleAddInput = useCallback(() => {
-    function empty(object: Record<string,any>) {
-      Object.keys(object).forEach(function (k){
-          if (object[k] && typeof object[k] === 'object') {
-              return empty(object[k]);
-          }
-          object[k] = '';
+    function empty(object: Record<string, any>) {
+      Object.keys(object).forEach(function (k) {
+        if (object[k] && typeof object[k] === 'object') {
+          return empty(object[k]);
+        }
+        object[k] = '';
       });
       return object
     }
@@ -108,7 +108,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
       value: ""
     } as unknown
 
-    if(isObject){
+    if (isObject) {
       const emptyObjValue = empty(defaultValue)
       defaultObj = {
         fromUpstream: false,
@@ -271,6 +271,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                   xs={9}
                 >
                   <TextInput
+                    variant='outlined'
                     name={`${name}.${index}.value`}
                     label={schema.title}
                   />

@@ -81,6 +81,7 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
               <Grid item xs={10}>
                 {elementType[key] === 'TextInput' &&
                   <TextInput
+                    variant='outlined'
                     label={key}
                     name={`${name}.value.${key}`}
                   />
