@@ -22,23 +22,23 @@ import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
 
 interface PieceFormItemProps {
   formId: string
-  schema: any;
+  schema: InputSchemaProperty;
   itemKey: string;
   control: Control<IWorkflowPieceData, any>
-  definitions?: any
+  definitions?: Definitions
   upstreamOptions: Option[] | ArrayOption
 }
 
-const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, itemKey, schema, definitions, control }) => {
-  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(schema,upstreamOptions)
+const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, itemKey, schema, definitions, control }) => {
+  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(schema, upstreamOptions)
 
-  const checkedFromUpstream = useWatch({name:`inputs.${itemKey}.fromUpstream`})
+  const checkedFromUpstream = useWatch({ name: `inputs.${itemKey}.fromUpstream` })
 
   let inputElement: React.ReactNode = null
 
   if (checkedFromUpstream) {
     let options: Option[] = []
-    if (schema.type === 'array') {
+    if ("type" in schema && schema.type === 'array') {
       options = (upstreamOptions as ArrayOption).array
     } else {
       options = upstreamOptions as Option[]
@@ -50,18 +50,23 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, i
         label={schema?.title}
         options={options}
       />);
-  } else if (schema?.allOf && schema.allOf.length > 0) {
-    const typeClass = schema.allOf[0]['$ref'].split("/").pop();
-    const valuesOptions: Array<string> = definitions?.[typeClass].enum;
+  } else if ("allOf" in schema && schema.allOf.length > 0) {
+    const typeClass = schema.allOf[0]['$ref'].split("/").pop() as string;
+    let enumOptions: string[] = []
+
+    if(definitions?.[typeClass] && (definitions[typeClass]).type === "string"){
+      enumOptions = (definitions[typeClass] as EnumDefinition).enum
+    }
+
     inputElement =
       <SelectInput<IWorkflowPieceData>
         label={itemKey}
         emptyValue
         defaultValue={schema?.default}
         name={`inputs.${itemKey}.value`}
-        options={valuesOptions}
+        options={enumOptions}
       />
-  } else if ((schema.type === 'number') && !schema.format) {
+  } else if ("type" in schema && schema.type === 'number') {
     inputElement =
       <NumberInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
@@ -69,7 +74,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, i
         label={schema.title}
         defaultValue={schema?.default ?? 10.5}
       />
-  } else if (schema.type === 'integer' && !schema.format) {
+  } else if ("type" in schema && schema.type === 'integer') {
     inputElement =
       <NumberInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
@@ -77,12 +82,12 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, i
         label={schema.title}
         defaultValue={schema?.default ?? 10}
       />
-  } else if (schema.type === 'boolean' && !schema.format) {
+  } else if ("type" in schema && schema.type === 'boolean') {
     inputElement = <CheckboxInput<IWorkflowPieceData>
       name={`inputs.${itemKey}.value`}
       label={schema.title}
     />
-  } else if (schema.type === 'array') {
+  } else if ("type" in schema && schema.type === 'array') {
     inputElement =
       <ArrayInput
         formId={formId}
@@ -92,33 +97,33 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({formId, upstreamOptions, i
         upstreamOptions={upstreamOptions as ArrayOption}
         control={control}
       />
-  } else if (schema.type === 'string' && schema.format === 'date') {
+  } else if ("type" in schema && schema.type === 'string' && schema.format === 'date') {
     inputElement =
       <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date"
       />;
-  } else if (schema.type === 'string' && schema?.format === 'time') {
+  } else if ("type" in schema && schema.type === 'string' && schema?.format === 'time') {
     inputElement =
       <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="time"
       />;
-  } else if (schema.type === 'string' && schema?.format === 'date-time') {
+  } else if ("type" in schema && schema.type === 'string' && schema?.format === 'date-time') {
     inputElement =
       <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date-time"
       />;
-  } else if (schema.type === 'string' && schema?.widget === 'codeeditor') {
+  } else if ("type" in schema && schema.type === 'string' && schema?.widget === 'codeeditor') {
     inputElement =
       <CodeEditorInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
       />
-  } else if (schema.type === 'string' && !schema.format) {
+  } else if ("type" in schema && schema.type === 'string' && !schema.format) {
     inputElement =
       <TextInput<IWorkflowPieceData>
         variant='outlined'
