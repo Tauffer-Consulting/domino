@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Drawer,
   Grid,
@@ -54,8 +54,10 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   }, [schema])
 
   const resolver = yupResolver(SidebarPieceFormSchema);
+
+  const [formLoaded, setFormLoaded] = useState(false)
+
   const methods = useForm({
-    defaultValues: async ()=>fetchForageWorkflowPiecesDataById(formId),
     resolver,
     mode: "onChange"
   })
@@ -63,14 +65,16 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const data = methods.watch()
 
   const loadData = useCallback(async () => {
+    setFormLoaded(false)
     const data = await fetchForageWorkflowPiecesDataById(formId)
-    if(data){
+    if (data) {
       reset(data) // put forage data on form if exist
     } else {
       reset()
     }
     trigger()
-  }, [formId,fetchForageWorkflowPiecesDataById, reset, trigger])
+    setFormLoaded(true)
+  }, [formId, fetchForageWorkflowPiecesDataById, reset, trigger])
 
   const saveData = useCallback(async () => {
     if (formId && open) {
@@ -85,7 +89,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     } else {
       reset()
     }
-  }, [open,reset,loadData])
+  }, [open, reset, loadData])
 
   // save on forage
   useEffect(() => {
@@ -123,37 +127,38 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
             </Grid>
 
             <Grid container sx={{ paddingBottom: "25px" }}>
-              <FormProvider {...methods} >
-                <Grid item xs={12} className='sidebar-jsonforms-grid'>
-                  <Grid item xs={12}>
-                    <PieceForm
-                      formId={formId}
-                      schema={schema}
-                    />
+              {formLoaded &&
+                <FormProvider {...methods} >
+                  <Grid item xs={12} className='sidebar-jsonforms-grid'>
+                    <Grid item xs={12}>
+                      <PieceForm
+                        formId={formId}
+                        schema={schema}
+                      />
+                    </Grid>
+
+                    <div style={{ marginBottom: '50px' }} />
+
+                    <Accordion
+                      sx={{
+                        '&.MuiAccordion-root:before': {
+                          display: 'none',
+                        },
+                      }}>
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>
+                          Advanced Options
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <StorageForm />
+                        <div style={{ marginBottom: '50px' }} />
+                        <ContainerResourceForm />
+                      </AccordionDetails>
+                    </Accordion>
                   </Grid>
-
-                  <div style={{ marginBottom: '50px' }} />
-
-                  <Accordion
-                    sx={{
-                      '&.MuiAccordion-root:before': {
-                        display: 'none',
-                      },
-                    }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>
-                        Advanced Options
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <StorageForm />
-                      <div style={{ marginBottom: '50px' }} />
-                      <ContainerResourceForm />
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
-              </FormProvider>
-
+                </FormProvider>
+              }
             </Grid>
           </div>
         </Grid>

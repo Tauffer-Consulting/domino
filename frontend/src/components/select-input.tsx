@@ -17,11 +17,10 @@ type Props<T> = SelectProps & {
   options: string[] | { label: string, value: string }[]
 
   emptyValue?: boolean
-  defaultValue: string
   registerOptions?: RegisterOptions<FieldValues>
 }
 
-function SelectInput<T extends FieldValues>({ options, label, name, defaultValue, emptyValue, registerOptions, ...rest }: Props<T>) {
+function SelectInput<T extends FieldValues>({ options, label, name, emptyValue, registerOptions, ...rest }: Props<T>) {
   const { control, formState: { errors } } = useFormContext()
 
   const error = fetchFromObject(errors, name)
@@ -36,7 +35,6 @@ function SelectInput<T extends FieldValues>({ options, label, name, defaultValue
           <Select
             labelId={name}
             label={label}
-            defaultValue={emptyValue ? "" : defaultValue}
             {...rest}
             {...field}
             onChange={(e)=>field.onChange(e.target.value as any)}
