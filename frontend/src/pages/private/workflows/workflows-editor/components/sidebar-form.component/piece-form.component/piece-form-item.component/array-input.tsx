@@ -17,7 +17,7 @@ import CodeEditorInput from 'components/codeeditor-input';
 import SelectUpstreamInput from './select-upstream-input';
 import ObjectInputComponent from './object-input';
 import { ArrayOption } from '../../piece-form.component/upstream-options';
-import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
+import { createUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context';
 
 interface ArrayInputItemProps {
@@ -52,7 +52,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
     return subItemSchema
   }, [definitions, schema])
 
-  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(subItemSchema, upstreamOptions)
+  const [checkedUpstream, disableUpstream] = createUpstreamCheckboxOptions(subItemSchema, upstreamOptions)
 
   const getFromUpstream = useCallback((index: number) => {
     return formsData?.[index]?.fromUpstream ?? false
@@ -123,7 +123,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
   }, [append, schema.default])
 
   const updateOutputSchema = useCallback(async () => {
-    if (schema?.items?.["$ref"] === '#/definitions/OutputModifierModel' && formsData) {
+    if (schema?.items?.["$ref"] === '#/definitions/OutputArgsModel' && formsData) {
       const newProperties = formsData.reduce((acc: any, cur: { value: { type: string; name: string; description: any; }; }) => {
         let defaultValue: any = ""
         let newProperties = {}

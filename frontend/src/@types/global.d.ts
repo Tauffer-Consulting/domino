@@ -5,6 +5,8 @@ export { };
 declare global {
   type InputSchemaProperties = import("./properties").InputSchemaProperties;
   type InputSchemaProperty = import("./properties").InputSchemaProperty;
+  type ArrayObjectProperty = import("./properties").ArrayObjectProperty;
+
   type SimpleInputSchemaProperties = import("./properties").SimpleInputSchemaProperties;
   type SimpleInputSchemaProperty = import("./properties").SimpleInputSchemaProperty;
   type FromUpstream = import("./properties").FromUpstream;

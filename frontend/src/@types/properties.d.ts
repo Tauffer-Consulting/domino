@@ -66,6 +66,7 @@ type ArrayBooleanProperty = DefaultPropertyProps & {
 
 type ArrayObjectProperty = DefaultPropertyProps & {
   type: "array"
+  default: Array<Record<string,string|boolean|number>>
   items: Reference
 }
 

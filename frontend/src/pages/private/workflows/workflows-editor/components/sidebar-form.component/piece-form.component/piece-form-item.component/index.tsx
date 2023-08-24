@@ -18,7 +18,7 @@ import SelectUpstreamInput from './select-upstream-input';
 import ArrayInput from './array-input';
 
 import { ArrayOption, Option } from '../../piece-form.component/upstream-options';
-import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
+import { createUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
 
 interface PieceFormItemProps {
   formId: string
@@ -30,7 +30,7 @@ interface PieceFormItemProps {
 }
 
 const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, itemKey, schema, definitions, control }) => {
-  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(schema, upstreamOptions)
+  const [checkedUpstream, disableUpstream] = createUpstreamCheckboxOptions(schema, upstreamOptions)
 
   const checkedFromUpstream = useWatch({ name: `inputs.${itemKey}.fromUpstream` })
 

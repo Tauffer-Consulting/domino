@@ -7,13 +7,13 @@ import CheckboxInput from 'components/checkbox-input';
 
 import SelectUpstreamInput from './select-upstream-input';
 import { Option } from '../../piece-form.component/upstream-options';
-import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
+import { createUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
 import SelectInput from 'components/select-input';
 
 interface Prop {
   name: `inputs.${string}.value.${number}`
-  schema: any;
-  definitions?: any
+  schema: ArrayObjectProperty;
+  definitions: Definitions
   upstreamOptions: Option[]
   checkedFromUpstreamDefault: boolean
   checkedFromUpstreamEditable: boolean
@@ -21,7 +21,11 @@ interface Prop {
 
 const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, definitions }) => {
   const formsData = useWatch({ name })
-  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(schema, upstreamOptions)
+
+  const itensSchema = useMemo(() => {
+    const typeClass = schema.items.$ref.split("/").pop() as string;
+    return (definitions[typeClass] as ObjectDefinition).properties
+  }, [schema, definitions])
 
   const [enumOptions, setEnumOptions] = useState<string[]>([])
 
@@ -37,8 +41,8 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
 
   const elementType = useMemo(() => {
     const getElementType = function (key: string) {
-      if (schema?.items?.["$ref"] === '#/definitions/OutputModifierModel' && key === "type") {
-        const valuesOptions: Array<string> = definitions?.["OutputModifierItemType"].enum;
+      if (schema?.items?.["$ref"] === '#/definitions/OutputArgsModel' && key === "type") {
+        const valuesOptions: Array<string> = (definitions["OutputArgsType"] as EnumDefinition).enum;
         setEnumOptions(valuesOptions)
         return "SelectInput"
       } else {
@@ -58,7 +62,7 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
     <>
       {Object.entries(defaultValues).map(([key, value]) => {
         const fromUpstream = getFromUpstream(key)
-
+        const [checkedUpstream, disableUpstream] = createUpstreamCheckboxOptions(itensSchema[key], upstreamOptions)
         return (
           <Grid
             key={key}
