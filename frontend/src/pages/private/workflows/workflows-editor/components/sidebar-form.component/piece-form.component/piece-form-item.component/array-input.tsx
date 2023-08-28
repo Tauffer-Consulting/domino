@@ -49,7 +49,13 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
     return subItemSchema
   }, [definitions, schema])
 
-  const disableUpstream = disableCheckboxOptions(subItemSchema, upstreamOptions)
+  const disableUpstream = useMemo(()=>{
+    if("length" in upstreamOptions){
+      return true
+    } else {
+      return disableCheckboxOptions(subItemSchema, upstreamOptions.items)
+    }
+  },[subItemSchema, upstreamOptions])
 
   const isFromUpstream = useCallback((index: number) => {
     return formsData?.[index]?.fromUpstream ?? false

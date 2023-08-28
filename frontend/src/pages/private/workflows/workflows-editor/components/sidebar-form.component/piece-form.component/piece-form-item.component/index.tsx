@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Grid,
@@ -30,7 +30,13 @@ interface PieceFormItemProps {
 }
 
 const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, itemKey, schema, definitions, control }) => {
-  const disableUpstream = disableCheckboxOptions(schema, upstreamOptions)
+  const disableUpstream = useMemo(()=>{
+    if("length" in upstreamOptions){
+      return disableCheckboxOptions(schema, upstreamOptions)
+    } else {
+      return disableCheckboxOptions(schema, upstreamOptions.array)
+    }
+  },[schema, upstreamOptions])
 
   const checkedFromUpstream = useWatch({ name: `inputs.${itemKey}.fromUpstream` })
 
