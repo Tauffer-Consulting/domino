@@ -12,7 +12,7 @@ type BooleanProperty = DefaultPropertyProps & {
   default: boolean
 }
 type NumberProperty = DefaultPropertyProps & {
-  type: "number" | "integer"
+  type: "number" | "integer" | "float"
   default: number
   exclusiveMaximum?: number
   exclusiveMinimum?: number
@@ -29,13 +29,6 @@ type EnumProperty = DefaultPropertyProps & {
   default: string
 }
 
-export type SimpleInputSchemaProperty =
-  | BooleanProperty
-  | NumberProperty
-  | StringProperty
-  | EnumProperty
-
-export type SimpleInputSchemaProperties = Record<string, SimpleInputSchemaProperty>
 
 type ArrayStringProperty = DefaultPropertyProps & {
   type: "array"
@@ -70,10 +63,15 @@ type ArrayObjectProperty = DefaultPropertyProps & {
   items: Reference
 }
 
+export type SimpleInputSchemaProperty =
+  | BooleanProperty
+  | NumberProperty
+  | StringProperty
+  | EnumProperty
+
 export type InputSchemaProperty = SimpleInputSchemaProperty
   | ArrayStringProperty
   | ArrayNumberProperty
   | ArrayBooleanProperty
   | ArrayObjectProperty
 
-export type InputSchemaProperties = Record<string, InputSchemaProperty>

@@ -25,7 +25,7 @@ import { yupResolver } from 'utils';
 
 interface ISidebarPieceFormProps {
   formId: string,
-  schema: Record<string, unknown>,
+  schema: InputSchema,
   title: string,
   open: boolean,
   onClose: (event: any) => void,
@@ -43,6 +43,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const {
     setForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
+    setForageWorkflowPiecesOutputSchema,
   } = useWorkflowsEditor()
 
   const SidebarPieceFormSchema = useMemo(() => {
@@ -76,11 +77,66 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     setFormLoaded(true)
   }, [formId, fetchForageWorkflowPiecesDataById, reset, trigger])
 
+  const updateOutputSchema = useCallback(async () => {
+    if (schema?.properties) {
+      const outputSchemaProperty = Object.keys(schema.properties).find((key) => {
+        const inputSchema = schema.properties[key]
+        return (
+          "items" in inputSchema &&
+          "$ref" in inputSchema.items &&
+          inputSchema.items.$ref === '#/definitions/OutputArgsModel'
+        )
+      })
+
+      if (outputSchemaProperty && data?.inputs?.[outputSchemaProperty]?.value) {
+        const formsData = data.inputs[outputSchemaProperty].value
+        const newProperties = formsData.reduce((acc: any, cur: { value: { type: string; name: string; description: any; }; }) => {
+          let defaultValue: any = ""
+          let newProperties = {}
+
+          if (cur.value.type === "integer") {
+            defaultValue = 1
+          } else if (cur.value.type === "float") {
+            defaultValue = 1.1
+          } else if (cur.value.type === "boolean") {
+            defaultValue = false
+          }
+
+          if (cur.value.type === "array") {
+            newProperties = {
+              [cur.value.name as string]: {
+                items: {
+                  type: "string"
+                },
+                description: cur.value.description,
+                title: cur.value.name,
+                type: cur.value.type,
+              }
+            }
+          } else {
+            newProperties = {
+              [cur.value.name as string]: {
+                default: defaultValue,
+                description: cur.value.description,
+                title: cur.value.name,
+                type: cur.value.type,
+              }
+            }
+          }
+          return { ...acc, ...newProperties }
+        }, {})
+
+        await setForageWorkflowPiecesOutputSchema(formId, newProperties)
+      }
+    }
+  }, [data, formId, schema, setForageWorkflowPiecesOutputSchema])
+
   const saveData = useCallback(async () => {
     if (formId && open) {
       await setForageWorkflowPiecesData(formId, data as IWorkflowPieceData)
+      await updateOutputSchema()
     }
-  }, [formId, open, data, setForageWorkflowPiecesData])
+  }, [formId, open, setForageWorkflowPiecesData, data, updateOutputSchema])
 
   //load forage
   useEffect(() => {

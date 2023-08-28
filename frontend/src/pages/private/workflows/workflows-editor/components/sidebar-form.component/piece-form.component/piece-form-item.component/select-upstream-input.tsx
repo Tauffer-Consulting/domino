@@ -42,11 +42,11 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) 
     onChange(event)
   }, [name, object, options, setValue]);
 
-  const error = fetchFromObject(errors, name)
+  const error = fetchFromObject(errors, object ? name as ObjectName : `${name}.upstreamValue`)
 
   return (
     <FormControl fullWidth>
-      <InputLabel id={name}>{label}</InputLabel>
+      <InputLabel error={!!error} id={name}>{label}</InputLabel>
       <Controller
         control={control}
         name={object ? name as ObjectName : `${name}.upstreamValue`}
@@ -56,12 +56,17 @@ const SelectUpstreamInput: React.FC<Props> = ({ options, label, name, object }) 
             defaultValue={""}
             labelId={name}
             label={label}
+            error={!!error}
             {...field}
             onChange={event =>
               handleSelectChange(event, field.onChange)
             }
           >
-            <MenuItem value="" disabled>
+            <MenuItem
+              value=""
+              disabled
+
+            >
               <em>None</em>
             </MenuItem>
             {options && options.map(({ value }: Option) => (

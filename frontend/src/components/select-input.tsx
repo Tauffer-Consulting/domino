@@ -27,7 +27,7 @@ function SelectInput<T extends FieldValues>({ options, label, name, emptyValue, 
 
   return (
     <FormControl fullWidth>
-      <InputLabel id={name}>{label}</InputLabel>
+      <InputLabel id={name} error={!!error}>{label}</InputLabel>
       <Controller
         name={name}
         control={control}
@@ -35,17 +35,25 @@ function SelectInput<T extends FieldValues>({ options, label, name, emptyValue, 
           <Select
             labelId={name}
             label={label}
+            error={!!error}
             {...rest}
             {...field}
-            onChange={(e)=>field.onChange(e.target.value as any)}
+            onChange={(e) => field.onChange(e.target.value as any)}
           >
-            {emptyValue && <MenuItem value="" disabled>
+            {emptyValue &&
+              <MenuItem
+                value=""
+                disabled
+              >
               <em>None</em>
             </MenuItem>}
             {options.map((option) => {
               if (typeof option === "object") {
                 return (
-                  <MenuItem key={option.value} value={option.value}>
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}
+                  >
                     {option.label}
                   </MenuItem>
                 )

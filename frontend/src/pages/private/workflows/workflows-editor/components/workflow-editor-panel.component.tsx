@@ -22,6 +22,7 @@ import { useWorkflowsEditor } from "context/workflows/workflows-editor.context"
 import { INodeData } from './custom-node.component'
 import { containerResourcesSchema } from 'common/schemas/containerResourcesSchemas'
 import { IWorkflowPieceData, storageAccessModes } from 'context/workflows/types'
+import { extractDefaultInputValues } from 'utils'
 /**
  * @todo When change the workspace should we clear the forage ?
  * @todo Solve any types
@@ -78,7 +79,6 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
 
   // Node double click open drawer with forms
   const onNodeDoubleClick = useCallback(async (event: any, node: any) => {
-    //const pieceNode = await fetchForagePieceById(node.id.split('_')[0])
     const pieceNode = await fetchWorkflowPieceById(node.id)
     setFormSchema(pieceNode?.input_schema)
     setFormId(node.id)
@@ -138,9 +138,8 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
 
     setNodes((ns: Node[]) => ns.concat(newNode))
     const piece = await fetchForagePieceById(data.id)
-    const inputSchema = piece?.input_schema
-    const defaultData: any = extractDefaultValues(inputSchema)
-    const defaultContainerResources: unknown = extractDefaultValues(containerResourcesSchema)
+    const defaultInputs = extractDefaultInputValues(piece as unknown as PieceSchema)
+    const defaultContainerResources = extractDefaultValues(containerResourcesSchema as any)
 
     const currentWorkflowPieces = await getForageWorkflowPieces()
     const newWorkflowPieces = {
@@ -149,78 +148,11 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
     }
     await setForageWorkflowPieces(newWorkflowPieces)
 
-    // Set default data for upstream mapping - used in dags
-    const defaultInputs: any = {}
-    for (const key in defaultData) {
-      const fromUpstream = false // TODO - If someday we allow default upstream true we should change this
-      const upstreamId = null
-
-      var defaultValues = defaultData[key]
-      if (Array.isArray(defaultData[key])) {
-        const auxDefaultValues = []
-        for (const element of defaultData[key]) {
-          let newValue: any = {}
-          if (typeof element === 'object') {
-            newValue = {
-              fromUpstream: {},
-              upstreamId: {},
-              upstreamArgument: {},
-              upstreamValue: {},
-              value: {}
-            }
-            for (const [_key, _value] of Object.entries(element)) {
-              newValue.fromUpstream = {
-                ...newValue.fromUpstream,
-                [_key]: fromUpstream
-              }
-              newValue.upstreamId = {
-                ...newValue.upstreamId,
-                [_key]: ""
-              }
-              newValue.upstreamArgument = {
-                ...newValue.upstreamArgument,
-                [_key]: ""
-              }
-              newValue.upstreamValue = {
-                ...newValue.upstreamValue,
-                [_key]: ""
-              }
-              newValue.value = {
-                ...newValue.value,
-                [_key]: _value
-              }
-            }
-            auxDefaultValues.push(newValue)
-          } else {
-            newValue = {
-              fromUpstream: fromUpstream,
-              upstreamId: upstreamId ?? "",
-              upstreamArgument: "",
-              upstreamValue: "",
-              value: element
-            }
-            auxDefaultValues.push(newValue)
-          }
-        }
-        defaultValues = auxDefaultValues
-      }
-      defaultInputs[key] = {
-        fromUpstream,
-        upstreamId: upstreamId ?? "",
-        upstreamArgument: "",
-        upstreamValue: "",
-        value: (
-          defaultValues === null || defaultValues === undefined
-        ) ? null : defaultValues
-      }
-    }
-
-    // TODO: refactor types here
-    const defaultWorkflowPieceData = {
+    const defaultWorkflowPieceData: IWorkflowPieceData = {
       storage: { storageAccessMode: storageAccessModes.ReadWrite },
       containerResources: defaultContainerResources,
       inputs: defaultInputs
-    } as unknown as IWorkflowPieceData
+    }
 
     await setForageWorkflowPiecesData(newNode.id, defaultWorkflowPieceData)
   }, [
@@ -312,7 +244,13 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
           <Background color='#aaa' gap={16} />
         </ReactFlow>
       </div>
-      <SidebarForm schema={formSchema} formId={formId} onClose={toggleDrawer(false)} open={drawerState} title={formTitle} />
+      <SidebarForm
+        schema={formSchema}
+        formId={formId}
+        onClose={toggleDrawer(false)}
+        open={drawerState}
+        title={formTitle}
+      />
 
     </ReactFlowProvider>
   )

@@ -18,7 +18,7 @@ import SelectUpstreamInput from './select-upstream-input';
 import ArrayInput from './array-input';
 
 import { ArrayOption, Option } from '../../piece-form.component/upstream-options';
-import { createUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
+import { disableCheckboxOptions } from './disableCheckboxOptions';
 
 interface PieceFormItemProps {
   formId: string
@@ -30,7 +30,7 @@ interface PieceFormItemProps {
 }
 
 const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, itemKey, schema, definitions, control }) => {
-  const [checkedUpstream, disableUpstream] = createUpstreamCheckboxOptions(schema, upstreamOptions)
+  const disableUpstream = disableCheckboxOptions(schema, upstreamOptions)
 
   const checkedFromUpstream = useWatch({ name: `inputs.${itemKey}.fromUpstream` })
 
@@ -54,7 +54,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, 
     const typeClass = schema.allOf[0]['$ref'].split("/").pop() as string;
     let enumOptions: string[] = []
 
-    if(definitions?.[typeClass] && (definitions[typeClass]).type === "string"){
+    if (definitions?.[typeClass] && (definitions[typeClass]).type === "string") {
       enumOptions = (definitions[typeClass] as EnumDefinition).enum
     }
 
@@ -65,7 +65,8 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, 
         name={`inputs.${itemKey}.value`}
         options={enumOptions}
       />
-  } else if ("type" in schema && schema.type === 'number') {
+  } else if ("type" in schema && (schema.type === 'number' || schema.type === 'float')) {
+
     inputElement =
       <NumberInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
@@ -96,33 +97,52 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, 
         upstreamOptions={upstreamOptions as ArrayOption}
         control={control}
       />
-  } else if ("type" in schema && schema.type === 'string' && schema.format === 'date') {
+  } else if (
+    "type" in schema &&
+    "format" in schema &&
+    schema.type === 'string' &&
+    schema.format === 'date') {
     inputElement =
       <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date"
       />;
-  } else if ("type" in schema && schema.type === 'string' && schema?.format === 'time') {
+  } else if (
+    "type" in schema &&
+    "format" in schema &&
+    schema.type === 'string' &&
+    schema.format === 'time') {
     inputElement =
       <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="time"
       />;
-  } else if ("type" in schema && schema.type === 'string' && schema?.format === 'date-time') {
+  } else if (
+    "type" in schema &&
+    "format" in schema &&
+    schema.type === 'string' &&
+    schema.format === 'date-time') {
     inputElement =
       <DatetimeInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date-time"
       />;
-  } else if ("type" in schema && schema.type === 'string' && schema?.widget === 'codeeditor') {
+  } else if (
+    "type" in schema &&
+    "widget" in schema &&
+    schema.type === 'string' &&
+    schema.widget === 'codeeditor') {
     inputElement =
       <CodeEditorInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
       />
-  } else if ("type" in schema && schema.type === 'string' && !schema.format) {
+  } else if (
+    "type" in schema &&
+    !("format" in schema) &&
+    schema.type === 'string') {
     inputElement =
       <TextInput<IWorkflowPieceData>
         variant='outlined'
@@ -149,7 +169,6 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({ formId, upstreamOptions, 
       <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
         <CheckboxInput
           name={`inputs.${itemKey}.fromUpstream`}
-          defaultChecked={checkedUpstream}
           disabled={disableUpstream}
         />
       </Grid>

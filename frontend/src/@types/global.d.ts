@@ -1,35 +1,29 @@
 import { CSSProperties } from "react"
 
-export { };
+export {};
 
 declare global {
-  type InputSchemaProperties = import("./properties").InputSchemaProperties;
   type InputSchemaProperty = import("./properties").InputSchemaProperty;
   type ArrayObjectProperty = import("./properties").ArrayObjectProperty;
 
-  type SimpleInputSchemaProperties = import("./properties").SimpleInputSchemaProperties;
   type SimpleInputSchemaProperty = import("./properties").SimpleInputSchemaProperty;
   type FromUpstream = import("./properties").FromUpstream;
 
-  type ObjectDefinition = {
-    type: "object"
-
-    title: string
-    description: string
-
-    properties: SimpleInputSchemaProperties
-  }
-
   type EnumDefinition = {
-    type: "string"
-
     title: string
     description: string
-
+    type: "string"
     enum: Array<string>
   }
 
-  type Definition = ObjectDefinition | EnumDefinition
+  type ObjectDefinition = {
+    title: string
+    description: string
+    type: "object"
+    properties: Record<string,EnumDefinition | SimpleInputSchemaProperty>
+  }
+
+  type Definition = EnumDefinition | ObjectDefinition
 
   type Definitions = Record<string, Definition>
 
@@ -39,7 +33,7 @@ declare global {
 
     type: "object"
 
-    properties: InputSchemaProperties
+    properties: Record<string,InputSchemaProperty>
     definitions: Definitions
   }
 

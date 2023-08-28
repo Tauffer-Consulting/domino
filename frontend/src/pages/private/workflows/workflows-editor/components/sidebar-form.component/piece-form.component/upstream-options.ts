@@ -18,7 +18,7 @@ const getInputType = (schema: Record<string, any>) => {
   if ('allOf' in schema || "oneOf" in schema || "anyOf" in schema) {
     type = 'enum'
   }
-  return type as string
+  return type === "number" ? "float" : type as string
 }
 
 const getOptions = (upstreamPieces: Record<string, any>, type: string): Option[] | ArrayOption => {
