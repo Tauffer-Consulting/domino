@@ -18,6 +18,7 @@ import SelectUpstreamInput from './select-upstream-input';
 import ObjectInputComponent from './object-input';
 import { ArrayOption } from '../../piece-form.component/upstream-options';
 import { disableCheckboxOptions } from './disableCheckboxOptions';
+import { getFromUpstream } from 'utils';
 
 interface ArrayInputItemProps {
   formId: string
@@ -87,12 +88,16 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
   }, [subItemSchema, definitions])
 
   const handleAddInput = useCallback(() => {
-    function empty(object: Record<string, any>) {
+    function empty(object: Record<string, any>, fromUpstream = false) {
       Object.keys(object).forEach(function (k) {
         if (object[k] && typeof object[k] === 'object') {
           return empty(object[k]);
         }
-        object[k] = '';
+        if(fromUpstream){
+          object[k] = getFromUpstream(schema, definitions, k)
+        } else {
+          object[k] = '';
+        }
       });
       return object
     }
@@ -100,7 +105,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
     const defaultValue = schema.default[0]
     const isObject = typeof defaultValue === "object"
     let defaultObj = {
-      fromUpstream: false,
+      fromUpstream: getFromUpstream(schema),
       upstreamArgument: "",
       upstreamId: "",
       upstreamValue: "",
@@ -108,9 +113,10 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
     } as unknown
 
     if (isObject) {
-      const emptyObjValue = empty(defaultValue)
+      const emptyObjValue = empty({...defaultValue})
+      const emptyObjFromUpstream = empty({...defaultValue},true)
       defaultObj = {
-        fromUpstream: false,
+        fromUpstream: emptyObjFromUpstream,
         upstreamArgument: emptyObjValue,
         upstreamId: emptyObjValue,
         upstreamValue: emptyObjValue,
@@ -119,7 +125,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
     }
 
     append([defaultObj] as any)
-  }, [append, schema.default])
+  }, [append, definitions, schema])
 
   return (
     <Card sx={{ width: "100%", paddingTop: 0 }}>
