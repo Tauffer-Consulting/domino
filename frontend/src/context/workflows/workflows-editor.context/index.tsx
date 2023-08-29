@@ -73,6 +73,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     setForageWorkflowPiecesData,
     clearForageWorkflowPiecesData,
     removeForageWorkflowPieceDataById,
+    clearDownstreamDataById,
   } = useWorkflowPiecesData()
 
 
@@ -255,6 +256,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     setForageWorkflowPiecesOutputSchema,
 
     clearForageData,
+    clearDownstreamDataById,
     clearForageWorkflowPiecesData,
     clearForageWorkflowPieces,
     fetchWorkflowSettingsData,

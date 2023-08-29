@@ -66,6 +66,7 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
     removeForageWorkflowPieceDataById,
     fetchWorkflowPieceById,
     setForageWorkflowPiecesData,
+    clearDownstreamDataById,
   } = useWorkflowsEditor()
 
   // Removing flowchart elements
@@ -76,6 +77,11 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
     }
   }, [removeForageWorkflowPieceDataById, removeForageWorkflowPiecesById])
 
+  const onEdgesDelete = useCallback(async (edges: Edge[]) => {
+    for (const edge of edges) {
+      await clearDownstreamDataById(edge.source)
+    }
+  }, [clearDownstreamDataById])
 
   // Node double click open drawer with forms
   const onNodeDoubleClick = useCallback(async (event: any, node: any) => {
@@ -234,6 +240,7 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
           onEdgesChange={onEdgesChange}
           onNodeDoubleClick={onNodeDoubleClick}
           onNodesDelete={onNodesDelete}
+          onEdgesDelete={onEdgesDelete}
           deleteKeyCode={["Delete", "Backspace"]} /* 'delete'-key */
           onInit={onLoad}
           onDrop={onDrop}

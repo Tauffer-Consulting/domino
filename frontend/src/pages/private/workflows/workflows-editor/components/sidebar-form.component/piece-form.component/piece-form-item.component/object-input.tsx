@@ -65,7 +65,7 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
     <>
       {Object.entries(defaultValues).map(([key, value]) => {
         const fromUpstream = isFromUpstream(key)
-        const disableUpstream = disableCheckboxOptions(itensSchema[key] as any, upstreamOptions)
+        const disableUpstream = disableCheckboxOptions(itensSchema[key] as any)
         return (
           <Grid
             key={key}

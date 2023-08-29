@@ -8,14 +8,9 @@ function getFromUpstreamType(schema: InputSchemaProperty): FromUpstream {
   return "allowed"
 }
 
-export function disableCheckboxOptions(schema: InputSchemaProperty, upstreamOptions: Option[]): boolean {
+export function disableCheckboxOptions(schema: InputSchemaProperty): boolean {
   let disable: boolean = false;
   const fromUpstream = getFromUpstreamType(schema)
-
-  if (!(upstreamOptions as Option[])?.length) {
-    disable = true;
-    return disable
-  }
 
   if (fromUpstream === "allowed") {
     disable = false;
