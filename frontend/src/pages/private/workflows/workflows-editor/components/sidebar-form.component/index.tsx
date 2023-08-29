@@ -44,6 +44,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     setForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
     setForageWorkflowPiecesOutputSchema,
+    clearDownstreamDataById,
   } = useWorkflowsEditor()
 
   const SidebarPieceFormSchema = useMemo(() => {
@@ -127,9 +128,10 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
         }, {})
 
         await setForageWorkflowPiecesOutputSchema(formId, newProperties)
+        await clearDownstreamDataById(formId)
       }
     }
-  }, [data, formId, schema, setForageWorkflowPiecesOutputSchema])
+  }, [data.inputs, formId, schema.properties,clearDownstreamDataById, setForageWorkflowPiecesOutputSchema])
 
   const saveData = useCallback(async () => {
     if (formId && open) {
