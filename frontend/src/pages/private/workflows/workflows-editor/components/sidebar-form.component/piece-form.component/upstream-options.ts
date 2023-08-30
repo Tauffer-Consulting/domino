@@ -1,4 +1,4 @@
-import { getUuidSlice } from "utils"
+import { generateTaskName, getUuidSlice } from "utils"
 
 export type Option = {
   id: string,
@@ -18,7 +18,7 @@ const getInputType = (schema: Record<string, any>) => {
   if ('allOf' in schema || "oneOf" in schema || "anyOf" in schema) {
     type = 'enum'
   }
-  return type as string
+  return type === "number" ? "float" : type as string
 }
 
 const getOptions = (upstreamPieces: Record<string, any>, type: string): Option[] | ArrayOption => {
@@ -38,7 +38,8 @@ const getOptions = (upstreamPieces: Record<string, any>, type: string): Option[]
         if ((upType === type) || (upType==="string" && type==="object")) {
           const value = `${upPiece?.name} (${getUuidSlice(upPiece.id)}) - ${upSchema[property].title}`
           const upstreamArgument = property
-          options.push({ id: upstreamId, argument: upstreamArgument, value })
+          const taskName = generateTaskName(upPiece.name,upPiece.id)
+          options.push({ id: taskName, argument: upstreamArgument, value })
         }
       }
     }

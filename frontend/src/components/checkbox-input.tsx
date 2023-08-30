@@ -6,11 +6,10 @@ import { fetchFromObject } from 'utils';
 interface Props<T> {
   name: Path<T>
   label?: string
-  defaultChecked?: boolean
   disabled?: boolean
 }
 
-function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = false, disabled = false }: Props<T>) {
+function CheckboxInput<T extends FieldValues>({ label, name, disabled = false }: Props<T>) {
   const { control, formState: { errors } } = useFormContext<T>()
 
   const error = fetchFromObject(errors, name)
@@ -30,7 +29,6 @@ function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = fa
                   {...field}
                   checked={!!field.value}
                   disabled={disabled}
-                  defaultChecked={defaultChecked}
                 />
               )}
             />}
@@ -39,13 +37,11 @@ function CheckboxInput<T extends FieldValues>({ label, name, defaultChecked = fa
         <Controller
           name={name}
           control={control}
-          defaultValue={defaultChecked as any}
           render={({ field }) => (
             <Checkbox
               {...field}
               checked={!!field.value}
               disabled={disabled}
-              defaultChecked={defaultChecked}
             />
           )}
         />

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Grid } from '@mui/material';
 
@@ -7,25 +7,27 @@ import CheckboxInput from 'components/checkbox-input';
 
 import SelectUpstreamInput from './select-upstream-input';
 import { Option } from '../../piece-form.component/upstream-options';
-import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
+import { disableCheckboxOptions } from './disableCheckboxOptions';
 import SelectInput from 'components/select-input';
+import { getDefinition } from 'utils';
 
 interface Prop {
   name: `inputs.${string}.value.${number}`
-  schema: any;
-  definitions?: any
+  schema: ArrayObjectProperty;
+  definitions: Definitions
   upstreamOptions: Option[]
-  checkedFromUpstreamDefault: boolean
-  checkedFromUpstreamEditable: boolean
 }
 
 const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, definitions }) => {
   const formsData = useWatch({ name })
-  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(schema, upstreamOptions)
+
+  const itensSchema = useMemo(() => {
+    return (getDefinition(schema,definitions) as ObjectDefinition).properties
+  }, [schema, definitions])
 
   const [enumOptions, setEnumOptions] = useState<string[]>([])
 
-  const getFromUpstream = useCallback((key: string) => {
+  const isFromUpstream = useCallback((key: string) => {
     return (formsData?.fromUpstream[key] ?? false) as boolean
   }, [formsData])
 
@@ -37,10 +39,15 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
 
   const elementType = useMemo(() => {
     const getElementType = function (key: string) {
-      if (schema?.items?.["$ref"] === '#/definitions/OutputModifierModel' && key === "type") {
-        const valuesOptions: Array<string> = definitions?.["OutputModifierItemType"].enum;
-        setEnumOptions(valuesOptions)
-        return "SelectInput"
+      const schemaDefinition = getDefinition(schema,definitions)
+      if ("properties" in schemaDefinition) {
+        const itemSchemaDefinition = getDefinition(schemaDefinition.properties[key],definitions)
+        if("enum" in itemSchemaDefinition){
+          const valuesOptions = (itemSchemaDefinition as EnumDefinition).enum;
+          setEnumOptions(valuesOptions)
+          return "SelectInput"
+        }
+        return "TextInput"
       } else {
         return "TextInput";
       }
@@ -51,14 +58,14 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
       return acc
     }, {})
 
-  }, [schema?.items, defaultValues, definitions])
+  }, [defaultValues, schema, definitions])
 
 
   return (
     <>
       {Object.entries(defaultValues).map(([key, value]) => {
-        const fromUpstream = getFromUpstream(key)
-
+        const fromUpstream = isFromUpstream(key)
+        const disableUpstream = disableCheckboxOptions(itensSchema[key] as any)
         return (
           <Grid
             key={key}
@@ -81,6 +88,7 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
               <Grid item xs={10}>
                 {elementType[key] === 'TextInput' &&
                   <TextInput
+                    variant='outlined'
                     label={key}
                     name={`${name}.value.${key}`}
                   />
@@ -101,7 +109,6 @@ const ObjectInputComponent: React.FC<Prop> = ({ schema, name, upstreamOptions, d
             >
               <CheckboxInput
                 name={`${name}.fromUpstream.${key}`}
-                defaultChecked={checkedUpstream}
                 disabled={disableUpstream}
               />
             </Grid>

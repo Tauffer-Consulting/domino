@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Drawer,
   Grid,
@@ -13,29 +13,22 @@ import * as yup from "yup"
 
 import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
 
-
 import PieceForm from './piece-form.component'
 import { createInputsSchemaValidation } from './piece-form.component/validation'
 
-import ContainerResourceForm, { ContainerResourceFormSchema, defaultContainerResources } from './container-resource-form.component';
+import ContainerResourceForm, { ContainerResourceFormSchema } from './container-resource-form.component';
 
-import StorageForm, { defaultStorage, storageFormSchema } from './storage-form.component';
+import StorageForm, { storageFormSchema } from './storage-form.component';
 
 import { IWorkflowPieceData } from 'context/workflows/types';
 import { yupResolver } from 'utils';
 
 interface ISidebarPieceFormProps {
   formId: string,
-  schema: Record<string, unknown>,
+  schema: InputSchema,
   title: string,
   open: boolean,
   onClose: (event: any) => void,
-}
-
-const defaultValues: IWorkflowPieceData = {
-  containerResources: defaultContainerResources,
-  storage: defaultStorage,
-  inputs: {},
 }
 
 const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
@@ -50,6 +43,8 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const {
     setForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
+    setForageWorkflowPiecesOutputSchema,
+    clearDownstreamDataById,
   } = useWorkflowsEditor()
 
   const SidebarPieceFormSchema = useMemo(() => {
@@ -61,8 +56,10 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   }, [schema])
 
   const resolver = yupResolver(SidebarPieceFormSchema);
+
+  const [formLoaded, setFormLoaded] = useState(false)
+
   const methods = useForm({
-    defaultValues: async ()=>fetchForageWorkflowPiecesDataById(formId),
     resolver,
     mode: "onChange"
   })
@@ -70,20 +67,78 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const data = methods.watch()
 
   const loadData = useCallback(async () => {
+    setFormLoaded(false)
     const data = await fetchForageWorkflowPiecesDataById(formId)
-    if(data){
+    if (data) {
       reset(data) // put forage data on form if exist
     } else {
       reset()
     }
     trigger()
-  }, [formId,fetchForageWorkflowPiecesDataById, reset, trigger])
+    setFormLoaded(true)
+  }, [formId, fetchForageWorkflowPiecesDataById, reset, trigger])
+
+  const updateOutputSchema = useCallback(async () => {
+    if (schema?.properties) {
+      const outputSchemaProperty = Object.keys(schema.properties).find((key) => {
+        const inputSchema = schema.properties[key]
+        return (
+          "items" in inputSchema &&
+          "$ref" in inputSchema.items &&
+          inputSchema.items.$ref === '#/definitions/OutputArgsModel'
+        )
+      })
+
+      if (outputSchemaProperty && data?.inputs?.[outputSchemaProperty]?.value) {
+        const formsData = data.inputs[outputSchemaProperty].value
+        const newProperties = formsData.reduce((acc: any, cur: { value: { type: string; name: string; description: any; }; }) => {
+          let defaultValue: any = ""
+          let newProperties = {}
+
+          if (cur.value.type === "integer") {
+            defaultValue = 1
+          } else if (cur.value.type === "float") {
+            defaultValue = 1.1
+          } else if (cur.value.type === "boolean") {
+            defaultValue = false
+          }
+
+          if (cur.value.type === "array") {
+            newProperties = {
+              [cur.value.name as string]: {
+                items: {
+                  type: "string"
+                },
+                description: cur.value.description,
+                title: cur.value.name,
+                type: cur.value.type,
+              }
+            }
+          } else {
+            newProperties = {
+              [cur.value.name as string]: {
+                default: defaultValue,
+                description: cur.value.description,
+                title: cur.value.name,
+                type: cur.value.type,
+              }
+            }
+          }
+          return { ...acc, ...newProperties }
+        }, {})
+
+        await setForageWorkflowPiecesOutputSchema(formId, newProperties)
+        await clearDownstreamDataById(formId)
+      }
+    }
+  }, [data.inputs, formId, schema.properties,clearDownstreamDataById, setForageWorkflowPiecesOutputSchema])
 
   const saveData = useCallback(async () => {
     if (formId && open) {
       await setForageWorkflowPiecesData(formId, data as IWorkflowPieceData)
+      await updateOutputSchema()
     }
-  }, [formId, open, data, setForageWorkflowPiecesData])
+  }, [formId, open, setForageWorkflowPiecesData, data, updateOutputSchema])
 
   //load forage
   useEffect(() => {
@@ -92,7 +147,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     } else {
       reset()
     }
-  }, [open,reset,loadData])
+  }, [open, reset, loadData])
 
   // save on forage
   useEffect(() => {
@@ -130,37 +185,38 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
             </Grid>
 
             <Grid container sx={{ paddingBottom: "25px" }}>
-              <FormProvider {...methods} >
-                <Grid item xs={12} className='sidebar-jsonforms-grid'>
-                  <Grid item xs={12}>
-                    <PieceForm
-                      formId={formId}
-                      schema={schema}
-                    />
+              {formLoaded &&
+                <FormProvider {...methods} >
+                  <Grid item xs={12} className='sidebar-jsonforms-grid'>
+                    <Grid item xs={12}>
+                      <PieceForm
+                        formId={formId}
+                        schema={schema}
+                      />
+                    </Grid>
+
+                    <div style={{ marginBottom: '50px' }} />
+
+                    <Accordion
+                      sx={{
+                        '&.MuiAccordion-root:before': {
+                          display: 'none',
+                        },
+                      }}>
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>
+                          Advanced Options
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <StorageForm />
+                        <div style={{ marginBottom: '50px' }} />
+                        <ContainerResourceForm />
+                      </AccordionDetails>
+                    </Accordion>
                   </Grid>
-
-                  <div style={{ marginBottom: '50px' }} />
-
-                  <Accordion
-                    sx={{
-                      '&.MuiAccordion-root:before': {
-                        display: 'none',
-                      },
-                    }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>
-                        Advanced Options
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <StorageForm />
-                      <div style={{ marginBottom: '50px' }} />
-                      <ContainerResourceForm />
-                    </AccordionDetails>
-                  </Accordion>
-                </Grid>
-              </FormProvider>
-
+                </FormProvider>
+              }
             </Grid>
           </div>
         </Grid>

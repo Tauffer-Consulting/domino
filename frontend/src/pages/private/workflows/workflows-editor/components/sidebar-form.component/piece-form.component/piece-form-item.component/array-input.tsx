@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Control, FieldArrayWithId, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { Control, FieldArrayWithId, useFieldArray, useWatch } from 'react-hook-form';
 
 import { Card, CardContent, IconButton, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -17,8 +17,8 @@ import CodeEditorInput from 'components/codeeditor-input';
 import SelectUpstreamInput from './select-upstream-input';
 import ObjectInputComponent from './object-input';
 import { ArrayOption } from '../../piece-form.component/upstream-options';
-import { useUpstreamCheckboxOptions } from './useUpstreamCheckboxOptions';
-import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context';
+import { disableCheckboxOptions } from './disableCheckboxOptions';
+import { getFromUpstream } from 'utils';
 
 interface ArrayInputItemProps {
   formId: string
@@ -39,8 +39,6 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
   const fields = data as unknown as FieldArrayWithId<InputArray>[]
   const formsData = useWatch({ name })
 
-  const { setForageWorkflowPiecesOutputSchema } = useWorkflowsEditor()
-
   const [enumOptions, setEnumOptions] = useState<string[]>([])
 
   const subItemSchema = useMemo(() => {
@@ -52,9 +50,11 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
     return subItemSchema
   }, [definitions, schema])
 
-  const [checkedUpstream, disableUpstream] = useUpstreamCheckboxOptions(subItemSchema, upstreamOptions)
+  const disableUpstream = useMemo(()=>{
+      return disableCheckboxOptions(subItemSchema)
+  },[subItemSchema])
 
-  const getFromUpstream = useCallback((index: number) => {
+  const isFromUpstream = useCallback((index: number) => {
     return formsData?.[index]?.fromUpstream ?? false
   }, [formsData])
 
@@ -88,63 +88,44 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
   }, [subItemSchema, definitions])
 
   const handleAddInput = useCallback(() => {
+    function empty(object: Record<string, any>, fromUpstream = false) {
+      Object.keys(object).forEach(function (k) {
+        if (object[k] && typeof object[k] === 'object') {
+          return empty(object[k]);
+        }
+        if(fromUpstream){
+          object[k] = getFromUpstream(schema, definitions, k)
+        } else {
+          object[k] = '';
+        }
+      });
+      return object
+    }
 
-    const defaultValue = [{
-      fromUpstream: false,
+    const defaultValue = schema.default[0]
+    const isObject = typeof defaultValue === "object"
+    let defaultObj = {
+      fromUpstream: getFromUpstream(schema),
       upstreamArgument: "",
       upstreamId: "",
       upstreamValue: "",
       value: ""
-    }]
+    } as unknown
 
-    console.log(defaultValue)
-
-    append(defaultValue as any)
-  }, [append])
-
-  const updateOutputSchema = useCallback(async () => {
-    if (schema?.items?.["$ref"] === '#/definitions/OutputModifierModel' && formsData) {
-      const newProperties = formsData.reduce((acc: any, cur: { value: { type: string; name: string; description: any; }; }) => {
-        let defaultValue: any = ""
-        let newProperties = {}
-
-        if (cur.value.type === "integer") {
-          defaultValue = 1
-        } else if (cur.value.type === "float") {
-          defaultValue = 1.1
-        } else if (cur.value.type === "boolean") {
-          defaultValue = false
-        }
-
-        if (cur.value.type === "array") {
-          newProperties = {
-            [cur.value.name as string]: {
-              items: {
-                type: "string"
-              },
-              description: cur.value.description,
-              title: cur.value.name,
-              type: cur.value.type,
-            }
-          }
-        } else {
-          newProperties = {
-            [cur.value.name as string]: {
-              default: defaultValue,
-              description: cur.value.description,
-              title: cur.value.name,
-              type: cur.value.type,
-            }
-          }
-        }
-        return { ...acc, ...newProperties }
-      }, {})
-
-      await setForageWorkflowPiecesOutputSchema(formId, newProperties)
+    if (isObject) {
+      const emptyObjValue = empty({...defaultValue})
+      const emptyObjFromUpstream = empty({...defaultValue},true)
+      defaultObj = {
+        fromUpstream: emptyObjFromUpstream,
+        upstreamArgument: emptyObjValue,
+        upstreamId: emptyObjValue,
+        upstreamValue: emptyObjValue,
+        value: defaultValue
+      } as unknown
     }
-  }, [formsData, schema?.items, setForageWorkflowPiecesOutputSchema, formId])
 
-  useEffect(() => { updateOutputSchema() }, [updateOutputSchema])
+    append([defaultObj] as any)
+  }, [append, definitions, schema])
 
   return (
     <Card sx={{ width: "100%", paddingTop: 0 }}>
@@ -158,7 +139,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
 
         {fields && fields.map((fieldWithId, index) => {
           const { id } = fieldWithId
-          const fromUpstream = getFromUpstream(index)
+          const fromUpstream = isFromUpstream(index)
           return (
             <Grid
               key={id}
@@ -251,6 +232,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                   xs={9}
                 >
                   <TextInput
+                    variant='outlined'
                     name={`${name}.${index}.value`}
                     label={schema.title}
                   />
@@ -319,7 +301,6 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 <Grid item xs={1}>
                   <CheckboxInput
                     name={`${name}.${index}.fromUpstream`}
-                    defaultChecked={checkedUpstream}
                     disabled={disableUpstream}
                   />
                 </Grid>
@@ -332,8 +313,6 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                     schema={schema}
                     definitions={definitions}
                     upstreamOptions={upstreamOptions.items}
-                    checkedFromUpstreamDefault={checkedUpstream}
-                    checkedFromUpstreamEditable={disableUpstream}
                   />
                 </Grid>
               )}

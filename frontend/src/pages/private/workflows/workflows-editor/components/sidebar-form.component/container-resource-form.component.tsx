@@ -8,7 +8,6 @@ import * as yup from "yup";
 import { IContainerResourceFormData } from "context/workflows/types";
 import NumberInput from "components/number-input";
 import CheckboxInput from "components/checkbox-input";
-import { useFormContext } from "react-hook-form";
 
 // TODO check if these values make sense
 const minAcceptedMemory = 128

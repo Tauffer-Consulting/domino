@@ -162,6 +162,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextInput
+                  variant='outlined'
                   name="config.name"
                   label="Name"
                   defaultValue={defaultSettingsData.config.name}
