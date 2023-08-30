@@ -1,5 +1,3 @@
-import { Option } from "../upstream-options";
-
 function getFromUpstreamType(schema: InputSchemaProperty): FromUpstream {
   if (schema?.from_upstream) {
     return schema?.from_upstream

@@ -1,23 +1,42 @@
-import { FC, useState } from 'react'
+import { FC, useCallback } from 'react'
 
-import { Box, Button, Grid, Link, Typography } from '@mui/material'
-import TextField from '@mui/material/TextField';
+import { Box, Button, Grid, Typography, Link as LinkMui } from '@mui/material'
 
 import { PublicLayout } from 'modules/layout'
 import { useAuthentication } from 'context/authentication'
-import { useNavigate } from 'react-router-dom'
-
+import { Link } from 'react-router-dom'
+import * as yup from "yup"
+import { yupResolver } from 'utils';
+import { FormProvider, useForm } from 'react-hook-form';
+import TextInput from 'components/text-input';
 
 /**
  * Sign in component
  */
 
+interface ISignIn {
+  email: string,
+  password: string,
+}
+
+const validationSignIn: yup.ObjectSchema<ISignIn> = yup.object().shape({
+  email: yup.string().email().required(),
+  password: yup.string().required()
+})
+
 export const SignInPage: FC = () => {
   const { authenticate, authLoading } = useAuthentication()
-  const navigate = useNavigate()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const resolver = yupResolver(validationSignIn)
+
+  const methods = useForm<ISignIn>({
+    reValidateMode: "onChange",
+    resolver,
+  })
+
+  const handleSubmit = useCallback(async (data: ISignIn) => {
+    await authenticate(data.email, data.password)
+  }, [authenticate])
 
   return (
     <PublicLayout>
@@ -45,75 +64,76 @@ export const SignInPage: FC = () => {
           />
         </Box>
       </Box>
-      <Box sx={{textAlign: 'center'}}>
-        <Typography variant='h1' component='h1' sx={{fontWeight:'semi-bold'}}>Welcome Back</Typography>
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography variant='h1' component='h1' sx={{ fontWeight: 'semi-bold' }}>Welcome Back</Typography>
       </Box>
       <Box
         component='form'
-        onSubmit={(e: any) => e.preventDefault()}
+        onSubmit={methods.handleSubmit(data => handleSubmit(data))}
         noValidate
         sx={{ mt: 1 }}
       >
-        <TextField
-          margin='normal'
-          required
-          fullWidth
-          variant='outlined'
-          id='email'
-          label='E-mail address'
-          name='email'
-          autoComplete='email'
-          autoFocus
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          margin='normal'
-          required
-          fullWidth
-          variant='outlined'
-          name='password'
-          label='Password'
-          type='password'
-          id='password'
-          autoComplete='current-password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button
-          type='submit'
-          fullWidth
-          variant='contained'
-          disabled={authLoading || !email || !password}
-          sx={{ mt: 3, mb: 2 }}
-          onClick={() => authenticate(email, password)}
-        >
-          Sign In
-        </Button>
-        <Grid container>
-          <Grid item xs>
-            <Link href='/recover-password' variant='body2'>
-              Forgot password?
-            </Link>
+        <FormProvider {...methods} >
+          <TextInput
+            margin='normal'
+            required
+            fullWidth
+            variant='outlined'
+            id='email'
+            label='E-mail address'
+            name='email'
+            autoComplete='email'
+            autoFocus
+          />
+          <TextInput
+            margin='normal'
+            required
+            fullWidth
+            variant='outlined'
+            name='password'
+            label='Password'
+            type='password'
+            id='password'
+            autoComplete='current-password'
+          />
+          <Button
+            type='submit'
+            fullWidth
+            variant='contained'
+            disabled={authLoading}
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Sign In
+          </Button>
+          <Grid container>
+            <Grid item xs>
+              <Link to='/recover-password'>
+                <Typography variant='body2' color='text.primary'>
+                  Forgot password?
+                </Typography>
+              </Link>
+            </Grid>
+            <Grid item>
+              <Link to="/sign-up">
+                <Typography variant='body2' color='text.primary'>
+                  Don't have an account? Sign Up
+                </Typography>
+              </Link>
+            </Grid>
           </Grid>
-          <Grid item>
-            <Link href="" variant='body2' onClick={() => navigate('/sign-up')}>
-              {"Don't have an account? Sign Up"}
-            </Link>
-          </Grid>
-        </Grid>
-        <Typography
-          variant='body2'
-          color='text.secondary'
-          align='center'
-          sx={{ mt: 4 }}
-        >
-          {'Copyright © '}
-          <Link color='inherit' href='https://www.taufferconsulting.com/'>
-            Tauffer Consulting
-          </Link>
-          {' 2022.'}
-        </Typography>
+          <Typography
+            variant='body2'
+            color='text.secondary'
+            align='center'
+            sx={{ mt: 4 }}
+          >
+            {'Copyright © '}
+            <LinkMui color='inherit' href='https://www.taufferconsulting.com/'>
+              Tauffer Consulting
+            </LinkMui>
+            {' 2022.'}
+          </Typography>
+        </FormProvider>
       </Box>
     </PublicLayout>
   )
