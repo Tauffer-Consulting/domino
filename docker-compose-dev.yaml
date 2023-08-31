@@ -33,14 +33,6 @@ x-airflow-common:
       condition: service_healthy
 
 services:
-  docker-proxy:
-    image: bobrik/socat
-    command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
-    ports:
-      - "2376:2375"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
   postgres:
     image: postgres:13
     container_name: airflow-postgres
@@ -376,6 +368,15 @@ services:
     depends_on:
       domino_rest:
         condition: service_started
+
+  docker-proxy:
+    image: bobrik/socat
+    container_name: domino-docker-proxy
+    command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
+    ports:
+      - "2376:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   postgres-db-volume: null
