@@ -12,6 +12,7 @@ import ReactFlow, {
   applyEdgeChanges,
   Connection,
   Edge,
+  MarkerType,
   //removeElements,
   Node
 } from 'reactflow'
@@ -193,7 +194,21 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
 
   // Connecting elements
   const onConnect = useCallback((connection: Connection) => {
-    setEdges((eds: Edge[]) => addEdge(connection, eds))
+    setEdges((prevEdges:Edge[]) => {
+      const newEdges = addEdge(connection, prevEdges);
+  
+      newEdges.forEach((edge:Edge) => {
+        edge.markerEnd = {
+          type: MarkerType.ArrowClosed,
+          width: 50,
+          height: 50,
+          color: '#b1b1b7',
+        };
+        // edge.animated = true;
+      });
+  
+      return newEdges;
+    });
   }, [setEdges]);
 
   const setNodeErrors = useCallback((nodeIds: string[]) => {
