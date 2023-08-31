@@ -40,6 +40,7 @@ services:
       - "2376:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
   postgres:
     image: postgres:13
     container_name: airflow-postgres

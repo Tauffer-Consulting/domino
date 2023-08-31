@@ -44,7 +44,7 @@ interface Props {
   nodesWithErros: string[]
 }
 
-const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
+const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
   const [formSchema, setFormSchema] = useState<any>({})
   const [formId, setFormId] = useState<string>("")
   const [formTitle, setFormTitle] = useState<string>('')
@@ -194,16 +194,16 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
 
   // Connecting elements
   const onConnect = useCallback((connection: Connection) => {
-    setEdges((prevEdges:Edge[]) => {
+    setEdges((prevEdges: Edge[]) => {
       const newEdges = addEdge(connection, prevEdges);
-      newEdges.forEach((edge:Edge) => {
+      newEdges.forEach((edge: Edge) => {
         edge.markerEnd = {
           type: MarkerType.ArrowClosed,
           width: 30,
           height: 30,
-          color: '#b1b1b7',
+          color: '#6a6a6e',
         };
-        edge.animated = true;
+        edge.animated = false;
       });
 
       return newEdges;
@@ -235,9 +235,9 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
     )
   }, [setNodes])
 
-  useEffect(()=>{
+  useEffect(() => {
     setNodeErrors(nodesWithErros)
-  },[nodesWithErros, setNodeErrors])
+  }, [nodesWithErros, setNodeErrors])
 
   return (
     <ReactFlowProvider>
