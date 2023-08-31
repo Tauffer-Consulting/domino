@@ -196,17 +196,16 @@ const WorkflowEditorPanelComponent = ({nodesWithErros}:Props) => {
   const onConnect = useCallback((connection: Connection) => {
     setEdges((prevEdges:Edge[]) => {
       const newEdges = addEdge(connection, prevEdges);
-  
       newEdges.forEach((edge:Edge) => {
         edge.markerEnd = {
           type: MarkerType.ArrowClosed,
-          width: 50,
-          height: 50,
+          width: 30,
+          height: 30,
           color: '#b1b1b7',
         };
-        // edge.animated = true;
+        edge.animated = true;
       });
-  
+
       return newEdges;
     });
   }, [setEdges]);
