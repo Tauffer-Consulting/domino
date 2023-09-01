@@ -18,7 +18,7 @@ classifiers = [
 
 ]
 dependencies = [
-    "urllib3== 1.26.15",
+    "pydantic==1.10.11",
     "tomli==2.0.1",
     "tomli-w==1.0.0",
     "PyYAML==6.0",
@@ -26,12 +26,13 @@ dependencies = [
     "click==8.1.3",
     "rich==12.6.0",
     "colorama==0.4.6",
+    # Maybe these dependencies could be put as optional-dependencies
+    "urllib3== 1.26.15",
     "cryptography==39.0.1",
-    "pydantic==1.10.11",
+    "pyOpenSSL==23.1.1",
     "PyGithub==1.55",
     "docker>=6.0.1",
     "kubernetes==23.6.0",
-    "pyOpenSSL==23.1.1",
     "bottle==0.12.25",
 ]
 
