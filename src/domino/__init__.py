@@ -1,11 +1,9 @@
-import os
+from pathlib import Path
 
-# Get the path of the current script (__init__.py)
-current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Construct the path to the VERSION file
-version_file_path = os.path.join(current_dir, 'VERSION')
+def _get_version():
+    version_file_path = Path(__file__).parent / 'VERSION'
+    with version_file_path.open('r') as version_file:
+        return version_file.read().strip()
 
-# Read the version from the VERSION file
-with open(version_file_path, 'r') as version_file:
-    __version__ = version_file.read().strip()
+__version__ = _get_version()
