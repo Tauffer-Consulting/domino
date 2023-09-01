@@ -302,15 +302,6 @@ def cli_run_piece_docker():
     run_piece_in_docker()
 
 
-@click.command()
-def cli_run_piece_bash():
-    """Run Piece on bash"""
-    from domino.scripts.run_piece_bash import run_piece as run_piece_in_bash
-
-    console.print("Running bash Piece...")
-    run_piece_in_bash()
-
-
 ###############################################################################
 # PARENT GROUP
 ###############################################################################
@@ -326,7 +317,6 @@ def cli(ctx):
 cli.add_command(cli_platform, name="platform")
 cli.add_command(cli_piece, name="piece")
 cli.add_command(cli_run_piece_k8s, name="run-piece-k8s")
-cli.add_command(cli_run_piece_bash, name="run-piece-bash")
 cli.add_command(cli_run_piece_docker, name='run-piece-docker')
 
 if __name__ == '__main__':
