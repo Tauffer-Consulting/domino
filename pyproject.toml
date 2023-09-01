@@ -41,11 +41,11 @@ documentation = "https://tauffer-consulting.github.io/domino-docs/"
 repository = "https://github.com/Tauffer-Consulting/domino"
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.dynamic]
-version = { attr = "domino.VERSION" }
+version = { attr = "domino.__version__" }
 readme = { file = "README.md" }
 
 [project.scripts]
