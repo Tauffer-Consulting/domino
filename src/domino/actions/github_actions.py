@@ -35,7 +35,7 @@ class Actions(object):
             if release.tag_name == cls.new_tag:
                 raise Exception("Version already exists.")
             release_tag_version = release.tag_name.split("-")[-1]
-            if version.parse(release_tag_version) > version.parse(__version__):
+            if version.parse(release_tag_version) > version.parse(domino.__version__):
                 raise Exception("Version number is smaller than the last release.")
         return
 
