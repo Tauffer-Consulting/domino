@@ -44,6 +44,21 @@ repository = "https://github.com/Tauffer-Consulting/domino"
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+domino = [
+    'cli/utils/config-domino-local.toml',
+    'cli/utils/docker-compose.yaml',
+    'custom_operators/sidecar/sidecar_lifecycle.sh',
+    'custom_operators/sidecar/rclone.conf',
+    'custom_operators/sidecar/fuse.conf',
+]
+
 [tool.setuptools.dynamic]
 version = { attr = "domino.__version__" }
 readme = { file = "README.md" }
