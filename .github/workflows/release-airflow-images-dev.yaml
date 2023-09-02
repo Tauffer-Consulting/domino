@@ -103,5 +103,5 @@ jobs:
         with:
           push: true
           tags: ghcr.io/tauffer-consulting/domino-shared-storage-sidecar-dev:latest
-          context: domino/custom_operators/sidecar
-          file: domino/custom_operators/sidecar/Dockerfile
+          context: src/domino/custom_operators/sidecar
+          file: src/domino/custom_operators/sidecar/Dockerfile
