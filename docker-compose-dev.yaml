@@ -369,6 +369,7 @@ services:
       domino_rest:
         condition: service_started
 
+  # Domino Docker Proxy
   docker-proxy:
     image: bobrik/socat
     container_name: domino-docker-proxy
