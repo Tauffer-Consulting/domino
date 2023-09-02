@@ -44,11 +44,8 @@ WORKDIR /opt/airflow
 # Editable pip install for Domino from local folder
 USER airflow
 RUN mkdir -p domino/domino_py
-COPY setup.py domino/domino_py/
-COPY requirements.txt domino/domino_py/
-COPY requirements-airflow.txt domino/domino_py/
-COPY README.md domino/domino_py/
-COPY domino domino/domino_py/domino
+COPY pyproject.toml domino/domino_py/
+COPY domino domino/domino_py/src/domino
 # provisory repository used for testing only - remove it
 COPY ./pieces_repository_test domino/pieces_repository 
 COPY ./pieces_repository_test/.domino domino/pieces_repository/.domino
