@@ -326,5 +326,6 @@ cli.add_command(cli_piece, name="piece")
 cli.add_command(cli_run_piece_k8s, name="run-piece-k8s")
 cli.add_command(cli_run_piece_docker, name='run-piece-docker')
 
+
 if __name__ == '__main__':
     cli()
