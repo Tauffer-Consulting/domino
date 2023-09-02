@@ -65,15 +65,3 @@ class GetWorkspaceResponse(BaseModel):
 
 class PatchWorkspaceResponse(GetWorkspaceResponse):
     ...
-
-
-class ListWorkspacePiecesRepositoriesResponseData(BaseModel):
-    id: int
-    name: str
-    source: RepositorySource
-    path: str
-    version: str
-
-class ListWorkspacePiecesRepositoriesResponse(BaseModel):
-    data: List[ListWorkspacePiecesRepositoriesResponseData]
-    metadata: PaginationSet
