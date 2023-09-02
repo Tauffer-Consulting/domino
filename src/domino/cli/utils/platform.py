@@ -3,6 +3,7 @@ import tomli
 import tomli_w
 import yaml
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 import base64
 from pathlib import Path
 from rich.console import Console
@@ -560,3 +561,57 @@ def run_platform_compose(detached: bool = False, use_config_file: bool = False, 
     if dev:
         environment['DOMINO_COMPOSE_DEV'] = '-dev'
     subprocess.Popen(cmd, env=environment)
+
+
+def stop_platform_compose() -> None:
+    # If "docker-compose.yaml" file is present in current working path, try run "docker compose down"
+    docker_compose_path = Path.cwd().resolve() / "docker-compose.yaml"
+    if docker_compose_path.exists():
+        cmd = [
+            "docker", 
+            "compose", 
+            "down"
+        ]
+        completed_process = subprocess.run(cmd)
+        if completed_process.returncode == 0:
+            print("Domino Platform stopped successfully. All containers were removed.")
+    # If not, try to stop and remove containers by name
+    else:
+        def stop_and_remove_container(container_name):
+            print(f"Stopping {container_name}...")
+            process = subprocess.Popen(f"docker stop {container_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode != 0:
+                print(f"Command failed with error: {stderr.decode()}")
+            else:
+                print(stdout.decode())
+
+            print(f"Removing {container_name}...")
+            process = subprocess.Popen(f"docker rm {container_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode != 0:
+                print(f"Command failed with error: {stderr.decode()}")
+            else:
+                print(stdout.decode())
+        
+        try:
+            container_names = [
+                "domino-frontend",
+                "domino-rest",
+                "domino-postgres",
+                "domino-docker-proxy",
+                "airflow-domino-scheduler",
+                "airflow-domino-worker",
+                "airflow-webserver",
+                "airflow-triggerer",
+                "airflow-redis",
+                "airflow-postgres",
+                "airflow-flower",
+                "airflow-cli",
+                "airflow-init",
+            ]
+            with ThreadPoolExecutor() as executor:
+                executor.map(stop_and_remove_container, container_names)
+            print("Domino Platform stopped successfully. All containers were removed.")
+        except Exception as e:
+            print(f"An error occurred: {e}")

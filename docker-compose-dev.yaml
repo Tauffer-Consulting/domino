@@ -64,6 +64,7 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
+    container_name: airflow-webserver
     command: webserver
     ports:
       - "8080:8080"

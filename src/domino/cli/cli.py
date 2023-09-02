@@ -182,9 +182,18 @@ def cli_create_platform(domino_frontend_image, domino_rest_image, run_airflow, u
     help="Run platform in dev mode.",
     default=False
 )
-def cli_run_platform_compose(d, use_config_file, dev):
+@click.option(
+    '--stop',
+    is_flag=True,
+    help="Stop and remove containers.",
+    default=False
+)
+def cli_run_platform_compose(d, use_config_file, dev, stop):
     """Run Domino platform locally with docker compose. Do NOT use this in production."""
-    platform.run_platform_compose(detached=d, use_config_file=use_config_file, dev=dev)
+    if stop:
+        platform.stop_platform_compose()
+    else:
+        platform.run_platform_compose(detached=d, use_config_file=use_config_file, dev=dev)
 
 
 @click.group()

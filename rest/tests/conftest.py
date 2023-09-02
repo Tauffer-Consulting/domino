@@ -4,6 +4,7 @@ from typing import Dict
 from database.models import User, PieceRepository, Workflow, Workspace
 import os
 
+
 def pytest_collection_modifyitems(items):
     CLASS_ORDER = [
         "TestAuthRouter", 
