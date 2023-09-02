@@ -24,7 +24,7 @@ RUN chmod -R 777 .
 # Editable pip install for Domino from local folder
 RUN mkdir -p /home/domino/domino_py
 COPY pyproject.toml /home/domino/domino_py/
-COPY domino /home/domino/domino_py/src/domino
+COPY src/domino /home/domino/domino_py/src/domino
 WORKDIR /home/domino/domino_py
 RUN chmod -R 777 .
 RUN pip install --no-cache -e .
