@@ -523,7 +523,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     console.print("and the Backend API at: http://localhost/api/")
 
 
-def run_platform_compose(detached: bool = False, use_config_file: bool = False) -> None:
+def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False) -> None:
     if use_config_file:
         console.print("Using config file...")
         with open("config-domino-local.toml", "rb") as f:
@@ -557,4 +557,6 @@ def run_platform_compose(detached: bool = False, use_config_file: bool = False) 
     if detached:
         cmd.append("-d")
     environment = os.environ.copy()
+    if dev:
+        environment['DOMINO_COMPOSE_DEV'] = '-dev'
     subprocess.Popen(cmd, env=environment)

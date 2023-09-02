@@ -31,15 +31,7 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
-services:
-  docker-proxy:
-    image: bobrik/socat
-    command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
-    ports:
-      - "2376:2375"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-  
+services: 
   postgres:
     image: postgres:13
     environment:
@@ -225,7 +217,7 @@ services:
   # Modified Airflow Scheduler with Domino
   airflow-scheduler:
     <<: *airflow-common
-    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
+    image: ghcr.io/tauffer-consulting/domino-airflow-base${DOMINO_COMPOSE_DEV}:latest
     container_name: airflow-domino-scheduler
     command: scheduler
     healthcheck:
@@ -256,7 +248,7 @@ services:
   # Modified Airflow Worker with Domino
   airflow-worker:
     <<: *airflow-common
-    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
+    image: ghcr.io/tauffer-consulting/domino-airflow-base${DOMINO_COMPOSE_DEV}:latest
     container_name: airflow-domino-worker
     command: celery worker
     healthcheck:
@@ -288,7 +280,7 @@ services:
 
   # Domino REST Api
   domino_rest:
-    image: ghcr.io/tauffer-consulting/domino-rest:latest
+    image: ghcr.io/tauffer-consulting/domino-rest${DOMINO_COMPOSE_DEV}:latest
     container_name: domino-rest
     command: bash -c "alembic upgrade heads && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
     ports:
@@ -340,13 +332,23 @@ services:
 
   # Domino Frontend
   domino_frontend:
-    image: ghcr.io/tauffer-consulting/domino-frontend:compose
+    image: ghcr.io/tauffer-consulting/domino-frontend${DOMINO_COMPOSE_DEV}:compose
     container_name: domino-frontend
     ports:
       - "3000:80"
     depends_on:
       domino_rest:
         condition: service_started
+  
+  # Domino Docker proxy
+  docker-proxy:
+    image: bobrik/socat
+    container_name: domino-docker-proxy
+    command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
+    ports:
+      - "2376:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   postgres-db-volume: null

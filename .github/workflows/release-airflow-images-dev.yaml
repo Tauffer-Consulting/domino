@@ -1,22 +1,14 @@
-name: Build and publish Domino Airflow production images
+name: Build and publish Domino Airflow development images
 
 on:
   push:
     branches:
-      - main
+      - dev
     paths:
       - src/domino/**
-  # workflow_run:
-  #   workflows:
-  #     - "Build and publish domino-py package"
-  #   branches:
-  #     - main
-  #   types:
-  #     - completed
 
 jobs:
   domino-airflow-base:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Airflow Base Image
     runs-on: ubuntu-latest
     steps:
@@ -38,12 +30,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-base:latest
+          tags: ghcr.io/tauffer-consulting/domino-airflow-base-dev:latest
           context: .
           file: Dockerfile-airflow-domino-base-dev # TODO check file to use in prod env, by now using the same as dev
 
   domino-pod-base:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Base Pod Image
     runs-on: ubuntu-latest
     steps:
@@ -63,12 +54,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:latest
+          tags: ghcr.io/tauffer-consulting/domino-airflow-pod-dev:latest
           context: .
           file: Dockerfile-airflow-domino-pod-dev # TODO check file to use in prod env, by now using the same as dev
 
   domino-pod-gpu-base:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Base Pod GPU Image
     runs-on: ubuntu-latest
     steps:
@@ -88,12 +78,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:gpu
+          tags: ghcr.io/tauffer-consulting/domino-airflow-pod-dev:gpu
           context: .
           file: Dockerfile-airflow-domino-pod-gpu
 
   domino-storage-sidecar:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Storage Sidecar Image
     runs-on: ubuntu-latest
     steps:
@@ -113,6 +102,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-shared-storage-sidecar:latest
+          tags: ghcr.io/tauffer-consulting/domino-shared-storage-sidecar-dev:latest
           context: domino/custom_operators/sidecar
           file: domino/custom_operators/sidecar/Dockerfile
