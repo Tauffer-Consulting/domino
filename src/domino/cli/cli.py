@@ -201,6 +201,7 @@ cli_platform.add_command(cli_prepare_platform, name="prepare")
 cli_platform.add_command(cli_create_platform, name="create")
 cli_platform.add_command(cli_run_platform_compose, name="run-compose")
 
+
 ###############################################################################
 # OPERATORS REPOSITORY 
 ###############################################################################
