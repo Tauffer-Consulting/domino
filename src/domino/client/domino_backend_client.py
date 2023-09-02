@@ -46,12 +46,12 @@ class DominoBackendRestClient(requests.Session):
         )
         return response
 
-    def get_piece_repositories(self, workspace_id: int, filters: dict):
+    def get_piece_repositories_from_workspace_id(self, workspace_id: int, params: dict):
         resource = f"/workspaces/{workspace_id}/pieces-repositories"
         response = self.request(
             method='get',
             resource=resource,
-            params=filters
+            params=params
         )
         return response
     

@@ -477,15 +477,16 @@ class WorkflowService(object):
                 workflow_shared_storage['storage_repository_id'] = workspace_storage_repository_id
 
             piece_db = self.piece_repository.find_by_id(piece_request.get('id'))
+            piece_repository_db = self.piece_repository_repository.find_by_id(piece_db.repository_id)
             pieces_repositories_ids.add(piece_db.repository_id)
             stream_tasks_dict[task_key] = {
                 'task_id': task_key,
                 'piece': {
                     'name': piece_db.name,
                     'source_image': piece_db.source_image,
-                    'repository_id': piece_db.repository_id,
-                    # 'id': piece_db.id,
-                    # 'dependency': piece_db.dependency_group_name,
+                    'repository_url': piece_repository_db.url,
+                    'repository_version': piece_repository_db.version,
+                    'workspace_id': workspace_id,
                 },
                 'workflow_shared_storage': workflow_shared_storage,
                 'container_resources': container_resources,

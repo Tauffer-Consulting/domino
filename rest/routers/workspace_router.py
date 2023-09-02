@@ -7,6 +7,7 @@ from schemas.requests.workspace import CreateWorkspaceRequest, AssignWorkspaceRe
 from schemas.responses.workspace import (
     CreateWorkspaceResponse, 
     ListUserWorkspacesResponse, 
+    ListWorkspacePiecesRepositoriesResponse,
     AssignWorkspaceResponse, 
     GetWorkspaceResponse, 
     PatchWorkspaceResponse, 
@@ -279,3 +280,30 @@ def list_workspace_users(
     except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
+@router.get(
+    path="/{workspace_id}/pieces-repositories",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {'model': ListWorkspacePiecesRepositoriesResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
+        status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError},
+        status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
+    },
+)
+def list_workspace_pieces_repositories(
+    workspace_id: int,
+    filters: dict = {},
+    page: int = 0,
+    page_size: int = 10,
+    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+) -> ListWorkspacePiecesRepositoriesResponse:
+    try:
+        # TODO: finish this method, with filters
+        return workspace_service.list_workspace_pieces_repositories(
+            workspace_id=workspace_id,
+            filters=filters,
+            page=page,
+            page_size=page_size
+        )
+    except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)

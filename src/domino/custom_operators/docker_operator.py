@@ -15,7 +15,9 @@ class DominoDockerOperator(DockerOperator):
         task_id: str,
         piece_name: str,
         deploy_mode: str, # TODO enum
-        repository_id: int,
+        repository_url: str,
+        repository_version: str,
+        workspace_id: int,
         piece_input_kwargs: Optional[Dict] = None, 
         workflow_shared_storage: WorkflowSharedStorage = None,
         **docker_operator_kwargs
@@ -23,10 +25,11 @@ class DominoDockerOperator(DockerOperator):
         self.task_id = task_id
         self.piece_name = piece_name
         self.deploy_mode = deploy_mode
-        self.repository_id = repository_id
+        self.repository_url = repository_url
+        self.repository_version = repository_version
+        self.workspace_id = workspace_id
         self.piece_input_kwargs = piece_input_kwargs
         self.workflow_shared_storage = workflow_shared_storage
-        self.domino_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
 
         # Environment variables
         self.environment = {
@@ -70,11 +73,22 @@ class DominoDockerOperator(DockerOperator):
         )
     
 
-    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
+    def _get_piece_secrets(self):
         """Get piece secrets values from Domino API"""
+        piece_repository = self.domino_client.get_piece_repositories_from_workspace_id(
+            workspace_id=self.workspace_id,
+            params={
+                "filters": {
+                    "repository_url": self.repository_url,
+                    "repository_version": self.repository_version,
+                },
+                "page": 0,
+                "page_size": 1,
+            }
+        )[0]
         secrets_response = self.domino_client.get_piece_secrets(
-            piece_repository_id=piece_repository_id,
-            piece_name=piece_name
+            piece_repository_id=piece_repository.id,
+            piece_name=self.piece_name
         )
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
@@ -140,7 +154,7 @@ class DominoDockerOperator(DockerOperator):
         self.upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
         self._update_piece_kwargs_with_upstream_xcom()
 
-        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.piece_name)
+        piece_secrets = self._get_piece_secrets()
         self.environment['DOMINO_PIECE_SECRETS'] = str(piece_secrets)
 
         dag_id = context["dag_run"].dag_id
@@ -151,6 +165,10 @@ class DominoDockerOperator(DockerOperator):
 
 
     def execute(self, context: Context) -> Optional[str]:
+        """
+        Code from here onward is executed by the Worker and not by the Scheduler.
+        """
+        self.domino_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
         # env var format = {"name": "value"}
         self._prepare_execute_environment(context=context)
         return super().execute(context=context)

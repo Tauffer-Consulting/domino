@@ -14,6 +14,7 @@ class PieceRepository(Base, BaseDatabaseModel):
     label = Column(String(50), unique=False)
     source = Column(Enum(RepositorySource), nullable=True, default=RepositorySource.github.value)
     path = Column(String(250), nullable=True)
+    url = Column(String(250), nullable=True)
     version = Column(String(10), nullable=True)
     dependencies_map = Column(JSON, nullable=True)
     compiled_metadata = Column(JSON, nullable=True)

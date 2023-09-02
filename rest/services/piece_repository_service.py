@@ -28,6 +28,7 @@ from database.models import PieceRepository
 from clients.github_rest_client import GithubRestClient
 from core.settings import settings
 
+
 class PieceRepositoryService(object):
     def __init__(self) -> None:
         self.logger = get_configured_logger(self.__class__.__name__)
