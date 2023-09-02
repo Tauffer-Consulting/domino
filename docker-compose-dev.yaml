@@ -250,7 +250,7 @@ services:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
-      - ./domino/:/opt/airflow/domino/domino_py/domino # Hot reload domino package - remove in production
+      - ./src/domino/:/opt/airflow/domino/domino_py/src/domino # Hot reload domino package - remove in production
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -286,7 +286,7 @@ services:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
       - ${PWD}/domino_data:/home/shared_storage
-      - ./domino/:/opt/airflow/domino/domino_py/domino # Enable hot reload for domino package - remove in production
+      - ./src/domino/:/opt/airflow/domino/domino_py/src/domino # Enable hot reload for domino package - remove in production
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:

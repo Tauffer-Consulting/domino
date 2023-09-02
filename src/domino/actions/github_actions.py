@@ -2,14 +2,14 @@ import re
 import sys
 import os
 from packaging import version
-from domino.version import __version__
+import domino
 from domino.client.github_rest_client import GithubRestClient
 
 
 class Actions(object):
     github_client = GithubRestClient(token=os.environ.get("GITHUB_TOKEN"))
     repo_name = os.environ.get("GITHUB_REPOSITORY")
-    new_tag = f"domino-py-{__version__}"
+    new_tag = f"domino-py-{domino.__version__}"
 
     @classmethod
     def _validate_package_version(cls):
@@ -35,7 +35,7 @@ class Actions(object):
             if release.tag_name == cls.new_tag:
                 raise Exception("Version already exists.")
             release_tag_version = release.tag_name.split("-")[-1]
-            if version.parse(release_tag_version) > version.parse(__version__):
+            if version.parse(release_tag_version) > version.parse(domino.__version__):
                 raise Exception("Version number is smaller than the last release.")
         return
 
