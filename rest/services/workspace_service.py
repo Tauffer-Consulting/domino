@@ -8,7 +8,7 @@ from schemas.responses.workspace import (
     GetWorkspaceResponse,
     PatchWorkspaceResponse,
     ListWorkspaceUsersResponseData,
-    ListWorkspaceUsersResponse
+    ListWorkspaceUsersResponse,
 )
 from schemas.responses.base import PaginationSet
 from schemas.requests.piece_repository import CreateRepositoryRequest
@@ -306,56 +306,6 @@ class WorkspaceService(object):
         return ListWorkspaceUsersResponse(
             data=response_data,
             metadata=response_metadata
-        )
-    
-    def list_workspace_pieces_repositories(
-        self,
-        workspace_id: int,
-        filters: dict,
-        page: int,
-        page_size: int,
-    ):
-        """List all pieces repositories for a workspace
-
-        Args:
-            workspace_id (int): Workspace id
-            filters (dict): Filters to apply, based on PieceRepository table model
-            page (int): Page number
-            page_size (int): page_size per page - max 50
-            auth_context (AuthorizationContextData): User authorization context data
-
-        Returns:
-            List[GetPiecesResponse]: List of all pieces data
-        """
-        self.logger.info(f"Listing workspace {workspace_id} pieces repositories")
-
-        workspace = self.workspace_repository.find_by_id(id=workspace_id)
-        if not workspace:
-            raise ResourceNotFoundException("Workspace not found.")
+        )    
         
-        pieces_repositories = self.pieces
-
-        # pieces_repositories = self.workspace_repository.find_workspace_pieces_repositories(
-        #     workspace_id=workspace_id,
-        #     page=page,
-        #     page_size=page_size,
-        #     filters=filters
-        # )
-        # return [
-        #     ListWorkspacePiecesRepositoriesResponse(
-        #         id=piece_repository.id,
-        #         name=piece_repository.name,
-        #         source=piece_repository.source,
-        #         path=piece_repository.path,
-        #         version=piece_repository.version,
-        #         status=piece_repository.status,
-        #         created_at=piece_repository.created_at,
-        #         updated_at=piece_repository.updated_at
-        #     )
-        #     for piece_repository in pieces_repositories
-        # ]
-
-        
-        
-
         

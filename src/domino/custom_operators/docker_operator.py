@@ -75,19 +75,19 @@ class DominoDockerOperator(DockerOperator):
 
     def _get_piece_secrets(self):
         """Get piece secrets values from Domino API"""
-        piece_repository = self.domino_client.get_piece_repositories_from_workspace_id(
-            workspace_id=self.workspace_id,
+        piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
             params={
+                "workspace_id": self.workspace_id,
                 "filters": {
-                    "repository_url": self.repository_url,
-                    "repository_version": self.repository_version,
+                    "url": self.repository_url,
+                    "version": self.repository_version,
                 },
                 "page": 0,
                 "page_size": 1,
             }
-        )[0]
+        ).json()
         secrets_response = self.domino_client.get_piece_secrets(
-            piece_repository_id=piece_repository.id,
+            piece_repository_id=piece_repository_data["data"][0]["id"],
             piece_name=self.piece_name
         )
         if secrets_response.status_code != 200:

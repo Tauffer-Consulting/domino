@@ -60,7 +60,7 @@ class PieceRepositoryService(object):
         page: int,
         page_size: int,
         filters: ListRepositoryFilters
-    ) -> List[GetWorkspaceRepositoriesResponse]:
+    ) -> GetWorkspaceRepositoriesResponse:
         self.logger.info(f"Getting repositories for workspace {workspace_id}")
         pieces_repositories = self.piece_repository_repository.find_by_workspace_id(
             workspace_id=workspace_id,

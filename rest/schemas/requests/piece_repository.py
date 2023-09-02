@@ -13,6 +13,8 @@ class ListRepositoryFilters(BaseModel):
     name__like: Optional[str]
     path_like: Optional[str]
     version: Optional[str]
+    url: Optional[str]
+    workspace_id: Optional[int]
     source: Optional[RepositorySource] = Field(description="Source of the repository.", default=RepositorySource.github.value)
 
 class CreateRepositoryRequest(BaseModel):
