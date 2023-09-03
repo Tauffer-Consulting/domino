@@ -20,7 +20,9 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         task_id: str,
         piece_name: str, 
         deploy_mode: str, # TODO enum
-        repository_id: int, 
+        repository_url: str,
+        repository_version: str,
+        workspace_id: int, 
         piece_input_kwargs: Optional[Dict] = None, 
         workflow_shared_storage: WorkflowSharedStorage = None,
         container_resources: Optional[Dict] = None,
@@ -29,10 +31,11 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self.task_id = task_id
         self.piece_name = piece_name
         self.deploy_mode = deploy_mode
-        self.repository_id = repository_id
+        self.repository_url = repository_url
+        self.repository_version = repository_version
+        self.workspace_id = workspace_id
         self.piece_input_kwargs = piece_input_kwargs
         self.workflow_shared_storage = workflow_shared_storage
-        self.domino_client = DominoBackendRestClient(base_url="http://domino-rest-service:8000/")  # TODO change url based on platform configuration
 
         # Environment variables
         pod_env_vars = {
@@ -308,11 +311,22 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         return pod_cp
 
 
-    def _get_piece_secrets(self, piece_repository_id: int, piece_name: str):
+    def _get_piece_secrets(self):
         """Get piece secrets values from Domino API"""
+        piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
+            params={
+                "workspace_id": self.workspace_id,
+                "filters": {
+                    "url": self.repository_url,
+                    "version": self.repository_version,
+                },
+                "page": 0,
+                "page_size": 1,
+            }
+        ).json()
         secrets_response = self.domino_client.get_piece_secrets(
-            piece_repository_id=piece_repository_id,
-            piece_name=piece_name
+            piece_repository_id=piece_repository_data["data"][0]["id"],
+            piece_name=self.piece_name
         )
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
@@ -402,7 +416,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self._update_env_var_value_from_name(name='DOMINO_RUN_PIECE_KWARGS', value=str(domino_k8s_run_op_kwargs))
         
         # Add pieces secrets to environment variables
-        piece_secrets = self._get_piece_secrets(piece_repository_id=self.repository_id, piece_name=self.piece_name)
+        piece_secrets = self._get_piece_secrets()
         self.env_vars.append({
             "name": "DOMINO_PIECE_SECRETS",
             "value": str(piece_secrets),
@@ -422,6 +436,11 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
 
 
     def execute(self, context: Context):
+        """
+        Code from here onward is executed by the Worker and not by the Scheduler.
+        """
+        # TODO change url based on platform configuration
+        self.domino_client = DominoBackendRestClient(base_url="http://domino-rest-service:8000/")
         self._prepare_execute_environment(context=context)
         remote_pod = None
         try:

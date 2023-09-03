@@ -106,6 +106,7 @@ class DominoDockerOperator(DockerOperator):
             upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
         return upstream_xcoms_data
 
+
     def _get_piece_kwargs_value_from_upstream_xcom(
         self, 
         value: Any
@@ -125,6 +126,7 @@ class DominoDockerOperator(DockerOperator):
             }
         return value
 
+
     def _update_piece_kwargs_with_upstream_xcom(self):
         if not self.piece_input_kwargs:
             self.piece_input_kwargs = dict()
@@ -137,6 +139,7 @@ class DominoDockerOperator(DockerOperator):
         self.piece_input_kwargs = updated_piece_kwargs
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE'] = str(self.shared_storage_upstream_ids_list)
         self.environment['DOMINO_RUN_PIECE_KWARGS'] = str(self.piece_input_kwargs)
+
 
     def _prepare_execute_environment(self, context: Context):
         """ 
