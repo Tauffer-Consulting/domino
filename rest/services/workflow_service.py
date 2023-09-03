@@ -481,16 +481,16 @@ class WorkflowService(object):
             pieces_repositories_ids.add(piece_db.repository_id)
             stream_tasks_dict[task_key] = {
                 'task_id': task_key,
+                'workspace_id': workspace_id,
                 'piece': {
                     'name': piece_db.name,
                     'source_image': piece_db.source_image,
                     'repository_url': piece_repository_db.url,
                     'repository_version': piece_repository_db.version,
-                    'workspace_id': workspace_id,
                 },
+                'input_kwargs': input_kwargs,
                 'workflow_shared_storage': workflow_shared_storage,
                 'container_resources': container_resources,
-                'input_kwargs': input_kwargs
             }
             if 'dependencies' in task_value and task_value['dependencies']:
                 stream_tasks_dict[task_key]['upstream'] = task_value.get('dependencies')
