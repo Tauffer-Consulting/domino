@@ -50,7 +50,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
         setCurrrentEdittingSecretId(selectedSecretId)
     }, [])
 
-    const handleSaveSecret = useCallback(async(e: any) => {
+    const handleSaveSecret = useCallback(async (e: any) => {
         e.preventDefault();
         const selectedSecretId = e.currentTarget.value
 
@@ -59,7 +59,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
             return
         }
 
-        if (e.currentTarget.ariaLabel === 'clear'){
+        if (e.currentTarget.ariaLabel === 'clear') {
             const payload = {
                 value: null
             }
@@ -70,8 +70,8 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
             }).then((response) => {
                 toast.success('Secret updated.')
                 refreshSecrets()
-                resetField(selectedSecretId?.toString(), { keepTouched : false})
-                setCurrrentEdittingSecretId(null) 
+                resetField(selectedSecretId?.toString(), { keepTouched: false })
+                setCurrrentEdittingSecretId(null)
             }).catch((err) => {
                 toast.error('Error while updating secrets')
             })
@@ -79,7 +79,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
         }
 
         const formValue = getValues(selectedSecretId?.toString())
-        if (!formValue){
+        if (!formValue) {
             toast.warning("Please enter a valid value for the secret.")
             return
         }
@@ -87,7 +87,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
             toast.warning('Please enter a new value for the secret.')
             return
         }
-        
+
         const payload = {
             value: formValue,
         }
@@ -95,7 +95,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
             repositoryId: repositoryId.toString(),
             secretId: selectedSecretId as string,
             payload: payload
-        }).then((response)=>{
+        }).then((response) => {
             toast.success('Secret updated')
             refreshSecrets()
             setCurrrentEdittingSecretId(null)
@@ -126,21 +126,21 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
                     {
                         currrentEdittingSecretId?.toString() === secret.id.toString() ? (
                             <div>
-                            <Tooltip title="Save">
-                                <IconButton aria-label="save" value={secret.id} onClick={handleSaveSecret}>
-                                    <SaveAltIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Clear">
-                                <IconButton aria-label="clear" value={secret.id} onClick={handleSaveSecret} >
-                                    <DeleteIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Cancel">
+                                <Tooltip title="Save">
+                                    <IconButton aria-label="save" value={secret.id} onClick={handleSaveSecret}>
+                                        <SaveAltIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Clear">
+                                    <IconButton aria-label="clear" value={secret.id} onClick={handleSaveSecret} >
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Cancel">
                                     <IconButton aria-label="cancel" onClick={() => setCurrrentEdittingSecretId(null)}>
-                                    <CancelIcon/>
-                                </IconButton>
-                            </Tooltip>
+                                        <CancelIcon />
+                                    </IconButton>
+                                </Tooltip>
                             </div>
                         ) : (
                             <Tooltip title="Edit">
@@ -179,8 +179,8 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
             <CardContent>
                 <Box>
                     <Typography variant='body1'>
-                        Secrets are environment variables that are encrypted and injected to the operator container based on the operator SecretsModel.
-                        Anyone with access to this workspace can use these secrets for running operators.
+                        Secrets are environment variables that are encrypted and injected to the Piece container based on the Piece's SecretsModel.
+                        Anyone with access to this workspace can use these secrets for running Pieces.
                     </Typography>
                     <form>
                         <Grid container spacing={2} sx={{ marginTop: '15px' }}>

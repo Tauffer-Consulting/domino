@@ -27,7 +27,7 @@ const StorageSecretsCard = () => {
     const { register, getValues, resetField } = useForm();
     const [currrentEdittingSecretId, setCurrrentEdittingSecretId] = useState<number | null>(null)
     const [repositoryId, setRepositoryId] = useState<number | null>(null)
-    
+
     const {
         defaultRepositories
     } = useWorkspaceSettings()
@@ -48,7 +48,7 @@ const StorageSecretsCard = () => {
         data: secrets,
         mutate: refreshSecrets,
     } = useAuthenticatedGetRepositorySecrets({ repositoryId: storageRepository?.id.toString() ?? '' })
-    
+
     const patchRepositorySecret = useAuthenticatedPatchRepositorySecret()
 
     const handleEditSecret = useCallback((e: any) => {
@@ -57,7 +57,7 @@ const StorageSecretsCard = () => {
         setCurrrentEdittingSecretId(selectedSecretId)
     }, [])
 
-    const handleSaveSecret = useCallback(async(e: any) => {
+    const handleSaveSecret = useCallback(async (e: any) => {
         e.preventDefault();
         const selectedSecretId = e.currentTarget.value
 
@@ -66,7 +66,7 @@ const StorageSecretsCard = () => {
             return
         }
 
-        if (e.currentTarget.ariaLabel === 'clear'){
+        if (e.currentTarget.ariaLabel === 'clear') {
             const payload = {
                 value: null
             }
@@ -77,8 +77,8 @@ const StorageSecretsCard = () => {
             }).then((response) => {
                 toast.success('Secret updated.')
                 refreshSecrets()
-                resetField(selectedSecretId?.toString(), { keepTouched : false})
-                setCurrrentEdittingSecretId(null) 
+                resetField(selectedSecretId?.toString(), { keepTouched: false })
+                setCurrrentEdittingSecretId(null)
             }).catch((err) => {
                 toast.error('Error while updating secrets')
             })
@@ -86,7 +86,7 @@ const StorageSecretsCard = () => {
         }
 
         const formValue = getValues(selectedSecretId?.toString())
-        if (!formValue){
+        if (!formValue) {
             toast.warning("Please enter a valid value for the secret.")
             return
         }
@@ -102,7 +102,7 @@ const StorageSecretsCard = () => {
             repositoryId: repositoryId.toString(),
             secretId: selectedSecretId as string,
             payload: payload
-        }).then((response)=>{
+        }).then((response) => {
             toast.success('Secret updated')
             refreshSecrets()
             setCurrrentEdittingSecretId(null)
@@ -173,8 +173,8 @@ const StorageSecretsCard = () => {
             <CardContent>
                 <Box>
                     <Typography variant='body1'>
-                        Storage Secrets are environment variables that are encrypted and injected to a sidecar container to the Operators making use of shared storage.
-                        Anyone with access to this workspace can use these secrets for sharing storage between running operators.
+                        Storage Secrets are environment variables that are encrypted and injected to a sidecar container to the Pieces making use of shared storage.
+                        Anyone with access to this workspace can use these secrets for sharing storage between running Pieces.
                     </Typography>
                     {
                         secrets && secrets?.length > 0 ? (
