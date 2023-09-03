@@ -3,7 +3,7 @@ from airflow.utils.context import Context
 from kubernetes.client import models as k8s
 from kubernetes import client, config
 from kubernetes.stream import stream as kubernetes_stream
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 from contextlib import closing
 import ast
 import copy
@@ -311,7 +311,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         return pod_cp
 
 
-    def _get_piece_secrets(self):
+    def _get_piece_secrets(self) -> Dict[str, Any]:
         """Get piece secrets values from Domino API"""
         piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
             params={

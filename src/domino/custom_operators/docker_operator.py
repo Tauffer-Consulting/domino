@@ -73,7 +73,7 @@ class DominoDockerOperator(DockerOperator):
         )
     
 
-    def _get_piece_secrets(self):
+    def _get_piece_secrets(self) -> Dict[str, Any]:
         """Get piece secrets values from Domino API"""
         piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
             params={
