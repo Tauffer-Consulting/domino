@@ -1,13 +1,12 @@
 from typing import Dict, Optional
 from airflow.models import BaseOperator
 
-from domino.custom_operators.base_operator import BaseDominoOperator
 from domino.client.domino_backend_client import DominoBackendRestClient
 
 
 # This is  WIP, not working yet.
 
-class DominoWorkerOperator(BaseDominoOperator, BaseOperator):
+class DominoWorkerOperator(BaseOperator):
     """
     This Operator runs Pieces directly in a Worker.
     """
@@ -21,15 +20,6 @@ class DominoWorkerOperator(BaseDominoOperator, BaseOperator):
         repository_id: int,
         piece_input_kwargs: Optional[Dict] = None, 
     ):
-        super(BaseDominoOperator).__init__(
-            dag_id=dag_id,
-            task_id=task_id,
-            piece_name=piece_name,
-            deploy_mode=deploy_mode,
-            repository_id=repository_id,
-            piece_input_kwargs=piece_input_kwargs,
-            domino_client_url="http://domino-rest:8000/",
-        )
         self._get_piece_class()
         self._get_piece_secrets()
         self._get_airflow_conn_id()
