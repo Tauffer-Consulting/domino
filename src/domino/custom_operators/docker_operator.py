@@ -61,7 +61,12 @@ class DominoDockerOperator(DockerOperator):
         ]
         if self.workflow_shared_storage and str(self.workflow_shared_storage.source.value).lower() == str(getattr(StorageSource, 'local').value).lower():
             mounts.append(
-                Mount(source=shared_storage_host_path, target=shared_storage_container_path, type='bind', read_only=False),
+                Mount(
+                    source=shared_storage_host_path, 
+                    target=shared_storage_container_path, 
+                    type='bind', 
+                    read_only=False
+                ),
             )
 
         super().__init__(
