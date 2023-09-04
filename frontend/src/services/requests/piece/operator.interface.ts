@@ -1,4 +1,4 @@
-import { type ERepositorySource } from "common/interfaces/repository-source.enum";
+import { type ERepositorySource } from "common/interfaces/repositorySource.enum";
 
 /**
  * Operator object

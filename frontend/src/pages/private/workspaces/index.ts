@@ -1,2 +1,2 @@
-export * from "./workspaces/workspaces-page.component";
-export * from "./workspace-settings/workspace-settings-page.component";
+export * from "./workspaces/workspacesPage.component";
+export * from "./workspaceSettings/workspaceSettingsPage.component";

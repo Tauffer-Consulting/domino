@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { SWRConfig } from "swr";
 
-import ApplicationRoutes from "./router/application-routes.component";
+import ApplicationRoutes from "./router/applicationRoutes.component";
 import { theme } from "./theme.config";
 
 import "ag-grid-community/dist/styles/ag-grid.css";

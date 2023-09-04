@@ -1,4 +1,4 @@
-export * from "./container-resources";
+export * from "./containerResources";
 export * from "./storage";
-export * from "./workflow-piece-data";
+export * from "./workflowPieceData";
 export * from "./input";

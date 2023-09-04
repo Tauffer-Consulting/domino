@@ -2,16 +2,16 @@ import LoopIcon from "@mui/icons-material/Loop";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import TabContext from "@mui/lab/TabContext";
 import { Button, Grid, Typography, Breadcrumbs, Link } from "@mui/material";
-import { withContext } from "common/hocs/with-context.hoc";
+import { withContext } from "common/hocs/withContext.hoc";
 import {
   useWorkflows,
   WorkflowsProvider,
 } from "context/workflows/workflows.context";
 import { useState, useMemo } from "react";
 
-import { WorflowRunTaskFlowchart } from "./workflows-run-tasks-flowchart.component";
-import { WorkflowsRunsTable } from "./workflows-runs-table.component";
-import { WorkflowsTable } from "./workflows-table.component";
+import { WorkflowsRunsTable } from "./workflowsRunsTable.component";
+import { WorflowRunTaskFlowchart } from "./workflowsRunTasksFlowchart.component";
+import { WorkflowsTable } from "./workflowsTable.component";
 // Icons
 
 /**
@@ -31,7 +31,8 @@ export const WorkflowsComponent = withContext(WorkflowsProvider, () => {
     let executionDate = null;
     if (workflowRuns.data && selectedWorkflowRunId) {
       executionDate = workflowRuns?.data?.find(
-        (run) => run.workflow_run_id === selectedWorkflowRunId,
+        (run: { workflow_run_id: any }) =>
+          run.workflow_run_id === selectedWorkflowRunId,
       )?.execution_date;
       executionDate = executionDate
         ? new Date(executionDate).toLocaleString()
