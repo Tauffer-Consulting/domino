@@ -1,7 +1,7 @@
-import { FC, memo } from 'react'
+import { type FC, memo } from "react";
 
 export function withContext<P>(Provider: FC<P>, Component: FC<P>): FC<P> {
-  const MemoizedComponent = memo(Component)
+  const MemoizedComponent = memo(Component);
   /**
    * @todo solve as any type
    */
@@ -10,8 +10,8 @@ export function withContext<P>(Provider: FC<P>, Component: FC<P>): FC<P> {
       <Provider {...props}>
         <MemoizedComponent {...(props as any)} />
       </Provider>
-    )
-  }
+    );
+  };
 
-  return WithContext
+  return WithContext;
 }

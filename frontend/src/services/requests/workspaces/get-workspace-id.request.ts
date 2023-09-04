@@ -1,10 +1,11 @@
-import { AxiosResponse } from 'axios'
-import useSWR from 'swr'
-import { dominoApiClient } from 'services/clients/domino.client'
-import { IGetWorkspaceIdResponseInterface } from './workspaces.interface'
+import { type AxiosResponse } from "axios";
+import { dominoApiClient } from "services/clients/domino.client";
+import useSWR from "swr";
+
+import { type IGetWorkspaceIdResponseInterface } from "./workspaces.interface";
 
 interface IGetWorkspaceIdParams {
-  id: string
+  id: string;
 }
 
 /**
@@ -13,10 +14,12 @@ interface IGetWorkspaceIdParams {
  * @returns workspace
  */
 const getWorkspaceId: (
-  params: IGetWorkspaceIdParams
-) => Promise<AxiosResponse<IGetWorkspaceIdResponseInterface>> = (params) => {
-  return dominoApiClient.get(`/workspaces/${params.id}`)
-}
+  params: IGetWorkspaceIdParams,
+) => Promise<AxiosResponse<IGetWorkspaceIdResponseInterface>> = async (
+  params,
+) => {
+  return await dominoApiClient.get(`/workspaces/${params.id}`);
+};
 
 /**
  * Authenticated fetcher function that gets workspace by id
@@ -24,17 +27,18 @@ const getWorkspaceId: (
  * @returns workspace fetcher fn
  */
 export const useAuthenticatedGetWorkspaceIdFetcher = () => {
-  return (params: IGetWorkspaceIdParams) => getWorkspaceId(params).then(data => data.data)
-}
+  return async (params: IGetWorkspaceIdParams) =>
+    await getWorkspaceId(params).then((data) => data.data);
+};
 
 /**
  * Get workspace data
  * @returns workspace data as swr response
  */
 export const useAuthenticatedGetWorkspace = (params: IGetWorkspaceIdParams) => {
-  const fetcher = useAuthenticatedGetWorkspaceIdFetcher()
-  return useSWR(`/workspaces/${params.id}`, () => fetcher(params), {
+  const fetcher = useAuthenticatedGetWorkspaceIdFetcher();
+  return useSWR(`/workspaces/${params.id}`, async () => await fetcher(params), {
     revalidateOnFocus: false,
-    revalidateOnReconnect: false
-  })
-}
+    revalidateOnReconnect: false,
+  });
+};

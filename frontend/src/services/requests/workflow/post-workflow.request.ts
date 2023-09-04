@@ -1,10 +1,12 @@
-import { AxiosResponse } from 'axios'
-import { dominoApiClient } from '../../clients/domino.client'
-import { IPostWorkflowResponseInterface } from './workflow.interface'
-import { CreateWorkflowRequest } from 'context/workflows/types'
+import { type AxiosResponse } from "axios";
+import { type CreateWorkflowRequest } from "context/workflows/types";
+
+import { dominoApiClient } from "../../clients/domino.client";
+
+import { type IPostWorkflowResponseInterface } from "./workflow.interface";
 
 export interface IPostWorkflowParams extends CreateWorkflowRequest {
-  workspace_id: string
+  workspace_id: string;
 }
 
 /**
@@ -12,11 +14,15 @@ export interface IPostWorkflowParams extends CreateWorkflowRequest {
  * @returns ?
  */
 const postWorkflow: (
-  payload: IPostWorkflowParams
-) => Promise<AxiosResponse<IPostWorkflowResponseInterface>> = (payload) => {
-
-  return dominoApiClient.post(`/workspaces/${payload.workspace_id}/workflows`, payload)
-}
+  payload: IPostWorkflowParams,
+) => Promise<AxiosResponse<IPostWorkflowResponseInterface>> = async (
+  payload,
+) => {
+  return await dominoApiClient.post(
+    `/workspaces/${payload.workspace_id}/workflows`,
+    payload,
+  );
+};
 
 /**
  * Create authenticated workflow
@@ -24,10 +30,8 @@ const postWorkflow: (
  * @returns crate workflow function
  */
 export const useAuthenticatedPostWorkflow = () => {
-  const fetcher = (params: IPostWorkflowParams) =>
-    postWorkflow(
-      params
-    ).then(data => data.data)
+  const fetcher = async (params: IPostWorkflowParams) =>
+    await postWorkflow(params).then((data) => data.data);
 
-  return fetcher
-}
+  return fetcher;
+};

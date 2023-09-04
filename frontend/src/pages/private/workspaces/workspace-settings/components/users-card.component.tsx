@@ -1,6 +1,4 @@
-import { FC, useCallback, useState } from 'react'
-
-import { PersonAdd } from '@mui/icons-material'
+import { PersonAdd } from "@mui/icons-material";
 import {
   Card,
   CardHeader,
@@ -12,68 +10,69 @@ import {
   MenuItem,
   Grid,
   InputLabel,
-  FormControl
-} from '@mui/material'
-import TextField from '@mui/material/TextField'
-import { useWorkspaces } from 'context/workspaces/workspaces.context'
-import { useWorkspaceSettings } from 'context/workspaces/workspace-settings.context'
-import { toast } from 'react-toastify'
+  FormControl,
+} from "@mui/material";
+import TextField from "@mui/material/TextField";
+import { useWorkspaceSettings } from "context/workspaces/workspace-settings.context";
+import { useWorkspaces } from "context/workspaces/workspaces.context";
+import { type FC, useCallback, useState } from "react";
+import { toast } from "react-toastify";
 
 /**
  * @todo integrate with backend
  * @returns Users card component
  */
 export const UsersCard: FC = () => {
-  const [userEmail, setUserEmail] = useState<string>('')
-  const [permission, setPermission] = useState<string>('')
-  const { workspaceData } = useWorkspaceSettings()
-  const { handleInviteUserWorkspace } = useWorkspaces()
-  
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [permission, setPermission] = useState<string>("");
+  const { workspaceData } = useWorkspaceSettings();
+  const { handleInviteUserWorkspace } = useWorkspaces();
+
   const inviteUser = useCallback(() => {
     // if not user email or not permission toastfail
     if (!userEmail || !permission) {
-      toast.error('Email and permission are required.')
+      toast.error("Email and permission are required.");
       return;
     }
     if (!workspaceData) {
-      toast.error('Workspace not found.')
+      toast.error("Workspace not found.");
       return;
     }
-    handleInviteUserWorkspace(workspaceData.id, userEmail, permission)
-    setUserEmail('')
-    setPermission('')
-  
-  }, [permission, userEmail, handleInviteUserWorkspace, workspaceData])
-
+    handleInviteUserWorkspace(workspaceData.id, userEmail, permission);
+    setUserEmail("");
+    setPermission("");
+  }, [permission, userEmail, handleInviteUserWorkspace, workspaceData]);
 
   if (!workspaceData) {
-    return null
+    return null;
   }
   return (
-    <Card variant='outlined' sx={{ height: "100%" }}>
-      <CardHeader title='Users' titleTypographyProps={{ variant: 'h6' }}/>
+    <Card variant="outlined" sx={{ height: "100%" }}>
+      <CardHeader title="Users" titleTypographyProps={{ variant: "h6" }} />
       <CardContent>
         <Box>
-          <Typography variant='subtitle1'>Invite user</Typography>
+          <Typography variant="subtitle1">Invite user</Typography>
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 64px',
+              display: "grid",
+              gridTemplateColumns: "1fr 64px",
               gap: 1,
-              mt: 1
+              mt: 1,
             }}
           >
             <TextField
               value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
+              onChange={(e) => {
+                setUserEmail(e.target.value);
+              }}
               fullWidth
-              variant='outlined'
-              id='user'
-              label='User e-mail'
-              type='email'
-              name='user'
+              variant="outlined"
+              id="user"
+              label="User e-mail"
+              type="email"
+              name="user"
             />
-            <Button  color='primary' variant='contained' onClick={inviteUser}>
+            <Button color="primary" variant="contained" onClick={inviteUser}>
               <PersonAdd />
             </Button>
           </Box>
@@ -86,10 +85,12 @@ export const UsersCard: FC = () => {
               id="select-workspace-invite-permission"
               value={permission}
               label="Permission"
-              onChange={(e) => setPermission(e.target.value as string)}
+              onChange={(e) => {
+                setPermission(e.target.value);
+              }}
             >
-              <MenuItem value={'read'}>Read</MenuItem>
-              <MenuItem value={'owner'}>Owner</MenuItem>
+              <MenuItem value={"read"}>Read</MenuItem>
+              <MenuItem value={"owner"}>Owner</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -117,5 +118,5 @@ export const UsersCard: FC = () => {
         )} */}
       </CardContent>
     </Card>
-  )
-}
+  );
+};

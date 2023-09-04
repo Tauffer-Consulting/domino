@@ -1,19 +1,15 @@
-import React from "react";
-import {
-  Grid,
-  Typography,
-} from '@mui/material'
-
-import * as yup from "yup";
-import { IContainerResourceFormData } from "context/workflows/types";
-import NumberInput from "components/number-input";
+import { Grid, Typography } from "@mui/material";
 import CheckboxInput from "components/checkbox-input";
+import NumberInput from "components/number-input";
+import { type IContainerResourceFormData } from "context/workflows/types";
+import React from "react";
+import * as yup from "yup";
 
 // TODO check if these values make sense
-const minAcceptedMemory = 128
-const minAcceptedCpu = 100
-const maxAcceptedMemory = 12800
-const maxAcceptedCpu = 10000
+const minAcceptedMemory = 128;
+const minAcceptedCpu = 100;
+const maxAcceptedMemory = 12800;
+const maxAcceptedCpu = 10000;
 
 export const defaultContainerResources: IContainerResourceFormData = {
   useGpu: false,
@@ -23,51 +19,57 @@ export const defaultContainerResources: IContainerResourceFormData = {
   },
   cpu: {
     min: 100,
-    max: 100
-  }
-}
+    max: 100,
+  },
+};
 
-export const ContainerResourceFormSchema: yup.ObjectSchema<IContainerResourceFormData> = yup.object().shape({
-  cpu: yup.object().shape({
-    min: yup
-      .number()
-      .integer()
-      .typeError('Must must be a number')
-      .max(maxAcceptedCpu)
-      .min(minAcceptedCpu)
-      .required(),
-    max: yup
-      .number()
-      .integer()
-      .typeError('Must be a number')
-      .max(maxAcceptedCpu)
-      .when("min",([min],schema)=>schema.min(min))
-      .required()
-  }),
-  memory: yup.object().shape({
-    min: yup
-      .number()
-      .integer()
-      .max(maxAcceptedMemory)
-      .min(minAcceptedMemory)
-      .required(),
-    max: yup
-      .number()
-      .integer()
-      .typeError('Must be a number')
-      .max(maxAcceptedMemory)
-      .when("min",([min],schema)=>schema.min(min))
-      .required()
-  }),
-  useGpu: yup.boolean().required(),
-});
+export const ContainerResourceFormSchema: yup.ObjectSchema<IContainerResourceFormData> =
+  yup.object().shape({
+    cpu: yup.object().shape({
+      min: yup
+        .number()
+        .integer()
+        .typeError("Must must be a number")
+        .max(maxAcceptedCpu)
+        .min(minAcceptedCpu)
+        .required(),
+      max: yup
+        .number()
+        .integer()
+        .typeError("Must be a number")
+        .max(maxAcceptedCpu)
+        .when("min", ([min], schema) => schema.min(min))
+        .required(),
+    }),
+    memory: yup.object().shape({
+      min: yup
+        .number()
+        .integer()
+        .max(maxAcceptedMemory)
+        .min(minAcceptedMemory)
+        .required(),
+      max: yup
+        .number()
+        .integer()
+        .typeError("Must be a number")
+        .max(maxAcceptedMemory)
+        .when("min", ([min], schema) => schema.min(min))
+        .required(),
+    }),
+    useGpu: yup.boolean().required(),
+  });
 
 const ContainerResourceForm: React.FC = () => {
-
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} marginBottom={2}>
-        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Container Resources</Typography>
+        <Typography
+          variant="subtitle2"
+          component="div"
+          sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
+        >
+          Container Resources
+        </Typography>
       </Grid>
       <Grid item xs={6}>
         <NumberInput
@@ -77,7 +79,7 @@ const ContainerResourceForm: React.FC = () => {
           type="int"
           inputProps={{
             min: minAcceptedCpu,
-            max: maxAcceptedCpu
+            max: maxAcceptedCpu,
           }}
         />
       </Grid>
@@ -89,7 +91,7 @@ const ContainerResourceForm: React.FC = () => {
           required
           inputProps={{
             min: minAcceptedCpu,
-            max: maxAcceptedCpu
+            max: maxAcceptedCpu,
           }}
         />
       </Grid>
@@ -101,7 +103,7 @@ const ContainerResourceForm: React.FC = () => {
           required
           inputProps={{
             min: minAcceptedMemory,
-            max: maxAcceptedMemory
+            max: maxAcceptedMemory,
           }}
         />
       </Grid>
@@ -113,18 +115,15 @@ const ContainerResourceForm: React.FC = () => {
           required
           inputProps={{
             min: minAcceptedMemory,
-            max: maxAcceptedMemory
+            max: maxAcceptedMemory,
           }}
         />
       </Grid>
       <Grid item xs={12}>
-        <CheckboxInput
-          name="containerResources.useGpu"
-          label="Use GPU"
-        />
+        <CheckboxInput name="containerResources.useGpu" label="Use GPU" />
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
 export default ContainerResourceForm;

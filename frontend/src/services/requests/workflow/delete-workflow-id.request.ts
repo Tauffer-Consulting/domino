@@ -1,10 +1,12 @@
-import { AxiosResponse } from 'axios'
-import { dominoApiClient } from '../../clients/domino.client'
-import { IDeleteWorkflowIdResponseInterface } from './workflow.interface'
-import { useWorkspaces } from 'context/workspaces/workspaces.context'
+import { type AxiosResponse } from "axios";
+import { useWorkspaces } from "context/workspaces/workspaces.context";
+
+import { dominoApiClient } from "../../clients/domino.client";
+
+import { type IDeleteWorkflowIdResponseInterface } from "./workflow.interface";
 
 interface IDeleteWorkflowIdParams {
-  id: string
+  id: string;
 }
 
 /**
@@ -13,25 +15,29 @@ interface IDeleteWorkflowIdParams {
  */
 const deleteWorkflowId: (
   workspaceId: string,
-  params: IDeleteWorkflowIdParams
-) => Promise<AxiosResponse<IDeleteWorkflowIdResponseInterface>> = (workspaceId, params) => {
-  return dominoApiClient.delete(`/workspaces/${workspaceId}/workflows/${params.id}`)
-}
+  params: IDeleteWorkflowIdParams,
+) => Promise<AxiosResponse<IDeleteWorkflowIdResponseInterface>> = async (
+  workspaceId,
+  params,
+) => {
+  return await dominoApiClient.delete(
+    `/workspaces/${workspaceId}/workflows/${params.id}`,
+  );
+};
 
 /**
  * Delete workflow by id
- * @returns authenticated delete function 
+ * @returns authenticated delete function
  */
 export const useAuthenticatedDeleteWorkflowId = () => {
-  const { workspace } = useWorkspaces()
+  const { workspace } = useWorkspaces();
 
-  if (!workspace) throw new Error('Impossible to fetch delete without specifying a workspace')
+  if (!workspace)
+    throw new Error(
+      "Impossible to fetch delete without specifying a workspace",
+    );
 
-  const fetcher = (params: IDeleteWorkflowIdParams) =>
-    deleteWorkflowId(
-      workspace.id as string,
-      params
-    ).then(data => data)
-  return fetcher
-
-}
+  const fetcher = async (params: IDeleteWorkflowIdParams) =>
+    await deleteWorkflowId(workspace.id, params).then((data) => data);
+  return fetcher;
+};

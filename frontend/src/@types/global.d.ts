@@ -1,4 +1,5 @@
-import { CSSProperties } from "react"
+/* eslint-disable @typescript-eslint/consistent-type-imports */
+import { type CSSProperties } from "react";
 
 export {};
 
@@ -6,70 +7,69 @@ declare global {
   type InputSchemaProperty = import("./properties").InputSchemaProperty;
   type ArrayObjectProperty = import("./properties").ArrayObjectProperty;
 
-  type SimpleInputSchemaProperty = import("./properties").SimpleInputSchemaProperty;
+  type SimpleInputSchemaProperty =
+    import("./properties").SimpleInputSchemaProperty;
   type FromUpstream = import("./properties").FromUpstream;
 
-  type EnumDefinition = {
-    title: string
-    description: string
-    type: "string"
-    enum: Array<string>
+  interface EnumDefinition {
+    title: string;
+    description: string;
+    type: "string";
+    enum: string[];
   }
 
-  type ObjectDefinition = {
-    title: string
-    description: string
-    type: "object"
-    properties: Record<string,EnumDefinition | SimpleInputSchemaProperty>
+  interface ObjectDefinition {
+    title: string;
+    description: string;
+    type: "object";
+    properties: Record<string, EnumDefinition | SimpleInputSchemaProperty>;
   }
 
-  type Definition = EnumDefinition | ObjectDefinition
+  type Definition = EnumDefinition | ObjectDefinition;
 
-  type Definitions = Record<string, Definition>
+  type Definitions = Record<string, Definition>;
 
   interface InputSchema {
-    title: string
-    description: string
+    title: string;
+    description: string;
 
-    type: "object"
+    type: "object";
 
-    properties: Record<string,InputSchemaProperty>
-    definitions: Definitions
+    properties: Record<string, InputSchemaProperty>;
+    definitions: Definitions;
   }
 
-  interface OutputSchema {
-
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface OutputSchema {}
 
   interface PieceSchema {
-    id: number
-    name: string
-    description: string
+    id: number;
+    name: string;
+    description: string;
 
-    repository_id: number
+    repository_id: number;
 
-    input_schema: InputSchema
-    output_schema: OutputSchema
+    input_schema: InputSchema;
+    output_schema: OutputSchema;
 
-    secrets_schema: null
-    source_image: string
-    source_url: string
+    secrets_schema: null;
+    source_image: string;
+    source_url: string;
     dependency: {
-      dockerfile: string | null
-      requirements_file: string | null
-    }
+      dockerfile: string | null;
+      requirements_file: string | null;
+    };
 
     style: {
-      label: string
-      module: string
+      label: string;
+      module: string;
 
-      nodeType: string
-      nodeStyle: CSSProperties
+      nodeType: string;
+      nodeStyle: CSSProperties;
 
-      useIcon: boolean
-      iconClassName?: string
-      iconStyle: CSSProperties
-
-    }
+      useIcon: boolean;
+      iconClassName?: string;
+      iconStyle: CSSProperties;
+    };
   }
 }

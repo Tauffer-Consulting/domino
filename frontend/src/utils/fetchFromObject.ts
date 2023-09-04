@@ -1,12 +1,11 @@
 export function fetchFromObject(obj: any, prop: string): any {
-
-  if (typeof obj === 'undefined') {
+  if (typeof obj === "undefined") {
     return;
   }
 
-  var _index = prop.indexOf('.')
+  const _index = prop.indexOf(".");
   if (_index > -1) {
-    const newObj = obj[prop.substring(0, _index)]
+    const newObj = obj[prop.substring(0, _index)];
 
     return fetchFromObject(newObj, prop.substr(_index + 1));
   }

@@ -1,77 +1,78 @@
-type Reference = { "$ref": `#/definitions/${string}` }
-type FromUpstream = "always" | "never" | "allowed"
+interface Reference {
+  $ref: `#/definitions/${string}`;
+}
+type FromUpstream = "always" | "never" | "allowed";
 
-type DefaultPropertyProps = {
-  title: string
-  description: string
-  from_upstream?: FromUpstream
+interface DefaultPropertyProps {
+  title: string;
+  description: string;
+  from_upstream?: FromUpstream;
 }
 
 type BooleanProperty = DefaultPropertyProps & {
-  type: "boolean"
-  default: boolean
-}
+  type: "boolean";
+  default: boolean;
+};
 type NumberProperty = DefaultPropertyProps & {
-  type: "number" | "integer" | "float"
-  default: number
-  exclusiveMaximum?: number
-  exclusiveMinimum?: number
-}
+  type: "number" | "integer" | "float";
+  default: number;
+  exclusiveMaximum?: number;
+  exclusiveMinimum?: number;
+};
 type StringProperty = DefaultPropertyProps & {
-  type: "string"
-  default: string
+  type: "string";
+  default: string;
 
-  widget?: string
-  format?: "date" | "time" | "date-time"
-}
+  widget?: string;
+  format?: "date" | "time" | "date-time";
+};
 type EnumProperty = DefaultPropertyProps & {
-  allOf: Array<Reference>
-  default: string
-}
-
+  allOf: Reference[];
+  default: string;
+};
 
 type ArrayStringProperty = DefaultPropertyProps & {
-  type: "array"
-  default: Array<string>
+  type: "array";
+  default: string[];
   items: {
-    type: "string"
+    type: "string";
 
-    widget?: string
-    format?: "date" | "time" | "date-time"
-  }
-}
+    widget?: string;
+    format?: "date" | "time" | "date-time";
+  };
+};
 
 type ArrayNumberProperty = DefaultPropertyProps & {
-  type: "array"
-  default: Array<number>
+  type: "array";
+  default: number[];
   items: {
-    type: "number" | "integer"
-  }
-}
+    type: "number" | "integer";
+  };
+};
 
 type ArrayBooleanProperty = DefaultPropertyProps & {
-  type: "array"
-  default: Array<boolean>
+  type: "array";
+  default: boolean[];
   items: {
-    type: "boolean"
-  }
-}
+    type: "boolean";
+  };
+};
 
 type ArrayObjectProperty = DefaultPropertyProps & {
-  type: "array"
-  default: Array<Record<string,string|boolean|number>>
-  items: Reference
-}
+  type: "array";
+  default: Array<Record<string, string | boolean | number>>;
+  items: Reference;
+};
 
 export type SimpleInputSchemaProperty =
   | BooleanProperty
   | NumberProperty
   | StringProperty
-  | EnumProperty
+  | EnumProperty;
 
-export type InputSchemaProperty = SimpleInputSchemaProperty
+export type InputSchemaProperty =
+  | SimpleInputSchemaProperty
   | ArrayStringProperty
   | ArrayNumberProperty
   | ArrayBooleanProperty
-  | ArrayObjectProperty
-
+  | ArrayObjectProperty;

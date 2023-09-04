@@ -1,10 +1,12 @@
-import { AxiosResponse } from 'axios'
-import { useCallback } from 'react'
-import { dominoApiClient } from '../../clients/domino.client'
-import { IGetRepoOperatorsResponseInterface } from './operator.interface'
+import { type AxiosResponse } from "axios";
+import { useCallback } from "react";
+
+import { dominoApiClient } from "../../clients/domino.client";
+
+import { type IGetRepoOperatorsResponseInterface } from "./operator.interface";
 
 interface IGetRepoOperatorsParams {
-  id: string
+  id: string;
 }
 
 /**
@@ -14,12 +16,12 @@ interface IGetRepoOperatorsParams {
  * @returns pieces
  */
 const getRepoIdOperators: (args: {
-  params: IGetRepoOperatorsParams
-}
-) => Promise<AxiosResponse<IGetRepoOperatorsResponseInterface>> = ({ params }) => {
-  return dominoApiClient.get(`pieces-repositories/${params.id}/pieces`)
-}
-
+  params: IGetRepoOperatorsParams;
+}) => Promise<AxiosResponse<IGetRepoOperatorsResponseInterface>> = async ({
+  params,
+}) => {
+  return await dominoApiClient.get(`pieces-repositories/${params.id}/pieces`);
+};
 
 /**
  * Get pieces by repo id authenticated fetcher function
@@ -28,8 +30,7 @@ const getRepoIdOperators: (args: {
  */
 export const useFetchAuthenticatedGetRepoIdOperators = () => {
   const fetcher = useCallback(async (params: IGetRepoOperatorsParams) => {
-    return getRepoIdOperators({ params }).then(data => data.data)
-  }, [])
-  return fetcher
-}
-
+    return await getRepoIdOperators({ params }).then((data) => data.data);
+  }, []);
+  return fetcher;
+};

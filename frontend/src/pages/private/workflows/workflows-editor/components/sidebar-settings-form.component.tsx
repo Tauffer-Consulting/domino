@@ -1,68 +1,76 @@
-import { useCallback, useEffect, useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form';
-import * as yup from "yup";
+import { Drawer, Grid, Typography, TextField } from "@mui/material";
+import DatetimeInput from "components/datetime-input";
+import SelectInput from "components/select-input";
+import TextInput from "components/text-input";
 import {
-  Drawer,
-  Grid,
-  Typography,
-  TextField,
-} from '@mui/material'
-
-import { useWorkflowsEditor } from 'context/workflows/workflows-editor.context'
-import { EndDateTypes, IWorkflowSettings, ScheduleIntervals, StorageSourcesAWS, StorageSourcesLocal, endDateTypes, scheduleIntervals, storageSourcesAWS, storageSourcesLocal } from 'context/workflows/types/settings';
-
-import { yupResolver } from 'utils';
-
-import TextInput from 'components/text-input';
-import SelectInput from 'components/select-input';
-import DatetimeInput from 'components/datetime-input';
-import dayjs from 'dayjs';
+  type EndDateTypes,
+  type IWorkflowSettings,
+  type ScheduleIntervals,
+  type StorageSourcesAWS,
+  type StorageSourcesLocal,
+  endDateTypes,
+  scheduleIntervals,
+  storageSourcesAWS,
+  storageSourcesLocal,
+} from "context/workflows/types/settings";
+import { useWorkflowsEditor } from "context/workflows/workflows-editor.context";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { yupResolver } from "utils";
+import * as yup from "yup";
 
 interface ISidebarSettingsFormProps {
-  open: boolean,
-  onClose: (event: any) => void
+  open: boolean;
+  onClose: (event: any) => void;
 }
 
 const defaultSettingsData: IWorkflowSettings = {
   config: {
-    name: '',
+    name: "",
     scheduleInterval: scheduleIntervals.None,
     startDate: dayjs(new Date()).toISOString(),
     endDateType: endDateTypes.Never,
   },
   storage: {
     storageSource: storageSourcesLocal.None,
-    baseFolder: '',
-    bucket: ''
-  }
-}
-
-const storageSourceOptions = process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local-compose" ? [
-  {
-    "label": "None",
-    "value": "None"
+    baseFolder: "",
+    bucket: "",
   },
-  {
-    "label": "Local",
-    "value": "Local"
-  }
-] : [
-  {
-    "label": "None",
-    "value": "None"
-  },
-  {
-    "label": "AWS S3",
-    "value": "AWSS3"
-  }
-]
+};
 
-type ValidationSchema = yup.ObjectSchema<IWorkflowSettings>
+const storageSourceOptions =
+  process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local-compose"
+    ? [
+        {
+          label: "None",
+          value: "None",
+        },
+        {
+          label: "Local",
+          value: "Local",
+        },
+      ]
+    : [
+        {
+          label: "None",
+          value: "None",
+        },
+        {
+          label: "AWS S3",
+          value: "AWSS3",
+        },
+      ];
+
+type ValidationSchema = yup.ObjectSchema<IWorkflowSettings>;
 
 // TODO check yup validation
 export const WorkflowSettingsFormSchema: ValidationSchema = yup.object().shape({
   config: yup.object().shape({
-    name: yup.string().matches(/^[\w]*$/, 'Name can only have letters and numbers.').required(),
+    name: yup
+      .string()
+      .matches(/^[\w]*$/, "Name can only have letters and numbers.")
+      .required(),
     scheduleInterval: yup
       .mixed<ScheduleIntervals>()
       .oneOf(Object.values(scheduleIntervals))
@@ -75,94 +83,103 @@ export const WorkflowSettingsFormSchema: ValidationSchema = yup.object().shape({
       .required(),
   }),
   storage: yup.object().shape({
-    storageSource: yup.lazy(
-      value => {
-        if (value === storageSourcesAWS.AWSS3) {
-          return yup.mixed<StorageSourcesAWS>().oneOf(Object.values(storageSourcesAWS)).required()
-        }
-        return yup.mixed<StorageSourcesLocal>().oneOf(Object.values(storageSourcesLocal)).required()
+    storageSource: yup.lazy((value) => {
+      if (value === storageSourcesAWS.AWSS3) {
+        return yup
+          .mixed<StorageSourcesAWS>()
+          .oneOf(Object.values(storageSourcesAWS))
+          .required();
       }
-    ),
+      return yup
+        .mixed<StorageSourcesLocal>()
+        .oneOf(Object.values(storageSourcesLocal))
+        .required();
+    }),
     baseFolder: yup.string(),
-    bucket: yup.string()
-  })
+    bucket: yup.string(),
+  }),
 });
 
 const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
-  const {
-    open,
-    onClose,
-  } = props
+  const { open, onClose } = props;
 
-
-  const {
-    fetchWorkflowSettingsData,
-    setWorkflowSettingsData,
-  } = useWorkflowsEditor()
+  const { fetchWorkflowSettingsData, setWorkflowSettingsData } =
+    useWorkflowsEditor();
 
   const resolver = yupResolver(WorkflowSettingsFormSchema);
-  const methods = useForm<IWorkflowSettings>({ mode: "onChange", resolver })
-  const { register, watch, reset, trigger, getValues } = methods
-  const formData = watch()
+  const methods = useForm<IWorkflowSettings>({ mode: "onChange", resolver });
+  const { register, watch, reset, trigger, getValues } = methods;
+  const formData = watch();
 
-  const [loaded, setLoaded] = useState(false)
+  const [loaded, setLoaded] = useState(false);
 
   const validate = useCallback(() => {
-    if (loaded)
-      trigger()
-  }, [loaded, trigger])
+    if (loaded) void trigger();
+  }, [loaded, trigger]);
 
-  useEffect(() => { validate() }, [validate])
+  useEffect(() => {
+    validate();
+  }, [validate]);
 
   const loadData = useCallback(async () => {
-    const data = await fetchWorkflowSettingsData()
+    const data = await fetchWorkflowSettingsData();
     if (Object.keys(data).length === 0) {
-      reset(defaultSettingsData)
+      reset(defaultSettingsData);
     } else {
-      reset(data)
+      reset(data);
     }
-    setLoaded(true)
-  }, [reset, fetchWorkflowSettingsData])
+    setLoaded(true);
+  }, [reset, fetchWorkflowSettingsData]);
 
   const saveData = useCallback(async () => {
     if (open) {
-      await setWorkflowSettingsData(formData)
+      await setWorkflowSettingsData(formData);
     }
-  }, [formData, open, setWorkflowSettingsData])
+  }, [formData, open, setWorkflowSettingsData]);
 
   useEffect(() => {
     if (open) {
-      loadData()
+      void loadData();
     }
-  }, [open, loadData])
+  }, [open, loadData]);
 
   useEffect(() => {
-    saveData()
-  }, [saveData])
-
+    void saveData();
+  }, [saveData]);
 
   if (Object.keys(formData).length === 0) {
-    return null
+    return null;
   }
 
   return (
     <Drawer
-      anchor='left'
+      anchor="left"
       open={open}
       onClose={onClose}
       sx={{
-        "& .MuiDrawer-paper": { marginTop: "4rem", width: "33%", maxWidth: '500px', minWidth: '300px' }
+        "& .MuiDrawer-paper": {
+          marginTop: "4rem",
+          width: "33%",
+          maxWidth: "500px",
+          minWidth: "300px",
+        },
       }}
       BackdropProps={{ style: { backgroundColor: "transparent" } }}
     >
       <Grid container>
         <Grid container padding={1}>
-          <Typography variant='h5' component="h5" sx={{ marginTop: '20px', marginBottom: "20px" }}>Settings</Typography >
+          <Typography
+            variant="h5"
+            component="h5"
+            sx={{ marginTop: "20px", marginBottom: "20px" }}
+          >
+            Settings
+          </Typography>
           <FormProvider {...methods}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextInput
-                  variant='outlined'
+                  variant="outlined"
                   name="config.name"
                   label="Name"
                   defaultValue={defaultSettingsData.config.name}
@@ -178,9 +195,9 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
               </Grid>
               <Grid item xs={12}>
                 <DatetimeInput
-                  name='config.startDate'
+                  name="config.startDate"
                   label="Start Date/Time"
-                  type='date-time'
+                  type="date-time"
                 />
               </Grid>
               <Grid
@@ -197,22 +214,29 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                     defaultValue={defaultSettingsData.config.endDateType}
                   />
                 </Grid>
-                {getValues().config.endDateType === endDateTypes.UserDefined &&
+                {getValues().config.endDateType ===
+                  endDateTypes.UserDefined && (
                   <Grid item xs={8}>
                     <DatetimeInput
-                      name='config.endDate'
+                      name="config.endDate"
                       label="End Date/Time"
-                      type='date-time'
+                      type="date-time"
                     />
                   </Grid>
-                }
+                )}
               </Grid>
             </Grid>
           </FormProvider>
         </Grid>
         <Grid container padding={1}>
           <Grid item xs={12}>
-            <Typography variant='h5' component="h5" sx={{ marginTop: '20px', marginBottom: "20px" }}>Storage</Typography >
+            <Typography
+              variant="h5"
+              component="h5"
+              sx={{ marginTop: "20px", marginBottom: "20px" }}
+            >
+              Storage
+            </Typography>
           </Grid>
           <FormProvider {...methods}>
             <Grid container spacing={2}>
@@ -224,35 +248,33 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   defaultValue={defaultSettingsData.storage.storageSource}
                 />
               </Grid>
-              {
-                formData.storage.storageSource === storageSourcesAWS.AWSS3 ? (
-                  <>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Bucket"
-                        defaultValue={defaultSettingsData.storage.bucket}
-                        required
-                        fullWidth
-                        {...register("storage.bucket")}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Base Folder"
-                        defaultValue={defaultSettingsData.storage.baseFolder}
-                        required
-                        fullWidth
-                        {...register("storage.baseFolder")}
-                      />
-                    </Grid>
-                  </>
-                ) : null
-              }
+              {formData.storage.storageSource === storageSourcesAWS.AWSS3 ? (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Bucket"
+                      defaultValue={defaultSettingsData.storage.bucket}
+                      required
+                      fullWidth
+                      {...register("storage.bucket")}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Base Folder"
+                      defaultValue={defaultSettingsData.storage.baseFolder}
+                      required
+                      fullWidth
+                      {...register("storage.baseFolder")}
+                    />
+                  </Grid>
+                </>
+              ) : null}
             </Grid>
           </FormProvider>
         </Grid>
       </Grid>
     </Drawer>
-  )
-}
-export default SidebarSettingsForm
+  );
+};
+export default SidebarSettingsForm;

@@ -1,61 +1,63 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Edge } from "reactflow";
+import { type Edge } from "reactflow";
 import localForage from "services/config/local-forage.config";
 import { createCustomContext } from "utils";
 
 export interface IWorkflowsEdgesContext {
-  edges: Edge[]
-  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>
-  fetchForageWorkflowEdges: () => Promise<Edge[]>
+  edges: Edge[];
+  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
+  fetchForageWorkflowEdges: () => Promise<Edge[]>;
 }
 
 export const [WorkflowsEdgesContext, useWorkflowsEdges] =
-  createCustomContext<IWorkflowsEdgesContext>('WorkflowsEdges Context')
+  createCustomContext<IWorkflowsEdgesContext>("WorkflowsEdges Context");
 
-const WorkflowsEdgesProvider: React.FC<{children:React.ReactNode}> = ({ children }) => {
-  const [edges, setEdges] = useState<Edge[]>([])
-  const [loadingEdges, setLoadingEdges] = useState<boolean>(true)
-  
+const WorkflowsEdgesProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const [loadingEdges, setLoadingEdges] = useState<boolean>(true);
+
   const setForageWorkflowEdges = useCallback(async (edges: Edge[]) => {
-    await localForage.setItem('workflowEdges', edges)
-  }, [])
+    await localForage.setItem("workflowEdges", edges);
+  }, []);
 
   const fetchForageWorkflowEdges = useCallback(async () => {
-    var workflowEdges = await localForage.getItem<any>("workflowEdges")
-    if ((!workflowEdges) || (workflowEdges.length === 0)) {
-      workflowEdges = []
+    let workflowEdges = await localForage.getItem<any>("workflowEdges");
+    if (!workflowEdges || workflowEdges.length === 0) {
+      workflowEdges = [];
     }
-    return workflowEdges
-  }, [])
+    return workflowEdges;
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      const forageEdges = await fetchForageWorkflowEdges()
-      await setForageWorkflowEdges(forageEdges)
-      setLoadingEdges(false)
-    })()
-  }, [])
+    void (async () => {
+      const forageEdges = await fetchForageWorkflowEdges();
+      await setForageWorkflowEdges(forageEdges);
+      setLoadingEdges(false);
+    })();
+  }, []);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       if (loadingEdges) {
-        return
+        return;
       }
-      await setForageWorkflowEdges(edges)
-    })()
-  }, [edges, setForageWorkflowEdges, loadingEdges])
+      await setForageWorkflowEdges(edges);
+    })();
+  }, [edges, setForageWorkflowEdges, loadingEdges]);
 
   const value: IWorkflowsEdgesContext = {
     edges,
-    fetchForageWorkflowEdges: () => fetchForageWorkflowEdges(),
+    fetchForageWorkflowEdges: async () => await fetchForageWorkflowEdges(),
     setEdges,
-  }
+  };
 
   return (
     <WorkflowsEdgesContext.Provider value={value}>
       {children}
     </WorkflowsEdgesContext.Provider>
-  )
-}
+  );
+};
 
-export default WorkflowsEdgesProvider
+export default WorkflowsEdgesProvider;

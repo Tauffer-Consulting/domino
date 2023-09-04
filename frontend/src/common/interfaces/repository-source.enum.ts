@@ -1,3 +1,3 @@
 export enum ERepositorySource {
-  github = 'github'
+  github = "github",
 }

@@ -1,145 +1,183 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Control, FieldArrayWithId, useFieldArray, useWatch } from 'react-hook-form';
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Card, CardContent, IconButton, Grid } from "@mui/material";
+import CheckboxInput from "components/checkbox-input";
+import CodeEditorInput from "components/codeeditor-input";
+import DatetimeInput from "components/datetime-input";
+import NumberInput from "components/number-input";
+import SelectInput from "components/select-input";
+import TextInput from "components/text-input";
+import {
+  type IWorkflowPieceData,
+  type InputArray,
+} from "context/workflows/types";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  type Control,
+  type FieldArrayWithId,
+  useFieldArray,
+  useWatch,
+} from "react-hook-form";
+import { getFromUpstream } from "utils";
 
-import { Card, CardContent, IconButton, Grid } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { type ArrayOption } from "../../piece-form.component/upstream-options";
 
-import { IWorkflowPieceData, InputArray } from 'context/workflows/types';
-
-import TextInput from 'components/text-input';
-import SelectInput from 'components/select-input';
-import NumberInput from 'components/number-input';
-import CheckboxInput from 'components/checkbox-input';
-import DatetimeInput from 'components/datetime-input';
-import CodeEditorInput from 'components/codeeditor-input';
-
-import SelectUpstreamInput from './select-upstream-input';
-import ObjectInputComponent from './object-input';
-import { ArrayOption } from '../../piece-form.component/upstream-options';
-import { disableCheckboxOptions } from './disableCheckboxOptions';
-import { getFromUpstream } from 'utils';
+import { disableCheckboxOptions } from "./disableCheckboxOptions";
+import ObjectInputComponent from "./object-input";
+import SelectUpstreamInput from "./select-upstream-input";
 
 interface ArrayInputItemProps {
-  formId: string
-  inputKey: string
+  formId: string;
+  inputKey: string;
   schema: any;
-  control: Control<IWorkflowPieceData, any>
-  definitions?: any
-  upstreamOptions: ArrayOption
+  control: Control<IWorkflowPieceData, any>;
+  definitions?: any;
+  upstreamOptions: ArrayOption;
 }
 
-const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, upstreamOptions, definitions, control }) => {
-
-  const name = `inputs.${inputKey}.value` as `inputs.${string}.value`
-  const { fields: data, append, remove } = useFieldArray({
+const ArrayInput: React.FC<ArrayInputItemProps> = ({
+  formId,
+  inputKey,
+  schema,
+  upstreamOptions,
+  definitions,
+  control,
+}) => {
+  const name: `inputs.${string}.value` = `inputs.${inputKey}.value`;
+  const {
+    fields: data,
+    append,
+    remove,
+  } = useFieldArray({
     name,
     control,
-  })
-  const fields = data as unknown as FieldArrayWithId<InputArray>[]
-  const formsData = useWatch({ name })
+  });
+  const fields = data as unknown as Array<FieldArrayWithId<InputArray>>;
+  const formsData = useWatch({ name });
 
-  const [enumOptions, setEnumOptions] = useState<string[]>([])
+  const [enumOptions, setEnumOptions] = useState<string[]>([]);
 
   const subItemSchema = useMemo(() => {
     let subItemSchema: any = schema?.items;
     if (schema?.items?.$ref) {
-      const subItemSchemaName = schema.items.$ref.split('/').pop();
+      const subItemSchemaName = schema.items.$ref.split("/").pop();
       subItemSchema = definitions?.[subItemSchemaName];
     }
-    return subItemSchema
-  }, [definitions, schema])
+    return subItemSchema;
+  }, [definitions, schema]);
 
-  const disableUpstream = useMemo(()=>{
-      return disableCheckboxOptions(subItemSchema)
-  },[subItemSchema])
+  const disableUpstream = useMemo(() => {
+    return disableCheckboxOptions(subItemSchema);
+  }, [subItemSchema]);
 
-  const isFromUpstream = useCallback((index: number) => {
-    return formsData?.[index]?.fromUpstream ?? false
-  }, [formsData])
+  const isFromUpstream = useCallback(
+    (index: number) => {
+      return formsData?.[index]?.fromUpstream ?? false;
+    },
+    [formsData],
+  );
 
   const elementType = useMemo(() => {
     if (subItemSchema?.allOf && subItemSchema.allOf.length > 0) {
-      const typeClass = subItemSchema.allOf[0]['$ref'].split("/").pop();
-      const valuesOptions: Array<string> = definitions?.[typeClass].enum;
-      setEnumOptions(valuesOptions)
-      return "SelectInput"
-    } else if ((subItemSchema?.type === 'number') && !subItemSchema?.format) {
-      return "NumberInput"
-    } else if (subItemSchema?.type === 'integer' && !subItemSchema?.format) {
-      return "NumberInputInt"
-    } else if (subItemSchema?.type === 'boolean' && !subItemSchema?.format) {
+      const typeClass = subItemSchema.allOf[0].$ref.split("/").pop();
+      const valuesOptions: string[] = definitions?.[typeClass].enum;
+      setEnumOptions(valuesOptions);
+      return "SelectInput";
+    } else if (subItemSchema?.type === "number" && !subItemSchema?.format) {
+      return "NumberInput";
+    } else if (subItemSchema?.type === "integer" && !subItemSchema?.format) {
+      return "NumberInputInt";
+    } else if (subItemSchema?.type === "boolean" && !subItemSchema?.format) {
       return "CheckboxInput";
-    } else if (subItemSchema?.type === 'string' && !subItemSchema?.format && !subItemSchema?.widget) {
+    } else if (
+      subItemSchema?.type === "string" &&
+      !subItemSchema?.format &&
+      !subItemSchema?.widget
+    ) {
       return "TextInput";
-    } else if (subItemSchema?.type === 'string' && subItemSchema?.format === 'date') {
+    } else if (
+      subItemSchema?.type === "string" &&
+      subItemSchema?.format === "date"
+    ) {
       return "DateInput";
-    } else if (subItemSchema?.type === 'string' && subItemSchema?.format === 'time') {
+    } else if (
+      subItemSchema?.type === "string" &&
+      subItemSchema?.format === "time"
+    ) {
       return "TimeInput";
-    } else if (subItemSchema?.type === 'string' && subItemSchema?.format === 'date-time') {
+    } else if (
+      subItemSchema?.type === "string" &&
+      subItemSchema?.format === "date-time"
+    ) {
       return "DatetimeInput";
-    } else if (subItemSchema?.type === 'string' && subItemSchema?.widget === 'codeeditor') {
-      return "CodeEditorInput"
-    } else if (subItemSchema?.type === 'object') {
+    } else if (
+      subItemSchema?.type === "string" &&
+      subItemSchema?.widget === "codeeditor"
+    ) {
+      return "CodeEditorInput";
+    } else if (subItemSchema?.type === "object") {
       return "ObjectInput";
     } else {
       return "Unknown";
     }
-  }, [subItemSchema, definitions])
+  }, [subItemSchema, definitions]);
 
   const handleAddInput = useCallback(() => {
     function empty(object: Record<string, any>, fromUpstream = false) {
       Object.keys(object).forEach(function (k) {
-        if (object[k] && typeof object[k] === 'object') {
+        if (object[k] && typeof object[k] === "object") {
           return empty(object[k]);
         }
-        if(fromUpstream){
-          object[k] = getFromUpstream(schema, definitions, k)
+        if (fromUpstream) {
+          object[k] = getFromUpstream(schema, definitions, k);
         } else {
-          object[k] = '';
+          object[k] = "";
         }
       });
-      return object
+      return object;
     }
 
-    const defaultValue = schema.default[0]
-    const isObject = typeof defaultValue === "object"
+    const defaultValue = schema.default[0];
+    const isObject = typeof defaultValue === "object";
     let defaultObj = {
       fromUpstream: getFromUpstream(schema),
       upstreamArgument: "",
       upstreamId: "",
       upstreamValue: "",
-      value: ""
-    } as unknown
+      value: "",
+    } as unknown;
 
     if (isObject) {
-      const emptyObjValue = empty({...defaultValue})
-      const emptyObjFromUpstream = empty({...defaultValue},true)
+      const emptyObjValue = empty({ ...defaultValue });
+      const emptyObjFromUpstream = empty({ ...defaultValue }, true);
       defaultObj = {
         fromUpstream: emptyObjFromUpstream,
         upstreamArgument: emptyObjValue,
         upstreamId: emptyObjValue,
         upstreamValue: emptyObjValue,
-        value: defaultValue
-      } as unknown
+        value: defaultValue,
+      } as unknown;
     }
 
-    append([defaultObj] as any)
-  }, [append, definitions, schema])
+    append([defaultObj] as any);
+  }, [append, definitions, schema]);
 
   return (
     <Card sx={{ width: "100%", paddingTop: 0 }}>
       <div>
-        <IconButton onClick={handleAddInput} aria-label="Add" sx={{ marginRight: "16px" }}>
+        <IconButton
+          onClick={handleAddInput}
+          aria-label="Add"
+          sx={{ marginRight: "16px" }}
+        >
           <AddIcon />
         </IconButton>
         {schema?.title}
       </div>
-      <CardContent  >
-
-        {fields && fields.map((fieldWithId, index) => {
-          const { id } = fieldWithId
-          const fromUpstream = isFromUpstream(index)
+      <CardContent>
+        {fields?.map((fieldWithId, index) => {
+          const { id } = fieldWithId;
+          const fromUpstream = isFromUpstream(index);
           return (
             <Grid
               key={id}
@@ -153,21 +191,19 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 borderRadius: "6px",
               }}
             >
-              <Grid
-                item
-                xs={1}
-              >
-                <IconButton onClick={() => { remove(index) }} aria-label="Delete">
+              <Grid item xs={1}>
+                <IconButton
+                  onClick={() => {
+                    remove(index);
+                  }}
+                  aria-label="Delete"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Grid>
 
-
               {fromUpstream && elementType !== "ObjectInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <SelectUpstreamInput
                     name={`${name}.${index}`}
                     label={schema?.title}
@@ -176,10 +212,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "SelectInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <SelectInput
                     label={schema.title}
                     emptyValue
@@ -190,10 +223,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "NumberInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <NumberInput
                     name={`${name}.${index}.value`}
                     type="float"
@@ -203,10 +233,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "NumberInputInt" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <NumberInput
                     name={`${name}.${index}.value`}
                     type="int"
@@ -216,10 +243,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "CheckboxInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <CheckboxInput
                     name={`${name}.${index}.value`}
                     label={schema.title}
@@ -227,22 +251,16 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "TextInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <TextInput
-                    variant='outlined'
+                    variant="outlined"
                     name={`${name}.${index}.value`}
                     label={schema.title}
                   />
                 </Grid>
               )}
               {!fromUpstream && elementType === "DateInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <DatetimeInput
                     name={`${name}.${index}.value`}
                     label={schema.title}
@@ -251,10 +269,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "TimeInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <DatetimeInput
                     name={`${name}.${index}.value`}
                     label={schema.title}
@@ -263,10 +278,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "DatetimeInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
+                <Grid item xs={9}>
                   <DatetimeInput
                     name={`${name}.${index}.value`}
                     label={schema.title}
@@ -275,23 +287,13 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                 </Grid>
               )}
               {!fromUpstream && elementType === "CodeEditorInput" && (
-                <Grid
-                  item
-                  xs={9}
-                >
-                  <CodeEditorInput
-                    name={`${name}.${index}.value`}
-                  />
+                <Grid item xs={9}>
+                  <CodeEditorInput name={`${name}.${index}.value`} />
                 </Grid>
               )}
               {!fromUpstream && elementType === "Unknown" && (
-                <Grid
-                  item
-                  xs={9}
-                >
-                  <div
-                    style={{ color: "red", fontWeight: "bold" }}
-                  >
+                <Grid item xs={9}>
+                  <div style={{ color: "red", fontWeight: "bold" }}>
                     Unknown widget type for {subItemSchema?.title}
                   </div>
                 </Grid>
@@ -316,13 +318,12 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({ formId, inputKey, schema, u
                   />
                 </Grid>
               )}
-
             </Grid>
           );
         })}
       </CardContent>
     </Card>
   );
-}
+};
 
 export default React.memo(ArrayInput);

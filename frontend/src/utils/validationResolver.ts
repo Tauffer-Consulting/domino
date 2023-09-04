@@ -1,9 +1,10 @@
-import { FieldErrors, FieldValues } from 'react-hook-form';
-import { ObjectSchema, ValidationError } from 'yup';
+import { type FieldErrors, type FieldValues } from "react-hook-form";
+import { type ObjectSchema, ValidationError } from "yup";
 
-const isNullOrUndefined = (value: unknown): value is null | undefined => value == null
+const isNullOrUndefined = (value: unknown): value is null | undefined =>
+  value == null;
 
-const isObjectType = (value: unknown) => typeof value === 'object';
+const isObjectType = (value: unknown) => typeof value === "object";
 
 const isDateObject = (value: unknown): value is Date => value instanceof Date;
 
@@ -18,18 +19,14 @@ function compact<TValue>(value: TValue[]) {
 }
 
 function stringToPath(input: string): string[] {
-  return compact(input.replace(/["|']|\]/g, '').split(/\.|\[/));
+  return compact(input.replace(/["|']|\]/g, "").split(/\.|\[/));
 }
 
 function isKey(value: string) {
   return /^\w*$/.test(value);
 }
 
-function set(
-  object: FieldValues,
-  path: string,
-  value?: unknown,
-) {
+function set(object: FieldValues, path: string, value?: unknown) {
   let index = -1;
   const tempPath = isKey(path) ? [path] : stringToPath(path);
   const length = tempPath.length;
@@ -45,8 +42,8 @@ function set(
         isObject(objValue) || Array.isArray(objValue)
           ? objValue
           : !isNaN(+tempPath[index + 1])
-            ? []
-            : {};
+          ? []
+          : {};
     }
     object[key] = newValue;
     object = object[key];
@@ -57,54 +54,47 @@ function set(
 const toNestError = <TFieldValues extends FieldValues>(
   errors: FieldErrors,
 ): FieldErrors => {
-  const fieldErrors = {} as FieldErrors<TFieldValues>;
+  const fieldErrors: FieldErrors<TFieldValues> = {};
   for (const path in errors) {
-    set(
-      fieldErrors,
-      path,
-      Object.assign(errors[path] || {}),
-    );
+    set(fieldErrors, path, Object.assign(errors[path] ?? {}));
   }
 
   return fieldErrors;
 };
 
-export const yupResolver = (
-  validationSchema: ObjectSchema<Record<string, any>>
-) => async (data: any) => {
-  try {
-    const values = await validationSchema.validate(data, {
-      abortEarly: false,
-    });
+export const yupResolver =
+  (validationSchema: ObjectSchema<Record<string, any>>) =>
+  async (data: any) => {
+    try {
+      const values = await validationSchema.validate(data, {
+        abortEarly: false,
+      });
 
-    return {
-      values,
-      errors: {},
-    };
-  } catch (e) {
-    if (e instanceof ValidationError) {
-      const errors = e.inner.reduce(
-        (allErrors, currentError) => {
+      return {
+        values,
+        errors: {},
+      };
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        const errors = e.inner.reduce((allErrors, currentError) => {
           const path = (currentError.path as string)
             ?.replaceAll("[", ".")
-            .replaceAll("]", "")
+            .replaceAll("]", "");
           return {
             ...allErrors,
             [path]: {
-              type: currentError.type ?? 'validation',
+              type: currentError.type ?? "validation",
               message: currentError.message,
             },
-          }
-        },
-        {}
-      )
+          };
+        }, {});
 
-      return {
-        values: {},
-        errors: toNestError(errors),
-      };
+        return {
+          values: {},
+          errors: toNestError(errors),
+        };
+      }
+
+      throw new Error("Error trying to validate form schema");
     }
-
-    throw new Error('Error trying to validate form schema');
-  }
-}
+  };

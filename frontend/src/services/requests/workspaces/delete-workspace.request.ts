@@ -1,11 +1,12 @@
-import { AxiosResponse } from 'axios'
-import { dominoApiClient } from '../../clients/domino.client'
-import { useCallback } from 'react'
+import { type AxiosResponse } from "axios";
+import { useCallback } from "react";
 
-interface IDeleteWorkspacesResponseInterface { }
+import { dominoApiClient } from "../../clients/domino.client";
+
+type IDeleteWorkspacesResponseInterface = unknown;
 
 export interface IDeleteWorkspacesParams {
-    id: string
+  id: string;
 }
 
 /**
@@ -13,13 +14,21 @@ export interface IDeleteWorkspacesParams {
  * @returns ?
  */
 const deleteWorkspace: (
-    params: IDeleteWorkspacesParams
-) => Promise<AxiosResponse<IDeleteWorkspacesResponseInterface>> = (params) => {
-    return dominoApiClient.delete(`/workspaces/${params.id}`)
-}
+  params: IDeleteWorkspacesParams,
+) => Promise<AxiosResponse<IDeleteWorkspacesResponseInterface>> = async (
+  params,
+) => {
+  return await dominoApiClient.delete(`/workspaces/${params.id}`);
+};
 
 export const useAuthenticatedDeleteWorkspaces = () => {
-    const fetcher = useCallback((params: IDeleteWorkspacesParams) => deleteWorkspace(params).then(data => { return data }), [])
+  const fetcher = useCallback(
+    async (params: IDeleteWorkspacesParams) =>
+      await deleteWorkspace(params).then((data) => {
+        return data;
+      }),
+    [],
+  );
 
-    return fetcher
-}
+  return fetcher;
+};

@@ -1,13 +1,12 @@
-import { AxiosResponse } from 'axios'
-import { dominoApiClient } from '../../clients/domino.client'
-import { useCallback } from 'react'
+import { type AxiosResponse } from "axios";
+import { useCallback } from "react";
 
-interface IPostWorkspacesResponseInterface {
-  [x: string]: any
-}
+import { dominoApiClient } from "../../clients/domino.client";
+
+type IPostWorkspacesResponseInterface = Record<string, any>;
 
 export interface IPostWorkspacesParams {
-  name: string
+  name: string;
 }
 
 /**
@@ -15,10 +14,12 @@ export interface IPostWorkspacesParams {
  * @returns ?
  */
 const postWorkspaces: (
-  params: IPostWorkspacesParams
-) => Promise<AxiosResponse<IPostWorkspacesResponseInterface>> = (params) => {
-  return dominoApiClient.post(`/workspaces`, params)
-}
+  params: IPostWorkspacesParams,
+) => Promise<AxiosResponse<IPostWorkspacesResponseInterface>> = async (
+  params,
+) => {
+  return await dominoApiClient.post(`/workspaces`, params);
+};
 
 /**
  * Create authenticated workspaces
@@ -27,10 +28,12 @@ const postWorkspaces: (
  */
 export const useAuthenticatedPostWorkspaces = () => {
   const fetcher = useCallback(
-    (params: IPostWorkspacesParams) => postWorkspaces(params)
-      .then(data => {
-        return data.data
-      }), [])
+    async (params: IPostWorkspacesParams) =>
+      await postWorkspaces(params).then((data) => {
+        return data.data;
+      }),
+    [],
+  );
 
-  return fetcher
-}
+  return fetcher;
+};

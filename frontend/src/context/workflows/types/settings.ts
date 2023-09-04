@@ -1,50 +1,50 @@
 export enum scheduleIntervals {
-    None = "none",
-    Once = "once",
-    Hourly = "hourly",
-    Daily = "daily",
-    Weekly = "weekly",
-    Monthly = "monthly",
-    Yearly = "yearly",
+  None = "none",
+  Once = "once",
+  Hourly = "hourly",
+  Daily = "daily",
+  Weekly = "weekly",
+  Monthly = "monthly",
+  Yearly = "yearly",
 }
 
-export type ScheduleIntervals = `${scheduleIntervals}`
+export type ScheduleIntervals = `${scheduleIntervals}`;
 
 export enum endDateTypes {
-    Never = "never",
-    UserDefined = "User defined",
+  Never = "never",
+  UserDefined = "User defined",
 }
 
-export type EndDateTypes = `${endDateTypes}`
+export type EndDateTypes = `${endDateTypes}`;
 
 export enum storageSourcesAWS {
-    None = "None",
-    AWSS3 = "AWS S3",
+  None = "None",
+  AWSS3 = "AWS S3",
 }
 
-export type StorageSourcesAWS = `${storageSourcesAWS}`
+export type StorageSourcesAWS = `${storageSourcesAWS}`;
 
 export enum storageSourcesLocal {
-    None = "None",
-    Local = "Local",
+  None = "None",
+  Local = "Local",
 }
 
-export type StorageSourcesLocal = `${storageSourcesLocal}`
+export type StorageSourcesLocal = `${storageSourcesLocal}`;
 
 export interface IWorkflowSettingsConfig {
-    name: string,
-    scheduleInterval: ScheduleIntervals,
-    startDate: string,
-    endDate?: string,
-    endDateType: EndDateTypes,
+  name: string;
+  scheduleInterval: ScheduleIntervals;
+  startDate: string;
+  endDate?: string;
+  endDateType: EndDateTypes;
 }
 
 export interface IWorkflowSettingsStorage {
-    storageSource: StorageSourcesAWS | StorageSourcesLocal,
-    baseFolder?: string,
-    bucket?: string
+  storageSource: StorageSourcesAWS | StorageSourcesLocal;
+  baseFolder?: string;
+  bucket?: string;
 }
 export interface IWorkflowSettings {
-    config: IWorkflowSettingsConfig
-    storage: IWorkflowSettingsStorage
+  config: IWorkflowSettingsConfig;
+  storage: IWorkflowSettingsStorage;
 }

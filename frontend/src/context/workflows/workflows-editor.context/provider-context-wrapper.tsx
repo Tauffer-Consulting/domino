@@ -1,11 +1,13 @@
 import PiecesProvider from "./pieces.context";
 import WorkflowsEdgesProvider from "./workflow-edges.context";
 import WorkflowsNodesProvider from "./workflow-nodes.context";
-import WorkflowPiecesProvider from "./workflow-pieces.context";
 import WorkflowPiecesDataProvider from "./workflow-pieces-data.context";
+import WorkflowPiecesProvider from "./workflow-pieces.context";
 import WorkflowSettingsDataProvider from "./workflow-settings-data.context";
 
-const ProviderContextWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProviderContextWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   return (
     <WorkflowSettingsDataProvider>
       <PiecesProvider>
@@ -21,6 +23,6 @@ const ProviderContextWrapper: React.FC<{ children: React.ReactNode }> = ({ child
       </PiecesProvider>
     </WorkflowSettingsDataProvider>
   );
-}
+};
 
-export default ProviderContextWrapper
+export default ProviderContextWrapper;

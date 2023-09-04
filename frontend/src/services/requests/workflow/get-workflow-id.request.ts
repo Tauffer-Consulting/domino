@@ -1,13 +1,16 @@
-import { AxiosResponse } from 'axios'
-import { useWorkspaces } from 'context/workspaces/workspaces.context'
-import { dominoApiClient } from '../../clients/domino.client'
-import { IGetWorkflowIdResponseInterface } from './workflow.interface'
+import { type AxiosResponse } from "axios";
+import { useWorkspaces } from "context/workspaces/workspaces.context";
+
+import { dominoApiClient } from "../../clients/domino.client";
+
+import { type IGetWorkflowIdResponseInterface } from "./workflow.interface";
 
 interface IGetWorkflowIdParams {
-  id: string
+  id: string;
 }
 
-const getWorkflowUrl = (workspaceId: string, id: string) => `/workspaces/${workspaceId}/workflows/${id}`
+const getWorkflowUrl = (workspaceId: string, id: string) =>
+  `/workspaces/${workspaceId}/workflows/${id}`;
 
 /**
  * Get workflow by id using GET /workflow
@@ -15,12 +18,13 @@ const getWorkflowUrl = (workspaceId: string, id: string) => `/workspaces/${works
  */
 const getWorkflowId: (
   workspaceId: string,
-  params: IGetWorkflowIdParams
-) => Promise<AxiosResponse<IGetWorkflowIdResponseInterface>> = (workspaceId, params) => {
-
-  return dominoApiClient.get(getWorkflowUrl(workspaceId, params.id))
-}
-
+  params: IGetWorkflowIdParams,
+) => Promise<AxiosResponse<IGetWorkflowIdResponseInterface>> = async (
+  workspaceId,
+  params,
+) => {
+  return await dominoApiClient.get(getWorkflowUrl(workspaceId, params.id));
+};
 
 /**
  * Get workflow by id
@@ -28,18 +32,17 @@ const getWorkflowId: (
  * @returns workflow fetcher fn
  */
 export const useAuthenticatedGetWorkflowId = () => {
-  const { workspace } = useWorkspaces()
+  const { workspace } = useWorkspaces();
 
-  if (!workspace) throw new Error('Impossible to fetch workflows without specifying a workspace')
+  if (!workspace)
+    throw new Error(
+      "Impossible to fetch workflows without specifying a workspace",
+    );
 
   // todo add swr ?
-  const fetcher = (params: IGetWorkflowIdParams) => {
-    return getWorkflowId(
-      workspace.id as string,
-      params
-    ).then(data => data.data)
-  }
+  const fetcher = async (params: IGetWorkflowIdParams) => {
+    return await getWorkflowId(workspace.id, params).then((data) => data.data);
+  };
 
-  return fetcher
-
-}
+  return fetcher;
+};

@@ -1,5 +1,5 @@
 export interface IOperatorRepositorySecretsData {
-    id: number
-    name: string
-    is_filled: boolean
+  id: number;
+  name: string;
+  is_filled: boolean;
 }

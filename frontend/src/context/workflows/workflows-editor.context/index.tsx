@@ -1,37 +1,59 @@
-import React, { FC, useCallback } from 'react'
-
+import { useWorkspaces } from "context/workspaces/workspaces.context";
+import React, { type FC, useCallback } from "react";
 import {
-  IPostWorkflowParams,
+  type IPostWorkflowParams,
   useAuthenticatedPostWorkflow,
-  IPostWorkflowResponseInterface,
-} from 'services/requests/workflow'
+  type IPostWorkflowResponseInterface,
+} from "services/requests/workflow";
+import { createCustomContext, generateTaskName, getIdSlice } from "utils";
 
-import { useWorkspaces } from 'context/workspaces/workspaces.context';
+import { type CreateWorkflowRequest, type TasksDataModel } from "../types";
 
-import { createCustomContext, generateTaskName, getIdSlice } from 'utils'
+import { usesPieces, type IPiecesContext } from "./pieces.context";
+import {
+  useWorkflowsEdges,
+  type IWorkflowsEdgesContext,
+} from "./workflow-edges.context";
+import {
+  useWorkflowsNodes,
+  type IWorkflowsNodesContext,
+} from "./workflow-nodes.context";
+import {
+  useWorkflowPiecesData,
+  type IWorkflowPiecesDataContext,
+} from "./workflow-pieces-data.context";
+import {
+  useWorkflowPiece,
+  type IWorkflowPieceContext,
+} from "./workflow-pieces.context";
+import {
+  type IWorkflowSettingsContext,
+  useWorkflowSettings,
+} from "./workflow-settings-data.context";
 
-import { usesPieces, IPiecesContext } from './pieces.context';
-import { useWorkflowsEdges, IWorkflowsEdgesContext } from './workflow-edges.context';
-import { useWorkflowsNodes, IWorkflowsNodesContext } from './workflow-nodes.context';
-import { useWorkflowPiece, IWorkflowPieceContext } from './workflow-pieces.context';
-import { useWorkflowPiecesData, IWorkflowPiecesDataContext } from './workflow-pieces-data.context';
-import { IWorkflowSettingsContext, useWorkflowSettings } from './workflow-settings-data.context';
-import { CreateWorkflowRequest, TasksDataModel } from '../types';
-
-interface IWorkflowsEditorContext extends IPiecesContext, IWorkflowsEdgesContext, IWorkflowSettingsContext, IWorkflowsNodesContext, IWorkflowPieceContext, IWorkflowPiecesDataContext {
-
-  fetchWorkflowForage: () => any // TODO add type
-  workflowsEditorBodyFromFlowchart: () => Promise<CreateWorkflowRequest> // TODO add type
-  handleCreateWorkflow: (params: IPostWorkflowParams) => Promise<IPostWorkflowResponseInterface>
-  clearForageData: () => Promise<void>
+interface IWorkflowsEditorContext
+  extends IPiecesContext,
+    IWorkflowsEdgesContext,
+    IWorkflowSettingsContext,
+    IWorkflowsNodesContext,
+    IWorkflowPieceContext,
+    IWorkflowPiecesDataContext {
+  fetchWorkflowForage: () => any; // TODO add type
+  workflowsEditorBodyFromFlowchart: () => Promise<CreateWorkflowRequest>; // TODO add type
+  handleCreateWorkflow: (
+    params: IPostWorkflowParams,
+  ) => Promise<IPostWorkflowResponseInterface>;
+  clearForageData: () => Promise<void>;
 }
 
 export const [WorkflowsEditorContext, useWorkflowsEditor] =
-  createCustomContext<IWorkflowsEditorContext>('WorkflowsEditor Context')
+  createCustomContext<IWorkflowsEditorContext>("WorkflowsEditor Context");
 
-export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const { workspace } = useWorkspaces()
-  const postWorkflow = useAuthenticatedPostWorkflow()
+export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
+  children,
+}) => {
+  const { workspace } = useWorkspaces();
+  const postWorkflow = useAuthenticatedPostWorkflow();
 
   const {
     repositories,
@@ -42,13 +64,9 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     fetchRepoById,
     search,
     handleSearch,
-  } = usesPieces()
+  } = usesPieces();
 
-  const {
-    edges,
-    fetchForageWorkflowEdges,
-    setEdges,
-  } = useWorkflowsEdges()
+  const { edges, fetchForageWorkflowEdges, setEdges } = useWorkflowsEdges();
 
   const {
     nodes,
@@ -56,7 +74,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     fetchForageWorkflowNodes,
     setNodes,
     toggleNodeDirection,
-  } = useWorkflowsNodes()
+  } = useWorkflowsNodes();
 
   const {
     setForageWorkflowPieces,
@@ -65,7 +83,7 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
     clearForageWorkflowPieces,
-  } = useWorkflowPiece()
+  } = useWorkflowPiece();
 
   const {
     fetchForageWorkflowPiecesData,
@@ -74,111 +92,124 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     clearForageWorkflowPiecesData,
     removeForageWorkflowPieceDataById,
     clearDownstreamDataById,
-  } = useWorkflowPiecesData()
-
+  } = useWorkflowPiecesData();
 
   const {
     fetchWorkflowSettingsData,
     setWorkflowSettingsData,
-    clearWorkflowSettingsData
-  } = useWorkflowSettings()
+    clearWorkflowSettingsData,
+  } = useWorkflowSettings();
 
-
-  const handleCreateWorkflow = useCallback(async (payload: IPostWorkflowParams) => {
-    return postWorkflow({ ...payload, workspace_id: workspace?.id ?? '' })
-  }, [postWorkflow, workspace])
-
+  const handleCreateWorkflow = useCallback(
+    async (payload: IPostWorkflowParams) => {
+      return await postWorkflow({
+        ...payload,
+        workspace_id: workspace?.id ?? "",
+      });
+    },
+    [postWorkflow, workspace],
+  );
 
   const fetchWorkflowForage = useCallback(async () => {
-    const workflowPieces = await getForageWorkflowPieces()
-    const workflowPiecesData = await fetchForageWorkflowPiecesData()
-    const workflowSettingsData = await fetchWorkflowSettingsData()
+    const workflowPieces = await getForageWorkflowPieces();
+    const workflowPiecesData = await fetchForageWorkflowPiecesData();
+    const workflowSettingsData = await fetchWorkflowSettingsData();
 
     return {
       workflowPieces,
       workflowPiecesData,
       workflowSettingsData,
-    }
-  }, [fetchForageWorkflowPiecesData, fetchWorkflowSettingsData, getForageWorkflowPieces])
+    };
+  }, [
+    fetchForageWorkflowPiecesData,
+    fetchWorkflowSettingsData,
+    getForageWorkflowPieces,
+  ]);
 
   const workflowsEditorBodyFromFlowchart = useCallback(async () => {
-    const workflowPiecesData = await fetchForageWorkflowPiecesData()
-    const workflowSettingsData = await fetchWorkflowSettingsData()
-    const workflowNodes = await fetchForageWorkflowNodes()
-    const workflowEdges = await fetchForageWorkflowEdges()
+    const workflowPiecesData = await fetchForageWorkflowPiecesData();
+    const workflowSettingsData = await fetchWorkflowSettingsData();
+    const workflowNodes = await fetchForageWorkflowNodes();
+    const workflowEdges = await fetchForageWorkflowEdges();
 
-
-    const workflow: CreateWorkflowRequest['workflow'] = {
+    const workflow: CreateWorkflowRequest["workflow"] = {
       name: workflowSettingsData.config.name,
       schedule_interval: workflowSettingsData.config.scheduleInterval,
       select_end_date: workflowSettingsData.config.endDateType,
       start_date: workflowSettingsData.config.startDate,
       end_date: workflowSettingsData.config.endDate,
-    }
+    };
 
-    const ui_schema: CreateWorkflowRequest['ui_schema'] = {
+    const ui_schema: CreateWorkflowRequest["ui_schema"] = {
       nodes: {},
-      edges: workflowEdges
-    }
+      edges: workflowEdges,
+    };
 
-    const tasks: CreateWorkflowRequest['tasks'] = {}
+    const tasks: CreateWorkflowRequest["tasks"] = {};
 
     for (const element of workflowNodes) {
-      const elementData = workflowPiecesData[element.id]
+      const elementData = workflowPiecesData[element.id];
 
-      const numberId = getIdSlice(element.id)
-      const taskName = generateTaskName(element.data.name, element.id)
+      const numberId = getIdSlice(element.id);
+      const taskName = generateTaskName(element.data.name, element.id);
 
-      ui_schema['nodes'][taskName] = element
+      ui_schema.nodes[taskName] = element;
 
       const dependencies = workflowEdges.reduce<string[]>((acc, edge) => {
         if (edge.target === element.id) {
-          const task = workflowNodes.find(n => n.id === edge.source)
+          const task = workflowNodes.find((n) => n.id === edge.source);
           if (task) {
-            const upTaskName = generateTaskName(task.data.name,task.id)
-            acc.push(upTaskName)
+            const upTaskName = generateTaskName(task.data.name, task.id);
+            acc.push(upTaskName);
           }
         }
 
-        return acc
-      }, [])
+        return acc;
+      }, []);
 
-      const { storageSource, baseFolder, ...providerOptions } = workflowSettingsData.storage || {}
+      const { storageSource, baseFolder, ...providerOptions } =
+        workflowSettingsData.storage || {};
 
-      const pieceInputKwargs = Object.entries(elementData.inputs).reduce((acc, [key, value]) => {
-        if(Array.isArray(value.value)) {
+      const pieceInputKwargs = Object.entries(elementData.inputs).reduce<
+        Record<string, any>
+      >((acc, [key, value]) => {
+        if (Array.isArray(value.value)) {
           acc[key] = {
             fromUpstream: value.fromUpstream,
             upstreamTaskId: value.fromUpstream ? value.upstreamId : null,
-            upstreamArgument: value.fromUpstream ? value.upstreamArgument : null,
+            upstreamArgument: value.fromUpstream
+              ? value.upstreamArgument
+              : null,
             value: value.value.map((value) => {
               return {
                 fromUpstream: value.fromUpstream,
                 upstreamTaskId: value.fromUpstream ? value.upstreamId : null,
-                upstreamArgument: value.fromUpstream ? value.upstreamArgument : null,
-                value: value.value
-              }
-            })
-          }
+                upstreamArgument: value.fromUpstream
+                  ? value.upstreamArgument
+                  : null,
+                value: value.value,
+              };
+            }),
+          };
 
-          return acc
+          return acc;
         }
 
         acc[key] = {
           fromUpstream: value.fromUpstream,
           upstreamTaskId: value.fromUpstream ? value.upstreamId : null,
           upstreamArgument: value.fromUpstream ? value.upstreamArgument : null,
-          value: value.value
-        }
+          value: value.value,
+        };
 
-        return acc
-      }, {} as Record<string, any>)
+        return acc;
+      }, {});
 
       const taskDataModel: TasksDataModel = {
         task_id: taskName,
         piece: {
           id: numberId,
-          name: element.data.name
+          name: element.data.name,
         },
         dependencies,
         piece_input_kwargs: pieceInputKwargs,
@@ -191,36 +222,42 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
         container_resources: {
           requests: {
             cpu: elementData.containerResources.cpu.min,
-            memory: elementData.containerResources.memory.min
+            memory: elementData.containerResources.memory.min,
           },
           limits: {
             cpu: elementData.containerResources.cpu.max,
-            memory: elementData.containerResources.memory.max
+            memory: elementData.containerResources.memory.max,
           },
-          use_gpu: elementData.containerResources.useGpu
+          use_gpu: elementData.containerResources.useGpu,
         },
-      }
+      };
 
-      tasks[taskName] = taskDataModel
+      tasks[taskName] = taskDataModel;
     }
-
-
 
     return {
       workflow,
       tasks,
       ui_schema,
-    }
-
-  }, [fetchForageWorkflowEdges, fetchForageWorkflowNodes, fetchForageWorkflowPiecesData, fetchWorkflowSettingsData])
+    };
+  }, [
+    fetchForageWorkflowEdges,
+    fetchForageWorkflowNodes,
+    fetchForageWorkflowPiecesData,
+    fetchWorkflowSettingsData,
+  ]);
 
   const clearForageData = useCallback(async () => {
     await Promise.allSettled([
       clearForageWorkflowPieces(),
       clearForageWorkflowPiecesData(),
       clearWorkflowSettingsData(),
-    ])
-  }, [clearForageWorkflowPieces, clearForageWorkflowPiecesData, clearWorkflowSettingsData])
+    ]);
+  }, [
+    clearForageWorkflowPieces,
+    clearForageWorkflowPiecesData,
+    clearWorkflowSettingsData,
+  ]);
 
   const value: IWorkflowsEditorContext = {
     repositories,
@@ -261,13 +298,12 @@ export const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({ ch
     clearForageWorkflowPieces,
     fetchWorkflowSettingsData,
     setWorkflowSettingsData,
-    clearWorkflowSettingsData
-  }
+    clearWorkflowSettingsData,
+  };
 
   return (
     <WorkflowsEditorContext.Provider value={value}>
       {children}
     </WorkflowsEditorContext.Provider>
-  )
-}
-
+  );
+};

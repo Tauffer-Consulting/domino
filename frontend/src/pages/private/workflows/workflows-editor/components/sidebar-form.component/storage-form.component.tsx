@@ -1,16 +1,32 @@
-import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import * as yup from 'yup'
-import { FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
-import { IStorageFormData, IWorkflowPieceData, StorageAccessModes, storageAccessModes } from 'context/workflows/types';
+import {
+  FormControl,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
+import {
+  type IStorageFormData,
+  type IWorkflowPieceData,
+  type StorageAccessModes,
+  storageAccessModes,
+} from "context/workflows/types";
+import React from "react";
+import { Controller, useFormContext } from "react-hook-form";
+import * as yup from "yup";
 
 export const storageFormSchema = yup.object().shape({
-  storageAccessMode: yup.mixed<StorageAccessModes>().oneOf(Object.values(storageAccessModes)).required(),
+  storageAccessMode: yup
+    .mixed<StorageAccessModes>()
+    .oneOf(Object.values(storageAccessModes))
+    .required(),
 });
 
 export const defaultStorage: IStorageFormData = {
-  storageAccessMode: storageAccessModes.None
-}
+  storageAccessMode: storageAccessModes.None,
+};
 
 const StorageForm: React.FC = () => {
   const { formState, control } = useFormContext<IWorkflowPieceData>();
@@ -18,7 +34,13 @@ const StorageForm: React.FC = () => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} marginBottom={2}>
-        <Typography variant="subtitle2" component="div" sx={{ flexGrow: 1, borderBottom: "1px solid;" }}>Storage</Typography>
+        <Typography
+          variant="subtitle2"
+          component="div"
+          sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
+        >
+          Storage
+        </Typography>
       </Grid>
       <Grid item xs={12}>
         <FormControl fullWidth>
@@ -30,9 +52,9 @@ const StorageForm: React.FC = () => {
             render={({ field }) => (
               <Select
                 {...field}
-                onChange={(event) =>
-                  field.onChange(event.target.value as storageAccessModes)
-                }
+                onChange={(event) => {
+                  field.onChange(event.target.value as storageAccessModes);
+                }}
               >
                 <MenuItem value="None">None</MenuItem>
                 <MenuItem value="Read">Read</MenuItem>
@@ -41,7 +63,6 @@ const StorageForm: React.FC = () => {
             )}
           />
 
-
           <FormHelperText error>
             {formState.errors.storage?.storageAccessMode?.message}
           </FormHelperText>
@@ -49,6 +70,6 @@ const StorageForm: React.FC = () => {
       </Grid>
     </Grid>
   );
-}
+};
 
 export default StorageForm;

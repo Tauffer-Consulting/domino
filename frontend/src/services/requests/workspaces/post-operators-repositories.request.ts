@@ -1,22 +1,23 @@
-import { AxiosResponse } from 'axios'
-import { dominoApiClient } from 'services/clients/domino.client'
+import { type AxiosResponse } from "axios";
+import { dominoApiClient } from "services/clients/domino.client";
+
 import {
-  IPostWorkspaceRepositoryParams,
-  IPostWorkspaceRepositoryPayload,
-  IPostWorkspaceRepositoryResponseInterface
-} from './workspaces.interface'
+  type IPostWorkspaceRepositoryParams,
+  type IPostWorkspaceRepositoryPayload,
+  type IPostWorkspaceRepositoryResponseInterface,
+} from "./workspaces.interface";
 
 /**
  * Create workspacesidoperatorsrepositories using POST /workspacesidoperatorsrepositories
  * @returns ?
  */
 const postOperatorsRepository: (
-  params: IPostWorkspaceRepositoryParams
-) => Promise<AxiosResponse<IPostWorkspaceRepositoryResponseInterface>> = (
-  params
+  params: IPostWorkspaceRepositoryParams,
+) => Promise<AxiosResponse<IPostWorkspaceRepositoryResponseInterface>> = async (
+  params,
 ) => {
-    return dominoApiClient.post('/pieces-repositories', params.data)
-  }
+  return await dominoApiClient.post("/pieces-repositories", params.data);
+};
 
 /**
  * Create authenticated workspacesidoperatorsrepositories
@@ -24,16 +25,16 @@ const postOperatorsRepository: (
  * @returns crate workspacesidoperatorsrepositories function
  */
 export const useAuthenticatedPostOperatorsRepository = (params: {
-  workspace: string
+  workspace: string;
 }) => {
   if (!params?.workspace)
-    throw new Error('Impossible to add repositories without a workspace!')
+    throw new Error("Impossible to add repositories without a workspace!");
 
-  const fetcher = (payload: IPostWorkspaceRepositoryPayload) =>
-    postOperatorsRepository({
+  const fetcher = async (payload: IPostWorkspaceRepositoryPayload) =>
+    await postOperatorsRepository({
       id: params.workspace,
-      data: payload
-    }).then((data) => data.data)
+      data: payload,
+    }).then((data) => data.data);
 
-  return fetcher
-}
+  return fetcher;
+};

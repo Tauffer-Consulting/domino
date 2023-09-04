@@ -1,25 +1,23 @@
-import { Box, Container } from '@mui/material'
-import { FC, ReactNode } from 'react'
-import { Header } from './header/header.component'
+import { Box, Container } from "@mui/material";
+import { type FC, type ReactNode } from "react";
 
-type IPrivateLayoutProps = {
-  children: ReactNode
-  sidePanel?: ReactNode
+import { Header } from "./header/header.component";
+
+interface IPrivateLayoutProps {
+  children: ReactNode;
+  sidePanel?: ReactNode;
 }
 
-export const PrivateLayout: FC<IPrivateLayoutProps> = ({
-  children
-}) => {
+export const PrivateLayout: FC<IPrivateLayoutProps> = ({ children }) => {
   return (
-    <Box sx={{ display: 'flex', width: '100%', marginTop: '3rem' }}>
+    <Box sx={{ display: "flex", width: "100%", marginTop: "3rem" }}>
       <Header />
 
-      <Container component='main' maxWidth={false} sx={{ padding: 3 }}>
+      <Container component="main" maxWidth={false} sx={{ padding: 3 }}>
         <Box sx={{ paddingLeft: 0 }}>{children}</Box>
       </Container>
-
     </Box>
-  )
-}
+  );
+};
 
-export default PrivateLayout
+export default PrivateLayout;

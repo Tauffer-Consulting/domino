@@ -1,19 +1,19 @@
-import { FC } from 'react'
-import { Navigate } from 'react-router-dom'
-import { useAuthentication } from 'context/authentication'
-import { useWorkspaces } from 'context/workspaces/workspaces.context'
+import { useAuthentication } from "context/authentication";
+import { useWorkspaces } from "context/workspaces/workspaces.context";
+import { type FC } from "react";
+import { Navigate } from "react-router-dom";
 
 interface IPrivateRouteProps {
   /**
    * @todo type properly
    */
-  component: any
+  component: any;
 
   /**
    * `true` if this route is accessible only after selecting a workspace
    * @default false
    * */
-  requireWorkspace?: boolean
+  requireWorkspace?: boolean;
 }
 
 /**
@@ -21,10 +21,10 @@ interface IPrivateRouteProps {
  */
 export const PrivateRoute: FC<IPrivateRouteProps> = ({
   component: Component,
-  requireWorkspace
+  requireWorkspace,
 }) => {
-  const { isLogged } = useAuthentication()
-  const { workspace } = useWorkspaces()
+  const { isLogged } = useAuthentication();
+  const { workspace } = useWorkspaces();
 
   /**
    * @todo simplify, **especially** if we have to add another state (maybe state machine?)
@@ -41,13 +41,13 @@ export const PrivateRoute: FC<IPrivateRouteProps> = ({
 
   switch (true) {
     case isLogged && requireWorkspace && !workspace:
-      return <Navigate to='/workspaces' replace />
+      return <Navigate to="/workspaces" replace />;
 
     case isLogged && requireWorkspace && !!workspace:
     case isLogged && !requireWorkspace:
-      return <Component />
+      return <Component />;
 
     default:
-      return <Navigate to='/sign-in' replace />
+      return <Navigate to="/sign-in" replace />;
   }
-}
+};
