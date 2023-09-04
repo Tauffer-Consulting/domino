@@ -5,8 +5,9 @@ from pydantic import BaseModel, validator, Field
 from datetime import datetime
 from constants.default_pieces.storage import AWSS3DefaultPiece
 
+
 """
-     Auxiliary data models
+Auxiliary data models
 """
 class ScheduleIntervalType(str, Enum):
     none = "none"
@@ -132,7 +133,7 @@ class TasksDataModel(BaseModel):
     dependencies: Optional[List[str]]
 
 """
-     Request data models
+Request data models
 """
 class CreateWorkflowRequest(BaseModel):
     workflow: WorkflowBaseSettings

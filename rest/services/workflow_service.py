@@ -697,10 +697,8 @@ class WorkflowService(object):
     @staticmethod
     def parse_log(log_text: str, task_id: str, piece_name: str):
         # Get the log lines between the start and stop patterns
-        # The start pattern is where we find the first ocurrence of the users pieces logger output
-        start_command_pattern = f'domino-.{piece_name}-{task_id}'
-        # The stop pattern is the xcom export output log line, after that we are sure we don't have more logs from the user
-        stop_command_pattern = 'Running command... if [ -s \/airflow\/xcom\/return.json ]'
+        start_command_pattern = "Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
+        stop_command_pattern = "End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
         # Find all lines between the start and stop patterns
         # We are using re.DOTALL to match newlines
         log = re.findall(f"[^\n]*{start_command_pattern}.*?{stop_command_pattern}[^\n]*", log_text, re.DOTALL)

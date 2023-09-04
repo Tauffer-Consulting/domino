@@ -67,6 +67,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         """
         Start logger.
         """
+        self.logger.info("Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
         self.logger.info(f"Started {self.task_id} of type {self.__class__.__name__} at {str(datetime.now().isoformat())}")
 
 
@@ -152,7 +153,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         # xcom_obj = output_obj.dict()
         xcom_obj = json.loads(output_obj.json())
         if not isinstance(xcom_obj, dict):
-            print(f"Piece {self.__class__.__name__} is not returning a valid XCOM object. Auto-generating a base XCOM for it...")
             self.logger.info(f"Piece {self.__class__.__name__} is not returning a valid XCOM object. Auto-generating a base XCOM for it...")
             xcom_obj = dict()
 
@@ -311,6 +311,8 @@ class BasePiece(metaclass=abc.ABCMeta):
         xcom_obj = self.format_xcom(output_obj=output_obj)
         self.push_xcom(xcom_obj=xcom_obj)
 
+        self.logger.info("End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
+
 
     @classmethod
     def dry_run(
@@ -420,10 +422,10 @@ class BasePiece(metaclass=abc.ABCMeta):
             dict: A dictionary containing the base64-encoded content and the file type.
         """
         if not Path(file_path).exists():
-            print(f"File {file_path} does not exist. Skipping serialization...")
+            self.logger.info(f"File {file_path} does not exist. Skipping serialization...")
             return None
         if not Path(file_path).is_file():
-            print(f"Path {file_path} is not a file. Skipping serialization...")
+            self.logger.info(f"Path {file_path} is not a file. Skipping serialization...")
             return None
         # Read file content as bytes and encode content into base64
         with open(file_path, "rb") as f:

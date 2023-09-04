@@ -19,6 +19,7 @@ with DAG(**dag_config) as dag:
     {{ key }} = Task(
         dag, 
         task_id='{{ key }}',
+        workspace_id={{ value["workspace_id"] }},
         workflow_shared_storage={% if value["workflow_shared_storage"] %}{{ value["workflow_shared_storage"] }}{% else %}None{% endif %},
         container_resources={% if value["container_resources"] %}{{ value["container_resources"] }}{% else %}None{% endif %},
         piece={{ value["piece"] }},

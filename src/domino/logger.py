@@ -4,8 +4,11 @@ LOG_LEVEL = logging.INFO
 LOG_FORMAT = '%(asctime)-15s.%(msecs)d %(levelname)-5s --- [%(threadName)15s]' \
              ' %(name)-15s : %(lineno)d : %(message)s'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
-logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT,
-                    datefmt=LOG_DATE_FORMAT)
+logging.basicConfig(
+    level=LOG_LEVEL, 
+    format=LOG_FORMAT,
+    datefmt=LOG_DATE_FORMAT
+)
 BASE_LOGGER_NAME = 'domino-'
 
 

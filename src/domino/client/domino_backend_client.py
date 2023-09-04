@@ -46,8 +46,8 @@ class DominoBackendRestClient(requests.Session):
         )
         return response
 
-    def get_piece_repositories_from_workspace_id(self, workspace_id: int, params: dict) -> requests.Response:
-        resource = f"/pieces-repositories"
+    def get_piece_repositories_from_workspace_id(self, params: dict) -> requests.Response:
+        resource = "/pieces-repositories"
         response = self.request(
             method='get',
             resource=resource,
