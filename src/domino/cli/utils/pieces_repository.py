@@ -355,6 +355,7 @@ def build_docker_images() -> None:
     updated_dependencies_map = build_images_from_pieces_repository()
     return updated_dependencies_map
 
+
 def publish_docker_images() -> None:
     """
     Load pieces to docker image map from environment variable and publish them to Container Registry.
