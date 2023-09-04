@@ -67,8 +67,8 @@ class BasePiece(metaclass=abc.ABCMeta):
         """
         Start logger.
         """
-        self.logger.info("Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
         self.logger.info(f"Started {self.task_id} of type {self.__class__.__name__} at {str(datetime.now().isoformat())}")
+        self.logger.info("Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
 
 
     def _wait_for_sidecar_paths(self):

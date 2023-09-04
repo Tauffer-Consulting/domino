@@ -721,8 +721,9 @@ class WorkflowService(object):
             if len(matches) > 1:
                 l = re.sub(datetime_pattern, '', l, len(matches) -1)
 
-            # Remove the stop pattern
-            l = re.sub(stop_command_pattern, '', l)
+            # Remove the start and stop patterns
+            if stop_command_pattern in l or start_command_pattern in l:
+                continue
             # Strip all extra spaces
             l = " ".join(l.split())
 

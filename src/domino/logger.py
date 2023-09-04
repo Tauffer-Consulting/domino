@@ -1,8 +1,8 @@
 import logging
 
 LOG_LEVEL = logging.INFO
-LOG_FORMAT = '%(asctime)-15s.%(msecs)d %(levelname)-5s --- [%(threadName)15s]' \
-             ' %(name)-15s : %(lineno)d : %(message)s'
+LOG_FORMAT = '%(levelname)-5s - [%(threadName)15s]' \
+             ' %(name)-15s : %(lineno)d : %(asctime)-15s.%(msecs)d %(message)s'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 logging.basicConfig(
     level=LOG_LEVEL, 
