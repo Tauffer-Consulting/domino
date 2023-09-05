@@ -11,7 +11,7 @@ class RepositorySourceRequestEnum(str, enum.Enum):
 
 class ListRepositoryFilters(BaseModel):
     name__like: Optional[str]
-    path_like: Optional[str]
+    path__like: Optional[str]
     version: Optional[str]
     url: Optional[str]
     workspace_id: Optional[int]
