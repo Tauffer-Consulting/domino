@@ -95,7 +95,8 @@ export const RepositoriesCard: FC = () => {
     handleAddRepository({
       path,
       source,
-      version
+      version,
+      url
     }).finally(() => {
       setStep('FETCH_METADATA')
       setAvailableVersions([])
@@ -103,7 +104,7 @@ export const RepositoriesCard: FC = () => {
       setUrl('')
       setIsStepLoading(false)
     })
-  }, [handleAddRepository, handleRefreshRepositories, path, source, version])
+  }, [handleAddRepository, handleRefreshRepositories, path, source, version, url])
 
   const handleNextStep = useCallback(() => {
     switch (step) {

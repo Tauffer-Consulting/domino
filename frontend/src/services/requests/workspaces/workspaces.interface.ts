@@ -55,7 +55,8 @@ export interface IPostWorkspaceRepositoryPayload {
   workspace_id: string
   source: ERepositorySource | string
   path: string
-  version: string
+  version: string,
+  url: string
 }
 export interface IPostWorkspaceRepositoryParams {
   id: string

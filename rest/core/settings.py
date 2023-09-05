@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.3.11")
     DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE', "github")
     DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: EmptyStrToNone = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', "")
+    DOMINO_DEFAULT_PIECES_REPOSITORY_URL: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_URL', 'https://github.com/Tauffer-Consulting/default_domino_pieces')
     
     # Default DB mock data
     RUN_CREATE_MOCK_DATA = False

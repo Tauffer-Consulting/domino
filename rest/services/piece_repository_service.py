@@ -213,7 +213,7 @@ class PieceRepositoryService(object):
 
         token = auth_context.workspace.github_access_token if auth_context.workspace.github_access_token else settings.DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN
         repository_files_metadata = self._read_repository_data(
-            source=piece_repository_data.source, 
+            source=piece_repository_data.source,
             path=piece_repository_data.path, 
             version=piece_repository_data.version,
             github_access_token=token
@@ -227,7 +227,8 @@ class PieceRepositoryService(object):
             version=piece_repository_data.version,
             dependencies_map=repository_files_metadata['dependencies_map'],
             compiled_metadata=repository_files_metadata['compiled_metadata'],
-            workspace_id=piece_repository_data.workspace_id
+            workspace_id=piece_repository_data.workspace_id,
+            url=piece_repository_data.url
         )
         repository = self.piece_repository_repository.create(piece_repository=new_repo)
         try:
