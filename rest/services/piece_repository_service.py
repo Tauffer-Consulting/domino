@@ -180,12 +180,15 @@ class PieceRepositoryService(object):
         self.logger.info(f"Creating default storage repository")
 
         new_repo = PieceRepository(
-            name=settings.DEFAULT_STORAGE_REPOSITORY_NAME,
+            name=settings.DEFAULT_STORAGE_REPOSITORY['name'],
             created_at=datetime.utcnow(),
             workspace_id=workspace_id,
-            path=None,
-            source=getattr(RepositorySource, 'default').value
+            path=settings.DEFAULT_STORAGE_REPOSITORY['path'],
+            source=settings.DEFAULT_STORAGE_REPOSITORY['source'],
+            version=settings.DEFAULT_STORAGE_REPOSITORY['version'],
+            url=settings.DEFAULT_STORAGE_REPOSITORY['url']
         )
+
         default_storage_repository = self.piece_repository_repository.create(piece_repository=new_repo)
         pieces = self.piece_service.create_default_storage_pieces(
             piece_repository_id=default_storage_repository.id,

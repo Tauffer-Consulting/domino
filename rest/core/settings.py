@@ -1,6 +1,8 @@
 from pydantic import BaseSettings, validators
 from typing import Optional
 import os
+from database.models.enums import RepositorySource
+
 
 
 def empty_to_none(v: str) -> Optional[str]:
@@ -66,7 +68,13 @@ class Settings(BaseSettings):
     AIRFLOW_WEBSERVER_HOST = os.environ.get('AIRFLOW_WEBSERVER_HOST', "http://airflow-webserver:8080/")
 
     # Default repositories
-    DEFAULT_STORAGE_REPOSITORY_NAME = 'default_storage_repository'
+    DEFAULT_STORAGE_REPOSITORY = dict(
+        name="default_storage_repository",
+        path="default_storage_repository",
+        source=getattr(RepositorySource, 'default').value,
+        version="0.0.1",
+        url="domino-default/default_storage_repository"
+    )
 
     DEPLOY_MODE = os.environ.get('DOMINO_DEPLOY_MODE', 'local-k8s')
 
