@@ -1,5 +1,5 @@
 import axios from "axios";
-import { environment } from "common/config/environment.config";
+import { environment } from "config/environment.config";
 import { dispatchLogout } from "context/authentication";
 
 import { endpoints } from "../config/endpoints.config";

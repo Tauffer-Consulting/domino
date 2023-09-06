@@ -1,5 +1,4 @@
-import { environment } from "common/config/environment.config";
-import { type IApiEnv } from "common/interfaces/environment.interface";
+import { environment, type IApiEnv } from "config/environment.config";
 
 interface IEndpoints {
   api: string;

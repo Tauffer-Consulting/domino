@@ -6,3 +6,4 @@ export { getIdSlice, getUuidSlice, getUuid } from "./getUuidSlice";
 export { generateTaskName } from "./generateTaskName";
 export { getDefinition } from "./getDefinition";
 export { getFromUpstream } from "./getFromUpstream";
+export { lazyImport } from "./lazyImports";

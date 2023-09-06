@@ -1,5 +1,5 @@
 import { type AxiosResponse } from "axios";
-import { useWorkspaces } from "context/workspaces/workspaces.context";
+import { useWorkspaces } from "context/workspaces";
 
 import { dominoApiClient } from "../../clients/domino.client";
 
