@@ -9,7 +9,7 @@ ENV DOMINO_DEPLOY_MODE=local-compose
 # ENV PATH /app/node_modules/.bin:$PATH
 WORKDIR /usr/src/app
 COPY --chown=node:node . /usr/src/app
-RUN mkdir -p node_modules/.cache 
+RUN mkdir -p node_modules/.cache
 RUN chmod -R 777 node_modules/.cache
 
 RUN yarn install --frozen-lockfile --production

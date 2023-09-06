@@ -1,2 +1,2 @@
-export * from './get-operator-repositories.request'
-export * from './operator.interface'
+export * from "./getPieceRepositories.request";
+export * from "./piece.interface";

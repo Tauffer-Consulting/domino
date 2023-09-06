@@ -1,3 +1,3 @@
-export * from './get-operator-repository-secrets.request'
-export * from './patch-operator-repository-secret.request'
-export * from './delete-operator-repository.request'
+export * from "./getPieceRepositorySecrets.request";
+export * from "./patchPieceRepositorySecret.request";
+export * from "./deletePieceRepository.request";

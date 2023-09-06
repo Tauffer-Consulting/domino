@@ -46,7 +46,7 @@
     "react-toastify": "^9.1.1",
     "reactflow": "^11.4.0",
     "swr": "^2.0.0",
-    "typescript": "^4.9.4",
+    "typescript": "*",
     "uuid": "^9.0.0",
     "yup": "^1.2.0"
   },
@@ -55,6 +55,8 @@
     "start:local": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local react-scripts start",
     "start:mock": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local REACT_APP_USE_MOCK=true react-scripts start",
     "build": "cross-env react-scripts build",
+    "lint": "eslint . --ext js,jsx,ts,tsx",
+    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
     "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts test",
     "eject": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts eject"
   },
@@ -68,5 +70,22 @@
     ">0.2%",
     "not dead",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "eslint": "^8.0.1",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-standard-with-typescript": "^39.0.0",
+    "eslint-import-resolver-typescript": "^3.6.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-testing-library": "^6.0.1",
+    "prettier": "^3.0.3"
+  }
 }

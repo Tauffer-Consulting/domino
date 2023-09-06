@@ -1,4 +1,4 @@
-import { ERepositorySource } from "common/interfaces/repository-source.enum"
+import { type ERepositorySource } from "interfaces/repositorySource.enum";
 
 // Workspace status enum with values (pending, accepted and rejected)
 export enum EWorkspaceStatus {
@@ -8,57 +8,59 @@ export enum EWorkspaceStatus {
 }
 
 interface IPaginationMetadata {
-  page: number
-  records: number
-  total: number
-  last_page: number
+  page: number;
+  records: number;
+  total: number;
+  last_page: number;
 }
 
 export interface IWorkspaceSummary {
-  id: string
-  workspace_name: string
-  user_permission: string
-  status: EWorkspaceStatus
-  github_access_token_filled: boolean
+  id: string;
+  workspace_name: string;
+  user_permission: string;
+  status: EWorkspaceStatus;
+  github_access_token_filled: boolean;
 }
 
 export interface IWorkspaceDetails {
-  id: string
-  workspace_name: string
-  github_access_token_filled: string
+  id: string;
+  workspace_name: string;
+  github_access_token_filled: string;
   // users: { user_id: string, permission: string }[]
-  // operators_repositories: {
+  // Pieces_repositories: {
   //   repository_id: string
   //   repository_name: string
   //   repository_source: ERepositorySource | string
   // }[]
 }
 
-export type IGetWorkspacesResponseInterface = IWorkspaceSummary[]
-export type IGetWorkspaceIdResponseInterface = IWorkspaceSummary
-export type IGetWorkspaceUsersResponse = {
-  data: [{
-    user_id: number
-    user_email: string
-    user_permission: string,
-    status: EWorkspaceStatus
-  }],
-  metadata: IPaginationMetadata
+export type IGetWorkspacesResponseInterface = IWorkspaceSummary[];
+export type IGetWorkspaceIdResponseInterface = IWorkspaceSummary;
+export interface IGetWorkspaceUsersResponse {
+  data: [
+    {
+      user_id: number;
+      user_email: string;
+      user_permission: string;
+      status: EWorkspaceStatus;
+    },
+  ];
+  metadata: IPaginationMetadata;
 }
 
 /**
  * @todo type properly
  */
-export type IPostWorkspaceRepositoryResponseInterface = Record<string, unknown>
+export type IPostWorkspaceRepositoryResponseInterface = Record<string, unknown>;
 
 export interface IPostWorkspaceRepositoryPayload {
-  workspace_id: string
-  source: ERepositorySource | string
-  path: string
-  version: string,
-  url: string
+  workspace_id: string;
+  source: ERepositorySource | string;
+  path: string;
+  version: string;
+  url: string;
 }
 export interface IPostWorkspaceRepositoryParams {
-  id: string
-  data: IPostWorkspaceRepositoryPayload
+  id: string;
+  data: IPostWorkspaceRepositoryPayload;
 }

@@ -1,122 +1,123 @@
+import { AxiosError } from "axios";
+import localforage from "localforage";
 import React, {
-  ReactNode,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
-  useState
-} from 'react'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import localforage from 'localforage'
-
-import { createCustomContext } from 'utils'
+  useState,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   postAuthLogin,
-  postAuthRegister
-} from 'services/requests/authentication'
+  postAuthRegister,
+} from "services/requests/authentication";
+import { createCustomContext } from "utils";
 
 import {
-  IAuthenticationContext,
-  IAuthenticationStore
-} from './authentication.interface'
-import { DOMINO_LOGOUT } from './authentication.logout'
-import { AxiosError } from 'axios'
-
+  type IAuthenticationContext,
+  type IAuthenticationStore,
+} from "./authentication.interface";
+import { DOMINO_LOGOUT } from "./authentication.logout";
 
 export const [AuthenticationContext, useAuthentication] =
-  createCustomContext<IAuthenticationContext>('Authentication Context')
+  createCustomContext<IAuthenticationContext>("Authentication Context");
 
 /**
  * Authentication provider.
  * @todo refactor local storage implementation with Local Forage
  */
 export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
-  children
+  children,
 }) => {
-  const navigate = useNavigate()
-  const [authLoading, setAuthLoading] = useState(false)
+  const navigate = useNavigate();
+  const [authLoading, setAuthLoading] = useState(false);
   const [store, setStore] = useState<IAuthenticationStore>({
-    token: localStorage.getItem('auth_token'),
-    userId: localStorage.getItem('userId')
-  })
+    token: localStorage.getItem("auth_token"),
+    userId: localStorage.getItem("userId"),
+  });
 
-  const isLogged = useRef(!!store.token)
+  const isLogged = useRef(!!store.token);
 
   const login = useCallback(
-    (token: string, userId: string, redirect = '') => {
-      isLogged.current = true
+    (token: string, userId: string, redirect = "") => {
+      isLogged.current = true;
       setStore((store) => ({
         ...store,
         token,
-        userId
-      }))
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('userId', userId as string)
-      navigate(redirect)
+        userId,
+      }));
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("userId", userId);
+      navigate(redirect);
     },
-    [navigate]
-  )
+    [navigate],
+  );
 
   const logout = useCallback(() => {
-    localStorage.clear()
-    localforage.clear()
-    isLogged.current = false
+    localStorage.clear();
+    void localforage.clear();
+    isLogged.current = false;
     setStore((store) => ({
       ...store,
-      token: null
-    }))
-    navigate('/sign-in')
-  }, [navigate])
+      token: null,
+    }));
+    navigate("/sign-in");
+  }, [navigate]);
 
   /**
    * @todo improve error handling
    */
   const authenticate = useCallback(
     async (email: string, password: string) => {
-      setAuthLoading(true)
+      setAuthLoading(true);
       postAuthLogin({ email, password })
         .then((res) => {
           if (res.status === 200) {
-            login(res.data.access_token, res.data.user_id as string)
+            login(res.data.access_token, res.data.user_id);
           }
         })
-        .catch((e ) => {
-          if(e instanceof AxiosError){
-            toast.error(e.response?.data?.detail ?? "Error on login, please review your inputs and try again")
+        .catch((e) => {
+          if (e instanceof AxiosError) {
+            toast.error(
+              e.response?.data?.detail ??
+                "Error on login, please review your inputs and try again",
+            );
           }
         })
         .finally(() => {
-          setAuthLoading(false)
-        })
+          setAuthLoading(false);
+        });
     },
-    [login]
-  )
+    [login],
+  );
 
   const register = useCallback(
     async (email: string, password: string) => {
-      setAuthLoading(true)
+      setAuthLoading(true);
       postAuthRegister({ email, password })
         .then((res) => {
           if (res.status === 201) {
-            toast.success('E-mail and password registered successfully!')
-            authenticate(email, password)
+            toast.success("E-mail and password registered successfully!");
+            void authenticate(email, password);
           }
         })
         .catch((err) => {
-          console.log(err?.response?.status)
+          console.log(err?.response?.status);
           if (err?.response?.status === 409) {
-            toast.warning(`This e-mail is already registered`)
+            toast.warning(`This e-mail is already registered`);
           } else {
-            toast.error(err?.response?.data?.detail ?? `Error while register`)
+            toast.error(err?.response?.data?.detail ?? `Error while register`);
           }
         })
         .finally(() => {
-          setAuthLoading(false)
-        })
+          setAuthLoading(false);
+        });
     },
-    [authenticate]
-  )
+    [authenticate],
+  );
 
   const value = useMemo((): IAuthenticationContext => {
     return {
@@ -125,23 +126,27 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       authLoading,
       logout,
       authenticate,
-      register
-    }
-  }, [store, logout, authenticate, register, authLoading])
+      register,
+    };
+  }, [store, logout, authenticate, register, authLoading]);
 
   /**
    * Listen to "logout" event and handles it (ie. unauthorized request)
    */
   useEffect(() => {
-    window.addEventListener(DOMINO_LOGOUT, () => logout())
+    window.addEventListener(DOMINO_LOGOUT, () => {
+      logout();
+    });
     return () => {
-      window.removeEventListener(DOMINO_LOGOUT, () => logout())
-    }
-  }, [logout])
+      window.removeEventListener(DOMINO_LOGOUT, () => {
+        logout();
+      });
+    };
+  }, [logout]);
 
   return (
     <AuthenticationContext.Provider value={value}>
       {children}
     </AuthenticationContext.Provider>
-  )
-}
+  );
+};
