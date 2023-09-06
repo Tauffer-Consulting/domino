@@ -33,8 +33,8 @@ export const TaskLogs = (props: ITaskLogsProps) => {
     return {
       width: "100%",
       border: "none",
-      overflowX: renderOverflowX ? "scroll" : "hidden",
-      whiteSpace: renderOverflowX ? "pre" : "pre-wrap",
+      overflowX: renderOverflowX ? "hidden" : "scroll",
+      whiteSpace: renderOverflowX ? "pre-wrap" : "pre",
       outline: "none",
     };
   }, [renderOverflowX]);
