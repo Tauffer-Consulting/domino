@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class AWSS3DefaultPiece(BaseModel):
     name: str = Field(title='Name', default='AWSS3DefaultPiece')
     description: str = Field(title='Description', default='AWS s3 Storage Default Piece')

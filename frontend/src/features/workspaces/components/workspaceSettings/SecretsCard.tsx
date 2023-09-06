@@ -219,10 +219,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
       <CardContent>
         <Box>
           <Typography variant="body1">
-            Secrets are environment variables that are encrypted and injected to
-            the operator container based on the operator SecretsModel. Anyone
-            with access to this workspace can use these secrets for running
-            operators.
+            {`Secrets are environment variables that are encrypted and injected to the Piece container based on the Piece's SecretsModel. Anyone with access to this workspace can use these secrets for running Pieces.`}
           </Typography>
           <form>
             <Grid container spacing={2} sx={{ marginTop: "15px" }}>

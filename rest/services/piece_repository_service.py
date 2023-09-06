@@ -28,6 +28,7 @@ from database.models import PieceRepository
 from clients.github_rest_client import GithubRestClient
 from core.settings import settings
 
+
 class PieceRepositoryService(object):
     def __init__(self) -> None:
         self.logger = get_configured_logger(self.__class__.__name__)
@@ -59,7 +60,7 @@ class PieceRepositoryService(object):
         page: int,
         page_size: int,
         filters: ListRepositoryFilters
-    ) -> List[GetWorkspaceRepositoriesResponse]:
+    ) -> GetWorkspaceRepositoriesResponse:
         self.logger.info(f"Getting repositories for workspace {workspace_id}")
         pieces_repositories = self.piece_repository_repository.find_by_workspace_id(
             workspace_id=workspace_id,
@@ -179,12 +180,15 @@ class PieceRepositoryService(object):
         self.logger.info(f"Creating default storage repository")
 
         new_repo = PieceRepository(
-            name=settings.DEFAULT_STORAGE_REPOSITORY_NAME,
+            name=settings.DEFAULT_STORAGE_REPOSITORY['name'],
             created_at=datetime.utcnow(),
             workspace_id=workspace_id,
-            path=None,
-            source=getattr(RepositorySource, 'default').value
+            path=settings.DEFAULT_STORAGE_REPOSITORY['path'],
+            source=settings.DEFAULT_STORAGE_REPOSITORY['source'],
+            version=settings.DEFAULT_STORAGE_REPOSITORY['version'],
+            url=settings.DEFAULT_STORAGE_REPOSITORY['url']
         )
+
         default_storage_repository = self.piece_repository_repository.create(piece_repository=new_repo)
         pieces = self.piece_service.create_default_storage_pieces(
             piece_repository_id=default_storage_repository.id,
@@ -212,7 +216,7 @@ class PieceRepositoryService(object):
 
         token = auth_context.workspace.github_access_token if auth_context.workspace.github_access_token else settings.DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN
         repository_files_metadata = self._read_repository_data(
-            source=piece_repository_data.source, 
+            source=piece_repository_data.source,
             path=piece_repository_data.path, 
             version=piece_repository_data.version,
             github_access_token=token
@@ -226,7 +230,8 @@ class PieceRepositoryService(object):
             version=piece_repository_data.version,
             dependencies_map=repository_files_metadata['dependencies_map'],
             compiled_metadata=repository_files_metadata['compiled_metadata'],
-            workspace_id=piece_repository_data.workspace_id
+            workspace_id=piece_repository_data.workspace_id,
+            url=piece_repository_data.url
         )
         repository = self.piece_repository_repository.create(piece_repository=new_repo)
         try:

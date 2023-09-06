@@ -8,7 +8,7 @@ from schemas.responses.workspace import (
     GetWorkspaceResponse,
     PatchWorkspaceResponse,
     ListWorkspaceUsersResponseData,
-    ListWorkspaceUsersResponse
+    ListWorkspaceUsersResponse,
 )
 from schemas.responses.base import PaginationSet
 from schemas.requests.piece_repository import CreateRepositoryRequest
@@ -79,7 +79,8 @@ class WorkspaceService(object):
                     workspace_id=workspace.id,
                     source=settings.DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE,
                     path=settings.DOMINO_DEFAULT_PIECES_REPOSITORY,
-                    version=settings.DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION
+                    version=settings.DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION,
+                    url=settings.DOMINO_DEFAULT_PIECES_REPOSITORY_URL
                 ),
                 auth_context=auth_context
             )
@@ -306,9 +307,6 @@ class WorkspaceService(object):
         return ListWorkspaceUsersResponse(
             data=response_data,
             metadata=response_metadata
-        )
-
+        )    
         
-        
-
         

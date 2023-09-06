@@ -1,4 +1,4 @@
-FROM node:14-alpine as build
+FROM node:19.9.0 as build
 
 # Set the working directory
 WORKDIR /app
@@ -16,7 +16,7 @@ COPY . .
 RUN yarn build
 
 # Use nginx as the web server
-FROM nginx:1.19-alpine
+FROM nginx:1.25.2
 
 # Copy the build output from the previous stage
 COPY --from=build /app/build /usr/share/nginx/html

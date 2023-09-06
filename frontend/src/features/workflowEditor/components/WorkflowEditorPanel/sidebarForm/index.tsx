@@ -78,7 +78,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
           return (
             "items" in inputSchema &&
             "$ref" in inputSchema.items &&
-            inputSchema.items.$ref === "#/definitions/OutputArgsModel"
+            inputSchema.items.$ref === "#/definitions/OutputModifierModel"
           );
         },
       );
@@ -132,11 +132,11 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
       }
     }
   }, [
+    schema,
     data.inputs,
-    formId,
-    schema.properties,
-    clearDownstreamDataById,
     setForageWorkflowPiecesOutputSchema,
+    formId,
+    clearDownstreamDataById,
   ]);
 
   const saveData = useCallback(async () => {

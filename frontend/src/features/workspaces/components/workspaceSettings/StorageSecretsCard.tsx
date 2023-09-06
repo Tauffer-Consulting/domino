@@ -218,9 +218,9 @@ const StorageSecretsCard = () => {
         <Box>
           <Typography variant="body1">
             Storage Secrets are environment variables that are encrypted and
-            injected to a sidecar container to the Operators making use of
-            shared storage. Anyone with access to this workspace can use these
-            secrets for sharing storage between running operators.
+            injected to a sidecar container to the Pieces making use of shared
+            storage. Anyone with access to this workspace can use these secrets
+            for sharing storage between running Pieces.
           </Typography>
           {secrets && secrets?.length > 0 ? (
             <form>
