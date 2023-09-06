@@ -13,12 +13,14 @@ type BooleanProperty = DefaultPropertyProps & {
   type: "boolean";
   default: boolean;
 };
+
 type NumberProperty = DefaultPropertyProps & {
   type: "number" | "integer" | "float";
   default: number;
   exclusiveMaximum?: number;
   exclusiveMinimum?: number;
 };
+
 type StringProperty = DefaultPropertyProps & {
   type: "string";
   default: string;
@@ -26,6 +28,7 @@ type StringProperty = DefaultPropertyProps & {
   widget?: string;
   format?: "date" | "time" | "date-time";
 };
+
 type EnumProperty = DefaultPropertyProps & {
   allOf: Reference[];
   default: string;

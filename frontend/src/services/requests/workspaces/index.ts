@@ -1,6 +1,6 @@
 export * from "./getWorkspaceId.request";
 export * from "./getWorkspaces.request";
-export * from "./postOperatorsRepositories.request";
+export * from "./postPiecesRepositories.request";
 export * from "./postWorkspaces.request";
 export * from "./deleteWorkspace.request";
 export * from "./workspaces.interface";

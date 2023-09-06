@@ -11,31 +11,28 @@ import {
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context/workflowsEditor";
 import { type FC, type SyntheticEvent, useState } from "react";
-import { type IOperator } from "services/requests/piece";
 
 import PiecesSidebarNode from "./sidebarNode";
 
 /**
  * @todo cleanup comments when no longer needed
- * @todo move operators rules to create workflow context
+ * @todo move pieces rules to create workflow context
  * @todo improve loading/error/empty states
  */
 const SidebarAddNode: FC = () => {
   const {
     repositories,
     repositoriesLoading,
-    repositoryOperators,
+    repositoryPieces,
     nodeDirection,
     toggleNodeDirection,
   } = useWorkflowsEditor();
 
-  const [piecesMap, setPiecesMap] = useState<Record<string, IOperator[]>>({});
+  const [piecesMap, setPiecesMap] = useState<Record<string, Piece[]>>({});
   const [expandedRepos, setExpandedRepos] = useState<string[]>([]);
 
-  /** controls if an accordion is loading operators */
-  const [loadingOperators, setLoadingOperators] = useState<string | false>(
-    false,
-  );
+  /** controls if an accordion is loading Pieces */
+  const [loadingPieces, setLoadingPieces] = useState<string | false>(false);
 
   return (
     <Box className="add-node-panel" sx={{ padding: "0px 0px 0px 0px" }}>
@@ -90,8 +87,8 @@ const SidebarAddNode: FC = () => {
             expanded={expandedRepos.includes(repo.id)}
             key={repo.id}
             onChange={(event: SyntheticEvent, expanded: boolean) => {
-              if (loadingOperators) return;
-              setLoadingOperators(repo.id);
+              if (loadingPieces) return;
+              setLoadingPieces(repo.id);
 
               // Check if the repo is currently expanded
               const isExpanded = expandedRepos.includes(repo.id);
@@ -108,11 +105,11 @@ const SidebarAddNode: FC = () => {
               if (!isExpanded) {
                 setPiecesMap((prev) => ({
                   ...prev,
-                  [repo.id]: repositoryOperators[repo.id],
+                  [repo.id]: repositoryPieces[repo.id],
                 }));
               }
 
-              setLoadingOperators(false);
+              setLoadingPieces(false);
             }}
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -135,13 +132,13 @@ const SidebarAddNode: FC = () => {
                 padding: "0px 0px 0px 0px",
               }}
             >
-              {!!loadingOperators && loadingOperators === repo.id && (
-                <Alert severity="info">Loading operators...</Alert>
+              {!!loadingPieces && loadingPieces === repo.id && (
+                <Alert severity="info">Loading Pieces...</Alert>
               )}
               {expandedRepos.includes(repo.id) &&
                 piecesMap[repo.id]?.length &&
-                piecesMap[repo.id].map((operator) => (
-                  <PiecesSidebarNode operator={operator} key={operator.id} />
+                piecesMap[repo.id].map((piece) => (
+                  <PiecesSidebarNode piece={piece} key={piece.id} />
                 ))}
             </AccordionDetails>
           </Accordion>

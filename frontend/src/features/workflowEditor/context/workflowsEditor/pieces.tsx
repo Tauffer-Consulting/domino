@@ -2,29 +2,25 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import localForage from "services/config/localForage.config";
 import {
-  type IGetRepoOperatorsResponseInterface,
-  type IOperator,
-  type IOperatorForageSchema,
-  type IOperatorRepository,
-  type IRepositoryOperators,
-  useAuthenticatedGetOperatorRepositories,
+  type IGetRepoPiecesResponseInterface,
+  useAuthenticatedGetPieceRepositories,
 } from "services/requests/piece";
-import { useFetchAuthenticatedGetRepoIdOperators } from "services/requests/piece/getPieceRepositoryPieces.request";
+import { useFetchAuthenticatedGetRepoIdPieces } from "services/requests/piece/getPieceRepositoryPieces.request";
 import { createCustomContext } from "utils";
 
 export interface IPiecesContext {
-  repositories: IOperatorRepository[];
+  repositories: PieceRepository[];
   repositoriesError: boolean;
   repositoriesLoading: boolean;
-  repositoryOperators: IRepositoryOperators;
+  repositoryPieces: PiecesRepository;
 
   search: string;
   handleSearch: (word: string) => void;
 
   fetchRepoById: (params: {
     id: string;
-  }) => Promise<IGetRepoOperatorsResponseInterface>;
-  fetchForagePieceById: (id: number) => Promise<IOperator | undefined>;
+  }) => Promise<IGetRepoPiecesResponseInterface>;
+  fetchForagePieceById: (id: number) => Promise<Piece | undefined>;
 }
 
 export const [PiecesContext, usesPieces] =
@@ -34,52 +30,53 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [search, handleSearch] = useState("");
-  const [repositoryOperators, setRepositoryOperatos] =
-    useState<IRepositoryOperators>({});
+  const [repositoryPieces, setRepositoryPieces] = useState<PiecesRepository>(
+    {},
+  );
 
-  const fetchRepoById = useFetchAuthenticatedGetRepoIdOperators();
+  const fetchRepoById = useFetchAuthenticatedGetRepoIdPieces();
 
   const {
     data,
     error: repositoriesError,
     isValidating: repositoriesLoading,
     // mutate: repositoriesRefresh
-  } = useAuthenticatedGetOperatorRepositories({});
+  } = useAuthenticatedGetPieceRepositories({});
 
-  const repositories: IOperatorRepository[] = useMemo(
+  const repositories: PieceRepository[] = useMemo(
     () => data?.data.filter((repo) => repo.name.includes(search)) ?? [],
     [data, search],
   );
 
   const fetchForagePieceById = useCallback(async (id: number) => {
-    const pieces = await localForage.getItem<IOperatorForageSchema>("pieces");
+    const pieces = await localForage.getItem<PieceForageSchema>("pieces");
     if (pieces !== null) {
       return pieces[id];
     }
   }, []);
 
   useEffect(() => {
-    const updateRepositoriesOperators = async () => {
-      const repositoyOperatorsAux: IRepositoryOperators = {};
-      const forageOperators: IOperatorForageSchema = {};
+    const updateRepositoriesPieces = async () => {
+      const repositoryPiecesAux: PiecesRepository = {};
+      const foragePieces: PieceForageSchema = {};
       for (const repo of repositories) {
         fetchRepoById({ id: repo.id })
           .then((pieces: any) => {
-            repositoyOperatorsAux[repo.id] = [];
+            repositoryPiecesAux[repo.id] = [];
             for (const op of pieces) {
-              repositoyOperatorsAux[repo.id].push(op);
-              forageOperators[op.id] = op;
+              repositoryPiecesAux[repo.id].push(op);
+              foragePieces[op.id] = op;
             }
-            setRepositoryOperatos(repositoyOperatorsAux);
-            void localForage.setItem("pieces", forageOperators);
+            setRepositoryPieces(repositoryPiecesAux);
+            void localForage.setItem("pieces", foragePieces);
           })
           .catch((e) => {
             console.log(e);
           });
-        // Set piece item to storage -> {piece_id: Operator}
+        // Set piece item to storage -> {piece_id: Piece}
       }
     };
-    void updateRepositoriesOperators();
+    void updateRepositoriesPieces();
   }, [repositories, fetchRepoById]);
 
   useEffect(() => {
@@ -95,7 +92,7 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     repositories,
     repositoriesError,
     repositoriesLoading,
-    repositoryOperators,
+    repositoryPieces,
     search,
   };
 

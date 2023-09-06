@@ -4,7 +4,7 @@ import { type IWorkflowPieceData } from "context/workflows/types";
 
 import { getFromUpstream } from "./getFromUpstream";
 
-export const extractDefaultInputValues = (pieceSchema: PieceSchema) => {
+export const extractDefaultInputValues = (pieceSchema: Piece) => {
   const schema = pieceSchema.input_schema.properties;
   const definitions = pieceSchema.input_schema.definitions;
   const defaultData = extractDefaultValues(pieceSchema.input_schema);
@@ -80,7 +80,7 @@ export const extractDefaultInputValues = (pieceSchema: PieceSchema) => {
 };
 
 export const extractDefaultValues = (
-  schema: InputSchema,
+  schema: PieceSchema,
   output: any | null = null,
 ) => {
   output = output === null ? {} : output;

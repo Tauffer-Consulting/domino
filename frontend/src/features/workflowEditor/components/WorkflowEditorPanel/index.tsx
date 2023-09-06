@@ -160,7 +160,7 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
       setNodes((ns: Node[]) => ns.concat(newNode));
       const piece = await fetchForagePieceById(data.id);
       const defaultInputs = extractDefaultInputValues(
-        piece as unknown as PieceSchema,
+        piece as unknown as Piece,
       );
       const defaultContainerResources = extractDefaultValues(
         containerResourcesSchema as any,

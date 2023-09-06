@@ -1,11 +1,10 @@
 import HelpIcon from "@mui/icons-material/Help";
 import { Box, Typography, IconButton } from "@mui/material";
 import React, { type FC, useState } from "react";
-import { type IOperator } from "services/requests/piece";
 
 import PieceDocsPopover from "./pieceDocsPopover";
 
-const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
+const PiecesSidebarNode: FC<{ piece: Piece }> = ({ piece }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   // Drag and drop from sidebar to Workflow area
@@ -40,7 +39,7 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
         borderRadius: "5px",
       }}
       onDragStart={(event) => {
-        onDragStart(event, { nodeData: operator });
+        onDragStart(event, { nodeData: piece });
       }}
       draggable
     >
@@ -54,7 +53,7 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
             maxWidth: "180px",
           }}
         >
-          {operator?.name ?? "-"}
+          {piece?.name ?? "-"}
         </Typography>
 
         <IconButton sx={{ padding: 0 }} onClick={handlePopoverOpen}>
@@ -63,7 +62,7 @@ const PiecesSidebarNode: FC<{ operator: IOperator }> = ({ operator }) => {
       </div>
 
       <PieceDocsPopover
-        operator={operator}
+        piece={piece}
         popoverOpen={popoverOpen}
         handlePopoverClose={handlePopoverClose}
       />

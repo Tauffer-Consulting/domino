@@ -31,7 +31,7 @@ import TextField from "@mui/material/TextField";
 import { ERepositorySource } from "interfaces/repositorySource.enum";
 import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { type IOperatorRepositoryMetadata } from "services/requests/piece";
+import { type IPieceRepositoryMetadata } from "services/requests/piece";
 
 import { useWorkspaceSettings } from "../../context/workspaceSettings";
 
@@ -48,7 +48,7 @@ export const RepositoriesCard: FC = () => {
   const [version, setVersion] = useState("");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [availableVersions, setAvailableVersions] = useState<
-    IOperatorRepositoryMetadata[]
+    IPieceRepositoryMetadata[]
   >([]);
 
   const {
@@ -172,7 +172,7 @@ export const RepositoriesCard: FC = () => {
     [setSelectedRepositoryId, selectedRepositoryId],
   );
 
-  const handleDeleteOperatorRepository = useCallback(
+  const handleDeletePieceRepository = useCallback(
     (e: React.SyntheticEvent<HTMLButtonElement>) => {
       const repositoryId = e.currentTarget.value;
       handleDeleteRepository(repositoryId)
@@ -298,7 +298,7 @@ export const RepositoriesCard: FC = () => {
                 </IconButton>
                 <IconButton
                   value={repo.id}
-                  onClick={handleDeleteOperatorRepository}
+                  onClick={handleDeletePieceRepository}
                 >
                   <Tooltip title="Delete repository.">
                     <DeleteIcon />

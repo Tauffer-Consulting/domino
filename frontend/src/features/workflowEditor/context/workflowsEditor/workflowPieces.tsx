@@ -1,13 +1,12 @@
 import React, { useCallback } from "react";
 import localForage from "services/config/localForage.config";
-import { type IOperator } from "services/requests/piece";
 import { createCustomContext } from "utils";
 
 export interface IWorkflowPieceContext {
   setForageWorkflowPieces: (workflowPieces: any) => Promise<void>; // TODO add type
-  getForageWorkflowPieces: () => Promise<Record<string, IOperator>>; // TODO add type
+  getForageWorkflowPieces: () => Promise<Record<string, Piece>>; // TODO add type
   removeForageWorkflowPiecesById: (id: string) => Promise<void>;
-  fetchWorkflowPieceById: (id: string) => Promise<IOperator>; // TODO add type
+  fetchWorkflowPieceById: (id: string) => Promise<Piece>; // TODO add type
   clearForageWorkflowPieces: () => Promise<void>;
   setForageWorkflowPiecesOutputSchema: (
     id: string,

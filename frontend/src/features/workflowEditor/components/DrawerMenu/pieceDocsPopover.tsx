@@ -3,29 +3,28 @@ import DragHandleIcon from "@mui/icons-material/DragHandle";
 import { Popover, IconButton, Typography } from "@mui/material";
 import React from "react";
 import Draggable from "react-draggable";
-import { type IOperator, type IIOProperty } from "services/requests/piece";
 
 function renderPieceProperties(
-  operator: IOperator,
+  piece: Piece,
   key: "input_schema" | "output_schema" | "secrets_schema",
 ) {
-  const schema = operator[key];
-  const properties = schema?.properties || {};
+  const schema = piece[key];
+  const properties = schema?.properties ?? {};
   return Object.entries(properties).map(([key, value]) => {
-    const argument = value as IIOProperty;
-    let typeName: string = argument.type;
+    const argument = value;
+    let typeName: string = "allOf" in argument ? "enum" : argument.type;
     let valuesOptions: string[] = [];
 
-    if (argument.allOf && argument.allOf.length > 0) {
+    if ("allOf" in argument && argument.allOf.length > 0) {
       typeName = "enum";
-      const typeClass = argument.allOf[0].$ref.split("/").pop();
-      valuesOptions = schema?.definitions?.[typeClass].enum;
+      const typeClass = argument.allOf[0].$ref.split("/").pop() as string;
+      valuesOptions = (schema?.definitions?.[typeClass] as EnumDefinition).enum;
     }
 
     return (
       <Typography key={key} sx={{ padding: "0.5rem 1rem 0rem 1.5rem" }}>
         <strong>{key}</strong> [<em>{typeName}</em>] - {argument.description}
-        {argument.allOf && argument.allOf.length > 0 && (
+        {valuesOptions && valuesOptions.length > 0 && (
           <>
             {" Options: "}
             {valuesOptions.join(", ")}
@@ -37,7 +36,7 @@ function renderPieceProperties(
 }
 
 interface PieceDocsPopoverProps {
-  operator: IOperator;
+  piece: Piece;
   popoverOpen: boolean;
   handlePopoverClose: (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -46,7 +45,7 @@ interface PieceDocsPopoverProps {
 }
 
 const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
-  operator,
+  piece,
   popoverOpen,
   handlePopoverClose,
 }) => (
@@ -124,7 +123,7 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
             textAlign: "center",
           }}
         >
-          {operator.name}
+          {piece.name}
         </Typography>
         <div className="close-button">
           <IconButton
@@ -139,12 +138,12 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
       </div>
       <div className="popover-content">
         <Typography sx={{ padding: "1rem 1rem 0rem 1rem" }}>
-          {operator.description}
+          {piece.description}
         </Typography>
         <Typography sx={{ padding: "0rem 1rem 0rem 1rem" }}>
-          {operator.source_url ? (
+          {piece.source_url ? (
             <a
-              href={operator.source_url}
+              href={piece.source_url}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -163,7 +162,7 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
         >
           Input
         </Typography>
-        {renderPieceProperties(operator, "input_schema")}
+        {renderPieceProperties(piece, "input_schema")}
         <Typography
           sx={{
             padding: "1rem 1rem 0rem 1rem",
@@ -173,8 +172,8 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
         >
           Output
         </Typography>
-        {renderPieceProperties(operator, "output_schema")}
-        {operator.secrets_schema && (
+        {renderPieceProperties(piece, "output_schema")}
+        {piece.secrets_schema && (
           <Typography
             sx={{
               padding: "1rem 1rem 0rem 1rem",
@@ -185,8 +184,7 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
             Secrets
           </Typography>
         )}
-        {operator.secrets_schema &&
-          renderPieceProperties(operator, "secrets_schema")}
+        {piece.secrets_schema && renderPieceProperties(piece, "secrets_schema")}
       </div>
     </Popover>
   </Draggable>

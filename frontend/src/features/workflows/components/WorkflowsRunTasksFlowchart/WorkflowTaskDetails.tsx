@@ -6,7 +6,7 @@ import { type IWorkflowRunTasks } from "services/requests/runs";
 import { taskStatesColorMap } from "../../constants";
 
 interface IWorkflowRunTasksExtended extends IWorkflowRunTasks {
-  operatorName: string;
+  pieceName: string;
 }
 
 interface ITaskDetailsProps {
@@ -48,7 +48,7 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
           </ListItem>
           <ListItem sx={{ justifyContent: "space-between", marginTop: "10px" }}>
             <Typography variant="body1" color="text.secondary" fontWeight="500">
-              Operator:
+              Piece:
             </Typography>
             <Typography
               variant="body1"
@@ -56,7 +56,7 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
               color="text.secondary"
               fontWeight="500"
             >
-              {props.taskData.operatorName}
+              {props.taskData.pieceName}
             </Typography>
           </ListItem>
           <ListItem sx={{ justifyContent: "space-between", marginTop: "10px" }}>

@@ -2,19 +2,18 @@ import { useWorkspaces } from "context/workspaces";
 import { type FC, useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import {
-  type IGetOperatorsRepositoriesReleasesParams,
-  type IGetOperatorsRepositoriesReleasesResponseInterface,
-  type IOperatorRepository,
-  useAuthenticatedGetOperatorRepositories,
+  type IGetPiecesRepositoriesReleasesParams,
+  type IGetPiecesRepositoriesReleasesResponseInterface,
+  useAuthenticatedGetPieceRepositories,
 } from "services/requests/piece";
-import { useAuthenticatedGetOperatorRepositoriesReleases } from "services/requests/piece/getOperatorsRepositoriesReleases.request";
+import { useAuthenticatedGetPieceRepositoriesReleases } from "services/requests/piece/getPiecesRepositoriesReleases.request";
 import { useAuthenticatedDeleteRepository } from "services/requests/repository";
 import {
   type IPostWorkspaceRepositoryPayload,
   type IPostWorkspaceRepositoryResponseInterface,
   type IWorkspaceSummary,
   useAuthenticatedGetWorkspace,
-  useAuthenticatedPostOperatorsRepository,
+  useAuthenticatedPostPiecesRepository,
 } from "services/requests/workspaces";
 import { createCustomContext } from "utils";
 
@@ -26,7 +25,7 @@ interface IWorkspaceSettingsContext {
   workspaceDataLoading: boolean;
   handleRefreshWorkspaceData: () => void;
 
-  repositories: IOperatorRepository[];
+  repositories: PieceRepository[];
   repositoriesError: boolean;
   repositoriesLoading: boolean;
   handleRefreshRepositories: () => void;
@@ -36,13 +35,13 @@ interface IWorkspaceSettingsContext {
   ) => Promise<IPostWorkspaceRepositoryResponseInterface | unknown>;
 
   handleFetchRepoReleases: (
-    params: IGetOperatorsRepositoriesReleasesParams,
-  ) => Promise<IGetOperatorsRepositoriesReleasesResponseInterface>;
+    params: IGetPiecesRepositoriesReleasesParams,
+  ) => Promise<IGetPiecesRepositoriesReleasesResponseInterface>;
   handleDeleteRepository: (id: string) => Promise<any>;
   selectedRepositoryId: number | null;
   setSelectedRepositoryId: (id: number | null) => void;
 
-  defaultRepositories: IOperatorRepository[];
+  defaultRepositories: PieceRepository[];
   defaultRepositoriesError: boolean;
   defaultRepositoriesLoading: boolean;
   handleRefreshDefaultRepositories: () => void;
@@ -79,20 +78,20 @@ export const WorkspaceSettingsProvider: FC<IWorkspaceSettingsProviderProps> = ({
     error: repositoriesError,
     isValidating: repositoriesLoading,
     mutate: refreshRepositories,
-  } = useAuthenticatedGetOperatorRepositories({});
+  } = useAuthenticatedGetPieceRepositories({});
 
   const {
     data: defaultRepositories,
     error: defaultRepositoriesError,
     isValidating: defaultRepositoriesLoading,
     mutate: refreshDefaultRepositories,
-  } = useAuthenticatedGetOperatorRepositories({ source: "default" });
+  } = useAuthenticatedGetPieceRepositories({ source: "default" });
 
-  const postRepository = useAuthenticatedPostOperatorsRepository({
+  const postRepository = useAuthenticatedPostPiecesRepository({
     workspace: workspace?.id ?? "",
   });
   const handleFetchRepoReleases =
-    useAuthenticatedGetOperatorRepositoriesReleases();
+    useAuthenticatedGetPieceRepositoriesReleases();
   const handleDeleteRepository = useAuthenticatedDeleteRepository();
 
   // Handlers

@@ -4,19 +4,19 @@ import { useWorkspaces } from "context/workspaces";
 import { dominoApiClient } from "../../clients/domino.client";
 
 import {
-  type IGetOperatorsRepositoriesReleasesParams,
-  type IGetOperatorsRepositoriesReleasesResponseInterface,
-} from "./operator.interface";
+  type IGetPiecesRepositoriesReleasesParams,
+  type IGetPiecesRepositoriesReleasesResponseInterface,
+} from "./piece.interface";
 
 /**
- * Get operator repository releases using GET /pieces-repositories/releases
+ * Get Piece repository releases using GET /pieces-repositories/releases
  * @param token auth token (string)
- * @returns operator repository
+ * @returns Piece repository
  */
-const getOperatorsRepositoriesReleases: (
-  params: IGetOperatorsRepositoriesReleasesParams,
+const getPiecesRepositoriesReleases: (
+  params: IGetPiecesRepositoriesReleasesParams,
 ) => Promise<
-  AxiosResponse<IGetOperatorsRepositoriesReleasesResponseInterface>
+  AxiosResponse<IGetPiecesRepositoriesReleasesResponseInterface>
 > = async ({ source, path, workspaceId }) => {
   const search = new URLSearchParams();
   search.set("source", source);
@@ -31,10 +31,10 @@ const getOperatorsRepositoriesReleases: (
 };
 
 /**
- * Get releases for a given operator repository
+ * Get releases for a given Piece repository
  * @returns pieces repositories releases
  */
-export const useAuthenticatedGetOperatorRepositoriesReleases = () => {
+export const useAuthenticatedGetPieceRepositoriesReleases = () => {
   const { workspace } = useWorkspaces();
 
   if (!workspace)
@@ -42,8 +42,8 @@ export const useAuthenticatedGetOperatorRepositoriesReleases = () => {
       "Impossible to fetch pieces repositories without specifying a workspace",
     );
 
-  return async (params: IGetOperatorsRepositoriesReleasesParams) =>
-    await getOperatorsRepositoriesReleases({
+  return async (params: IGetPiecesRepositoriesReleasesParams) =>
+    await getPiecesRepositoriesReleases({
       ...params,
       workspaceId: workspace.id,
     }).then((data) => {

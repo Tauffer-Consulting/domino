@@ -27,7 +27,7 @@ export interface IWorkspaceDetails {
   workspace_name: string;
   github_access_token_filled: string;
   // users: { user_id: string, permission: string }[]
-  // operators_repositories: {
+  // Pieces_repositories: {
   //   repository_id: string
   //   repository_name: string
   //   repository_source: ERepositorySource | string

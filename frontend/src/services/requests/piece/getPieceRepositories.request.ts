@@ -4,9 +4,9 @@ import useSWR from "swr";
 
 import { dominoApiClient } from "../../clients/domino.client";
 
-import { type IGetOperatorsRepositoriesResponseInterface } from "./operator.interface";
+import { type IGetPiecesRepositoriesResponseInterface } from "./piece.interface";
 
-interface IGetOperatorRepositoryFilters {
+interface IGetPieceRepositoryFilters {
   page?: number;
   page_size?: number;
   name__like?: string;
@@ -15,9 +15,9 @@ interface IGetOperatorRepositoryFilters {
   source?: "github" | "default";
 }
 
-const getOperatorsRepositoriesUrl = (
+const getPiecesRepositoriesUrl = (
   workspace: string,
-  filters: IGetOperatorRepositoryFilters,
+  filters: IGetPieceRepositoryFilters,
 ) => {
   const query = new URLSearchParams();
   query.set("workspace_id", workspace);
@@ -28,18 +28,19 @@ const getOperatorsRepositoriesUrl = (
 };
 
 /**
- * Get operator using GET /pieces-repositories
- * @returns operator
+ * Get Piece using GET /pieces-repositories
+ * @returns Piece
  */
-const getOperatorsRepositories: (
+const getPiecesRepositories: (
   workspace: string,
-  filters: IGetOperatorRepositoryFilters,
-) => Promise<
-  AxiosResponse<IGetOperatorsRepositoriesResponseInterface>
-> = async (workspace, filters) => {
+  filters: IGetPieceRepositoryFilters,
+) => Promise<AxiosResponse<IGetPiecesRepositoriesResponseInterface>> = async (
+  workspace,
+  filters,
+) => {
   //
   return await dominoApiClient.get(
-    getOperatorsRepositoriesUrl(workspace, filters),
+    getPiecesRepositoriesUrl(workspace, filters),
   );
 };
 
@@ -47,8 +48,8 @@ const getOperatorsRepositories: (
  * Get pieces repositories for current workspace
  * @returns pieces repositories as swr response
  */
-export const useAuthenticatedGetOperatorRepositories = (
-  filters: IGetOperatorRepositoryFilters,
+export const useAuthenticatedGetPieceRepositories = (
+  filters: IGetPieceRepositoryFilters,
 ) => {
   const { workspace } = useWorkspaces();
 
@@ -57,13 +58,13 @@ export const useAuthenticatedGetOperatorRepositories = (
       "Impossible to fetch pieces repositories without specifying a workspace",
     );
 
-  const fetcher = async (filters: IGetOperatorRepositoryFilters) =>
-    await getOperatorsRepositories(workspace.id, filters).then(
+  const fetcher = async (filters: IGetPieceRepositoryFilters) =>
+    await getPiecesRepositories(workspace.id, filters).then(
       (data) => data.data,
     );
 
   return useSWR(
-    getOperatorsRepositoriesUrl(workspace.id, filters),
+    getPiecesRepositoriesUrl(workspace.id, filters),
     async () => await fetcher(filters),
     {
       revalidateOnFocus: false,

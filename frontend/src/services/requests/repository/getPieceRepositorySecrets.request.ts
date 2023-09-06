@@ -4,7 +4,7 @@ import useSWR from "swr";
 
 import { dominoApiClient } from "../../clients/domino.client";
 
-import { type IOperatorRepositorySecretsData } from "./operatorRepository.interface";
+import { type IPieceRepositorySecretsData } from "./pieceRepository.interface";
 
 interface IGetRepositorySecretsParams {
   repositoryId: string;
@@ -19,7 +19,7 @@ const getRepositorySecretsUrl = (repositoryId: string) =>
  */
 const getRepositorySecrets: (
   repositoryId: string,
-) => Promise<AxiosResponse<IOperatorRepositorySecretsData[]>> = async (
+) => Promise<AxiosResponse<IPieceRepositorySecretsData[]>> = async (
   repositoryId,
 ) => {
   return await dominoApiClient.get(getRepositorySecretsUrl(repositoryId));

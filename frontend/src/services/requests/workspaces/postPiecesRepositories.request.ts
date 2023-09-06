@@ -8,10 +8,10 @@ import {
 } from "./workspaces.interface";
 
 /**
- * Create workspacesidoperatorsrepositories using POST /workspacesidoperatorsrepositories
+ * Create workspacesidPiecesrepositories using POST /workspacesidPiecesrepositories
  * @returns ?
  */
-const postOperatorsRepository: (
+const postPiecesRepository: (
   params: IPostWorkspaceRepositoryParams,
 ) => Promise<AxiosResponse<IPostWorkspaceRepositoryResponseInterface>> = async (
   params,
@@ -20,18 +20,18 @@ const postOperatorsRepository: (
 };
 
 /**
- * Create authenticated workspacesidoperatorsrepositories
+ * Create authenticated workspacesidPiecesrepositories
  * @param params `{ id: string, data: Record<string, unknown> }``
- * @returns crate workspacesidoperatorsrepositories function
+ * @returns crate workspacesidPiecesrepositories function
  */
-export const useAuthenticatedPostOperatorsRepository = (params: {
+export const useAuthenticatedPostPiecesRepository = (params: {
   workspace: string;
 }) => {
   if (!params?.workspace)
     throw new Error("Impossible to add repositories without a workspace!");
 
   const fetcher = async (payload: IPostWorkspaceRepositoryPayload) =>
-    await postOperatorsRepository({
+    await postPiecesRepository({
       id: params.workspace,
       data: payload,
     }).then((data) => data.data);

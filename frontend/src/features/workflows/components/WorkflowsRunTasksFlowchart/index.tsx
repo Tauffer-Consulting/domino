@@ -98,7 +98,7 @@ export const WorkflowRunTaskFlowchart = () => {
               selectedWorkflow?.ui_schema?.nodes?.[task.task_id];
             nodeIdTaskMap[node.id] = {
               ...task,
-              operatorName: node?.data?.style?.label ?? node?.data?.name,
+              pieceName: node?.data?.style?.label ?? node?.data?.name,
             };
 
             const color =

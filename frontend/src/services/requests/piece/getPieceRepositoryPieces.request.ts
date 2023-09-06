@@ -3,9 +3,9 @@ import { useCallback } from "react";
 
 import { dominoApiClient } from "../../clients/domino.client";
 
-import { type IGetRepoOperatorsResponseInterface } from "./operator.interface";
+import { type IGetRepoPiecesResponseInterface } from "./piece.interface";
 
-interface IGetRepoOperatorsParams {
+interface IGetRepoPiecesParams {
   id: string;
 }
 
@@ -15,9 +15,9 @@ interface IGetRepoOperatorsParams {
  * @param id repo id
  * @returns pieces
  */
-const getRepoIdOperators: (args: {
-  params: IGetRepoOperatorsParams;
-}) => Promise<AxiosResponse<IGetRepoOperatorsResponseInterface>> = async ({
+const getRepoIdPieces: (args: {
+  params: IGetRepoPiecesParams;
+}) => Promise<AxiosResponse<IGetRepoPiecesResponseInterface>> = async ({
   params,
 }) => {
   return await dominoApiClient.get(`pieces-repositories/${params.id}/pieces`);
@@ -28,9 +28,9 @@ const getRepoIdOperators: (args: {
  * @param params `{ id: string }`
  * @returns pieces from repo
  */
-export const useFetchAuthenticatedGetRepoIdOperators = () => {
-  const fetcher = useCallback(async (params: IGetRepoOperatorsParams) => {
-    return await getRepoIdOperators({ params }).then((data) => data.data);
+export const useFetchAuthenticatedGetRepoIdPieces = () => {
+  const fetcher = useCallback(async (params: IGetRepoPiecesParams) => {
+    return await getRepoIdPieces({ params }).then((data) => data.data);
   }, []);
   return fetcher;
 };
