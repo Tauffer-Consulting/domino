@@ -58,7 +58,7 @@ const storageSourceOptions =
         },
         {
           label: "AWS S3",
-          value: "AWSS3",
+          value: "AWS S3",
         },
       ];
 
@@ -84,7 +84,7 @@ export const WorkflowSettingsFormSchema: ValidationSchema = yup.object().shape({
   }),
   storage: yup.object().shape({
     storageSource: yup.lazy((value) => {
-      if (value === storageSourcesAWS.AWSS3) {
+      if (value === storageSourcesAWS.AWS_S3) {
         return yup
           .mixed<StorageSourcesAWS>()
           .oneOf(Object.values(storageSourcesAWS))
@@ -248,7 +248,7 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
                   defaultValue={defaultSettingsData.storage.storageSource}
                 />
               </Grid>
-              {formData.storage.storageSource === storageSourcesAWS.AWSS3 ? (
+              {formData.storage.storageSource === storageSourcesAWS.AWS_S3 ? (
                 <>
                   <Grid item xs={12}>
                     <TextField
