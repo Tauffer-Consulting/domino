@@ -168,8 +168,20 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
         [],
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { storageSource, baseFolder, ...providerOptions } =
         workflowSettingsData.storage || {};
+
+      const workflowSharedStorage = {
+        source: storageSource,
+        ...(baseFolder !== "" ? { base_folder: baseFolder } : {}),
+        ...{ mode: elementData?.storage?.storageAccessMode },
+        provider_options: {
+          ...(providerOptions && providerOptions.bucket !== ""
+            ? { bucket: providerOptions.bucket }
+            : {}),
+        },
+      };
 
       const pieceInputKwargs = Object.entries(elementData.inputs).reduce<
         Record<string, any>
@@ -214,12 +226,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
         },
         dependencies,
         piece_input_kwargs: pieceInputKwargs,
-        workflow_shared_storage: {
-          source: storageSource,
-          base_folder: baseFolder,
-          mode: elementData?.storage?.storageAccessMode,
-          provider_options: providerOptions,
-        },
+        workflow_shared_storage: workflowSharedStorage,
         container_resources: {
           requests: {
             cpu: elementData.containerResources.cpu.min,
