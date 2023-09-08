@@ -3,6 +3,7 @@ import DatetimeInput from "components/DatetimeInput";
 import SelectInput from "components/SelectInput";
 import TextInput from "components/TextInput";
 import dayjs from "dayjs";
+import { useWorkflowsEditor } from "features/workflowEditor/context";
 import {
   type EndDateTypes,
   type IWorkflowSettings,
@@ -13,8 +14,7 @@ import {
   scheduleIntervals,
   storageSourcesAWS,
   storageSourcesLocal,
-} from "features/workflowEditor/context/types/settings";
-import { useWorkflowsEditor } from "features/workflowEditor/context/workflowsEditor";
+} from "features/workflowEditor/context/types";
 import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "utils";

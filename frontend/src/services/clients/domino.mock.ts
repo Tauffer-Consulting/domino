@@ -1,9 +1,8 @@
 import MockAdapter from "axios-mock-adapter";
-
 import {
   postAuthLoginMockResponse,
   postAuthRegisterMockResponse,
-} from "../requests/authentication";
+} from "context/authentication/api";
 
 import { dominoApiClient } from "./domino.client";
 

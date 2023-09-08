@@ -10,12 +10,9 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import {
-  postAuthLogin,
-  postAuthRegister,
-} from "services/requests/authentication";
 import { createCustomContext } from "utils";
 
+import { postAuthLogin, postAuthRegister } from "./api";
 import {
   type IAuthenticationContext,
   type IAuthenticationStore,

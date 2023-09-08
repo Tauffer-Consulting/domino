@@ -15,13 +15,13 @@ import {
   IconButton,
   Alert,
 } from "@mui/material";
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 import {
   useAuthenticatedGetRepositorySecrets,
   useAuthenticatedPatchRepositorySecret,
-} from "services/requests/repository";
+} from "features/workflows/api";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import { useWorkspaceSettings } from "../../context/workspaceSettings";
 

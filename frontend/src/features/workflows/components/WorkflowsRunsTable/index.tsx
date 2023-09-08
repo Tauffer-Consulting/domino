@@ -6,9 +6,8 @@ import {
   type GridRowId,
   GridActionsCellItem,
 } from "@mui/x-data-grid";
+import { useWorkflows } from "features/workflows/context/workflows";
 import { useMemo, useCallback, useState, useEffect } from "react";
-
-import { useWorkflows } from "../../context/workflows";
 
 export const WorkflowsRunsTable = () => {
   const [selectionModel, setSelectionModel] = useState<GridRowId[]>([]);

@@ -23,18 +23,9 @@ import {
   GridActionsCellItem,
   type GridRowId,
 } from "@mui/x-data-grid";
+import { useWorkflows } from "features/workflows/context/workflows";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-
-import { useWorkflows } from "../../context/workflows";
-
-// import { toast } from "react-toastify";
-
-// import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-// import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-// import ZoomInIcon from '@mui/icons-material/ZoomIn';
-
-// import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 
 export const WorkflowsTable = () => {
   const {
@@ -324,17 +315,27 @@ export const WorkflowsTable = () => {
 
   const { rowsData, totalRows } = useMemo(() => {
     const rowsData = Array.isArray(workflows.data)
-      ? workflows.data.map((workflow) => {
-          return {
-            id: workflow.id,
-            name: workflow.name,
-            createdAt: workflow.created_at,
-            lastModified: workflow.last_changed_at,
-            scheduleInterval: workflow.schedule_interval,
-            status: workflow.status,
-            paused: workflow.is_paused,
-          };
-        })
+      ? workflows.data.map(
+          (workflow: {
+            id: any;
+            name: any;
+            created_at: any;
+            last_changed_at: any;
+            schedule_interval: any;
+            status: any;
+            is_paused: any;
+          }) => {
+            return {
+              id: workflow.id,
+              name: workflow.name,
+              createdAt: workflow.created_at,
+              lastModified: workflow.last_changed_at,
+              scheduleInterval: workflow.schedule_interval,
+              status: workflow.status,
+              paused: workflow.is_paused,
+            };
+          },
+        )
       : [];
     const totalRows = workflows.metadata?.total ?? 0;
     return { rowsData, totalRows };

@@ -28,10 +28,10 @@ import {
   Tooltip,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import { type IPieceRepositoryMetadata } from "features/workflows/api";
 import { ERepositorySource } from "interfaces/repositorySource.enum";
 import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { type IPieceRepositoryMetadata } from "services/requests/piece";
 
 import { useWorkspaceSettings } from "../../context/workspaceSettings";
 

@@ -1,7 +1,8 @@
 import { type FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { createCustomContext } from "utils";
+
 import {
-  type IWorkspaceSummary,
   useAuthenticatedGetWorkspaces,
   useAuthenticatedPostWorkspaces,
   useAuthenticatedDeleteWorkspaces,
@@ -10,8 +11,8 @@ import {
   useAuthenticatedWorkspaceInvite,
   useAuthenticatedRemoveUserWorkspace,
   useAuthenticatedGetWorkspaceUsers,
-} from "services/requests/workspaces";
-import { createCustomContext } from "utils";
+} from "./api";
+import { type IWorkspaceSummary } from "./types/workspaces";
 
 interface IWorkspacesContext {
   workspaces: IWorkspaceSummary[];

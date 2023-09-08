@@ -1,12 +1,11 @@
 import { Button, Card, Grid, ButtonGroup, CardContent } from "@mui/material";
 import CustomNode from "components/CustomNode";
+import { taskStatesColorMap } from "features/workflows/constants";
+import { useWorkflows } from "features/workflows/context/workflows";
 import { useCallback, useRef, useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import ReactFlow, { Background, Controls, ReactFlowProvider } from "reactflow";
 import "reactflow/dist/style.css";
-
-import { taskStatesColorMap } from "../../constants";
-import { useWorkflows } from "../../context/workflows";
 
 import { TaskDetails } from "./WorkflowTaskDetails";
 import { TaskLogs } from "./WorkflowTaskLogs";
@@ -102,7 +101,7 @@ export const WorkflowRunTaskFlowchart = () => {
             };
 
             const color =
-              task.state in taskStatesColorMap
+              (task.state as string) in taskStatesColorMap
                 ? taskStatesColorMap[task.state]
                 : taskStatesColorMap.default;
             node.data.style.nodeStyle.backgroundColor = color;
@@ -127,7 +126,8 @@ export const WorkflowRunTaskFlowchart = () => {
       void fetchTasks();
       const interval = setInterval(() => {
         const workflowRun = workflowRuns?.data?.find(
-          (run) => run.workflow_run_id === selectedWorkflowRunId,
+          (run: { workflow_run_id: string }) =>
+            run.workflow_run_id === selectedWorkflowRunId,
         );
         // Fetch all tasks data
         fetchTasks()

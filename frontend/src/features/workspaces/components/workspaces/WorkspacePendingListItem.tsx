@@ -9,8 +9,8 @@ import {
   Grid,
 } from "@mui/material";
 import { useWorkspaces } from "context/workspaces";
+import { type IWorkspaceSummary } from "context/workspaces/types";
 import { type FC } from "react";
-import { type IWorkspaceSummary } from "services/requests/workspaces";
 
 export const WorkspacePendingListItem: FC<{
   workspace: IWorkspaceSummary;

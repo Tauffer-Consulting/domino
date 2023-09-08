@@ -9,7 +9,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { useWorkflowsEditor } from "features/workflowEditor/context/workflowsEditor";
+import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type FC, type SyntheticEvent, useState } from "react";
 
 import PiecesSidebarNode from "./sidebarNode";

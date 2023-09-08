@@ -1,10 +1,14 @@
 import CustomNode, { type INodeData } from "components/CustomNode";
+import { useWorkflowsEditor } from "features/workflowEditor/context";
 import {
   type IWorkflowPieceData,
   storageAccessModes,
 } from "features/workflowEditor/context/types";
-import { useWorkflowsEditor } from "features/workflowEditor/context/workflowsEditor";
 import { containerResourcesSchema } from "features/workflowEditor/schemas/containerResourcesSchemas";
+import {
+  extractDefaultInputValues,
+  extractDefaultValues,
+} from "features/workflowEditor/utils";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactFlow, {
   addEdge,
@@ -21,7 +25,6 @@ import ReactFlow, {
   // removeElements,
   type Node,
 } from "reactflow";
-import { extractDefaultValues, extractDefaultInputValues } from "utils";
 import { v4 as uuidv4 } from "uuid";
 
 import SidebarForm from "./sidebarForm";

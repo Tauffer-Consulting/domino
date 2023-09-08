@@ -15,10 +15,10 @@ import {
   IconButton,
 } from "@mui/material";
 import { useWorkspaces } from "context/workspaces";
+import { useAuthenticatedPatchWorkspace } from "context/workspaces/api";
 import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useAuthenticatedPatchWorkspace } from "services/requests/workspaces";
 
 import { useWorkspaceSettings } from "../../context/workspaceSettings";
 

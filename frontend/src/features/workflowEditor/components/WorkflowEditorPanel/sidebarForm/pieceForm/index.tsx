@@ -1,5 +1,5 @@
+import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
-import { useWorkflowsEditor } from "features/workflowEditor/context/workflowsEditor";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 

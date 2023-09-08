@@ -8,9 +8,9 @@ import {
   Button,
   Grid,
 } from "@mui/material";
+import { type IWorkspaceSummary } from "context/workspaces/types";
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { type IWorkspaceSummary } from "services/requests/workspaces";
 
 export const WorkspaceListItem: FC<{
   workspace: IWorkspaceSummary;

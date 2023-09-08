@@ -1,9 +1,8 @@
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import { Grid, List, ListItem, Chip, Typography } from "@mui/material";
-import { type IWorkflowRunTasks } from "services/requests/runs";
-
-import { taskStatesColorMap } from "../../constants";
+import { taskStatesColorMap } from "features/workflows/constants";
+import { type IWorkflowRunTasks } from "features/workflows/types/runs";
 
 interface IWorkflowRunTasksExtended extends IWorkflowRunTasks {
   pieceName: string;

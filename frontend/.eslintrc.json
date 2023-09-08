@@ -79,10 +79,37 @@
         "checksVoidReturn": false
       }
     ],
-    "@typescript-eslint/naming-convention": ["warn",{
-      "selector": "variable",
-      "format":["snake_case","camelCase", "PascalCase"]
-    }],
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        "selector": "variable",
+        "format": [
+          "camelCase",
+          "snake_case",
+          "PascalCase",
+          "UPPER_CASE"
+        ]
+      },
+      {
+        "selector": "function",
+        "format": [
+          "camelCase",
+          "PascalCase"
+        ]
+      },
+      {
+        "selector": "typeLike",
+        "format": [
+          "PascalCase"
+        ]
+      },
+      {
+        "selector": "enum",
+        "format":[
+          "camelCase"
+        ]
+      }
+    ],
     "prettier/prettier": [
       "error",
       {}

@@ -1,20 +1,22 @@
 import { useWorkspaces } from "context/workspaces";
-import { type FC, useCallback, useState } from "react";
-import { toast } from "react-toastify";
 import {
-  type IGetPiecesRepositoriesReleasesParams,
-  type IGetPiecesRepositoriesReleasesResponseInterface,
-  useAuthenticatedGetPieceRepositories,
-} from "services/requests/piece";
-import { useAuthenticatedGetPieceRepositoriesReleases } from "services/requests/piece/getPiecesRepositoriesReleases.request";
-import { useAuthenticatedDeleteRepository } from "services/requests/repository";
+  useAuthenticatedGetWorkspace,
+  useAuthenticatedPostPiecesRepository,
+} from "context/workspaces/api";
 import {
   type IPostWorkspaceRepositoryPayload,
   type IPostWorkspaceRepositoryResponseInterface,
   type IWorkspaceSummary,
-  useAuthenticatedGetWorkspace,
-  useAuthenticatedPostPiecesRepository,
-} from "services/requests/workspaces";
+} from "context/workspaces/types";
+import {
+  type IGetPiecesRepositoriesReleasesParams,
+  type IGetPiecesRepositoriesReleasesResponseInterface,
+  useAuthenticatedDeleteRepository,
+  useAuthenticatedGetPieceRepositories,
+  useAuthenticatedGetPieceRepositoriesReleases,
+} from "features/workflows/api";
+import { type FC, useCallback, useState } from "react";
+import { toast } from "react-toastify";
 import { createCustomContext } from "utils";
 
 interface IWorkspaceSettingsContext {

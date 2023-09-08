@@ -15,6 +15,10 @@ import {
   Tooltip,
 } from "@mui/material";
 import {
+  useAuthenticatedGetRepositorySecrets,
+  useAuthenticatedPatchRepositorySecret,
+} from "features/workflows/api";
+import {
   useState,
   useImperativeHandle,
   useCallback,
@@ -24,10 +28,6 @@ import {
 } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import {
-  useAuthenticatedGetRepositorySecrets,
-  useAuthenticatedPatchRepositorySecret,
-} from "services/requests/repository";
 
 interface SecretsCardProps {
   repositoryId: number | null;

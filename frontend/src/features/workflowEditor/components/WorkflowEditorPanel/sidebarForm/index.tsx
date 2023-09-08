@@ -7,8 +7,8 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
+import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
-import { useWorkflowsEditor } from "features/workflowEditor/context/workflowsEditor";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "utils";

@@ -11,6 +11,7 @@ import {
   type InputArray,
   type IWorkflowPieceData,
 } from "features/workflowEditor/context/types";
+import { getFromUpstream } from "features/workflowEditor/utils";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   type Control,
@@ -18,7 +19,6 @@ import {
   useFieldArray,
   useWatch,
 } from "react-hook-form";
-import { getFromUpstream } from "utils";
 
 import { type ArrayOption } from "../../pieceForm/upstreamOptions";
 

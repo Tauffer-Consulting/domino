@@ -3,11 +3,11 @@ export function fetchFromObject(obj: any, prop: string): any {
     return;
   }
 
-  const _index = prop.indexOf(".");
-  if (_index > -1) {
-    const newObj = obj[prop.substring(0, _index)];
+  const index = prop.indexOf(".");
+  if (index > -1) {
+    const newObj = obj[prop.substring(0, index)];
 
-    return fetchFromObject(newObj, prop.substr(_index + 1));
+    return fetchFromObject(newObj, prop.substr(index + 1));
   }
 
   return obj[prop];
