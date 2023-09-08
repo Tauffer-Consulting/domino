@@ -1,4 +1,4 @@
-import { CircularProgress } from "@mui/material";
+import Loading from "components/Loading";
 import {
   WorkspaceSettingsPage,
   WorkspacesPage,
@@ -31,14 +31,13 @@ const { WorkflowsPage } = lazyImport(
  * Application router
  * @todo implement recover password pages
  * @todo implement error (404, ...) pages
- * @todo lazy loading with React.Lazy and Suspense
  * @returns app router component
  */
 export const ApplicationRoutes: FC = () => (
   <Suspense
     fallback={
       <div className="h-full w-full flex items-center justify-center">
-        <CircularProgress size="xl" />
+        <Loading />
       </div>
     }
   >
