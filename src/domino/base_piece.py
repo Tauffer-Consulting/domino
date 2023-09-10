@@ -183,7 +183,7 @@ class BasePiece(metaclass=abc.ABCMeta):
                     file_path=self.display_result["file_path"],
                     file_type=self.display_result["file_type"]
                 )
-            self.display_result["file_path"] = str(self.display_result["file_path"])
+            self.display_result["file_path"] = str(self.display_result.get("file_path", None))
             self.display_result["file_type"] = str(self.display_result["file_type"])
             xcom_obj["display_result"] = self.display_result
 
