@@ -185,7 +185,14 @@ class BasePiece(metaclass=abc.ABCMeta):
                 )
             self.display_result["file_path"] = str(self.display_result.get("file_path", None))
             self.display_result["file_type"] = str(self.display_result["file_type"])
-            xcom_obj["display_result"] = self.display_result
+        else:
+            raw_content = f"Piece {self.__class__.__name__} did not return a valid display_result."
+            base64_content = base64.b64encode(raw_content.encode("utf-8")).decode("utf-8")
+            self.display_result = dict()
+            self.display_result["file_path"] = None
+            self.display_result["file_type"] = "txt"
+            self.display_result["base64_content"] = base64_content
+        xcom_obj["display_result"] = self.display_result
 
         # Update XCOM with extra metadata
         xcom_obj.update(
