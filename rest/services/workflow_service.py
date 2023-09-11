@@ -468,10 +468,11 @@ class WorkflowService(object):
                 else:
                     input_kwargs[input_key] = input_value['value']
             
-            workspace_storage_repository = self._get_storage_repository_from_tasks(tasks=tasks, workspace_id=workspace_id)
-            if workflow_shared_storage:
-                workflow_shared_storage['storage_repository_url'] = workspace_storage_repository.url if workspace_storage_repository else None
-                workflow_shared_storage['storage_repository_version'] = workspace_storage_repository.version if workspace_storage_repository else None
+            # workspace_storage_repository = self._get_storage_repository_from_tasks(tasks=tasks, workspace_id=workspace_id)
+            # if workflow_shared_storage:
+            #     ...
+                #workflow_shared_storage['storage_repository_url'] = workspace_storage_repository.url if workspace_storage_repository else None
+                #workflow_shared_storage['storage_repository_version'] = workspace_storage_repository.version if workspace_storage_repository else None
 
             piece_db = self.piece_repository.find_by_id(piece_request.get('id'))
             piece_repository_db = self.piece_repository_repository.find_by_id(piece_db.repository_id)

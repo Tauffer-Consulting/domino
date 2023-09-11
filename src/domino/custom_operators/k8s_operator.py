@@ -273,8 +273,9 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         storage_piece_secrets = {}
         if self.workflow_shared_storage.source != "local":
             storage_piece_secrets = self._get_piece_secrets(
-                piece_repository_id=self.workflow_shared_storage.storage_repository_id,
-                piece_name=self.workflow_shared_storage.default_piece_name,
+                repository_url="domino-default/default_storage_repository",
+                repository_version="0.0.1",
+                piece_name=self.workflow_shared_storage.storage_piece_name,
             )
         self.workflow_shared_storage.source = self.workflow_shared_storage.source.name
         sidecar_env_vars = {
@@ -311,14 +312,19 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         return pod_cp
 
 
-    def _get_piece_secrets(self) -> Dict[str, Any]:
+    def _get_piece_secrets(
+        self,
+        repository_url: str,
+        repository_version: str,
+        piece_name: str
+    ) -> Dict[str, Any]:
         """Get piece secrets values from Domino API"""
         piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
             params={
                 "workspace_id": self.workspace_id,
                 "filters": {
-                    "url": self.repository_url,
-                    "version": self.repository_version,
+                    "url": repository_url,
+                    "version": repository_version,
                 },
                 "page": 0,
                 "page_size": 1,
@@ -326,7 +332,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         ).json()
         secrets_response = self.domino_client.get_piece_secrets(
             piece_repository_id=piece_repository_data["data"][0]["id"],
-            piece_name=self.piece_name
+            piece_name=piece_name
         )
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
@@ -416,7 +422,11 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self._update_env_var_value_from_name(name='DOMINO_RUN_PIECE_KWARGS', value=str(domino_k8s_run_op_kwargs))
         
         # Add pieces secrets to environment variables
-        piece_secrets = self._get_piece_secrets()
+        piece_secrets = self._get_piece_secrets(
+            repository_url=self.repository_url,
+            repository_version=self.repository_version,
+            piece_name=self.piece_name,
+        )
         self.env_vars.append({
             "name": "DOMINO_PIECE_SECRETS",
             "value": str(piece_secrets),

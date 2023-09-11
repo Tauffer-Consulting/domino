@@ -25,14 +25,15 @@ class WorkflowSharedStorage(BaseModel):
         description="The access mode to the storage source.", 
         default="none"
     )
-    default_piece_name: str = Field(
+    storage_piece_name: str = Field(
         description="The name of the default piece to be used for the storage source.",
     )
 
 
+
 class LocalSharedStorage(WorkflowSharedStorage):
     source = StorageSource.local
-    default_piece_name: str = "LocalDefaultOperator" # TODO to be implemented
+    storage_piece_name: str = "LocalStoragePiece" # TODO to be implemented
 
 
 class AwsS3SharedStorage(WorkflowSharedStorage):
@@ -40,14 +41,12 @@ class AwsS3SharedStorage(WorkflowSharedStorage):
     bucket: str = Field(
         description="The name of the bucket to be used as the root of the storage source."
     )
-    default_piece_name: str = "AWSS3DefaultPiece"
+    storage_piece_name: str = "AWSS3StoragePiece"
     base_folder: str = Field(
         description="The base folder to be used as the root of the storage source.",
         default="",
     )
-    storage_repository_id: int = Field(
-        description="The id of the storage repository to be used as the root of the storage source.",
-    )
+
 
 
 shared_storage_map = {
