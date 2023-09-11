@@ -96,9 +96,9 @@ def get_registry_token_from_env():
 )
 @click.option(
     '--deploy-mode',
-    prompt='Development mode',
+    prompt='Deploy mode',
     default="local-k8s",
-    help='Development mode - either "local" or "remote". If local it will allow you to use hot reloading for local operators repositories'
+    help='Deploy mode - either "local" or "remote". If local it will allow you to use hot reloading for local operators repositories'
 )
 @click.option(
     '--local-pieces-repository-path',
