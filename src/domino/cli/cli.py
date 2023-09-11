@@ -137,16 +137,6 @@ def cli_prepare_platform(
 
 @click.command()
 @click.option(
-    "--domino-frontend-image", 
-    default=None,
-    help="Load a local Domino frontend image to cluster."
-)
-@click.option(
-    "--domino-rest-image", 
-    default=None,
-    help="Load a local Domino REST image to cluster."
-)
-@click.option(
     "--run-airflow", 
     default=True,
     help="Run Domino Airflow services."
@@ -158,9 +148,9 @@ def cli_prepare_platform(
     help="Allow the platform to use GPUs. It will install NVIDIA plugins.",
     default=False
 )
-def cli_create_platform(domino_frontend_image, domino_rest_image, run_airflow, use_gpu):
+def cli_create_platform(run_airflow, use_gpu):
     """Create cluster, install services and run Domino platform."""
-    platform.create_platform(domino_frontend_image, domino_rest_image, run_airflow, use_gpu)
+    platform.create_platform(run_airflow, use_gpu)
 
 
 @click.command()

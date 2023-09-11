@@ -70,6 +70,9 @@ def prepare_platform(
     config_dict['kind']['DOMINO_DEPLOY_MODE'] = deploy_mode
 
     if deploy_mode == 'local-k8s-dev':
+        config_dict['dev']['DOMINO_AIRFLOW_IMAGE'] = ""
+        config_dict['dev']['DOMINO_REST_IMAGE'] = ""
+        config_dict['dev']['DOMINO_FRONTEND_IMAGE'] = ""
         config_dict['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'] = local_domino_path
         for local_pieces_repository in local_pieces_repository_path:
             # Read repo config.toml to get repo name to map it to cluster path
@@ -102,7 +105,7 @@ def prepare_platform(
     console.print("")
 
 
-def create_platform(domino_frontend_image: str = None, domino_rest_image: str = None, run_airflow: bool = True, use_gpu: bool = False) -> None:
+def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
     # Load configuration values
     with open("config-domino-local.toml", "rb") as f:
         platform_config = tomli.load(f)
@@ -120,7 +123,9 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
 
     local_pieces_respositories = {key: value for key, value in platform_config['dev'].items() if key != "DOMINO_LOCAL_DOMINO_PACKAGE"}
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
-        #for repo_name, repo_path in platform_config['local_pieces_repositories'].items():
+        domino_airflow_image = platform_config['dev'].get('DOMINO_AIRFLOW_IMAGE', None)
+        domino_rest_image = platform_config['dev'].get('DOMINO_REST_IMAGE', None)
+        domino_frontend_image = platform_config['dev'].get('DOMINO_FRONTEND_IMAGE', None)
         for repo_name, repo_path in local_pieces_respositories.items():
             extra_mounts_local_repositories.append(
                 dict(
@@ -199,6 +204,13 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     subprocess.run(["kubectl", "wait", "--namespace", "ingress-nginx", "--for", "condition=ready", "pod", "--selector=app.kubernetes.io/component=controller", "--timeout=180s"])
 
     # Load images to Kind cluster
+    if domino_airflow_image:
+        console.print(f"Loading local Domino Airflow image {domino_airflow_image} to Kind cluster...")
+        subprocess.run(["kind", "load", "docker-image", domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
+        domino_airflow_image = f'docker.io/library/{domino_airflow_image}'
+    else:  
+        domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest" 
+
     if domino_frontend_image:
         console.print(f"Loading local frontend image {domino_frontend_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", domino_frontend_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
@@ -302,7 +314,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
             "images": {
                 "useDefaultImageForMigration": False,
                 "airflow": {
-                    "repository": "ghcr.io/tauffer-consulting/domino-airflow-base",
+                    "repository": domino_airflow_image,
                     "tag": "latest",
                     "pullPolicy": "IfNotPresent"
                 }
