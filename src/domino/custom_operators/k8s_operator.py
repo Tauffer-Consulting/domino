@@ -36,6 +36,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self.workspace_id = workspace_id
         self.piece_input_kwargs = piece_input_kwargs
         self.workflow_shared_storage = workflow_shared_storage
+        self.piece_source_image = k8s_operator_kwargs["image"]
 
         # Environment variables
         pod_env_vars = {
@@ -91,8 +92,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         all_volumes = []
         all_volume_mounts = []
       
-        source_image = self.piece.get('source_image')
-        repository_raw_project_name = str(source_image).split('/')[2].split(':')[0]
+        repository_raw_project_name = str(self.piece_source_image).split('/')[-1].split(':')[0]
         persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
 
         persistent_volume_name = 'pv-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
