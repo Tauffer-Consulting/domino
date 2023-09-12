@@ -146,7 +146,7 @@ export const SignUpPage: FC = () => {
             <LinkMui color="inherit" href="https://www.taufferconsulting.com/">
               Tauffer Consulting
             </LinkMui>
-            {" 2022."}
+            {" 2023."}
           </Typography>
         </FormProvider>
       </Box>
