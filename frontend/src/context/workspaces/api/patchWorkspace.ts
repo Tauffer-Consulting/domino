@@ -3,7 +3,7 @@ import { type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
 import { dominoApiClient } from "services/clients/domino.client";
 
-interface patchWorkspaceParams {
+interface PatchWorkspaceParams {
   workspaceId: string;
   payload: {
     name?: string | null;
@@ -18,7 +18,7 @@ const patchWorkspaceUrl = (workspaceId: string) => `/workspaces/${workspaceId}`;
  * @returns workflow run result
  */
 const patchWorkspace: (
-  params: patchWorkspaceParams,
+  params: PatchWorkspaceParams,
 ) => Promise<AxiosResponse> = async (params) => {
   return await dominoApiClient.patch(
     patchWorkspaceUrl(params.workspaceId),
@@ -38,7 +38,7 @@ export const useAuthenticatedPatchWorkspace = () => {
       "Impossible to run workflows without specifying a workspace",
     );
 
-  const fetcher = async (params: patchWorkspaceParams) =>
+  const fetcher = async (params: PatchWorkspaceParams) =>
     await patchWorkspace(params).then((data) => data);
 
   return fetcher;

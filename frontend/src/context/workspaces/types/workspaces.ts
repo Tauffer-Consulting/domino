@@ -1,7 +1,9 @@
-import { type ERepositorySource } from "interfaces/repositorySource.enum";
+export enum repositorySource {
+  github = "github",
+}
 
 // Workspace status enum with values (pending, accepted and rejected)
-export enum EWorkspaceStatus {
+export enum workspaceStatus {
   PENDING = "pending",
   ACCEPTED = "accepted",
   REJECTED = "rejected",
@@ -18,7 +20,7 @@ export interface IWorkspaceSummary {
   id: string;
   workspace_name: string;
   user_permission: string;
-  status: EWorkspaceStatus;
+  status: workspaceStatus;
   github_access_token_filled: boolean;
 }
 
@@ -42,7 +44,7 @@ export interface IGetWorkspaceUsersResponse {
       user_id: number;
       user_email: string;
       user_permission: string;
-      status: EWorkspaceStatus;
+      status: workspaceStatus;
     },
   ];
   metadata: IPaginationMetadata;
@@ -55,7 +57,7 @@ export type IPostWorkspaceRepositoryResponseInterface = Record<string, unknown>;
 
 export interface IPostWorkspaceRepositoryPayload {
   workspace_id: string;
-  source: ERepositorySource | string;
+  source: repositorySource | string;
   path: string;
   version: string;
   url: string;

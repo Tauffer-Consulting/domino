@@ -1,4 +1,4 @@
-import { type ERepositorySource } from "interfaces/repositorySource.enum";
+import { type repositorySource } from "context/workspaces/types";
 
 interface IPaginationMetadata {
   page: number;
@@ -38,7 +38,7 @@ export type IGetPiecesRepositoriesReleasesResponseInterface =
  * Get Pieces Repositories Releases request params
  */
 export interface IGetPiecesRepositoriesReleasesParams {
-  source: ERepositorySource;
+  source: repositorySource;
   path: string;
   workspaceId?: string;
 }

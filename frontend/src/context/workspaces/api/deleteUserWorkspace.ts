@@ -2,7 +2,7 @@
 import { type AxiosResponse } from "axios";
 import { dominoApiClient } from "services/clients/domino.client";
 
-interface removeUserWorkspaceParams {
+interface RemoveUserWorkspaceParams {
   workspaceId: string;
   userId: string;
 }
@@ -15,7 +15,7 @@ const removeUserWorkspaceUrl = (workspaceId: string, userId: string) =>
  * @returns workflow run result
  */
 const removeUserWorkspace: (
-  params: removeUserWorkspaceParams,
+  params: RemoveUserWorkspaceParams,
 ) => Promise<AxiosResponse> = async (params) => {
   return await dominoApiClient.delete(
     removeUserWorkspaceUrl(params.workspaceId, params.userId),
@@ -27,7 +27,7 @@ const removeUserWorkspace: (
  * @param params `{ id: string }`
  */
 export const useAuthenticatedRemoveUserWorkspace = () => {
-  const fetcher = async (params: removeUserWorkspaceParams) =>
+  const fetcher = async (params: RemoveUserWorkspaceParams) =>
     await removeUserWorkspace(params).then((data) => data);
 
   return fetcher;
