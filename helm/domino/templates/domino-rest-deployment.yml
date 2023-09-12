@@ -33,7 +33,7 @@ spec:
             - name: AIRFLOW_WEBSERVER_HOST
               value: http://{{ .Release.Name }}-airflow-webserver:8080
             - name: DOMINO_DEPLOY_MODE
-              value: local-k8s # TODO change to prod
+              value: {{ .Values.rest.deployMode }}
             - name: DOMINO_DB_HOST
               value: {{ .Release.Name }}-postgres-service
             - name: DOMINO_DB_NAME

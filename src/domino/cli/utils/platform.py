@@ -189,11 +189,21 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
 
     cluster_name = platform_config["kind"]["DOMINO_KIND_CLUSTER_NAME"]
     
-    # Create Kind cluster
+    # Delete previous Kind cluster
+    console.print("")
     console.print(f"Removing previous Kind cluster - {cluster_name}...")
-    subprocess.run(["kind", "delete", "cluster", "--name", cluster_name])
+    result = subprocess.run(["kind", "delete", "cluster", "--name", cluster_name], capture_output=True, text=True)
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception(f"An error occurred while deleting previous Kind cluster - {cluster_name}: {error_message}")
+    console.print("")
+
+    # Create new Kind cluster
     console.print(f"Creating new Kind cluster - {cluster_name}...")
-    subprocess.run(["kind", "create", "cluster", "--name", cluster_name, "--config", "kind-cluster-config.yaml"])
+    result = subprocess.run(["kind", "create", "cluster", "--name", cluster_name, "--config", "kind-cluster-config.yaml"])
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception(f"An error occurred while creating Kind cluster - {cluster_name}: {error_message}")
     console.print("")
     console.print("Kind cluster created successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
 
@@ -201,7 +211,12 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
     console.print("")
     console.print("Installing NGINX controller...")
     subprocess.run(["kubectl", "apply", "-f", "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"], stdout=subprocess.DEVNULL)
-    subprocess.run(["kubectl", "wait", "--namespace", "ingress-nginx", "--for", "condition=ready", "pod", "--selector=app.kubernetes.io/component=controller", "--timeout=180s"])
+    result = subprocess.run(["kubectl", "wait", "--namespace", "ingress-nginx", "--for", "condition=ready", "pod", "--selector=app.kubernetes.io/component=controller", "--timeout=180s"])
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception("An error occurred while installing NGINX controller: {error_message}")
+    console.print("NGINX controller installed successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+    console.print("")
 
     # Load images to Kind cluster
     if domino_airflow_image:
@@ -366,6 +381,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
                 "-f", str(fp.name),
                 "domino",
                 f"{tmp_dir}/domino",
+                # "/media/luiz/storage2/Github/domino/helm/domino"  # TODO: remove this line, only for local dev
             ]
             subprocess.run(commands)
 
@@ -533,7 +549,9 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
     console.print("K8s resources created successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
 
     console.print("You can now access the Domino frontend at: http://localhost/")
-    console.print("and the Backend API at: http://localhost/api/")
+    console.print("Domino's REST API: http://localhost/api/")
+    console.print("Domino's REST API Swagger: http://localhost/api/docs")
+    console.print("")
 
 
 def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False) -> None:
