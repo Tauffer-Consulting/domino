@@ -5,14 +5,14 @@ interface IPaginationMetadata {
   total: number;
 }
 
-enum RunState {
+enum runState {
   success = "success",
   failed = "failed",
   running = "running",
   queued = "queued",
 }
 
-enum TaskState {
+enum taskState {
   success = "success",
   running = "running",
   failed = "failed",
@@ -34,7 +34,7 @@ export interface IWorkflowRuns {
   start_date: string;
   end_date: string;
   execution_date: string;
-  state: RunState;
+  state: runState;
 }
 
 export interface IWorkflowRunTasks {
@@ -47,7 +47,7 @@ export interface IWorkflowRunTasks {
   docker_image: string;
   task_id: string;
   try_number: number;
-  state: TaskState;
+  state: taskState;
 }
 
 export interface IGetWorkflowRunsResponseInterface {

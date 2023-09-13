@@ -17,6 +17,11 @@
     "react",
     "prettier"
   ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "rules": {
     "no-restricted-imports": [
       "error",
@@ -105,7 +110,7 @@
       },
       {
         "selector": "enum",
-        "format":[
+        "format": [
           "camelCase"
         ]
       }
