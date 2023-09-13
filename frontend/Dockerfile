@@ -12,8 +12,7 @@ COPY --chown=node:node . /usr/src/app
 RUN mkdir -p node_modules/.cache
 RUN chmod -R 777 node_modules/.cache
 
-RUN yarn install
-# --frozen-lockfile --production
+RUN yarn install --frozen-lockfile
 RUN yarn cache clean
 
 USER node
