@@ -6,7 +6,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useWatch } from "react-hook-form";
 import { getDefinition } from "utils";
 
-import { type Option } from "../../pieceForm/upstreamOptions";
+import { type Option } from "../upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import SelectUpstreamInput from "./selectUpstreamInput";

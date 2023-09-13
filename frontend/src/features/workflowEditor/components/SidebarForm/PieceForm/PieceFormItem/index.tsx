@@ -9,7 +9,7 @@ import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
 import React, { useMemo } from "react";
 import { type Control, useWatch } from "react-hook-form";
 
-import { type ArrayOption, type Option } from "../../pieceForm/upstreamOptions";
+import { type ArrayOption, type Option } from "../upstreamOptions";
 
 import ArrayInput from "./arrayInput";
 import { disableCheckboxOptions } from "./disableCheckboxOptions";

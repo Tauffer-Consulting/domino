@@ -12,13 +12,13 @@ import { yupResolver } from "utils";
 import * as yup from "yup";
 
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
+import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
+import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
+import { storageFormSchema } from "./SidebarForm/StorageForm";
 import SidebarSettingsForm, {
   WorkflowSettingsFormSchema,
 } from "./SidebarSettingsForm";
 import WorkflowEditorPanelComponent from "./WorkflowEditorPanel";
-import { ContainerResourceFormSchema } from "./WorkflowEditorPanel/sidebarForm/containerResourceForm";
-import { createInputsSchemaValidation } from "./WorkflowEditorPanel/sidebarForm/pieceForm/validation";
-import { storageFormSchema } from "./WorkflowEditorPanel/sidebarForm/storageForm";
 /**
  * Create workflow tab
  // TODO refactor/simplify inner files

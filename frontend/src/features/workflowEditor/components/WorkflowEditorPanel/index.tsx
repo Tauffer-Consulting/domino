@@ -27,7 +27,7 @@ import ReactFlow, {
 } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
-import SidebarForm from "./sidebarForm";
+import SidebarForm from "../SidebarForm";
 /**
  * @todo When change the workspace should we clear the forage ?
  * @todo Solve any types
@@ -125,8 +125,10 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
   );
 
   // Drag and Drop functions
-  // @ts-expect-error: Unreachable code error
-  const onDragOver = (event) => {
+  const onDragOver = (event: {
+    preventDefault: () => void;
+    dataTransfer: { dropEffect: string };
+  }) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   };

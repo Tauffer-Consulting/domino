@@ -20,7 +20,7 @@ import {
   useWatch,
 } from "react-hook-form";
 
-import { type ArrayOption } from "../../pieceForm/upstreamOptions";
+import { type ArrayOption } from "../upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import ObjectInputComponent from "./objectInput";
