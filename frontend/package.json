@@ -51,7 +51,7 @@
     "yup": "^1.2.0"
   },
   "scripts": {
-    "start": "cross-env REACT_APP_API_ENV=dev react-scripts start",
+    "start": "cross-env REACT_APP_API_ENV=dev DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "start:local": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local react-scripts start",
     "start:mock": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local REACT_APP_USE_MOCK=true react-scripts start",
     "build": "cross-env react-scripts build",
