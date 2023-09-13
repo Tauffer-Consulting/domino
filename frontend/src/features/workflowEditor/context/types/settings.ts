@@ -19,7 +19,7 @@ export type EndDateTypes = `${endDateTypes}`;
 
 export enum storageSourcesAWS {
   None = "None",
-  AWSS3 = "AWS S3",
+  AWS_S3 = "AWS S3",
 }
 
 export type StorageSourcesAWS = `${storageSourcesAWS}`;

@@ -28,8 +28,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import { repositorySource } from "context/workspaces/types";
 import { type IPieceRepositoryMetadata } from "features/workflows/api";
-import { ERepositorySource } from "interfaces/repositorySource.enum";
 import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -118,7 +118,7 @@ export const RepositoriesCard: FC = () => {
         setIsStepLoading(true);
         handleFetchRepoReleases({
           path,
-          source: source as ERepositorySource,
+          source: source as repositorySource,
         })
           .then((data) => {
             setAvailableVersions(data.splice(0, 10));
@@ -213,7 +213,7 @@ export const RepositoriesCard: FC = () => {
             InputProps={{
               ...(!!url && {
                 startAdornment:
-                  source === ERepositorySource.github ? (
+                  source === repositorySource.github ? (
                     <GitHubIcon sx={{ mr: 1 }} />
                   ) : (
                     <FolderIcon sx={{ mr: 1 }} />
@@ -279,7 +279,7 @@ export const RepositoriesCard: FC = () => {
                 <ListItemAvatar>
                   <IconButton value={repo.id}>
                     <Avatar>
-                      {repo.source === ERepositorySource.github ? (
+                      {repo.source === repositorySource.github ? (
                         <GitHubIcon />
                       ) : (
                         <FolderIcon />
