@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from enum import Enum
 from pydantic import BaseModel, validator, Field
 from datetime import datetime
-from constants.default_pieces.storage import AWSS3DefaultPiece
+from constants.default_pieces.storage import AWSS3StoragePiece
 
 
 """
@@ -87,7 +87,7 @@ class WorkflowBaseSettings(BaseModel):
 
 storage_default_piece_model_map = {
     'none': None,
-    'aws_s3': AWSS3DefaultPiece
+    'aws_s3': AWSS3StoragePiece
 }
 
 class WorkflowSharedStorageSourceEnum(str, Enum):

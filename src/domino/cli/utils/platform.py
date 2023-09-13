@@ -70,6 +70,9 @@ def prepare_platform(
     config_dict['kind']['DOMINO_DEPLOY_MODE'] = deploy_mode
 
     if deploy_mode == 'local-k8s-dev':
+        config_dict['dev']['DOMINO_AIRFLOW_IMAGE'] = ""
+        config_dict['dev']['DOMINO_REST_IMAGE'] = ""
+        config_dict['dev']['DOMINO_FRONTEND_IMAGE'] = ""
         config_dict['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'] = local_domino_path
         for local_pieces_repository in local_pieces_repository_path:
             # Read repo config.toml to get repo name to map it to cluster path
@@ -102,7 +105,7 @@ def prepare_platform(
     console.print("")
 
 
-def create_platform(domino_frontend_image: str = None, domino_rest_image: str = None, run_airflow: bool = True, use_gpu: bool = False) -> None:
+def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
     # Load configuration values
     with open("config-domino-local.toml", "rb") as f:
         platform_config = tomli.load(f)
@@ -118,9 +121,13 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     )
     extra_mounts_local_repositories = []
 
+    if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
+        domino_airflow_image = platform_config['dev'].pop('DOMINO_AIRFLOW_IMAGE', None)
+        domino_rest_image = platform_config['dev'].pop('DOMINO_REST_IMAGE', None)
+        domino_frontend_image = platform_config['dev'].pop('DOMINO_FRONTEND_IMAGE', None)
+    
     local_pieces_respositories = {key: value for key, value in platform_config['dev'].items() if key != "DOMINO_LOCAL_DOMINO_PACKAGE"}
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
-        #for repo_name, repo_path in platform_config['local_pieces_repositories'].items():
         for repo_name, repo_path in local_pieces_respositories.items():
             extra_mounts_local_repositories.append(
                 dict(
@@ -184,11 +191,21 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
 
     cluster_name = platform_config["kind"]["DOMINO_KIND_CLUSTER_NAME"]
     
-    # Create Kind cluster
+    # Delete previous Kind cluster
+    console.print("")
     console.print(f"Removing previous Kind cluster - {cluster_name}...")
-    subprocess.run(["kind", "delete", "cluster", "--name", cluster_name])
+    result = subprocess.run(["kind", "delete", "cluster", "--name", cluster_name], capture_output=True, text=True)
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception(f"An error occurred while deleting previous Kind cluster - {cluster_name}: {error_message}")
+    console.print("")
+
+    # Create new Kind cluster
     console.print(f"Creating new Kind cluster - {cluster_name}...")
-    subprocess.run(["kind", "create", "cluster", "--name", cluster_name, "--config", "kind-cluster-config.yaml"])
+    result = subprocess.run(["kind", "create", "cluster", "--name", cluster_name, "--config", "kind-cluster-config.yaml"])
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception(f"An error occurred while creating Kind cluster - {cluster_name}: {error_message}")
     console.print("")
     console.print("Kind cluster created successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
 
@@ -196,9 +213,21 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     console.print("")
     console.print("Installing NGINX controller...")
     subprocess.run(["kubectl", "apply", "-f", "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"], stdout=subprocess.DEVNULL)
-    subprocess.run(["kubectl", "wait", "--namespace", "ingress-nginx", "--for", "condition=ready", "pod", "--selector=app.kubernetes.io/component=controller", "--timeout=180s"])
+    result = subprocess.run(["kubectl", "wait", "--namespace", "ingress-nginx", "--for", "condition=ready", "pod", "--selector=app.kubernetes.io/component=controller", "--timeout=180s"])
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception("An error occurred while installing NGINX controller: {error_message}")
+    console.print("NGINX controller installed successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+    console.print("")
 
     # Load images to Kind cluster
+    if domino_airflow_image:
+        console.print(f"Loading local Domino Airflow image {domino_airflow_image} to Kind cluster...")
+        subprocess.run(["kind", "load", "docker-image", domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
+        domino_airflow_image = f'docker.io/library/{domino_airflow_image}'
+    else:  
+        domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest" 
+
     if domino_frontend_image:
         console.print(f"Loading local frontend image {domino_frontend_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", domino_frontend_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
@@ -302,7 +331,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
             "images": {
                 "useDefaultImageForMigration": False,
                 "airflow": {
-                    "repository": "ghcr.io/tauffer-consulting/domino-airflow-base",
+                    "repository": domino_airflow_image,
                     "tag": "latest",
                     "pullPolicy": "IfNotPresent"
                 }
@@ -354,6 +383,7 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
                 "-f", str(fp.name),
                 "domino",
                 f"{tmp_dir}/domino",
+                # "/media/luiz/storage2/Github/domino/helm/domino"  # TODO: remove this line, only for local dev
             ]
             subprocess.run(commands)
 
@@ -521,7 +551,9 @@ def create_platform(domino_frontend_image: str = None, domino_rest_image: str = 
     console.print("K8s resources created successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
 
     console.print("You can now access the Domino frontend at: http://localhost/")
-    console.print("and the Backend API at: http://localhost/api/")
+    console.print("Domino's REST API: http://localhost/api/")
+    console.print("Domino's REST API Swagger: http://localhost/api/docs")
+    console.print("")
 
 
 def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False) -> None:

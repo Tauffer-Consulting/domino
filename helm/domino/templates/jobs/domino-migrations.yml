@@ -12,6 +12,7 @@ spec:
       containers:
       - name: database-migrations
         image: {{ .Values.rest.image }}
+        imagePullPolicy: IfNotPresent
         command: ["/bin/bash"]
         args: ["run_migrations.sh"]   # will sleep for 20 seconds, run migrations and create first user
         env:

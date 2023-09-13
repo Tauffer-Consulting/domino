@@ -20,12 +20,12 @@ spec:
           image: {{ .Values.frontend.image }}
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - containerPort: 3000 #80
           {{- if .Values.frontend.entrypointCommand }}
           command:
             {{ toYaml .Values.frontend.entrypointCommand | indent 12 }}
           args:
-            ["-c","yarn start:local"]
+            ["-c","yarn start"]
           {{- end }}
           env:
             - name: REACT_APP_API_URL
@@ -49,7 +49,7 @@ spec:
     app: {{ .Release.Name }}-frontend
   ports:
   - port: 80
-    #targetPort: 3000
+    targetPort: 3000
     #nodePort: 30030
   #type: NodePort
 {{- end}}
