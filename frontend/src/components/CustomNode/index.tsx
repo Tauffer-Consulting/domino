@@ -1,7 +1,11 @@
 /* eslint-disable no-prototype-builtins */
-import { memo } from "react";
-import { Handle, Position } from "reactflow";
+import { Paper, Typography } from "@mui/material";
+import theme from "providers/theme.config";
+import React, { memo, useMemo, useState } from "react";
+import { Position, type NodeProps } from "reactflow";
 import { getUuidSlice } from "utils";
+
+import CustomHandle from "./Handle";
 
 interface IStyleData {
   iconClassName: string;
@@ -23,137 +27,188 @@ export interface INodeData {
   error: boolean;
 }
 
-/**
- * @todo make it work
- */
-const CustomNode = memo((data: any) => {
-  const extendedData = data.data;
+interface CustomNodeProps extends NodeProps {
+  data: INodeData;
+}
 
-  const dominoReactflowClassTypeMap: any = {
-    source: "input",
-    default: "default",
-    sink: "output",
-  };
-  let extendedClassExt = "";
-  if (
-    extendedData?.style.nodeType === undefined ||
-    !["default", "source", "sink"].includes(extendedData?.style.nodeType)
-  ) {
-    extendedClassExt = "default";
-  } else {
-    extendedClassExt =
-      dominoReactflowClassTypeMap[extendedData?.style.nodeType];
-  }
-  const extendedClass = `react-flow__node-${extendedClassExt}`;
-  // Handle render definition
-  const nodeTypeRenderHandleMap: any = {
-    input: {
-      renderTargetHandle: false,
-      renderSourceHandle: true,
-    },
-    output: {
-      renderTargetHandle: true,
-      renderSourceHandle: false,
-    },
-    default: {
-      renderTargetHandle: true,
-      renderSourceHandle: true,
-    },
-  };
+const CustomNode = memo(
+  ({ id, data: extendedData, selected }: CustomNodeProps) => {
+    const [hovered, setHovered] = useState(false);
 
-  let targetHandlePosition = Position.Top;
-  let sourceHandlePosition = Position.Bottom;
-  if (extendedData?.handleOriantation === "horizontal") {
-    targetHandlePosition = Position.Left;
-    sourceHandlePosition = Position.Right;
-  }
+    const extendedClassExt = useMemo(() => {
+      const dominoReactflowClassTypeMap: any = {
+        source: "input",
+        default: "default",
+        sink: "output",
+      };
+      if (
+        extendedData?.style.nodeType === undefined ||
+        !["default", "source", "sink"].includes(extendedData?.style.nodeType)
+      ) {
+        return "default";
+      } else {
+        return dominoReactflowClassTypeMap[extendedData?.style.nodeType];
+      }
+    }, [extendedData]);
 
-  // // Icon
-  const useIcon = !!extendedData?.style?.useIcon;
-  const iconId =
-    useIcon && extendedData?.style?.hasOwnProperty("iconId")
-      ? extendedData?.style?.iconId
-      : "";
-  const iconClass =
-    useIcon && extendedData?.style?.hasOwnProperty("iconClassName")
-      ? extendedData.style.iconClassName
-      : "fas fa-eye";
-  const iconStyle =
-    useIcon && extendedData?.style?.hasOwnProperty("iconStyle")
-      ? extendedData.style.iconStyle
-      : {};
+    const extendedClass = useMemo(() => {
+      return `react-flow__node-${extendedClassExt}`;
+    }, [extendedClassExt]);
 
-  // // Style
-  let customStyle: any = {
-    display: "flex",
-    flexDirection: "row-reverse",
-    justifyContent: useIcon ? "left" : "center",
-    alignItems: "center",
-  };
-  if (extendedData?.style.hasOwnProperty("nodeStyle")) {
-    customStyle = Object.assign(customStyle, extendedData.style.nodeStyle);
-  }
+    const nodeTypeRenderHandleMap = useMemo(
+      () =>
+        ({
+          input: {
+            renderTargetHandle: false,
+            renderSourceHandle: true,
+          },
+          output: {
+            renderTargetHandle: true,
+            renderSourceHandle: false,
+          },
+          default: {
+            renderTargetHandle: true,
+            renderSourceHandle: true,
+          },
+        }) as any,
+      [],
+    );
 
-  if (extendedData?.error) {
-    customStyle = Object.assign(customStyle, {
-      backgroundColor: "#f44336",
-      color: "#e6e6e6",
-    });
-  }
+    const { targetHandlePosition, sourceHandlePosition } = useMemo(() => {
+      return extendedData?.handleOriantation === "horizontal"
+        ? {
+            targetHandlePosition: Position.Left,
+            sourceHandlePosition: Position.Right,
+          }
+        : {
+            targetHandlePosition: Position.Top,
+            sourceHandlePosition: Position.Bottom,
+          };
+    }, [extendedData]);
 
-  return (
-    <div className={extendedClass} style={customStyle}>
-      {nodeTypeRenderHandleMap[extendedClassExt].renderSourceHandle ? (
-        <Handle
-          type="source"
-          id={`$handle-source-${data.id}`}
-          position={sourceHandlePosition}
-          style={{
-            width: "10px",
-            height: "10px",
-            border: "1px solid black",
-            backgroundColor: "white",
-          }}
-        />
-      ) : (
-        ""
-      )}
-      <div id={data.id} style={{ fontWeight: 500 }}>
-        {extendedData?.style?.label
-          ? extendedData?.style?.label
-          : extendedData?.name}
-        <p style={{ fontSize: 10, margin: 0, color: "#4E4E56" }}>
-          {getUuidSlice(data.id)}
-        </p>
+    const { useIcon, iconId, iconClass, iconStyle } = useMemo(() => {
+      const useIcon = !!extendedData?.style?.useIcon;
+      const iconId =
+        useIcon && extendedData?.style?.hasOwnProperty("iconId")
+          ? extendedData?.style?.iconId
+          : "";
+      const iconClass =
+        useIcon && extendedData?.style?.hasOwnProperty("iconClassName")
+          ? extendedData.style.iconClassName
+          : "fas fa-eye";
+      let iconStyle: React.CSSProperties = {
+        position: "absolute",
+        left: "4px",
+      };
+
+      if (useIcon && extendedData?.style?.hasOwnProperty("iconStyle")) {
+        iconStyle = { ...iconStyle, ...extendedData.style.iconStyle };
+      }
+
+      return {
+        useIcon,
+        iconId,
+        iconClass,
+        iconStyle,
+      };
+    }, [extendedData]);
+
+    const customStyle = useMemo(() => {
+      let style: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+
+        position: "relative",
+
+        height: 60,
+        lineHeight: "60px",
+        border: selected ? "2px" : "",
+        borderStyle: selected ? "solid" : "",
+        borderColor: selected ? theme.palette.info.dark : "",
+        borderRadius: selected ? "3px" : "",
+      };
+
+      if (extendedData?.style.hasOwnProperty("nodeStyle")) {
+        console.log(
+          "extendedData.style.nodeStyle",
+          extendedData.style.nodeStyle,
+        );
+        style = Object.assign(style, extendedData.style.nodeStyle);
+      }
+
+      if (extendedData?.error) {
+        style = Object.assign(style, {
+          backgroundColor: theme.palette.error.light,
+          color: theme.palette.background.paper,
+        });
+      }
+
+      return style;
+    }, [selected, extendedData]);
+
+    return (
+      <div
+        style={{ padding: 40 }}
+        onMouseEnter={() => {
+          setHovered(true);
+        }}
+        onMouseLeave={() => {
+          setHovered(false);
+        }}
+      >
+        {nodeTypeRenderHandleMap[extendedClassExt].renderTargetHandle ? (
+          <CustomHandle
+            hovered={hovered}
+            type="target"
+            id={`$handle-target-${id}`}
+            position={targetHandlePosition}
+          />
+        ) : null}
+        <Paper
+          id={id}
+          elevation={selected ? 12 : 3}
+          className={extendedClass}
+          style={customStyle}
+        >
+          {useIcon ? (
+            <span id={iconId} style={iconStyle}>
+              <i className={iconClass} />
+            </span>
+          ) : null}
+          <div style={{ marginLeft: "4px" }}>
+            <Typography
+              component="div"
+              variant="h5"
+              style={{ fontSize: 12 }}
+              fontWeight={500}
+            >
+              {extendedData?.style?.label
+                ? extendedData?.style?.label
+                : extendedData?.name}
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              color="text.secondary"
+              style={{ fontSize: 10 }}
+            >
+              {getUuidSlice(id)}
+            </Typography>
+          </div>
+        </Paper>
+        {nodeTypeRenderHandleMap[extendedClassExt].renderSourceHandle ? (
+          <CustomHandle
+            hovered={hovered}
+            type="source"
+            id={`$handle-source-${id}`}
+            position={sourceHandlePosition}
+          />
+        ) : null}
       </div>
-      {useIcon ? (
-        <div style={{ marginRight: "10px" }}>
-          <span id={iconId} style={iconStyle}>
-            <i className={iconClass} />
-          </span>
-        </div>
-      ) : (
-        ""
-      )}
-      {nodeTypeRenderHandleMap[extendedClassExt].renderTargetHandle ? (
-        <Handle
-          type="target"
-          id={`$handle-target-${data.id}`}
-          position={targetHandlePosition}
-          style={{
-            width: "8px",
-            height: "16px",
-            borderRadius: "0px",
-            border: "1px solid black",
-            backgroundColor: "white",
-          }}
-        />
-      ) : (
-        ""
-      )}
-    </div>
-  );
-});
+    );
+  },
+);
 
 CustomNode.displayName = "CustomNode";
 
