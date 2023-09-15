@@ -1,4 +1,5 @@
-import CustomNode, { type INodeData } from "components/CustomNode";
+import { type INodeData } from "components/CustomNode";
+import WorkflowPanel from "components/ReactFlow";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import {
   type IWorkflowPieceData,
@@ -9,22 +10,8 @@ import {
   extractDefaultInputValues,
   extractDefaultValues,
 } from "features/workflowEditor/utils";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import ReactFlow, {
-  addEdge,
-  Background,
-  Controls,
-  ReactFlowProvider,
-  type NodeChange,
-  type EdgeChange,
-  applyNodeChanges,
-  applyEdgeChanges,
-  type Connection,
-  type Edge,
-  MarkerType,
-  // removeElements,
-  type Node,
-} from "reactflow";
+import React, { type DragEvent, useCallback, useEffect, useState } from "react";
+import { type XYPosition, type Edge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
 import SidebarForm from "../SidebarForm";
@@ -32,11 +19,6 @@ import SidebarForm from "../SidebarForm";
  * @todo When change the workspace should we clear the forage ?
  * @todo Solve any types
  */
-
-// Load CustomNode
-const nodeTypes = {
-  CustomNode,
-};
 
 // @ts-expect-error: Unreachable code error
 const getId = (module_name) => {
@@ -53,13 +35,10 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
   const [formTitle, setFormTitle] = useState<string>("");
   const [drawerState, setDrawerState] = useState(false);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
-  const reactFlowWrapper = useRef(null);
 
   const {
     nodeDirection,
-    edges,
     setEdges,
-    nodes,
     setNodes,
     fetchForagePieceById,
     fetchForageWorkflowNodes,
@@ -114,38 +93,15 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
       const workflowNodes = await fetchForageWorkflowNodes();
       const workflowEdges = await fetchForageWorkflowEdges();
 
-      if (workflowNodes.length > 0) {
-        setNodes(workflowNodes);
-      }
-      if (workflowEdges.length > 0) {
-        setEdges(workflowEdges);
-      }
+      return { nodes: workflowNodes, edges: workflowEdges };
     },
     [setNodes, setEdges, fetchForageWorkflowNodes, fetchForageWorkflowEdges],
   );
 
-  // Drag and Drop functions
-  const onDragOver = (event: {
-    preventDefault: () => void;
-    dataTransfer: { dropEffect: string };
-  }) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-  };
-
   const onDrop = useCallback(
-    async (event: any) => {
+    async (event: DragEvent<HTMLDivElement>, position: XYPosition) => {
       event.preventDefault();
-
-      // @ts-expect-error: Unreachable code error
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
       const nodeData = event.dataTransfer.getData("application/reactflow");
-      // @ts-expect-error: Unreachable code error
-      const position = reactFlowInstance.project({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      });
-
       const { ...data } = JSON.parse(nodeData);
 
       const newNodeData: INodeData = {
@@ -162,7 +118,6 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
         data: newNodeData,
       };
 
-      setNodes((ns: Node[]) => ns.concat(newNode));
       const piece = await fetchForagePieceById(data.id);
       const defaultInputs = extractDefaultInputValues(
         piece as unknown as Piece,
@@ -185,6 +140,7 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
       };
 
       await setForageWorkflowPiecesData(newNode.id, defaultWorkflowPieceData);
+      return newNode;
     },
     [
       fetchForagePieceById,
@@ -208,41 +164,6 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
     }
     setDrawerState(open);
   };
-
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      setNodes((nds: Node[]) => applyNodeChanges(changes, nds));
-    },
-    [setNodes],
-  );
-
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => {
-      setEdges((eds: Edge[]) => applyEdgeChanges(changes, eds));
-    },
-    [setEdges],
-  );
-
-  // Connecting elements
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      setEdges((prevEdges: Edge[]) => {
-        const newEdges = addEdge(connection, prevEdges);
-        newEdges.forEach((edge: Edge) => {
-          edge.markerEnd = {
-            type: MarkerType.ArrowClosed,
-            width: 30,
-            height: 30,
-            color: "#6a6a6e",
-          };
-          edge.animated = false;
-        });
-
-        return newEdges;
-      });
-    },
-    [setEdges],
-  );
 
   const setNodeErrors = useCallback(
     (nodeIds: string[]) => {
@@ -277,31 +198,18 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
   }, [nodesWithErros, setNodeErrors]);
 
   return (
-    <ReactFlowProvider>
-      <div
-        className="reactflow-wrapper"
-        ref={reactFlowWrapper}
-        style={{ height: 600 }}
-      >
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onConnect={onConnect}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
+    <>
+      <div style={{ height: 750 }}>
+        <WorkflowPanel
+          editable={true}
           onNodeDoubleClick={onNodeDoubleClick}
           onNodesDelete={onNodesDelete}
           onEdgesDelete={onEdgesDelete}
-          deleteKeyCode={["Delete", "Backspace"]} /* 'delete'-key */
           onInit={onLoad}
           onDrop={onDrop}
-          onDragOver={onDragOver}
-          nodeTypes={nodeTypes}
-        >
-          <Controls />
-          <Background color="#aaa" gap={16} />
-        </ReactFlow>
+        />
       </div>
+
       <SidebarForm
         schema={formSchema}
         formId={formId}
@@ -309,7 +217,7 @@ const WorkflowEditorPanelComponent = ({ nodesWithErros }: Props) => {
         open={drawerState}
         title={formTitle}
       />
-    </ReactFlowProvider>
+    </>
   );
 };
 
