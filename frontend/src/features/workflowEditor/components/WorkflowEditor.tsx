@@ -94,7 +94,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
       const data = await workflowsEditorBodyFromFlowchart();
 
-      // TODO fill workspace id correctly
       await handleCreateWorkflow({ workspace_id: workspace?.id, ...data });
 
       toast.success("Workflow created successfully.");

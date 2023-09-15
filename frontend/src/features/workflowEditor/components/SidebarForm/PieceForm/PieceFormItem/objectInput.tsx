@@ -75,7 +75,7 @@ const ObjectInputComponent: React.FC<Prop> = ({
 
   return (
     <>
-      {Object.entries(defaultValues).map(([key, value]) => {
+      {Object.entries(defaultValues).map(([key]) => {
         const fromUpstream = isFromUpstream(key);
         const disableUpstream = disableCheckboxOptions(itensSchema[key] as any);
         return (

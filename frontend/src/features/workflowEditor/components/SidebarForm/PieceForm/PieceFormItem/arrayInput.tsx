@@ -36,7 +36,6 @@ interface ArrayInputItemProps {
 }
 
 const ArrayInput: React.FC<ArrayInputItemProps> = ({
-  formId,
   inputKey,
   schema,
   upstreamOptions,

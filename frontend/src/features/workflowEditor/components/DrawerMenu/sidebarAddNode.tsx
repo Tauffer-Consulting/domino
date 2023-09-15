@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type FC, type SyntheticEvent, useState } from "react";
+import { type FC, useState } from "react";
 
 import PiecesSidebarNode from "./sidebarNode";
 
@@ -86,7 +86,7 @@ const SidebarAddNode: FC = () => {
             TransitionProps={{ unmountOnExit: true }}
             expanded={expandedRepos.includes(repo.id)}
             key={repo.id}
-            onChange={(event: SyntheticEvent, expanded: boolean) => {
+            onChange={() => {
               if (loadingPieces) return;
               setLoadingPieces(repo.id);
 
