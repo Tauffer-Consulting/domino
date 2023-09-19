@@ -94,10 +94,8 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
       
         repository_raw_project_name = str(self.piece_source_image).split('/')[-1].split(':')[0]
         persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-
         persistent_volume_name = 'pv-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-        persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-
+        
         pvc_exists = False
         try:
             k8s_client.read_namespaced_persistent_volume_claim(name=persistent_volume_claim_name, namespace='default')

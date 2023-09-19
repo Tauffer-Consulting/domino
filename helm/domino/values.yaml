@@ -24,35 +24,34 @@ database:
   name: postgres
   user: postgres
   password: postgres
+# # Airflow services override
+# airflow:
+#   enabled: true
+#   env: [{ "name": DOMINO_DEPLOY_MODE, "value": prod }]
+#   images:
+#     useDefaultImageForMigration: false
+#     airflow:
+#       repository: ghcr.io/tauffer-consulting/domino-airflow-base
+#       tag: latest
+#       pullPolicy: IfNotPresent
 
-# Airflow services override
-airflow:
-  enabled: true
-  env: [{ "name": DOMINO_DEPLOY_MODE, "value": prod }]
-  images:
-    useDefaultImageForMigration: false
-    airflow:
-      repository: ghcr.io/tauffer-consulting/domino-airflow-base
-      tag: latest
-      pullPolicy: IfNotPresent
+#   extraSecrets:
+#     airflow-ssh-secret:
+#       # github ssh private deploy key for workflow repository
+#       data: |
+#         gitSshKey: default-substitute-this-for-your-own-key
 
-  extraSecrets:
-    airflow-ssh-secret:
-      # github ssh private deploy key for workflow repository
-      data: |
-        gitSshKey: default-substitute-this-for-your-own-key
+#   config:
+#     api:
+#       auth_backends: airflow.api.auth.backend.basic_auth
 
-  config:
-    api:
-      auth_backends: airflow.api.auth.backend.basic_auth
-
-  # Git sync
-  dags:
-    gitSync:
-      enabled: true
-      wait: 60 # interval between git sync attempts in seconds
-      # Github workflows reposiory ssh path
-      repo: ~
-      branch: main
-      subPath: "workflows"
-      sshKeySecret: airflow-ssh-secret
+#   # Git sync
+#   dags:
+#     gitSync:
+#       enabled: true
+#       wait: 60 # interval between git sync attempts in seconds
+#       # Github workflows reposiory ssh path
+#       repo: ~
+#       branch: main
+#       subPath: "workflows"
+#       sshKeySecret: airflow-ssh-secret
