@@ -266,6 +266,20 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
     token_pieces = platform_config["github"]["DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"]
     token_workflows = platform_config["github"]["DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS"]
 
+    domino_values_override_config = {
+        "github_access_token_pieces": token_pieces,
+        "github_access_token_workflows": token_workflows,
+        "frontend": {
+            "enabled": True,
+            "image": domino_frontend_image,
+        },
+        "rest": {
+            "enabled": True,
+            "image": domino_rest_image,
+            "workflowsRepository": platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'],
+        },
+    }
+
     # Create temporary airflow values with user provided arguments
     airflow_ssh_config = dict(
         gitSshKey=f"{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY']}",
@@ -304,24 +318,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
             }
         }
 
-    domino_values_override_config = {
-        "github_access_token_pieces": token_pieces,
-        "github_access_token_workflows": token_workflows,
-        "frontend": {
-            "enabled": True,
-            "image": domino_frontend_image,
-        },
-        "rest": {
-            "enabled": True,
-            "image": domino_rest_image,
-            "workflowsRepository": platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'],
-        },
-    }
-
     airflow_values_override_config = {
-        **domino_values_override_config,
-        # "airflow": {
-        # "enabled": True if run_airflow else False,
         "env": [
             {
                 "name": "DOMINO_DEPLOY_MODE",
@@ -358,7 +355,6 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         },
         **workers,
         **scheduler,
-        # }
     }
 
     # Write yaml to temp file and install domino airflow
@@ -381,23 +377,27 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         #     console.print("Installing dependencies...")
         #     subprocess.run(["helm", "dependency", "build"], cwd=f"{tmp_dir}/domino")
         # with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
-    with open("values-airflow.yaml", "w") as fp:
-        yaml.dump(airflow_values_override_config, fp)
+
     console.print('Installing Apache Airflow...')
-    commands = [
-        "helm", "install",
-        "-f", "values-airflow.yaml",
-        "airflow",
-        "apache-airflow/airflow",
-        "--version", " 1.9.0",
-        # "/media/luiz/storage2/Github/domino/helm/domino/charts/airflow-1.9.0.tgz"  # TODO: remove this line, only for local dev
-    ]
-    subprocess.run(commands)
-    console.print('Installing Domino...')
+    with open("values-override-airflow.yaml", "w") as fp:
+        yaml.dump(airflow_values_override_config, fp)
     commands = [
         "helm", "install",
         # "-f", str(fp.name),
-        "-f", "values-airflow.yaml",
+        "-f", "values-override-airflow.yaml",
+        "airflow",
+        "apache-airflow/airflow",
+        "--version", " 1.9.0",
+    ]
+    subprocess.run(commands)
+
+    console.print('Installing Domino...')
+    with open("values-override-domino.yaml", "w") as fp:
+        yaml.dump(domino_values_override_config, fp)
+    commands = [
+        "helm", "install",
+        # "-f", str(fp.name),
+        "-f", "values-override-domino.yaml",
         "domino",
         # f"{tmp_dir}/domino",
         "/media/luiz/storage2/Github/domino/helm/domino"  # TODO: remove this line, only for local dev
