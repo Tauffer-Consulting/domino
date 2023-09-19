@@ -320,72 +320,89 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
 
     airflow_values_override_config = {
         **domino_values_override_config,
-        "airflow": {
-            "enabled": True if run_airflow else False,
-            "env": [
-                {
-                    "name": "DOMINO_DEPLOY_MODE",
-                    "value": platform_config['kind']["DOMINO_DEPLOY_MODE"]
-                },
-            ],
-            "images": {
-                "useDefaultImageForMigration": False,
-                "airflow": {
-                    "repository": domino_airflow_image,
-                    "tag": "latest",
-                    "pullPolicy": "IfNotPresent"
-                }
+        # "airflow": {
+        # "enabled": True if run_airflow else False,
+        "env": [
+            {
+                "name": "DOMINO_DEPLOY_MODE",
+                "value": platform_config['kind']["DOMINO_DEPLOY_MODE"]
             },
-            "extraSecrets": {
-                "airflow-ssh-secret": {
-                    "data": airflow_ssh_config_parsed
-                }
+        ],
+        "images": {
+            "useDefaultImageForMigration": False,
+            "airflow": {
+                "repository": domino_airflow_image,
+                "tag": "latest",
+                "pullPolicy": "IfNotPresent"
+            }
+        },
+        "extraSecrets": {
+            "airflow-ssh-secret": {
+                "data": airflow_ssh_config_parsed
+            }
+        },
+        "config": {
+            "api": {
+                "auth_backend": "airflow.api.auth.backend.basic_auth"
             },
-            "dags": {
-                "gitSync": {
-                    "enabled": True,
-                    "wait": 60,
-                    "repo": f"ssh://git@github.com/{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY']}.git",
-                    "branch": "main",
-                    "subPath": "workflows",
-                    "sshKeySecret": "airflow-ssh-secret"
-                }
+        },
+        "dags": {
+            "gitSync": {
+                "enabled": True,
+                "wait": 60,
+                "repo": f"ssh://git@github.com/{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY']}.git",
+                "branch": "main",
+                "subPath": "workflows",
+                "sshKeySecret": "airflow-ssh-secret"
             },
-            **workers,
-            **scheduler,
-        }
+        },
+        **workers,
+        **scheduler,
+        # }
     }
 
     # Write yaml to temp file and install domino airflow
     subprocess.run(["helm", "repo", "add", "domino", DOMINO_HELM_REPOSITORY])
     subprocess.run(["helm", "repo", "add", "apache-airflow", "https://airflow.apache.org/"])  # ref: https://github.com/helm/helm/issues/8036
     subprocess.run(["helm", "repo", "update"])
-    with TemporaryDirectory() as tmp_dir:
-        console.print("Downloading Domino Helm chart...")
-        subprocess.run([
-            "helm",
-            "pull",
-            DOMINO_HELM_PATH,
-            "--version",
-            DOMINO_HELM_VERSION,
-            "--untar",
-            "-d",
-            tmp_dir
-        ])
-        if run_airflow:
-            console.print("Installing dependencies...")
-            subprocess.run(["helm", "dependency", "build"], cwd=f"{tmp_dir}/domino")
-        with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
-            yaml.dump(airflow_values_override_config, fp)
-            console.print('Installing Domino...')
-            commands = [
-                "helm", "install",
-                "-f", str(fp.name),
-                "domino",
-                f"{tmp_dir}/domino",
-                # "/media/luiz/storage2/Github/domino/helm/domino"  # TODO: remove this line, only for local dev
-            ]
-            subprocess.run(commands)
+    # with TemporaryDirectory() as tmp_dir:
+        # console.print("Downloading Domino Helm chart...")
+        # subprocess.run([
+        #     "helm",
+        #     "pull",
+        #     DOMINO_HELM_PATH,
+        #     "--version",
+        #     DOMINO_HELM_VERSION,
+        #     "--untar",
+        #     "-d",
+        #     tmp_dir
+        # ])
+        # if run_airflow:
+        #     console.print("Installing dependencies...")
+        #     subprocess.run(["helm", "dependency", "build"], cwd=f"{tmp_dir}/domino")
+        # with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+    with open("values-airflow.yaml", "w") as fp:
+        yaml.dump(airflow_values_override_config, fp)
+    console.print('Installing Apache Airflow...')
+    commands = [
+        "helm", "install",
+        "-f", "values-airflow.yaml",
+        "airflow",
+        "apache-airflow/airflow",
+        "--version", " 1.9.0",
+        # "/media/luiz/storage2/Github/domino/helm/domino/charts/airflow-1.9.0.tgz"  # TODO: remove this line, only for local dev
+    ]
+    subprocess.run(commands)
+    console.print('Installing Domino...')
+    commands = [
+        "helm", "install",
+        # "-f", str(fp.name),
+        "-f", "values-airflow.yaml",
+        "domino",
+        # f"{tmp_dir}/domino",
+        "/media/luiz/storage2/Github/domino/helm/domino"  # TODO: remove this line, only for local dev
+    ]
+    subprocess.run(commands)
 
     # For each path create a pv and pvc
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
@@ -549,10 +566,24 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
 
     console.print("")
     console.print("K8s resources created successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
-
     console.print("You can now access the Domino frontend at: http://localhost/")
     console.print("Domino's REST API: http://localhost/api/")
     console.print("Domino's REST API Swagger: http://localhost/api/docs")
+    console.print("")
+
+
+def destroy_platform() -> None:
+    # Delete Kind cluster
+    with open("config-domino-local.toml", "rb") as f:
+        platform_config = tomli.load(f)
+    cluster_name = platform_config["kind"]["DOMINO_KIND_CLUSTER_NAME"]
+    console.print(f"Removing Kind cluster - {cluster_name}...")
+    result = subprocess.run(["kind", "delete", "cluster", "--name", cluster_name], capture_output=True, text=True)
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception(f"An error occurred while deleting Kind cluster - {cluster_name}: {error_message}")
+    console.print("")
+    console.print("Kind cluster removed successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
     console.print("")
 
 

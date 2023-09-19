@@ -31,7 +31,7 @@ spec:
           env: 
             # TODO use load balancer instead of service ip for airflow webserver ?
             - name: AIRFLOW_WEBSERVER_HOST
-              value: http://{{ .Release.Name }}-airflow-webserver:8080
+              value: http://airflow-webserver:8080
             - name: DOMINO_DEPLOY_MODE
               value: {{ .Values.rest.deployMode }}
             - name: DOMINO_DB_HOST

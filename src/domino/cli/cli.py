@@ -154,6 +154,12 @@ def cli_create_platform(run_airflow, use_gpu):
 
 
 @click.command()
+def cli_destroy_platform():
+    """Destroy Kind cluster."""
+    platform.destroy_platform()
+
+
+@click.command()
 @click.option(
     "--d",
     is_flag=True,
@@ -198,6 +204,7 @@ def cli_platform(ctx):
 
 cli_platform.add_command(cli_prepare_platform, name="prepare")
 cli_platform.add_command(cli_create_platform, name="create")
+cli_platform.add_command(cli_destroy_platform, name="destroy")
 cli_platform.add_command(cli_run_platform_compose, name="run-compose")
 
 
