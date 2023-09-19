@@ -1,6 +1,5 @@
 import PiecesProvider from "./pieces";
-import WorkflowsEdgesProvider from "./workflowEdges";
-import WorkflowsNodesProvider from "./workflowNodes";
+import ReactWorkflowPersistenceProvider from "./reactWorkflowPersistence";
 import WorkflowPiecesProvider from "./workflowPieces";
 import WorkflowPiecesDataProvider from "./workflowPiecesData";
 import WorkflowsEditorProviderItem, {
@@ -16,17 +15,15 @@ const WorkflowsEditorProviderWrapper: React.FC<{
   return (
     <WorkflowSettingsDataProvider>
       <PiecesProvider>
-        <WorkflowsEdgesProvider>
-          <WorkflowsNodesProvider>
-            <WorkflowPiecesProvider>
-              <WorkflowPiecesDataProvider>
-                <WorkflowsEditorProviderItem>
-                  {children}
-                </WorkflowsEditorProviderItem>
-              </WorkflowPiecesDataProvider>
-            </WorkflowPiecesProvider>
-          </WorkflowsNodesProvider>
-        </WorkflowsEdgesProvider>
+        <ReactWorkflowPersistenceProvider>
+          <WorkflowPiecesProvider>
+            <WorkflowPiecesDataProvider>
+              <WorkflowsEditorProviderItem>
+                {children}
+              </WorkflowsEditorProviderItem>
+            </WorkflowPiecesDataProvider>
+          </WorkflowPiecesProvider>
+        </ReactWorkflowPersistenceProvider>
       </PiecesProvider>
     </WorkflowSettingsDataProvider>
   );

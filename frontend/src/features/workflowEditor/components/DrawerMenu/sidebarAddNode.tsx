@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type FC, useState } from "react";
+import { type FC, useState, useCallback } from "react";
 
 import PiecesSidebarNode from "./sidebarNode";
 
@@ -20,17 +20,17 @@ import PiecesSidebarNode from "./sidebarNode";
  * @todo improve loading/error/empty states
  */
 const SidebarAddNode: FC = () => {
-  const {
-    repositories,
-    repositoriesLoading,
-    repositoryPieces,
-    nodeDirection,
-    toggleNodeDirection,
-  } = useWorkflowsEditor();
-
+  const { repositories, repositoriesLoading, repositoryPieces } =
+    useWorkflowsEditor();
+  const [nodeDirection, setNodeDirection] = useState<"horizontal" | "vertical">(
+    "horizontal",
+  );
   const [piecesMap, setPiecesMap] = useState<Record<string, Piece[]>>({});
   const [expandedRepos, setExpandedRepos] = useState<string[]>([]);
 
+  const toggleNodeDirection = useCallback(() => {
+    setNodeDirection((nd) => (nd === "horizontal" ? "vertical" : "horizontal"));
+  }, []);
   /** controls if an accordion is loading Pieces */
   const [loadingPieces, setLoadingPieces] = useState<string | false>(false);
 

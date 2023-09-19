@@ -23,7 +23,6 @@ interface IStyleData {
 export interface INodeData {
   name: string;
   style: IStyleData;
-  handleOriantation: "horizontal" | "vertical";
   error: boolean;
 }
 
@@ -75,15 +74,22 @@ const CustomNode = memo(
     );
 
     const { targetHandlePosition, sourceHandlePosition } = useMemo(() => {
-      return extendedData?.handleOriantation === "horizontal"
-        ? {
-            targetHandlePosition: Position.Left,
-            sourceHandlePosition: Position.Right,
-          }
-        : {
-            targetHandlePosition: Position.Top,
-            sourceHandlePosition: Position.Bottom,
-          };
+      // TODO: deal with orientation
+
+      // return extendedData?.handleOriantation === "horizontal"
+      //   ? {
+      //       targetHandlePosition: Position.Left,
+      //       sourceHandlePosition: Position.Right,
+      //     }
+      //   : {
+      //       targetHandlePosition: Position.Top,
+      //       sourceHandlePosition: Position.Bottom,
+      //     };
+
+      return {
+        targetHandlePosition: Position.Left,
+        sourceHandlePosition: Position.Right,
+      };
     }, [extendedData]);
 
     const { useIcon, iconId, iconClass, iconStyle } = useMemo(() => {
@@ -131,10 +137,6 @@ const CustomNode = memo(
       };
 
       if (extendedData?.style.hasOwnProperty("nodeStyle")) {
-        console.log(
-          "extendedData.style.nodeStyle",
-          extendedData.style.nodeStyle,
-        );
         style = Object.assign(style, extendedData.style.nodeStyle);
       }
 
@@ -150,7 +152,6 @@ const CustomNode = memo(
 
     return (
       <div
-        style={{ padding: 40 }}
         onMouseEnter={() => {
           setHovered(true);
         }}

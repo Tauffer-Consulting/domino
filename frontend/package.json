@@ -32,6 +32,7 @@
     "axios-mock-adapter": "^1.21.2",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.7",
+    "elkjs": "^0.8.2",
     "localforage": "^1.10.0",
     "material-ui-dropzone": "^3.5.0",
     "prop-types": "^15.8.1",
@@ -48,6 +49,7 @@
     "swr": "^2.0.0",
     "typescript": "*",
     "uuid": "^9.0.0",
+    "web-worker": "^1.2.0",
     "yup": "^1.2.0"
   },
   "scripts": {

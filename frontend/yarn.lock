@@ -5069,6 +5069,11 @@ electron-to-chromium@^1.4.477:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.506.tgz#59f64a211102db4c3ebae2f39cc0e8e1b12b3a07"
   integrity sha512-xxGct4GPAKSRlrLBtJxJFYy74W11zX6PO9GyHgl/U+2s3Dp0ZEwAklDfNHXOWcvH7zWMpsmgbR0ggEuaYAVvHA==
 
+elkjs@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/elkjs/-/elkjs-0.8.2.tgz#c37763c5a3e24e042e318455e0147c912a7c248e"
+  integrity sha512-L6uRgvZTH+4OF5NE/MBbzQx/WYpru1xCBE9respNj6qznEewGUIfhzmm7horWWxbNO2M0WckQypGctR8lH79xQ==
+
 emittery@^0.10.2:
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-0.10.2.tgz#902eec8aedb8c41938c46e9385e9db7e03182933"
@@ -11398,6 +11403,11 @@ web-namespaces@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/web-namespaces/-/web-namespaces-2.0.1.tgz#1010ff7c650eccb2592cebeeaf9a1b253fd40692"
   integrity sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==
+
+web-worker@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/web-worker/-/web-worker-1.2.0.tgz#5d85a04a7fbc1e7db58f66595d7a3ac7c9c180da"
+  integrity sha512-PgF341avzqyx60neE9DD+XS26MMNMoUQRz9NOZwW32nPQrF6p77f1htcnjBSEV8BGMKZ16choqUG4hyI0Hx7mA==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"

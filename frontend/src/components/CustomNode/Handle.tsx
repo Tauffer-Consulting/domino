@@ -39,7 +39,6 @@ const CustomHandle: React.FC<CustomHandleProps> = ({
     if (props.type === "source" && props.position === Position.Right) {
       return {
         ...sourceStyle,
-        right: "8px",
         borderLeft: "10px solid",
         borderLeftColor: theme.palette.grey[400],
         borderTop: "10px solid transparent",
@@ -50,19 +49,16 @@ const CustomHandle: React.FC<CustomHandleProps> = ({
     if (props.type === "source" && props.position === Position.Bottom) {
       return {
         ...sourceStyle,
-        bottom: "-16px",
       } satisfies CSSProperties;
     }
     if (props.type === "target" && props.position === Position.Top) {
       return {
         ...targetStyle,
-        top: "-16px",
       } satisfies CSSProperties;
     }
     if (props.type === "target" && props.position === Position.Left) {
       return {
         ...targetStyle,
-        left: "-16px",
         borderLeft: "10px solid",
         borderLeftColor: theme.palette.grey[600],
         borderTop: "10px solid transparent",

@@ -190,19 +190,6 @@ export const WorkflowRunTaskFlowchart = () => {
       setSelectedNodeTaskData(taskData);
       setSelectedNodeId(node.id);
 
-      const updatedNodes = nodes.map((n) => {
-        if (n.id === node.id) {
-          n.data.style.nodeStyle.border = "3px solid #110d0e";
-          n.data.style.nodeStyle.borderRadius = "3px";
-        } else {
-          n.data.style.nodeStyle.border = "none";
-        }
-        n.data = {
-          ...n.data,
-        };
-        return n;
-      });
-      setNodes(updatedNodes);
       // Fetch logs for the task and display them
       const taskTryNumber = taskData?.try_number;
       const taskId = taskData?.task_id;
