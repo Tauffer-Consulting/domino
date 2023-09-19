@@ -28,6 +28,7 @@ import ReactFlow, {
   type ReactFlowInstance,
   type XYPosition,
 } from "reactflow";
+import "reactflow/dist/style.css";
 
 // Load CustomNode
 const NODE_TYPES = {
@@ -62,13 +63,13 @@ type Props =
       onNodesDelete: OnNodesDelete;
       onEdgesDelete: OnEdgesDelete;
       onDrop: OnDrop;
-      onInit: OnInit;
+      onInit?: OnInit;
 
       onNodeDoubleClick?: NodeMouseHandler;
     }
   | {
       editable: false;
-      onInit: OnInit;
+      onInit?: OnInit;
       onNodeDoubleClick?: NodeMouseHandler;
     };
 export interface WorkflowPanelRef {
@@ -89,20 +90,22 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
 
     const onInit = useCallback(async (instance: ReactFlowInstance) => {
       setInstance(instance);
-      const result = props.onInit(instance);
-      if (result instanceof Promise) {
-        result
-          .then(({ nodes, edges }) => {
-            setNodes(nodes);
-            setEdges(edges);
-          })
-          .catch((error) => {
-            console.error("Error from Promise-returning function:", error);
-          });
-      } else {
-        const { nodes, edges } = result;
-        setNodes(nodes);
-        setEdges(edges);
+      if (props.onInit) {
+        const result = props.onInit(instance);
+        if (result instanceof Promise) {
+          result
+            .then(({ nodes, edges }) => {
+              setNodes(nodes);
+              setEdges(edges);
+            })
+            .catch((error) => {
+              console.error("Error from Promise-returning function:", error);
+            });
+        } else {
+          const { nodes, edges } = result;
+          setNodes(nodes);
+          setEdges(edges);
+        }
       }
     }, []);
 
@@ -243,26 +246,43 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           ref={reactFlowWrapper}
           style={{ height: "100%", width: "100%" }}
         >
-          <ReactFlow
-            nodeTypes={NODE_TYPES}
-            edgeTypes={EDGE_TYPES}
-            nodes={nodes}
-            edges={edges}
-            onInit={onInit}
-            deleteKeyCode={props.editable ? ["Delete", "Backspace"] : []}
-            onConnect={onConnect}
-            onNodeDoubleClick={onNodeDoubleClick}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onNodesDelete={onNodesDelete}
-            onEdgesDelete={onEdgesDelete}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-          >
-            <MiniMap />
-            <Controls />
-            <Background color={theme.palette.grey[800]} gap={16} />
-          </ReactFlow>
+          {props.editable ? (
+            <ReactFlow
+              nodeTypes={NODE_TYPES}
+              edgeTypes={EDGE_TYPES}
+              nodes={nodes}
+              edges={edges}
+              onInit={onInit}
+              deleteKeyCode={["Delete", "Backspace"]}
+              onConnect={onConnect}
+              onNodeDoubleClick={onNodeDoubleClick}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onNodesDelete={onNodesDelete}
+              onEdgesDelete={onEdgesDelete}
+              onDrop={onDrop}
+              onDragOver={onDragOver}
+            >
+              <MiniMap />
+              <Controls />
+              <Background color={theme.palette.grey[800]} gap={16} />
+            </ReactFlow>
+          ) : (
+            <ReactFlow
+              nodeTypes={NODE_TYPES}
+              edgeTypes={EDGE_TYPES}
+              nodes={nodes}
+              edges={edges}
+              onInit={onInit}
+              onNodeDoubleClick={onNodeDoubleClick}
+              fitView={true}
+              nodesConnectable={false}
+            >
+              <MiniMap />
+              <Controls />
+              <Background color={theme.palette.grey[800]} gap={16} />
+            </ReactFlow>
+          )}
         </div>
       </ReactFlowProvider>
     );

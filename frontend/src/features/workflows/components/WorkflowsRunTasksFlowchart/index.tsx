@@ -1,19 +1,20 @@
-import { Button, Card, Grid, ButtonGroup, CardContent } from "@mui/material";
-import CustomNode from "components/CustomNode";
+import {
+  Button,
+  Card,
+  Grid,
+  ButtonGroup,
+  CardContent,
+  Paper,
+} from "@mui/material";
+import WorkflowPanel, { type WorkflowPanelRef } from "components/WorkflowPanel";
 import { taskStatesColorMap } from "features/workflows/constants";
 import { useWorkflows } from "features/workflows/context/workflows";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
-import ReactFlow, { Background, Controls, ReactFlowProvider } from "reactflow";
-import "reactflow/dist/style.css";
 
 import { TaskDetails } from "./WorkflowTaskDetails";
 import { TaskLogs } from "./WorkflowTaskLogs";
 import { TaskResult } from "./WorkflowTaskResult";
-
-const nodeTypes = {
-  CustomNode,
-};
 
 const buttonSX = {
   width: "100%",
@@ -42,9 +43,6 @@ const buttonSXActive = {
 };
 
 export const WorkflowRunTaskFlowchart = () => {
-  const reactFlowWrapper = useRef(null);
-  const [nodes, setNodes] = useState<any[]>([]);
-  const [edges, setEdges] = useState<any[]>([]);
   const [nodeIdTaskMapping, setNodeIdTaskMapping] = useState<any>({});
   const [selectedButton, setSelectedButton] = useState<string>("details");
   const [selectedNodeTaskData, setSelectedNodeTaskData] = useState<any>(null);
@@ -55,6 +53,8 @@ export const WorkflowRunTaskFlowchart = () => {
     file_type: "",
   });
   const updateTime = 5000; // in ms
+
+  const workflowPanelRef = useRef<WorkflowPanelRef>(null);
 
   const {
     selectedWorkflow,
@@ -114,12 +114,14 @@ export const WorkflowRunTaskFlowchart = () => {
         : [];
       nodes.push(...responseNodesData);
     }
-    setNodes(nodes);
+    workflowPanelRef.current?.setNodes(nodes);
     setNodeIdTaskMapping(nodeIdTaskMap);
-    setEdges(selectedWorkflow?.ui_schema?.edges ?? []);
+    workflowPanelRef.current?.setEdges(
+      selectedWorkflow?.ui_schema?.edges ?? [],
+    );
 
     return nodeIdTaskMap;
-  }, [handleFetchWorkflowRunTasks, setNodes, setEdges, selectedWorkflow]);
+  }, [handleFetchWorkflowRunTasks, workflowPanelRef, selectedWorkflow]);
 
   useEffect(() => {
     if (selectedWorkflowRunId) {
@@ -212,7 +214,6 @@ export const WorkflowRunTaskFlowchart = () => {
     },
     [
       nodeIdTaskMapping,
-      nodes,
       handleFetchWorkflowRunTaskLogs,
       handleFetchWorkflowRunTaskResult,
     ],
@@ -223,110 +224,97 @@ export const WorkflowRunTaskFlowchart = () => {
   }, []);
 
   return (
-    <ReactFlowProvider>
-      <Grid container spacing={2}>
-        <Grid item xl={6} lg={6}>
-          <Card
-            variant="elevation"
-            sx={{ height: "fit-content", mt: 2, overflow: "hidden" }}
-          >
-            <div
-              className="reactflow-wrapper"
-              ref={reactFlowWrapper}
-              style={{ height: 700 }}
-            >
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                nodeTypes={nodeTypes}
-                nodesConnectable={false}
-                onNodeDoubleClick={onNodeDoubleClick}
-              >
-                <Controls />
-                <Background color="#aaa" gap={16} />
-              </ReactFlow>
-            </div>
-          </Card>
-        </Grid>
-        <Grid item lg={6} sm={12}>
-          <Card
-            variant="elevation"
-            sx={{ height: 700, mt: 2, overflow: "hidden", padding: "10px" }}
-          >
-            <CardContent sx={{ height: "inherit", padding: "0" }}>
-              <Grid container sx={{ marginTop: "0px", height: "inherit" }}>
-                <Grid item xs={12}>
-                  <ButtonGroup
-                    sx={{
-                      width: "100%",
-                      background: "#ebebeb",
-                      height: "36px",
+    <Grid container spacing={2}>
+      <Grid item xl={6} lg={6}>
+        <Card
+          variant="elevation"
+          sx={{ height: "fit-content", mt: 2, overflow: "hidden" }}
+        >
+          <Paper sx={{ height: "80vh" }}>
+            <WorkflowPanel
+              editable={false}
+              ref={workflowPanelRef}
+              onNodeDoubleClick={onNodeDoubleClick}
+            />
+          </Paper>
+        </Card>
+      </Grid>
+      <Grid item lg={6} sm={12}>
+        <Card
+          variant="elevation"
+          sx={{ height: "80vh", mt: 2, overflow: "hidden", padding: "10px" }}
+        >
+          <CardContent sx={{ height: "inherit", padding: "0" }}>
+            <Grid container sx={{ marginTop: "0px", height: "inherit" }}>
+              <Grid item xs={12}>
+                <ButtonGroup
+                  sx={{
+                    width: "100%",
+                    background: "#ebebeb",
+                    height: "36px",
+                  }}
+                >
+                  <Button
+                    value="details"
+                    sx={
+                      selectedButton === "details" ? buttonSXActive : buttonSX
+                    }
+                    onClick={handleButtonClick}
+                    style={{
+                      borderTopRightRadius: "8px",
+                      borderBottomRightRadius: "8px",
                     }}
                   >
-                    <Button
-                      value="details"
-                      sx={
-                        selectedButton === "details" ? buttonSXActive : buttonSX
-                      }
-                      onClick={handleButtonClick}
-                      style={{
-                        borderTopRightRadius: "8px",
-                        borderBottomRightRadius: "8px",
-                      }}
-                    >
-                      Details
-                    </Button>
-                    <Button
-                      value="logs"
-                      sx={selectedButton === "logs" ? buttonSXActive : buttonSX}
-                      onClick={handleButtonClick}
-                      style={{
-                        borderTopLeftRadius: "8px",
-                        borderBottomLeftRadius: "8px",
-                        borderTopRightRadius: "8px",
-                        borderBottomRightRadius: "8px",
-                      }}
-                    >
-                      Logs
-                    </Button>
-                    <Button
-                      value="result"
-                      sx={
-                        selectedButton === "result" ? buttonSXActive : buttonSX
-                      }
-                      onClick={handleButtonClick}
-                      style={{
-                        borderTopRightRadius: "8px",
-                        borderBottomRightRadius: "8px",
-                        borderTopLeftRadius: "8px",
-                        borderBottomLeftRadius: "8px",
-                      }}
-                    >
-                      Result
-                    </Button>
-                  </ButtonGroup>
-                </Grid>
-                <Grid item xs={12} sx={{ height: "calc(100% - 50px)" }}>
-                  {selectedNodeTaskData === null ? (
-                    ""
-                  ) : selectedButton === "details" ? (
-                    <TaskDetails taskData={selectedNodeTaskData} />
-                  ) : selectedButton === "logs" ? (
-                    <TaskLogs logs={logs} />
-                  ) : selectedButton === "result" ? (
-                    <TaskResult
-                      base64_content={taskResult.base64_content}
-                      file_type={taskResult.file_type}
-                    />
-                  ) : (
-                    ""
-                  )}
-                </Grid>
+                    Details
+                  </Button>
+                  <Button
+                    value="logs"
+                    sx={selectedButton === "logs" ? buttonSXActive : buttonSX}
+                    onClick={handleButtonClick}
+                    style={{
+                      borderTopLeftRadius: "8px",
+                      borderBottomLeftRadius: "8px",
+                      borderTopRightRadius: "8px",
+                      borderBottomRightRadius: "8px",
+                    }}
+                  >
+                    Logs
+                  </Button>
+                  <Button
+                    value="result"
+                    sx={selectedButton === "result" ? buttonSXActive : buttonSX}
+                    onClick={handleButtonClick}
+                    style={{
+                      borderTopRightRadius: "8px",
+                      borderBottomRightRadius: "8px",
+                      borderTopLeftRadius: "8px",
+                      borderBottomLeftRadius: "8px",
+                    }}
+                  >
+                    Result
+                  </Button>
+                </ButtonGroup>
               </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
+              <Grid item xs={12} sx={{ height: "calc(100% - 50px)" }}>
+                {selectedNodeTaskData === null ? (
+                  ""
+                ) : selectedButton === "details" ? (
+                  <TaskDetails taskData={selectedNodeTaskData} />
+                ) : selectedButton === "logs" ? (
+                  <TaskLogs logs={logs} />
+                ) : selectedButton === "result" ? (
+                  <TaskResult
+                    base64_content={taskResult.base64_content}
+                    file_type={taskResult.file_type}
+                  />
+                ) : (
+                  ""
+                )}
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
       </Grid>
-    </ReactFlowProvider>
+    </Grid>
   );
 };

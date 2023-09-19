@@ -6,7 +6,7 @@ import { Button, Grid, Paper } from "@mui/material";
 import { AxiosError } from "axios";
 import { type INodeData } from "components/CustomNode";
 import Loading from "components/Loading";
-import WorkflowPanel, { type WorkflowPanelRef } from "components/ReactFlow";
+import WorkflowPanel, { type WorkflowPanelRef } from "components/WorkflowPanel";
 import { useWorkspaces } from "context/workspaces";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type DragEvent, useCallback, useRef, useState } from "react";
