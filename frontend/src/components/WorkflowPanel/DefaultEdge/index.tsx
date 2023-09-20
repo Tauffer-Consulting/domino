@@ -1,11 +1,12 @@
 import {
   BaseEdge,
   type EdgeProps,
-  getSmoothStepPath,
+  // getSmoothStepPath,
+  getBezierPath,
   MarkerType,
 } from "reactflow";
 
-export default function CustomEdge({
+const DefaultEdge: React.FC<EdgeProps> = ({
   id,
   sourceX,
   sourceY,
@@ -13,8 +14,8 @@ export default function CustomEdge({
   targetY,
   sourcePosition,
   targetPosition,
-}: EdgeProps) {
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
+}: EdgeProps) => {
+  const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -30,12 +31,13 @@ export default function CustomEdge({
       markerEnd={MarkerType.ArrowClosed}
       style={{
         position: "absolute",
-        transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
         color: "#6a6a6e",
-        width: 30,
-        height: 30,
+        width: 60,
+        height: 60,
         pointerEvents: "all",
       }}
     />
   );
-}
+};
+
+export default DefaultEdge;

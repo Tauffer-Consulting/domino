@@ -1,5 +1,4 @@
-import CustomEdge from "components/CustomEdge";
-import CustomNode, { type INodeData } from "components/CustomNode";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import Elk from "elkjs";
 import theme from "providers/theme.config";
 import React, {
@@ -27,7 +26,11 @@ import ReactFlow, {
   type Node,
   type ReactFlowInstance,
   type XYPosition,
+  ControlButton,
 } from "reactflow";
+
+import DefaultEdge from "./DefaultEdge";
+import CustomNode, { type INodeData } from "./DefaultNode";
 import "reactflow/dist/style.css";
 
 // Load CustomNode
@@ -36,7 +39,7 @@ const NODE_TYPES = {
 };
 
 const EDGE_TYPES = {
-  CustomEdge,
+  default: DefaultEdge,
 };
 type OnInit<NodeData = any, EdgeData = any> =
   | ((instance: ReactFlowInstance<NodeData, EdgeData>) => {
@@ -219,11 +222,12 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
 
           setNodes(updatedNodes as Node[]);
           setEdges(updatedEdges as Edge[]);
+          instance?.fitView();
         }
       } catch (error) {
         console.error("Error during layout:", error);
       }
-    }, [nodes, edges]);
+    }, [nodes, edges, instance]);
 
     useImperativeHandle(
       ref,
@@ -263,8 +267,17 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
               onDrop={onDrop}
               onDragOver={onDragOver}
             >
-              <MiniMap />
-              <Controls />
+              <MiniMap position="bottom-left" />
+              <Controls
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                }}
+              >
+                <ControlButton onClick={autoLayout} title="auto layout">
+                  <AutoFixHighIcon />
+                </ControlButton>
+              </Controls>
               <Background color={theme.palette.grey[800]} gap={16} />
             </ReactFlow>
           ) : (
@@ -278,8 +291,12 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
               fitView={true}
               nodesConnectable={false}
             >
-              <MiniMap />
-              <Controls />
+              <Controls
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                }}
+              />
               <Background color={theme.palette.grey[800]} gap={16} />
             </ReactFlow>
           )}

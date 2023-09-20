@@ -30,7 +30,7 @@ interface CustomNodeProps extends NodeProps {
   data: INodeData;
 }
 
-const CustomNode = memo(
+const DefaultNode = memo(
   ({ id, data: extendedData, selected }: CustomNodeProps) => {
     const [hovered, setHovered] = useState(false);
 
@@ -211,6 +211,6 @@ const CustomNode = memo(
   },
 );
 
-CustomNode.displayName = "CustomNode";
+DefaultNode.displayName = "CustomNode";
 
-export default CustomNode;
+export default DefaultNode;
