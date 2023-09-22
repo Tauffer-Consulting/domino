@@ -1,1 +1,2 @@
-export * from "./workflowsPage";
+export * from "./WorkflowsPage";
+export * from "./WorkflowDetailPage";
