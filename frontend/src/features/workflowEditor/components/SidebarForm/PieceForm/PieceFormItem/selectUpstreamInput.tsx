@@ -11,7 +11,7 @@ import React, { useCallback } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { fetchFromObject } from "utils";
 
-import { type Option } from "../../pieceForm/upstreamOptions";
+import { type Option } from "../upstreamOptions";
 
 type ObjectName = `inputs.${string}.value.${number}.upstreamValue.${string}`;
 type Name = `inputs.${string}`;

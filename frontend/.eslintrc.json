@@ -61,7 +61,11 @@
     "react/react-in-jsx-scope": "off",
     "jsx-a11y/anchor-is-valid": "off",
     "@typescript-eslint/no-unused-vars": [
-      "error"
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
     ],
     "@typescript-eslint/explicit-function-return-type": [
       "off"
@@ -93,7 +97,11 @@
           "snake_case",
           "PascalCase",
           "UPPER_CASE"
-        ]
+        ],
+        "filter":{
+          "regex": "^_",
+          "match":false
+        }
       },
       {
         "selector": "function",

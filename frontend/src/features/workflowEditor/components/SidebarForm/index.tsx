@@ -16,10 +16,10 @@ import * as yup from "yup";
 
 import ContainerResourceForm, {
   ContainerResourceFormSchema,
-} from "./containerResourceForm";
-import PieceForm from "./pieceForm";
-import { createInputsSchemaValidation } from "./pieceForm/validation";
-import StorageForm, { storageFormSchema } from "./storageForm";
+} from "./ContainerResourceForm";
+import PieceForm from "./PieceForm";
+import { createInputsSchemaValidation } from "./PieceForm/validation";
+import StorageForm, { storageFormSchema } from "./StorageForm";
 
 interface ISidebarPieceFormProps {
   formId: string;
