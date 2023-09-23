@@ -18,7 +18,7 @@ const PiecesSidebarNode: FC<{ piece: Piece }> = ({ piece }) => {
   };
 
   // Help popover
-  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+  const handlePopoverOpen = () => {
     setPopoverOpen(true);
   };
 

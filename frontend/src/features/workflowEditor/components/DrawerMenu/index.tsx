@@ -28,7 +28,7 @@ interface PermanentDrawerRightWorkflowsProps {
 
 export const PermanentDrawerRightWorkflows: FC<
   PermanentDrawerRightWorkflowsProps
-> = ({ isOpen, handleClose }) => {
+> = () => {
   const theme = useTheme();
   const [openDrawer, setOpenDrawer] = useState(true);
 

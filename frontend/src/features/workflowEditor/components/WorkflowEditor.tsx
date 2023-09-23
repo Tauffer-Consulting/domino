@@ -1,85 +1,141 @@
 import { Settings as SettingsSuggestIcon } from "@mui/icons-material";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
 import SaveIcon from "@mui/icons-material/Save";
-import { Button, Grid, Paper, Backdrop, CircularProgress } from "@mui/material";
+import { Button, Grid, Paper } from "@mui/material";
 import { AxiosError } from "axios";
+import Loading from "components/Loading";
+import WorkflowPanel, { type WorkflowPanelRef } from "components/WorkflowPanel";
+import { type INodeData } from "components/WorkflowPanel/DefaultNode";
 import { useWorkspaces } from "context/workspaces";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { useCallback, useState } from "react";
+import { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { type Edge, type Node, type XYPosition } from "reactflow";
 import { yupResolver } from "utils";
+import { useAutoSave } from "utils/useAutoSave";
+import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
+import { type IWorkflowPieceData, storageAccessModes } from "../context/types";
+import { containerResourcesSchema } from "../schemas/containerResourcesSchemas";
+import { extractDefaultInputValues, extractDefaultValues } from "../utils";
+
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
+import SidebarPieceForm from "./SidebarForm";
+import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
+import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
+import { storageFormSchema } from "./SidebarForm/StorageForm";
 import SidebarSettingsForm, {
   WorkflowSettingsFormSchema,
 } from "./SidebarSettingsForm";
-import WorkflowEditorPanelComponent from "./WorkflowEditorPanel";
-import { ContainerResourceFormSchema } from "./WorkflowEditorPanel/sidebarForm/containerResourceForm";
-import { createInputsSchemaValidation } from "./WorkflowEditorPanel/sidebarForm/pieceForm/validation";
-import { storageFormSchema } from "./WorkflowEditorPanel/sidebarForm/storageForm";
+
 /**
  * Create workflow tab
  // TODO refactor/simplify inner files
  // TODO handle runtime errors
  // TODO make it look good
- // TODO remove all '// @ts-ignore: Unreachable code error"'
  */
+const getId = (module_name: string) => {
+  return `${module_name}_${uuidv4()}`;
+};
+
 export const WorkflowsEditorComponent: React.FC = () => {
-  const [drawerState, setDrawerState] = useState(false);
-  const [backdropIsOpen, setBackdropIsOpen] = useState(false);
+  const workflowPanelRef = useRef<WorkflowPanelRef>(null);
+  const [sidebarSettingsDrawer, setSidebarSettingsDrawer] = useState(false);
+  const [sidebarPieceDrawer, setSidebarPieceDrawer] = useState(false);
+  const [formId, setFormId] = useState<string>("");
+  const [formTitle, setFormTitle] = useState<string>("");
+  const [formSchema, setFormSchema] = useState<any>({});
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setBackdropIsOpen] = useState(false);
+
   const { workspace } = useWorkspaces();
+
+  const saveDataToLocalForage = useCallback(async () => {
+    if (workflowPanelRef?.current) {
+      await Promise.allSettled([
+        setWorkflowEdges(workflowPanelRef.current.edges ?? []),
+        setWorkflowNodes(workflowPanelRef.current.nodes ?? []),
+      ]);
+    }
+  }, [workflowPanelRef.current]);
+
+  useAutoSave(saveDataToLocalForage, 3000);
 
   const {
     clearForageData,
     workflowsEditorBodyFromFlowchart,
     fetchWorkflowForage,
-    setNodes,
-    setEdges,
     handleCreateWorkflow,
+    fetchForagePieceById,
+    fetchForageWorkflowNodes,
+    fetchForageWorkflowEdges,
+    setForageWorkflowPieces,
+    getForageWorkflowPieces,
+    removeForageWorkflowPiecesById,
+    removeForageWorkflowPieceDataById,
+    fetchWorkflowPieceById,
+    setForageWorkflowPiecesData,
+    clearDownstreamDataById,
+    setWorkflowEdges,
+    setWorkflowNodes,
   } = useWorkflowsEditor();
 
   const validateWorkflowSettings = useCallback(async (payload: any) => {
     const resolver = yupResolver(WorkflowSettingsFormSchema);
     const validatedData = await resolver(payload.workflowSettingsData);
     if (!Object.keys(validatedData.errors).length) {
-      setNodesWithErros([]);
+      // do something
     } else {
       throw new Error("Please review your workflow settings.");
     }
   }, []);
 
-  const validateWorkflowPiecesData = useCallback(async (payload: any) => {
-    const validationSchema = yup.object().shape(
-      Object.entries(payload.workflowPieces).reduce((acc, [key, value]) => {
-        return {
-          [key]: yup.object({
-            storage: storageFormSchema,
-            containerResources: ContainerResourceFormSchema,
-            inputs: createInputsSchemaValidation((value as any).input_schema),
+  const validateWorkflowPiecesData = useCallback(
+    async (payload: any) => {
+      const validationSchema = yup.object().shape(
+        Object.entries(payload.workflowPieces).reduce((acc, [key, value]) => {
+          return {
+            [key]: yup.object({
+              storage: storageFormSchema,
+              containerResources: ContainerResourceFormSchema,
+              inputs: createInputsSchemaValidation((value as any).input_schema),
+            }),
+            ...acc,
+          };
+        }, {}),
+      ) as any;
+
+      const resolver = yupResolver(validationSchema);
+
+      const validatedData = await resolver(payload.workflowPiecesData);
+
+      if (!Object.keys(validatedData.errors).length) {
+        workflowPanelRef?.current?.setNodes((nodes) =>
+          nodes.map((n) => {
+            n = { ...n, data: { ...n.data, error: false } };
+            return n;
           }),
-          ...acc,
-        };
-      }, {}),
-    ) as any;
+        );
+      } else {
+        const nodeIds = Object.keys(validatedData.errors);
+        workflowPanelRef?.current?.setNodes((nodes) => [
+          ...nodes.map((n) => {
+            if (nodeIds.includes(n.id)) {
+              n = { ...n, data: { ...n.data, error: true } };
+            }
 
-    const resolver = yupResolver(validationSchema);
+            return n;
+          }),
+        ]);
 
-    const validatedData = await resolver(payload.workflowPiecesData);
-
-    if (!Object.keys(validatedData.errors).length) {
-      setNodesWithErros([]);
-    } else {
-      const nodeIds = Object.keys(validatedData.errors);
-      setNodesWithErros(nodeIds);
-
-      throw new Error("Please review the errors on your workflow.");
-    }
-  }, []);
-
-  const [nodesWithErros, setNodesWithErros] = useState<string[]>([]);
+        throw new Error("Please review the errors on your workflow.");
+      }
+    },
+    [workflowPanelRef],
+  );
 
   const handleSaveWorkflow = useCallback(async () => {
     try {
@@ -94,7 +150,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
       const data = await workflowsEditorBodyFromFlowchart();
 
-      // TODO fill workspace id correctly
       await handleCreateWorkflow({ workspace_id: workspace?.id, ...data });
 
       toast.success("Workflow created successfully.");
@@ -119,114 +174,227 @@ export const WorkflowsEditorComponent: React.FC = () => {
     workspace?.id,
   ]);
 
-  // @ts-expect-error: Unreachable code error
-  const toggleDrawer = (open) => (event) => {
+  const handleClear = useCallback(async () => {
+    await clearForageData();
+    workflowPanelRef.current?.setEdges([]);
+    workflowPanelRef.current?.setNodes([]);
+  }, [clearForageData]);
+
+  const onNodesDelete = useCallback(
+    async (nodes: any) => {
+      for (const node of nodes) {
+        await removeForageWorkflowPiecesById(node.id);
+        await removeForageWorkflowPieceDataById(node.id);
+      }
+    },
+    [removeForageWorkflowPieceDataById, removeForageWorkflowPiecesById],
+  );
+
+  const onEdgesDelete = useCallback(
+    async (edges: Edge[]) => {
+      for (const edge of edges) {
+        await clearDownstreamDataById(edge.source);
+      }
+    },
+    [clearDownstreamDataById],
+  );
+
+  // Node double click open drawer with forms
+  const onNodeDoubleClick = useCallback(
+    async (_e: any, node: Node) => {
+      const pieceNode = await fetchWorkflowPieceById(node.id);
+      setFormSchema(pieceNode?.input_schema);
+      setFormId(node.id);
+      setFormTitle(() => {
+        return pieceNode?.name ? pieceNode.name : "";
+      });
+      setSidebarPieceDrawer(true);
+    },
+    [fetchWorkflowPieceById],
+  );
+
+  const onLoad = useCallback(async () => {
+    // // Fetch old state from forage to avoid loosing flowchart when refreshing/leaving page
+    const workflowNodes = await fetchForageWorkflowNodes();
+    const workflowEdges = await fetchForageWorkflowEdges();
+
+    return { nodes: workflowNodes, edges: workflowEdges };
+  }, [fetchForageWorkflowNodes, fetchForageWorkflowEdges]);
+
+  const onDrop = useCallback(
+    async (event: DragEvent<HTMLDivElement>, position: XYPosition) => {
+      event.preventDefault();
+      const nodeData = event.dataTransfer.getData("application/reactflow");
+      const { ...data } = JSON.parse(nodeData);
+
+      const newNodeData: INodeData = {
+        name: data.name,
+        style: data.style,
+        error: false,
+      };
+
+      const newNode = {
+        id: getId(data.id),
+        type: "CustomNode",
+        position,
+        data: newNodeData,
+      };
+
+      const piece = await fetchForagePieceById(data.id);
+      const defaultInputs = extractDefaultInputValues(
+        piece as unknown as Piece,
+      );
+      const defaultContainerResources = extractDefaultValues(
+        containerResourcesSchema as any,
+      );
+
+      const currentWorkflowPieces = await getForageWorkflowPieces();
+      const newWorkflowPieces = {
+        ...currentWorkflowPieces,
+        [newNode.id]: piece,
+      };
+      await setForageWorkflowPieces(newWorkflowPieces);
+
+      const defaultWorkflowPieceData: IWorkflowPieceData = {
+        storage: { storageAccessMode: storageAccessModes.ReadWrite },
+        containerResources: defaultContainerResources,
+        inputs: defaultInputs,
+      };
+
+      await setForageWorkflowPiecesData(newNode.id, defaultWorkflowPieceData);
+      return newNode;
+    },
+    [
+      fetchForagePieceById,
+      setForageWorkflowPieces,
+      getForageWorkflowPieces,
+      setForageWorkflowPiecesData,
+    ],
+  );
+
+  // Left drawers controls
+  const toggleSidebarPieceDrawer = (open: boolean) => (event: any) => {
     if (
       event.type === "keydown" &&
       (event.key === "Tab" || event.key === "Shift")
     ) {
       return;
     }
-    setDrawerState(open);
+    setSidebarPieceDrawer(open);
   };
 
-  // Open Config Workflow Form
-  const handleConfigWorkflow = useCallback(() => {
-    setDrawerState(true);
-  }, []);
-
-  const handleClear = useCallback(async () => {
-    setNodes([]);
-    setEdges([]);
-    await clearForageData();
-  }, [setNodes, setEdges, clearForageData]);
+  const toggleSidebarSettingsDrawer = (open: boolean) => (event: any) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    console.log("here");
+    setSidebarSettingsDrawer(open);
+  };
 
   return (
     <>
-      <div className="reactflow-parent-div">
-        <Backdrop open={backdropIsOpen} sx={{ zIndex: 9999 }}>
-          <CircularProgress />
-        </Backdrop>
-        <Grid
-          container
-          spacing={4}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-          style={{ marginLeft: 0, marginTop: 0 }}
-        >
+      {loading && <Loading />}
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        style={{ marginLeft: 0, marginTop: 0 }}
+      >
+        <Grid item xs={10}>
           <Grid
-            item
-            xs={12}
-            sx={{
-              paddingLeft: "0px",
-              paddingRight: "300px",
-              marginLeft: 0,
-            }}
+            container
+            spacing={1}
+            direction="row"
+            justifyContent="flex-end"
+            alignItems="center"
+            style={{ marginBottom: 10 }}
           >
-            <Grid
-              container
-              spacing={1}
-              direction="row"
-              justifyContent="flex-end"
-              alignItems="center"
-              style={{ marginBottom: 10 }}
-            >
-              <Grid item>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  className="buttons-bar"
-                  startIcon={<SettingsSuggestIcon />}
-                  onClick={() => {
-                    handleConfigWorkflow();
-                  }}
-                >
-                  Settings
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  onClick={handleSaveWorkflow}
-                >
-                  Save
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  startIcon={<DownloadIcon />}
-                >
-                  Load
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  startIcon={<ClearIcon />}
-                  onClick={handleClear}
-                >
-                  Clear
-                </Button>
-              </Grid>
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                className="buttons-bar"
+                startIcon={<SettingsSuggestIcon />}
+                onClick={toggleSidebarSettingsDrawer(true)}
+              >
+                Settings
+              </Button>
             </Grid>
-            <Paper>
-              <WorkflowEditorPanelComponent nodesWithErros={nodesWithErros} />
-            </Paper>
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                startIcon={<SaveIcon />}
+                onClick={handleSaveWorkflow}
+              >
+                Save
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                startIcon={<DownloadIcon />}
+              >
+                Load
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                startIcon={<ClearIcon />}
+                onClick={handleClear}
+              >
+                Clear
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                startIcon={<AutoFixHighIcon />}
+                onClick={() => workflowPanelRef.current?.autoLayout()}
+              >
+                Auto Layout
+              </Button>
+            </Grid>
           </Grid>
+          <Paper sx={{ height: "80vh" }}>
+            <WorkflowPanel
+              editable
+              ref={workflowPanelRef}
+              onNodeDoubleClick={onNodeDoubleClick}
+              onNodesDelete={onNodesDelete}
+              onEdgesDelete={onEdgesDelete}
+              onInit={onLoad}
+              onDrop={onDrop}
+            />
+          </Paper>
+        </Grid>
+        <Grid item xs={2}>
           <PermanentDrawerRightWorkflows
             handleClose={() => {
               setMenuOpen(!menuOpen);
             }}
           />
         </Grid>
-        <SidebarSettingsForm onClose={toggleDrawer(false)} open={drawerState} />
-      </div>
+      </Grid>
+      <SidebarPieceForm
+        title={formTitle}
+        formId={formId}
+        schema={formSchema}
+        open={sidebarPieceDrawer}
+        onClose={toggleSidebarPieceDrawer(false)}
+      />
+      <SidebarSettingsForm
+        onClose={toggleSidebarSettingsDrawer(false)}
+        open={sidebarSettingsDrawer}
+      />
     </>
   );
 };

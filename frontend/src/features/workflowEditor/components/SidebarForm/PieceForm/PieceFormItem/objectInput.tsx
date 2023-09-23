@@ -6,7 +6,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useWatch } from "react-hook-form";
 import { getDefinition } from "utils";
 
-import { type Option } from "../../pieceForm/upstreamOptions";
+import { type Option } from "../upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import SelectUpstreamInput from "./selectUpstreamInput";
@@ -75,7 +75,7 @@ const ObjectInputComponent: React.FC<Prop> = ({
 
   return (
     <>
-      {Object.entries(defaultValues).map(([key, value]) => {
+      {Object.entries(defaultValues).map(([key]) => {
         const fromUpstream = isFromUpstream(key);
         const disableUpstream = disableCheckboxOptions(itensSchema[key] as any);
         return (

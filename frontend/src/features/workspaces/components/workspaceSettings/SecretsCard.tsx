@@ -78,7 +78,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
           secretId: selectedSecretId as string,
           payload,
         })
-          .then((response) => {
+          .then(() => {
             toast.success("Secret updated.");
             void refreshSecrets();
             resetField(selectedSecretId?.toString(), { keepTouched: false });
@@ -108,7 +108,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
         secretId: selectedSecretId as string,
         payload,
       })
-        .then((response) => {
+        .then(() => {
           toast.success("Secret updated");
           void refreshSecrets();
           setCurrrentEdittingSecretId(null);

@@ -8,15 +8,11 @@ import React, { type FC, useCallback } from "react";
 import { createCustomContext, generateTaskName, getIdSlice } from "utils";
 
 import { usesPieces, type IPiecesContext } from "./pieces";
+import {
+  useReactWorkflowPersistence,
+  type IReactWorkflowPersistenceContext,
+} from "./reactWorkflowPersistence";
 import { type CreateWorkflowRequest, type TasksDataModel } from "./types";
-import {
-  useWorkflowsEdges,
-  type IWorkflowsEdgesContext,
-} from "./workflowEdges";
-import {
-  useWorkflowsNodes,
-  type IWorkflowsNodesContext,
-} from "./workflowNodes";
 import { useWorkflowPiece, type IWorkflowPieceContext } from "./workflowPieces";
 import {
   useWorkflowPiecesData,
@@ -29,9 +25,8 @@ import {
 
 interface IWorkflowsEditorContext
   extends IPiecesContext,
-    IWorkflowsEdgesContext,
+    IReactWorkflowPersistenceContext,
     IWorkflowSettingsContext,
-    IWorkflowsNodesContext,
     IWorkflowPieceContext,
     IWorkflowPiecesDataContext {
   fetchWorkflowForage: () => any; // TODO add type
@@ -62,15 +57,13 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     handleSearch,
   } = usesPieces();
 
-  const { edges, fetchForageWorkflowEdges, setEdges } = useWorkflowsEdges();
-
   const {
-    nodes,
-    nodeDirection,
+    setWorkflowEdges,
+    setWorkflowNodes,
+    fetchForageWorkflowEdges,
     fetchForageWorkflowNodes,
-    setNodes,
-    toggleNodeDirection,
-  } = useWorkflowsNodes();
+    clearReactWorkflowPersistence,
+  } = useReactWorkflowPersistence();
 
   const {
     setForageWorkflowPieces,
@@ -257,11 +250,13 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 
   const clearForageData = useCallback(async () => {
     await Promise.allSettled([
+      clearReactWorkflowPersistence(),
       clearForageWorkflowPieces(),
       clearForageWorkflowPiecesData(),
       clearWorkflowSettingsData(),
     ]);
   }, [
+    clearReactWorkflowPersistence,
     clearForageWorkflowPieces,
     clearForageWorkflowPiecesData,
     clearWorkflowSettingsData,
@@ -269,44 +264,42 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 
   const value: IWorkflowsEditorContext = {
     repositories,
-    repositoriesError: !!repositoriesError,
-    repositoriesLoading,
     repositoryPieces,
-    search,
-    edges,
-    setEdges,
-    nodes,
-    setNodes,
-    handleSearch,
+    repositoriesError,
+    repositoriesLoading,
     fetchRepoById,
     fetchForagePieceById,
-    handleCreateWorkflow,
+    search,
+    handleSearch,
+
+    setWorkflowEdges,
+    setWorkflowNodes,
     fetchForageWorkflowEdges,
     fetchForageWorkflowNodes,
-    fetchWorkflowForage,
-    workflowsEditorBodyFromFlowchart,
+    clearReactWorkflowPersistence,
 
-    nodeDirection,
     setForageWorkflowPieces,
+    setForageWorkflowPiecesOutputSchema,
+    fetchWorkflowPieceById,
     getForageWorkflowPieces,
     removeForageWorkflowPiecesById,
-    removeForageWorkflowPieceDataById,
-    fetchWorkflowPieceById,
+    clearForageWorkflowPieces,
 
-    toggleNodeDirection,
-
+    setForageWorkflowPiecesData,
     fetchForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
-    setForageWorkflowPiecesData,
-    setForageWorkflowPiecesOutputSchema,
-
-    clearForageData,
-    clearDownstreamDataById,
+    removeForageWorkflowPieceDataById,
     clearForageWorkflowPiecesData,
-    clearForageWorkflowPieces,
-    fetchWorkflowSettingsData,
+    clearDownstreamDataById,
+
     setWorkflowSettingsData,
+    fetchWorkflowSettingsData,
     clearWorkflowSettingsData,
+
+    handleCreateWorkflow,
+    fetchWorkflowForage,
+    workflowsEditorBodyFromFlowchart,
+    clearForageData,
   };
 
   return (

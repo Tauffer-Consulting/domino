@@ -80,7 +80,7 @@ const StorageSecretsCard = () => {
           secretId: selectedSecretId as string,
           payload,
         })
-          .then((response) => {
+          .then((_response) => {
             toast.success("Secret updated.");
             void refreshSecrets();
             resetField(selectedSecretId?.toString(), { keepTouched: false });
@@ -110,7 +110,7 @@ const StorageSecretsCard = () => {
         secretId: selectedSecretId as string,
         payload,
       })
-        .then((response) => {
+        .then((_response) => {
           toast.success("Secret updated");
           void refreshSecrets();
           setCurrrentEdittingSecretId(null);
