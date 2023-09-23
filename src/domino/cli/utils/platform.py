@@ -141,7 +141,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
             extra_mounts_local_repositories.append(
                 dict(
                     hostPath=platform_config['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'],
-                    containerPath=f"/domino/domino_py",
+                    containerPath=f"/domino/domino_py/src",
                     readOnly=True,
                     propagation='HostToContainer'
                 )
