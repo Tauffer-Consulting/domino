@@ -14,7 +14,7 @@ import { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { type Edge, type Node, type XYPosition } from "reactflow";
 import { yupResolver } from "utils";
-import { useAutoSave } from "utils/useAutoSave";
+import { useInterval } from "utils/useAutoSave";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
@@ -62,7 +62,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     }
   }, [workflowPanelRef.current]);
 
-  useAutoSave(saveDataToLocalForage, 3000);
+  useInterval(saveDataToLocalForage, 3000);
 
   const {
     clearForageData,
