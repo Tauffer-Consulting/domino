@@ -1,8 +1,9 @@
 import { Button, Card, Grid, Skeleton } from "@mui/material";
-import { DataGrid, type GridColumns } from "@mui/x-data-grid";
+import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { NoDataOverlay } from "components/NoDataOverlay";
 import { useAuthenticatedGetWorkflowRuns } from "features/workflows/api";
 import { type IWorkflowRuns } from "features/workflows/types";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useInterval } from "utils/useAutoSave";
 
 import { States } from "./States";
@@ -15,18 +16,22 @@ export const WorkflowRunsTable: React.FC<Props> = ({ workflowId }) => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [selectedRow, setSelectedRow] = useState<string | null>(null);
+  const [paginationModel, setPaginationModel] = React.useState({
+    pageSize: 10,
+    page: 0,
+  });
 
   const {
     data: workflowRuns,
     isLoading,
-    mutate,
+    mutate: handleRefreshWorkflowsRun,
   } = useAuthenticatedGetWorkflowRuns({
-    page,
-    pageSize,
+    page: paginationModel.page,
+    pageSize: paginationModel.pageSize,
     workflowId,
   });
 
-  const columns = useMemo<GridColumns<IWorkflowRuns>>(
+  const columns = useMemo<Array<GridColDef<IWorkflowRuns>>>(
     () => [
       {
         field: "start_date",
@@ -77,8 +82,10 @@ export const WorkflowRunsTable: React.FC<Props> = ({ workflowId }) => {
     () => ({
       // every column need a id prop in DataGrid component
       rows:
-        workflowRuns?.data?.map((wr) => ({ ...wr, id: wr.workflow_run_id })) ??
-        [],
+        workflowRuns?.data?.map((wr) => ({
+          ...wr,
+          id: wr.workflow_run_id,
+        })) ?? [],
       totalRows: workflowRuns?.metadata?.total ?? 0,
     }),
     [workflowRuns],
@@ -86,7 +93,7 @@ export const WorkflowRunsTable: React.FC<Props> = ({ workflowId }) => {
 
   useEffect(() => {
     if (!isLoading && workflowRuns?.data && workflowRuns?.data?.length > 0) {
-      setSelectedRow(workflowRuns.data[0].workflow_run_id);
+      setSelectedRunId(workflowRuns.data[0].workflow_run_id);
     }
   }, [isLoading, workflowRuns]);
 
@@ -119,24 +126,27 @@ export const WorkflowRunsTable: React.FC<Props> = ({ workflowId }) => {
           ) : (
             <DataGrid
               density="compact"
-              onSelectionModelChange={([id]) => {
-                setSelectedRow(id as string);
+              onRowSelectionModelChange={([id]) => {
+                setSelectedRunId(id as string);
               }}
-              selectionModel={selectedRow ? [selectedRow] : []}
+              rowSelectionModel={selectedRunId ? [selectedRunId] : []}
               columns={columns}
               rows={rows}
               pagination
-              rowsPerPageOptions={[10, 15, 20]}
               paginationMode="server"
-              pageSize={pageSize}
-              page={page}
+              pageSizeOptions={[5, 10, 25]}
+              initialState={{
+                pagination: {
+                  paginationModel,
+                },
+              }}
               rowCount={totalRows}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
+              onPaginationModelChange={setPaginationModel}
               disableDensitySelector
               hideFooterSelectedRowCount
               disableColumnMenu
               disableColumnSelector
+              slots={{ noRowsOverlay: NoDataOverlay }}
               sx={{
                 "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
                   outline: "none",

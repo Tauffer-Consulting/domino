@@ -1,17 +1,18 @@
 import { Paper } from "@mui/material";
 import {
   DataGrid,
-  type GridColumns,
+  type GridColDef,
   type GridEventListener,
 } from "@mui/x-data-grid";
 import { AxiosError } from "axios";
+import { NoDataOverlay } from "components/NoDataOverlay";
 import {
   useAuthenticatedDeleteWorkflowId,
   useAuthenticatedGetWorkflows,
   useAuthenticatedPostWorkflowRunId,
 } from "features/workflows/api";
 import { type IWorkflow } from "features/workflows/types";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -28,14 +29,19 @@ import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
 export const WorkflowList: React.FC = () => {
   const navigate = useNavigate();
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [paginationModel, setPaginationModel] = React.useState({
+    pageSize: 10,
+    page: 0,
+  });
 
   const {
     data: workflows,
     isLoading,
     mutate: handleRefreshWorkflows,
-  } = useAuthenticatedGetWorkflows(page, pageSize);
+  } = useAuthenticatedGetWorkflows(
+    paginationModel.page,
+    paginationModel.pageSize,
+  );
   const handleDeleteWorkflow = useAuthenticatedDeleteWorkflowId();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
@@ -94,7 +100,7 @@ export const WorkflowList: React.FC = () => {
     [workflows],
   );
 
-  const columns = useMemo<GridColumns<IWorkflow>>(
+  const columns = useMemo<Array<GridColDef<IWorkflow>>>(
     () => [
       {
         field: "id",
@@ -193,16 +199,20 @@ export const WorkflowList: React.FC = () => {
           onRowClick={handleRowClick}
           pagination
           paginationMode="server"
-          pageSize={pageSize}
-          page={page}
+          pageSizeOptions={[5, 10, 25]}
+          initialState={{
+            pagination: {
+              paginationModel,
+            },
+          }}
           rowCount={totalRows}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
+          onPaginationModelChange={setPaginationModel}
           disableDensitySelector
-          disableSelectionOnClick
+          disableRowSelectionOnClick
           hideFooterSelectedRowCount
           disableColumnMenu
           disableColumnSelector
+          slots={{ noRowsOverlay: NoDataOverlay }}
           sx={{
             "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
               outline: "none",
