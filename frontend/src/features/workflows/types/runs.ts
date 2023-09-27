@@ -12,7 +12,7 @@ enum runState {
   queued = "queued",
 }
 
-enum taskState {
+export enum taskState {
   success = "success",
   running = "running",
   failed = "failed",

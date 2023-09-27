@@ -5,15 +5,23 @@ import React from "react";
 import { type Node } from "reactflow";
 
 interface Props {
-  runId: number | null;
+  runId: string | null;
   node: Node | null;
   panelRef: React.RefObject<WorkflowPanelRef>;
 }
 
-export const WorkflowRunDetail: React.FC<Props> = ({ runId }) => {
+export const WorkflowRunDetail: React.FC<Props> = ({ runId, node }) => {
   return (
     <Paper sx={{ height: "80vh" }}>
-      {runId ? <p>Vai ter dado</p> : <NoDataOverlay />}
+      {runId ? (
+        node ? (
+          <p style={{ margin: 0 }}>{JSON.stringify(node)}</p>
+        ) : (
+          <>Selecione um piece</>
+        )
+      ) : (
+        <NoDataOverlay />
+      )}
     </Paper>
   );
 };

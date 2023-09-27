@@ -2,36 +2,15 @@
 import { Paper, Typography } from "@mui/material";
 import theme from "providers/theme.config";
 import React, { memo, useMemo, useState } from "react";
-import { Position, type NodeProps } from "reactflow";
+import { Position } from "reactflow";
 import { getUuidSlice } from "utils";
+
+import { type DefaultNodeProps } from "../types";
 
 import CustomHandle from "./Handle";
 
-interface IStyleData {
-  iconClassName: string;
-  iconStyle: object;
-  label: string;
-  module: string;
-  nodeStyle: object;
-  nodeType: "default" | "input" | "output";
-  useIcon: boolean;
-  iconId: string;
-}
-/**
- * @todo improve dtypes
- */
-export interface INodeData {
-  name: string;
-  style: IStyleData;
-  error: boolean;
-}
-
-interface CustomNodeProps extends NodeProps {
-  data: INodeData;
-}
-
 const DefaultNode = memo(
-  ({ id, data: extendedData, selected }: CustomNodeProps) => {
+  ({ id, data: extendedData, selected }: DefaultNodeProps) => {
     const [hovered, setHovered] = useState(false);
 
     const extendedClassExt = useMemo(() => {
@@ -140,7 +119,7 @@ const DefaultNode = memo(
         style = Object.assign(style, extendedData.style.nodeStyle);
       }
 
-      if (extendedData?.error) {
+      if (extendedData?.validationError) {
         style = Object.assign(style, {
           backgroundColor: theme.palette.error.light,
           color: theme.palette.background.paper,

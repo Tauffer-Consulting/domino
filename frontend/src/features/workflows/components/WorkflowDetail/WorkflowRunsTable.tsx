@@ -4,18 +4,28 @@ import { NoDataOverlay } from "components/NoDataOverlay";
 import { useAuthenticatedGetWorkflowRuns } from "features/workflows/api";
 import { type IWorkflowRuns } from "features/workflows/types";
 import React, { useEffect, useMemo } from "react";
-import { useInterval } from "utils/useAutoSave";
+import { useInterval } from "utils";
 
 import { States } from "./States";
 
 interface Props {
   workflowId: string;
+  selectedRunId: string | null;
+  setSelectedRunId: React.Dispatch<React.SetStateAction<string | null>>;
+  triggerRun: () => void;
 }
 
-export const WorkflowRunsTable: React.FC<Props> = ({ workflowId }) => {
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [selectedRow, setSelectedRow] = useState<string | null>(null);
+/**
+ * @todo Show piece logs [ ]
+ * @todo Show result [ ]
+ */
+
+export const WorkflowRunsTable: React.FC<Props> = ({
+  workflowId,
+  selectedRunId,
+  setSelectedRunId,
+  triggerRun,
+}) => {
   const [paginationModel, setPaginationModel] = React.useState({
     pageSize: 10,
     page: 0,
@@ -97,14 +107,17 @@ export const WorkflowRunsTable: React.FC<Props> = ({ workflowId }) => {
     }
   }, [isLoading, workflowRuns]);
 
-  useInterval(mutate, 3000);
+  useInterval(handleRefreshWorkflowsRun, 3000);
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <Grid container spacing={3} justifyContent="end">
           <Grid item xs={1}>
-            <Button variant="contained"> New Run </Button>
+            <Button onClick={triggerRun} variant="contained">
+              {" "}
+              New Run{" "}
+            </Button>
           </Grid>
           <Grid item xs={1}>
             <Button variant="contained"> Cancel </Button>

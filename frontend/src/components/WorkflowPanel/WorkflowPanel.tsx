@@ -11,7 +11,7 @@ import React, {
   type ForwardedRef,
 } from "react";
 import ReactFlow, {
-  MiniMap,
+  type Node,
   addEdge,
   Background,
   Controls,
@@ -23,19 +23,23 @@ import ReactFlow, {
   type NodeMouseHandler,
   type OnNodesDelete,
   type OnEdgesDelete,
-  type Node,
   type ReactFlowInstance,
   type XYPosition,
   ControlButton,
 } from "reactflow";
 
 import DefaultEdge from "./DefaultEdge";
-import CustomNode, { type INodeData } from "./DefaultNode";
+import DefaultNodeComponent from "./DefaultNode";
+import RunNodeComponent from "./RunNode";
 import "reactflow/dist/style.css";
 
 // Load CustomNode
-const NODE_TYPES = {
-  CustomNode,
+const DEFAULT_NODE_TYPES = {
+  CustomNode: DefaultNodeComponent,
+};
+
+const RUN_NODE_TYPES = {
+  CustomNode: RunNodeComponent,
 };
 
 const EDGE_TYPES = {
@@ -51,14 +55,8 @@ type OnInit<NodeData = any, EdgeData = any> =
     ) => Promise<{ nodes: Node[]; edges: Edge[] }>);
 
 type OnDrop =
-  | ((
-      event: DragEvent<HTMLDivElement>,
-      position: XYPosition,
-    ) => Node<INodeData>)
-  | ((
-      event: DragEvent<HTMLDivElement>,
-      position: XYPosition,
-    ) => Promise<Node<INodeData>>);
+  | ((event: DragEvent<HTMLDivElement>, position: XYPosition) => Node)
+  | ((event: DragEvent<HTMLDivElement>, position: XYPosition) => Promise<Node>);
 
 type Props =
   | {
@@ -78,14 +76,13 @@ type Props =
 export interface WorkflowPanelRef {
   nodes: Node[];
   edges: Edge[];
-  setNodes: React.Dispatch<
-    React.SetStateAction<Array<Node<any, string | undefined>>>
-  >;
-  setEdges: React.Dispatch<React.SetStateAction<Array<Edge<any>>>>;
+  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   autoLayout: () => void;
 }
 const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
   (props: Props, ref: ForwardedRef<WorkflowPanelRef>) => {
+    console.log("WorkflowPanel re-render");
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
     const [instance, setInstance] = useState<ReactFlowInstance | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -122,11 +119,17 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
       [],
     );
 
-    const onNodeDoubleClick = useCallback(
-      props.editable && props.onNodeDoubleClick
-        ? props.onNodeDoubleClick
-        : () => {},
-      [],
+    const onNodeDoubleClick = useCallback<NodeMouseHandler>(
+      (e, n) => {
+        if (props.onNodeDoubleClick) {
+          props.onNodeDoubleClick(e, n);
+        }
+        if (!props.editable && instance) {
+          const nodeCenter = (n.width ?? 0) / 2;
+          instance.setCenter(n.position.x + nodeCenter, n.position.y);
+        }
+      },
+      [instance],
     );
 
     const onDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -191,8 +194,6 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
       try {
         const elkLayout = await elk.layout(elkGraph);
 
-        console.log(elkLayout);
-
         if (elkLayout?.children && elkLayout.edges) {
           const updatedNodes = elkLayout.children.map((elkNode) => {
             const node = nodes.find((node) => node.id === elkNode.id);
@@ -252,7 +253,7 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
         >
           {props.editable ? (
             <ReactFlow
-              nodeTypes={NODE_TYPES}
+              nodeTypes={DEFAULT_NODE_TYPES}
               edgeTypes={EDGE_TYPES}
               nodes={nodes}
               edges={edges}
@@ -267,8 +268,8 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
               onDrop={onDrop}
               onDragOver={onDragOver}
             >
-              <MiniMap position="bottom-left" />
               <Controls
+                position="bottom-center"
                 style={{
                   display: "flex",
                   flexDirection: "row",
@@ -282,7 +283,7 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
             </ReactFlow>
           ) : (
             <ReactFlow
-              nodeTypes={NODE_TYPES}
+              nodeTypes={RUN_NODE_TYPES}
               edgeTypes={EDGE_TYPES}
               nodes={nodes}
               edges={edges}
@@ -292,6 +293,8 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
               nodesConnectable={false}
             >
               <Controls
+                showInteractive={false}
+                position="bottom-center"
                 style={{
                   display: "flex",
                   flexDirection: "row",
@@ -308,4 +311,4 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
 
 WorkflowPanel.displayName = "WorkflowPanel";
 
-export default WorkflowPanel;
+export { WorkflowPanel };

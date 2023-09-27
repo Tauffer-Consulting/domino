@@ -4,7 +4,6 @@ import {
   type GridColDef,
   type GridEventListener,
 } from "@mui/x-data-grid";
-import { AxiosError } from "axios";
 import { NoDataOverlay } from "components/NoDataOverlay";
 import {
   useAuthenticatedDeleteWorkflowId,
@@ -14,15 +13,13 @@ import {
 import { type IWorkflow } from "features/workflows/types";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useInterval } from "utils";
 
 import { Actions } from "./Actions";
 import { Status } from "./Status";
 import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
 /**
- * @todo Trigger run. [x]
- * @todo Delete workflow. [x]
  * @todo Cancel run. []
  * @todo Pause run. []
  */
@@ -49,45 +46,18 @@ export const WorkflowList: React.FC = () => {
     try {
       await handleDeleteWorkflow({ id: String(id) });
       await handleRefreshWorkflows();
-      toast.success("Workflow deleted.");
     } catch (e) {
-      if (e instanceof AxiosError) {
-        if (e?.response?.status === 403) {
-          toast.error("You are not allowed to delete this workflow.");
-        } else if (e?.response?.status === 404) {
-          toast.error("Workflow not found.");
-        } else if (e?.response?.status === 409) {
-          toast.error("Workflow is not in a valid state. ");
-        } else {
-          console.error(e);
-          toast.error("Something went wrong.");
-        }
-      } else {
-        console.error(e);
-      }
+      console.error(e);
     }
   }, []);
   const runWorkflow = useCallback(async (id: IWorkflow["id"]) => {
     try {
       await handleRunWorkflow({ id: String(id) });
-      toast.info("Workflow started");
     } catch (e) {
-      if (e instanceof AxiosError) {
-        if (e?.response?.status === 403) {
-          toast.error("You are not allowed to run this workflow.");
-        } else if (e?.response?.status === 404) {
-          toast.error("Workflow not found.");
-        } else if (e?.response?.status === 409) {
-          toast.error("Workflow is not in a valid state. ");
-        } else {
-          console.error(e);
-          toast.error("Something went wrong when starting the workflow.");
-        }
-      } else {
-        console.error(e);
-      }
+      console.error(e);
     }
   }, []);
+
   const pauseWorkflow = useCallback((id: IWorkflow["id"]) => {
     console.log(id);
   }, []);
@@ -184,6 +154,8 @@ export const WorkflowList: React.FC = () => {
     },
     [navigate],
   );
+
+  useInterval(handleRefreshWorkflows, 5000);
 
   if (isLoading) {
     return <WorkflowsListSkeleton />;
