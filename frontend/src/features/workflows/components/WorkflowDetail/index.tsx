@@ -27,7 +27,7 @@ import { WorkflowRunsTable } from "./WorkflowRunsTable";
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
-  const [selectedNode, setSelectedNode] = useState<RunNode | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
 
   const { data: workflow, mutate: refreshWorkflow } =
@@ -94,9 +94,8 @@ export const WorkflowDetail: React.FC = () => {
         );
         const newNodes = JSON.stringify(nodes);
         if (newNodes !== currentNodes) {
-          console.log("here", nodes);
-          console.log("here", workflowPanelRef.current?.nodes);
-          workflowPanelRef.current?.setNodes(nodes);
+          // need to create a different object to perform a re-render
+          workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
           workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
         }
       } catch (e) {
@@ -109,7 +108,7 @@ export const WorkflowDetail: React.FC = () => {
   }, [runId, workflow, fetchWorkflowTasks]);
 
   const onNodeDoubleClick = useCallback<NodeMouseHandler>((_, node) => {
-    setSelectedNode(node);
+    setSelectedNodeId(node.id);
   }, []);
 
   useInterval(handleFetchWorkflowRunTasks, 1000);
@@ -142,7 +141,7 @@ export const WorkflowDetail: React.FC = () => {
       <Grid item xs={5}>
         <WorkflowRunDetail
           runId={runId}
-          node={selectedNode}
+          nodeId={selectedNodeId}
           panelRef={workflowPanelRef}
         />
       </Grid>
