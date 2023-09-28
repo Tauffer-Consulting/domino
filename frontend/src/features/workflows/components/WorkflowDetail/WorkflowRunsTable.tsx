@@ -15,11 +15,6 @@ interface Props {
   triggerRun: () => void;
 }
 
-/**
- * @todo Show piece logs [ ]
- * @todo Show result [ ]
- */
-
 export const WorkflowRunsTable: React.FC<Props> = ({
   workflowId,
   selectedRunId,

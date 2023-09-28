@@ -11,6 +11,7 @@ import {
   useAuthenticatedGetWorkflowRunTasks,
   useAuthenticatedPostWorkflowRunId,
 } from "features/workflows/api";
+import { type IWorkflowRunTasks } from "features/workflows/types";
 import React, { useCallback, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { type NodeMouseHandler } from "reactflow";
@@ -22,13 +23,20 @@ import { WorkflowRunsTable } from "./WorkflowRunsTable";
 /**
  * @todo Cancel run. []
  * @todo Pause run. []
+ * @todo Show piece logs [ ]
+ * @todo Show result [ ]
  */
+
+export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {
+  pieceName: string;
+}
 
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<IWorkflowRunTaskExtended[]>([]);
 
   const { data: workflow, mutate: refreshWorkflow } =
     useAuthenticatedGetWorkflowId({
@@ -70,24 +78,39 @@ export const WorkflowDetail: React.FC = () => {
         }
 
         const nodes: RunNode[] = [];
+        const tasks: IWorkflowRunTaskExtended[] = [];
         for (const result of allTasks) {
           const { data } = result;
-          // Create nodes and edges
-          const responseNodesData = Array.isArray(data)
-            ? data
-                .map((task) => {
-                  const defaultNode: DefaultNode | undefined = workflow
-                    .ui_schema.nodes[task.task_id] as DefaultNode | undefined;
-                  const runNode = { ...defaultNode } as unknown as RunNode;
 
-                  if (runNode?.data) {
-                    runNode.data.state = task.state;
-                  }
-                  return runNode as unknown as RunNode;
-                })
-                .filter((n) => !!n)
-            : [];
-          nodes.push(...responseNodesData);
+          if (Array.isArray(data)) {
+            const nodesData = data
+              .map((task) => {
+                const defaultNode: DefaultNode | undefined = workflow.ui_schema
+                  .nodes[task.task_id] as DefaultNode | undefined;
+                const runNode = { ...defaultNode } as unknown as RunNode;
+
+                if (runNode?.data) {
+                  runNode.data.state = task.state;
+                }
+                return runNode as unknown as RunNode;
+              })
+              .filter((n) => !!n);
+            const tasksData = data
+              .map((task) => {
+                const node: DefaultNode | undefined = workflow.ui_schema.nodes[
+                  task.task_id
+                ] as DefaultNode | undefined;
+
+                const pieceName = node?.data?.style?.label ?? node?.data?.name;
+                return {
+                  ...task,
+                  pieceName,
+                } as unknown as IWorkflowRunTaskExtended;
+              })
+              .filter((n) => !!n);
+            tasks.push(...tasksData);
+            nodes.push(...nodesData);
+          }
         }
         const currentNodes = JSON.stringify(
           workflowPanelRef.current?.nodes ?? {},
@@ -97,6 +120,7 @@ export const WorkflowDetail: React.FC = () => {
           // need to create a different object to perform a re-render
           workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
           workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
+          setTasks(tasks);
         }
       } catch (e) {
         if (e instanceof AxiosError) {
@@ -141,6 +165,7 @@ export const WorkflowDetail: React.FC = () => {
       <Grid item xs={5}>
         <WorkflowRunDetail
           runId={runId}
+          tasks={tasks}
           nodeId={selectedNodeId}
           panelRef={workflowPanelRef}
         />

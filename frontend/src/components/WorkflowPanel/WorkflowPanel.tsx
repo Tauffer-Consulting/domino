@@ -82,7 +82,6 @@ export interface WorkflowPanelRef {
 }
 const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
   (props: Props, ref: ForwardedRef<WorkflowPanelRef>) => {
-    console.log("WorkflowPanel re-render");
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
     const [instance, setInstance] = useState<ReactFlowInstance | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
