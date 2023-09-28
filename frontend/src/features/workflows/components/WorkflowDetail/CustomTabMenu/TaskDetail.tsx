@@ -23,27 +23,19 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
             <Typography variant="body1" color="text.secondary" fontWeight="500">
               State:
             </Typography>
-            <Typography
-              variant="body1"
-              component="span"
-              sx={{ display: "flex" }}
-              fontWeight="500"
-              color="text.secondary"
-            >
-              {
-                <Chip
-                  label={props.taskData.state}
-                  style={{
-                    width: "150px",
-                    backgroundColor: taskStatesColorMap[props.taskData.state],
-                    color:
-                      props.taskData.state in ["none", "default"]
-                        ? "black"
-                        : "white",
-                  }}
-                />
-              }
-            </Typography>
+            {
+              <Chip
+                label={props.taskData.state}
+                style={{
+                  width: "150px",
+                  backgroundColor: taskStatesColorMap[props.taskData.state],
+                  color:
+                    props.taskData.state in ["none", "default"]
+                      ? "black"
+                      : "white",
+                }}
+              />
+            }
           </ListItem>
           <ListItem sx={{ justifyContent: "space-between", marginTop: "10px" }}>
             <Typography variant="body1" color="text.secondary" fontWeight="500">

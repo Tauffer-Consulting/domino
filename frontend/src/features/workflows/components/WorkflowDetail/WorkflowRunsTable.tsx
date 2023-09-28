@@ -1,24 +1,25 @@
-import { Button, Card, Grid, Skeleton } from "@mui/material";
+import { Card, Grid, Skeleton } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { NoDataOverlay } from "components/NoDataOverlay";
 import { useAuthenticatedGetWorkflowRuns } from "features/workflows/api";
 import { type IWorkflowRuns } from "features/workflows/types";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useInterval } from "utils";
 
 import { States } from "./States";
+import { WorkflowRunTableFooter } from "./WorkflowRunTableFooter";
 
 interface Props {
   workflowId: string;
-  selectedRunId: string | null;
-  setSelectedRunId: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedRun: IWorkflowRuns | null;
+  onSelectedRunChange: (run: IWorkflowRuns | null) => void;
   triggerRun: () => void;
 }
 
 export const WorkflowRunsTable: React.FC<Props> = ({
   workflowId,
-  selectedRunId,
-  setSelectedRunId,
+  selectedRun,
+  onSelectedRunChange: setSelectedRun,
   triggerRun,
 }) => {
   const [paginationModel, setPaginationModel] = React.useState({
@@ -98,33 +99,21 @@ export const WorkflowRunsTable: React.FC<Props> = ({
 
   useEffect(() => {
     if (!isLoading && workflowRuns?.data && workflowRuns?.data?.length > 0) {
-      setSelectedRunId(workflowRuns.data[0].workflow_run_id);
+      setSelectedRun(workflowRuns.data[0]);
     }
   }, [isLoading, workflowRuns]);
 
   useInterval(handleRefreshWorkflowsRun, 3000);
 
+  const newRun = useCallback(() => {
+    triggerRun();
+    void handleRefreshWorkflowsRun();
+  }, [triggerRun, handleRefreshWorkflowsRun]);
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <Grid container spacing={3} justifyContent="end">
-          <Grid item xs={1}>
-            <Button onClick={triggerRun} variant="contained">
-              {" "}
-              New Run{" "}
-            </Button>
-          </Grid>
-          <Grid item xs={1}>
-            <Button variant="contained"> Cancel </Button>
-          </Grid>
-          <Grid item xs={1}>
-            <Button variant="contained"> Refresh</Button>
-          </Grid>
-        </Grid>
-      </Grid>
-
-      <Grid item xs={12}>
-        <Card sx={{ height: "40vh" }}>
+        <Card sx={{ height: "35vh" }}>
           {isLoading ? (
             <Skeleton
               animation="wave"
@@ -135,9 +124,14 @@ export const WorkflowRunsTable: React.FC<Props> = ({
             <DataGrid
               density="compact"
               onRowSelectionModelChange={([id]) => {
-                setSelectedRunId(id as string);
+                setSelectedRun(
+                  workflowRuns?.data?.find((wr) => wr.workflow_run_id === id) ??
+                    null,
+                );
               }}
-              rowSelectionModel={selectedRunId ? [selectedRunId] : []}
+              rowSelectionModel={
+                selectedRun ? [selectedRun.workflow_run_id] : []
+              }
               columns={columns}
               rows={rows}
               pagination
@@ -154,7 +148,13 @@ export const WorkflowRunsTable: React.FC<Props> = ({
               hideFooterSelectedRowCount
               disableColumnMenu
               disableColumnSelector
-              slots={{ noRowsOverlay: NoDataOverlay }}
+              slots={{
+                noRowsOverlay: NoDataOverlay,
+                footer: WorkflowRunTableFooter,
+              }}
+              slotProps={{
+                footer: { triggerRun: newRun },
+              }}
               sx={{
                 "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
                   outline: "none",

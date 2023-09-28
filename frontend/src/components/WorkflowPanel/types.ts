@@ -20,6 +20,7 @@ interface DefaultNodeData {
 }
 
 interface RunNodeData {
+  taskId: string;
   name: string;
   style: IStyleData;
   state: taskState;

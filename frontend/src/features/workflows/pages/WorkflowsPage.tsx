@@ -14,8 +14,6 @@ export const WorkflowsPage: React.FC = () => {
       <Grid container rowGap={6}>
         <Grid item xs={12}>
           <Breadcrumbs />
-        </Grid>
-        <Grid item xs={12}>
           <WorkflowList />
         </Grid>
       </Grid>

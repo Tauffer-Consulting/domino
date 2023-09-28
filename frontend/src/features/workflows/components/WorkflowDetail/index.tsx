@@ -1,5 +1,6 @@
 import { Grid, Paper } from "@mui/material";
 import { AxiosError } from "axios";
+import { Breadcrumbs } from "components/Breadcrumbs";
 import {
   WorkflowPanel,
   type WorkflowPanelRef,
@@ -11,7 +12,10 @@ import {
   useAuthenticatedGetWorkflowRunTasks,
   useAuthenticatedPostWorkflowRunId,
 } from "features/workflows/api";
-import { type IWorkflowRunTasks } from "features/workflows/types";
+import {
+  type IWorkflowRuns,
+  type IWorkflowRunTasks,
+} from "features/workflows/types";
 import React, { useCallback, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { type NodeMouseHandler } from "reactflow";
@@ -25,6 +29,7 @@ import { WorkflowRunsTable } from "./WorkflowRunsTable";
  * @todo Pause run. []
  * @todo Show piece logs [ ]
  * @todo Show result [ ]
+ * @todo add break interval when workflow is not running
  */
 
 export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {
@@ -34,25 +39,34 @@ export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
+  const [shouldIntervalRun, setShouldIntervalRun] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [runId, setRunId] = useState<string | null>(null);
+  const [selectedRun, setSelectedRun] = useState<IWorkflowRuns | null>(null);
   const [tasks, setTasks] = useState<IWorkflowRunTaskExtended[]>([]);
 
-  const { data: workflow, mutate: refreshWorkflow } =
-    useAuthenticatedGetWorkflowId({
-      id: id as string,
-    });
+  const { data: workflow } = useAuthenticatedGetWorkflowId({
+    id: id as string,
+  });
 
   const fetchWorkflowTasks = useAuthenticatedGetWorkflowRunTasks();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
   const handleFetchWorkflowRunTasks = useCallback(async () => {
-    if (runId && workflow) {
+    if (selectedRun && workflow) {
       try {
+        if (
+          selectedRun &&
+          (selectedRun.state === "success" || selectedRun.state === "failed")
+        ) {
+          setShouldIntervalRun(false);
+        } else {
+          setShouldIntervalRun(true);
+        }
+        console.log("I RUN");
         const pageSize = 100;
         const result = await fetchWorkflowTasks({
           workflowId: id as string,
-          runId,
+          runId: selectedRun.workflow_run_id,
           page: 0,
           pageSize,
         });
@@ -68,7 +82,7 @@ export const WorkflowDetail: React.FC = () => {
             async (page) =>
               await fetchWorkflowTasks({
                 workflowId: id as string,
-                runId,
+                runId: selectedRun.workflow_run_id,
                 page,
                 pageSize,
               }),
@@ -90,6 +104,7 @@ export const WorkflowDetail: React.FC = () => {
                 const runNode = { ...defaultNode } as unknown as RunNode;
 
                 if (runNode?.data) {
+                  runNode.data.taskId = task.task_id;
                   runNode.data.state = task.state;
                 }
                 return runNode as unknown as RunNode;
@@ -129,32 +144,41 @@ export const WorkflowDetail: React.FC = () => {
         console.log(e);
       }
     }
-  }, [runId, workflow, fetchWorkflowTasks]);
+  }, [selectedRun, workflow, fetchWorkflowTasks]);
 
-  const onNodeDoubleClick = useCallback<NodeMouseHandler>((_, node) => {
-    setSelectedNodeId(node.id);
+  const handleSelectRun = useCallback((run: IWorkflowRuns | null) => {
+    setShouldIntervalRun(true);
+    setSelectedRun(run);
   }, []);
 
-  useInterval(handleFetchWorkflowRunTasks, 1000);
-  useInterval(refreshWorkflow, 5000);
+  const onNodeDoubleClick = useCallback<NodeMouseHandler>(
+    (_, node: RunNode) => {
+      setSelectedNodeId(node.data.taskId);
+    },
+    [],
+  );
+
+  useInterval(handleFetchWorkflowRunTasks, 1000, shouldIntervalRun);
 
   return (
     <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Breadcrumbs />
+      </Grid>
       <Grid item xs={12}>
         <WorkflowRunsTable
           triggerRun={() => {
             if (workflow?.id) {
               void handleRunWorkflow({ id: String(workflow.id) });
-              void refreshWorkflow();
             }
           }}
-          selectedRunId={runId}
-          setSelectedRunId={setRunId}
+          selectedRun={selectedRun}
+          onSelectedRunChange={handleSelectRun}
           workflowId={id as string}
         />
       </Grid>
       <Grid item xs={7}>
-        <Paper sx={{ height: "80vh" }}>
+        <Paper sx={{ height: "46vh" }}>
           <WorkflowPanel
             ref={workflowPanelRef}
             editable={false}
@@ -164,10 +188,9 @@ export const WorkflowDetail: React.FC = () => {
       </Grid>
       <Grid item xs={5}>
         <WorkflowRunDetail
-          runId={runId}
+          runId={selectedRun?.workflow_run_id ?? null}
           tasks={tasks}
           nodeId={selectedNodeId}
-          panelRef={workflowPanelRef}
         />
       </Grid>
     </Grid>

@@ -287,7 +287,7 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
               nodes={nodes}
               edges={edges}
               onInit={onInit}
-              onNodeClick={onNodeDoubleClick}
+              onNodeDoubleClick={onNodeDoubleClick}
               fitView={true}
               nodesConnectable={false}
             >

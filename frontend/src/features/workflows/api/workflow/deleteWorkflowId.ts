@@ -51,10 +51,12 @@ export const useAuthenticatedDeleteWorkflowId = () => {
           } else if (e?.response?.status === 409) {
             toast.error("Workflow is not in a valid state. ");
           } else {
-            throw e;
+            console.error(e);
+            toast.error("Something went wrong. ");
           }
+        } else {
+          throw e;
         }
-        throw e;
       });
   return fetcher;
 };
