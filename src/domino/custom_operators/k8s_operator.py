@@ -145,7 +145,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             )
             volume_mount_dev = k8s.V1VolumeMount(
                 name='jobs-persistent-storage-dev', 
-                mount_path='/home/domino/domino_py', 
+                mount_path='/home/domino/domino_py/src/domino',
                 sub_path=None,
                 read_only=True
             )
@@ -163,7 +163,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         pod = super().build_pod_request_obj(context)
         self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
         self.shared_storage_base_mount_path = '/home/shared_storage'
-        self.shared_storage_upstream_ids_list = list()
+
         if not self.workflow_shared_storage or self.workflow_shared_storage.mode.name == 'none':
             return pod
         if  self.workflow_shared_storage.source.name in ["aws_s3", "gcs"]:
@@ -354,6 +354,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         Update Operator kwargs with upstream tasks XCOM data
         Also updates the list of upstream tasks for which we need to mount the results path
         """
+        self.shared_storage_upstream_ids_list = list()
         domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
         if not domino_k8s_run_op_kwargs:
             domino_k8s_run_op_kwargs = {
