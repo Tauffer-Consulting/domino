@@ -141,7 +141,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
             extra_mounts_local_repositories.append(
                 dict(
                     hostPath=platform_config['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'],
-                    containerPath=f"/domino/domino_py/src",
+                    containerPath=f"/domino/domino_py/src/domino",
                     readOnly=True,
                     propagation='HostToContainer'
                 )
@@ -302,7 +302,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         workers_extra_volumes_mounts = [
             {
                 "name": "domino-dev-extra",
-                "mountPath": "/opt/airflow/domino/domino_py"
+                "mountPath": "/opt/airflow/domino/domino_py/src/domino"
             }
         ]
         workers = {
@@ -396,11 +396,10 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         yaml.dump(domino_values_override_config, fp)
     commands = [
         "helm", "install",
-        # "-f", str(fp.name),
-        "-f", "values-override-domino.yaml",
+        "-f", str(fp.name),
         "domino",
-        # f"{tmp_dir}/domino",
-        "/media/luiz/storage2/Github/domino/helm/domino"  # TODO: remove this line, only for local dev
+        #f"{tmp_dir}/domino",
+        "/home/vinicius/Documents/work/tauffer/domino/helm/domino"  # TODO: remove this line, only for local dev
     ]
     subprocess.run(commands)
 
@@ -412,7 +411,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
 
         # Create service account role binding with admin access for airflow worker
         role_binding_name_worker = "full-access-user-clusterrolebinding-worker"
-        sa_name = "domino-airflow-worker"
+        sa_name = "airflow-worker"
         cluster_role_binding_worker = client.V1ClusterRoleBinding(
             metadata=client.V1ObjectMeta(name=role_binding_name_worker),
             subjects=[
@@ -432,7 +431,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         v1.create_cluster_role_binding(cluster_role_binding_worker)
 
         role_binding_name_scheduler = "full-access-user-clusterrolebinding-scheduler"
-        sa_name = "domino-airflow-scheduler"
+        sa_name = "airflow-scheduler"
         cluster_role_binding_scheduler = client.V1ClusterRoleBinding(
             metadata=client.V1ObjectMeta(name=role_binding_name_scheduler),
             subjects=[
@@ -540,7 +539,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
                     storage_class_name="standard",
                     access_modes=["ReadWriteMany"],
                     capacity={"storage": "2Gi"},
-                    host_path=client.V1HostPathVolumeSource(path="/domino/domino_py"),
+                    host_path=client.V1HostPathVolumeSource(path="/domino/domino_py/src/domino"),
                     claim_ref=client.V1ObjectReference(
                         namespace="default",
                         name="domino-dev-volume-claim",
