@@ -274,6 +274,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
                 repository_url="domino-default/default_storage_repository",
                 repository_version="0.0.1",
                 piece_name=self.workflow_shared_storage.storage_piece_name,
+                source='default',
             )
         self.workflow_shared_storage.source = self.workflow_shared_storage.source.name
         sidecar_env_vars = {
@@ -314,19 +315,20 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self,
         repository_url: str,
         repository_version: str,
-        piece_name: str
+        piece_name: str,
+        source: str = 'github'
     ) -> Dict[str, Any]:
         """Get piece secrets values from Domino API"""
+        params = {
+            "workspace_id": self.workspace_id,
+            "url": repository_url,
+            "version": repository_version,
+            'source': source,
+            "page": 0,
+            "page_size": 1,
+        }
         piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
-            params={
-                "workspace_id": self.workspace_id,
-                "filters": {
-                    "url": repository_url,
-                    "version": repository_version,
-                },
-                "page": 0,
-                "page_size": 1,
-            }
+            params=params
         ).json()
         secrets_response = self.domino_client.get_piece_secrets(
             piece_repository_id=piece_repository_data["data"][0]["id"],
