@@ -126,7 +126,13 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         domino_rest_image = platform_config['dev'].pop('DOMINO_REST_IMAGE', None)
         domino_frontend_image = platform_config['dev'].pop('DOMINO_FRONTEND_IMAGE', None)
     
-    local_pieces_respositories = {key: value for key, value in platform_config['dev'].items() if key != "DOMINO_LOCAL_DOMINO_PACKAGE"}
+    domino_dev_private_variables_list = [
+        "DOMINO_LOCAL_DOMINO_PACKAGE",
+        "DOMINO_REST_IMAGE",
+        "DOMINO_FRONTEND_IMAGE",
+        "DOMINO_AIRFLOW_IMAGE"
+    ]
+    local_pieces_respositories = {key: value for key, value in platform_config['dev'].items() if key not in domino_dev_private_variables_list}
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
         for repo_name, repo_path in local_pieces_respositories.items():
             extra_mounts_local_repositories.append(
