@@ -137,9 +137,9 @@ def cli_prepare_platform(
 
 @click.command()
 @click.option(
-    "--run-airflow", 
+    "--install-airflow", 
     default=True,
-    help="Run Domino Airflow services."
+    help="Install Airflow services."
 )
 @click.option(
     "--use-gpu",
@@ -148,9 +148,9 @@ def cli_prepare_platform(
     help="Allow the platform to use GPUs. It will install NVIDIA plugins.",
     default=False
 )
-def cli_create_platform(run_airflow, use_gpu):
+def cli_create_platform(install_airflow, use_gpu):
     """Create cluster, install services and run Domino platform."""
-    platform.create_platform(run_airflow, use_gpu)
+    platform.create_platform(install_airflow, use_gpu)
 
 
 @click.command()

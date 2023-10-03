@@ -105,7 +105,7 @@ def prepare_platform(
     console.print("")
 
 
-def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
+def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None:
     # Load configuration values
     with open("config-domino-local.toml", "rb") as f:
         platform_config = tomli.load(f)
@@ -363,10 +363,27 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         **scheduler,
     }
 
-    # Write yaml to temp file and install domino airflow
+    # Update Helm repositories
     subprocess.run(["helm", "repo", "add", "domino", DOMINO_HELM_REPOSITORY])
     subprocess.run(["helm", "repo", "add", "apache-airflow", "https://airflow.apache.org/"])  # ref: https://github.com/helm/helm/issues/8036
     subprocess.run(["helm", "repo", "update"])
+
+    # Install Airflow Helm Chart
+    if install_airflow:
+        console.print('Installing Apache Airflow...')
+        airflow_override_file = "values-override-airflow.yaml"
+        with open(airflow_override_file, "w") as fp:
+            yaml.dump(airflow_values_override_config, fp)
+        commands = [
+            "helm", "install",
+            "-f", airflow_override_file,
+            "airflow",
+            "apache-airflow/airflow",
+            "--version", " 1.9.0",
+        ]
+        subprocess.run(commands)
+
+    # TODO - install Domino from remote Helm chart
     # with TemporaryDirectory() as tmp_dir:
         # console.print("Downloading Domino Helm chart...")
         # subprocess.run([
@@ -379,33 +396,20 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         #     "-d",
         #     tmp_dir
         # ])
-        # if run_airflow:
-        #     console.print("Installing dependencies...")
-        #     subprocess.run(["helm", "dependency", "build"], cwd=f"{tmp_dir}/domino")
         # with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
 
-    console.print('Installing Apache Airflow...')
-    with open("values-override-airflow.yaml", "w") as fp:
-        yaml.dump(airflow_values_override_config, fp)
-    commands = [
-        "helm", "install",
-        # "-f", str(fp.name),
-        "-f", "values-override-airflow.yaml",
-        "airflow",
-        "apache-airflow/airflow",
-        "--version", " 1.9.0",
-    ]
-    subprocess.run(commands)
-
+    # Install Domino Helm Chart
     console.print('Installing Domino...')
-    with open("values-override-domino.yaml", "w") as fp:
+    domino_override_file = "values-override-domino.yaml"
+    with open(domino_override_file, "w") as fp:
         yaml.dump(domino_values_override_config, fp)
     commands = [
         "helm", "install",
-        "-f", str(fp.name),
+        "-f", domino_override_file,
         "domino",
         #f"{tmp_dir}/domino",
-        "/home/vinicius/Documents/work/tauffer/domino/helm/domino"  # TODO: remove this line, only for local dev
+        # "/home/vinicius/Documents/work/tauffer/domino/helm/domino"  # TODO: remove this line, only for local dev
+        "/media/luiz/storage2/Github/domino/helm/domino" # TODO: remove this line, only for local
     ]
     subprocess.run(commands)
 
