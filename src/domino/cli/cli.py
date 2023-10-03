@@ -32,7 +32,7 @@ def validate_github_token_workflows(value):
     return None
 
 
-def validate_github_token_operators(value):
+def validate_github_token(value):
     if value and value.startswith("ghp_"):
         return value
     return None
@@ -56,9 +56,6 @@ def get_github_token_workflows_from_env():
 
 def get_workflows_repository_from_env():
     return os.environ.get("DOMINO_GITHUB_WORKFLOWS_REPOSITORY", None)
-
-def get_local_operators_repository_path():
-    return ""
 
 def get_registry_token_from_env():
     return os.environ.get('GHCR_PASSWORD', "")
@@ -98,13 +95,13 @@ def get_registry_token_from_env():
     '--deploy-mode',
     prompt='Deploy mode',
     default="local-k8s",
-    help='Deploy mode - either "local" or "remote". If local it will allow you to use hot reloading for local operators repositories'
+    help='Deploy mode - either "local" or "remote".'
 )
 @click.option(
     '--local-pieces-repository-path',
     prompt='Local pieces repository path. Example: ["/path/to/repo1", "/path/to/"repo2"]',
     default=[],
-    help='List of local pieces repository paths. It is used only if dev-mode is set to "local" and it will allow you to use hot reloading for local operators repositories. Example: ["path/to/repo1", "path/to/"repo2"]',
+    help='List of local pieces repository paths.',
 )
 @click.option(
     "--local-domino-path",
@@ -209,7 +206,7 @@ cli_platform.add_command(cli_run_platform_compose, name="run-compose")
 
 
 ###############################################################################
-# OPERATORS REPOSITORY 
+# PIECES REPOSITORY 
 ###############################################################################
 
 def generate_random_repo_name():
