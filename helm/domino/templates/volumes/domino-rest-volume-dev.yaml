@@ -10,7 +10,7 @@ spec:
     - ReadWriteOnce
   # persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /domino/domino_py/rest
+    path: /domino/domino_py/src/rest
   nodeAffinity:
     required:
       nodeSelectorTerms:

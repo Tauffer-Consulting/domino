@@ -94,10 +94,8 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
       
         repository_raw_project_name = str(self.piece_source_image).split('/')[-1].split(':')[0]
         persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-
         persistent_volume_name = 'pv-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-        persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-
+        
         pvc_exists = False
         try:
             k8s_client.read_namespaced_persistent_volume_claim(name=persistent_volume_claim_name, namespace='default')
@@ -147,7 +145,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             )
             volume_mount_dev = k8s.V1VolumeMount(
                 name='jobs-persistent-storage-dev', 
-                mount_path='/home/domino/domino_py', 
+                mount_path='/home/domino/domino_py/src/domino',
                 sub_path=None,
                 read_only=True
             )
@@ -163,9 +161,9 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         This function runs after our own self.execute, by super().execute()
         """
         pod = super().build_pod_request_obj(context)
-        self.task_id_replaced = self.task_id.replace("_", "-").lower() # doing this because airflow doesn't allow underscores and upper case in mount names
+        self.task_id_replaced = self.task_id.lower().replace("_", "-") # doing this because airflow doesn't allow underscores and upper case in mount names and max len is 63
         self.shared_storage_base_mount_path = '/home/shared_storage'
-        self.shared_storage_upstream_ids_list = list()
+
         if not self.workflow_shared_storage or self.workflow_shared_storage.mode.name == 'none':
             return pod
         if  self.workflow_shared_storage.source.name in ["aws_s3", "gcs"]:
@@ -181,7 +179,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         pod_cp.spec.volumes = pod.spec.volumes or []
         pod_cp.spec.volumes.append(
             k8s.V1Volume(
-                name=f'workflow-shared-storage-volume-{self.task_id_replaced}',
+                name=f'workflow-shared-storage-volume-{self.task_id_replaced}'[0:63], # max resource name in k8s is 63 chars
                 persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name="domino-workflow-shared-storage-volume-claim")
             )
         )
@@ -190,7 +188,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         for tid in self.shared_storage_upstream_ids_list:
             pod_cp.spec.containers[0].volume_mounts.append(
                 k8s.V1VolumeMount(
-                    name=f'workflow-shared-storage-volume-{self.task_id_replaced}', 
+                    name=f'workflow-shared-storage-volume-{self.task_id_replaced}'[0:63], # max resource name in k8s is 63 chars
                     mount_path=f"{self.shared_storage_base_mount_path}/{tid}",  # path inside main container
                     mount_propagation="HostToContainer",
                     read_only=True,
@@ -199,7 +197,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         # Add volume mount for this task
         pod_cp.spec.containers[0].volume_mounts.append(
             k8s.V1VolumeMount(
-                name=f'workflow-shared-storage-volume-{self.task_id_replaced}', 
+                name=f'workflow-shared-storage-volume-{self.task_id_replaced}'[0:63],  # max resource name in k8s is 63 chars
                 mount_path=f"{self.shared_storage_base_mount_path}/{self.task_id}",  # path inside main container
                 mount_propagation="Bidirectional",
                 read_only=True,
@@ -222,7 +220,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             tid_replaced = tid.lower().replace("_", "-") # Doing this because k8s doesn't allow underscores in volume names
             volume_mounts_main_container.append(
                 k8s.V1VolumeMount(
-                    name=f'workflow-shared-storage-volume-{tid_replaced}', 
+                    name=f'workflow-shared-storage-volume-{tid_replaced}'[0:63], # max resource name in k8s is 63 chars
                     mount_path=f"{self.shared_storage_base_mount_path}/{tid}",  # path inside main container
                     mount_propagation="HostToContainer",
                     read_only=True,
@@ -230,21 +228,21 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             )
             volume_mounts_sidecar_container.append(
                 k8s.V1VolumeMount(
-                    name=f'workflow-shared-storage-volume-{tid_replaced}', 
+                    name=f'workflow-shared-storage-volume-{tid_replaced}'[0:63], # max resource name in k8s is 63 chars
                     mount_path=f"{self.shared_storage_base_mount_path}/{tid}",  # path inside sidecar container
                     mount_propagation="Bidirectional",
                 )
             )
             pod_volumes_list.append(
                 k8s.V1Volume(
-                    name=f'workflow-shared-storage-volume-{tid_replaced}',
+                    name=f'workflow-shared-storage-volume-{tid_replaced}'[0:63], # max resource name in k8s is 63 chars
                     empty_dir=k8s.V1EmptyDirVolumeSource()
                 )
             )
         # Set up pod Volumes and containers VolumemMounts for this Operator results
         volume_mounts_main_container.append(
             k8s.V1VolumeMount(
-                name=f'workflow-shared-storage-volume-{self.task_id_replaced}', 
+                name=f'workflow-shared-storage-volume-{self.task_id_replaced}'[0:63], # max resource name in k8s is 63 chars
                 mount_path=f"{self.shared_storage_base_mount_path}/{self.task_id}",  # path inside main container
                 mount_propagation="HostToContainer",
                 read_only=False,
@@ -252,14 +250,14 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         )
         volume_mounts_sidecar_container.append(
             k8s.V1VolumeMount(
-                name=f'workflow-shared-storage-volume-{self.task_id_replaced}', 
+                name=f'workflow-shared-storage-volume-{self.task_id_replaced}'[0:63], # max resource name in k8s is 63 chars
                 mount_path=f"{self.shared_storage_base_mount_path}/{self.task_id}",  # path inside sidecar container
                 mount_propagation="Bidirectional",
             )
         )
         pod_volumes_list.append(
             k8s.V1Volume(
-                name=f'workflow-shared-storage-volume-{self.task_id_replaced}',
+                name=f'workflow-shared-storage-volume-{self.task_id_replaced}'[0:63], # max resource name in k8s is 63 chars
                 empty_dir=k8s.V1EmptyDirVolumeSource()
             )
         )
@@ -276,6 +274,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
                 repository_url="domino-default/default_storage_repository",
                 repository_version="0.0.1",
                 piece_name=self.workflow_shared_storage.storage_piece_name,
+                source='default',
             )
         self.workflow_shared_storage.source = self.workflow_shared_storage.source.name
         sidecar_env_vars = {
@@ -289,7 +288,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             'DOMINO_WORKFLOW_RUN_SUBPATH': self.workflow_run_subpath,
             'AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE': str(self.shared_storage_upstream_ids_list),
         }
-        self.shared_storage_sidecar_container_name = f"domino-shared-storage-sidecar-{self.task_id_replaced}"
+        self.shared_storage_sidecar_container_name = f"domino-shared-storage-sidecar-{self.task_id_replaced}"[0:63]
         sidecar_container = k8s.V1Container(
             name=self.shared_storage_sidecar_container_name,
             command=['bash', '-c', './sidecar_lifecycle.sh'],
@@ -316,19 +315,20 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self,
         repository_url: str,
         repository_version: str,
-        piece_name: str
+        piece_name: str,
+        source: str = 'github'
     ) -> Dict[str, Any]:
         """Get piece secrets values from Domino API"""
+        params = {
+            "workspace_id": self.workspace_id,
+            "url": repository_url,
+            "version": repository_version,
+            'source': source,
+            "page": 0,
+            "page_size": 1,
+        }
         piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
-            params={
-                "workspace_id": self.workspace_id,
-                "filters": {
-                    "url": repository_url,
-                    "version": repository_version,
-                },
-                "page": 0,
-                "page_size": 1,
-            }
+            params=params
         ).json()
         secrets_response = self.domino_client.get_piece_secrets(
             piece_repository_id=piece_repository_data["data"][0]["id"],
@@ -356,6 +356,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         Update Operator kwargs with upstream tasks XCOM data
         Also updates the list of upstream tasks for which we need to mount the results path
         """
+        self.shared_storage_upstream_ids_list = list()
         domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
         if not domino_k8s_run_op_kwargs:
             domino_k8s_run_op_kwargs = {

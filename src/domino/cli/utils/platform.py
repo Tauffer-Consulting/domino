@@ -105,7 +105,7 @@ def prepare_platform(
     console.print("")
 
 
-def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
+def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None:
     # Load configuration values
     with open("config-domino-local.toml", "rb") as f:
         platform_config = tomli.load(f)
@@ -126,7 +126,13 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         domino_rest_image = platform_config['dev'].pop('DOMINO_REST_IMAGE', None)
         domino_frontend_image = platform_config['dev'].pop('DOMINO_FRONTEND_IMAGE', None)
     
-    local_pieces_respositories = {key: value for key, value in platform_config['dev'].items() if key != "DOMINO_LOCAL_DOMINO_PACKAGE"}
+    domino_dev_private_variables_list = [
+        "DOMINO_LOCAL_DOMINO_PACKAGE",
+        "DOMINO_REST_IMAGE",
+        "DOMINO_FRONTEND_IMAGE",
+        "DOMINO_AIRFLOW_IMAGE"
+    ]
+    local_pieces_respositories = {key: value for key, value in platform_config['dev'].items() if key not in domino_dev_private_variables_list}
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
         for repo_name, repo_path in local_pieces_respositories.items():
             extra_mounts_local_repositories.append(
@@ -141,7 +147,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
             extra_mounts_local_repositories.append(
                 dict(
                     hostPath=platform_config['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'],
-                    containerPath=f"/domino/domino_py",
+                    containerPath=f"/domino/domino_py/src/domino",
                     readOnly=True,
                     propagation='HostToContainer'
                 )
@@ -266,6 +272,20 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
     token_pieces = platform_config["github"]["DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"]
     token_workflows = platform_config["github"]["DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS"]
 
+    domino_values_override_config = {
+        "github_access_token_pieces": token_pieces,
+        "github_access_token_workflows": token_workflows,
+        "frontend": {
+            "enabled": True,
+            "image": domino_frontend_image,
+        },
+        "rest": {
+            "enabled": True,
+            "image": domino_rest_image,
+            "workflowsRepository": platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'],
+        },
+    }
+
     # Create temporary airflow values with user provided arguments
     airflow_ssh_config = dict(
         gitSshKey=f"{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY']}",
@@ -288,7 +308,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         workers_extra_volumes_mounts = [
             {
                 "name": "domino-dev-extra",
-                "mountPath": "/opt/airflow/domino/domino_py"
+                "mountPath": "/opt/airflow/domino/domino_py/src/domino"
             }
         ]
         workers = {
@@ -304,88 +324,94 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
             }
         }
 
-    domino_values_override_config = {
-        "github_access_token_pieces": token_pieces,
-        "github_access_token_workflows": token_workflows,
-        "frontend": {
-            "enabled": True,
-            "image": domino_frontend_image,
-        },
-        "rest": {
-            "enabled": True,
-            "image": domino_rest_image,
-            "workflowsRepository": platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'],
-        },
-    }
-
     airflow_values_override_config = {
-        **domino_values_override_config,
-        "airflow": {
-            "enabled": True if run_airflow else False,
-            "env": [
-                {
-                    "name": "DOMINO_DEPLOY_MODE",
-                    "value": platform_config['kind']["DOMINO_DEPLOY_MODE"]
-                },
-            ],
-            "images": {
-                "useDefaultImageForMigration": False,
-                "airflow": {
-                    "repository": domino_airflow_image,
-                    "tag": "latest",
-                    "pullPolicy": "IfNotPresent"
-                }
+        "env": [
+            {
+                "name": "DOMINO_DEPLOY_MODE",
+                "value": platform_config['kind']["DOMINO_DEPLOY_MODE"]
             },
-            "extraSecrets": {
-                "airflow-ssh-secret": {
-                    "data": airflow_ssh_config_parsed
-                }
+        ],
+        "images": {
+            "useDefaultImageForMigration": False,
+            "airflow": {
+                "repository": domino_airflow_image,
+                "tag": "latest",
+                "pullPolicy": "IfNotPresent"
+            }
+        },
+        "extraSecrets": {
+            "airflow-ssh-secret": {
+                "data": airflow_ssh_config_parsed
+            }
+        },
+        "config": {
+            "api": {
+                "auth_backend": "airflow.api.auth.backend.basic_auth"
             },
-            "dags": {
-                "gitSync": {
-                    "enabled": True,
-                    "wait": 60,
-                    "repo": f"ssh://git@github.com/{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY']}.git",
-                    "branch": "main",
-                    "subPath": "workflows",
-                    "sshKeySecret": "airflow-ssh-secret"
-                }
+        },
+        "dags": {
+            "gitSync": {
+                "enabled": True,
+                "wait": 60,
+                "repo": f"ssh://git@github.com/{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY']}.git",
+                "branch": "main",
+                "subPath": "workflows",
+                "sshKeySecret": "airflow-ssh-secret"
             },
-            **workers,
-            **scheduler,
-        }
+        },
+        **workers,
+        **scheduler,
     }
 
-    # Write yaml to temp file and install domino airflow
+    # Update Helm repositories
     subprocess.run(["helm", "repo", "add", "domino", DOMINO_HELM_REPOSITORY])
     subprocess.run(["helm", "repo", "add", "apache-airflow", "https://airflow.apache.org/"])  # ref: https://github.com/helm/helm/issues/8036
     subprocess.run(["helm", "repo", "update"])
-    with TemporaryDirectory() as tmp_dir:
-        console.print("Downloading Domino Helm chart...")
-        subprocess.run([
-            "helm",
-            "pull",
-            DOMINO_HELM_PATH,
-            "--version",
-            DOMINO_HELM_VERSION,
-            "--untar",
-            "-d",
-            tmp_dir
-        ])
-        if run_airflow:
-            console.print("Installing dependencies...")
-            subprocess.run(["helm", "dependency", "build"], cwd=f"{tmp_dir}/domino")
-        with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+
+    # Install Airflow Helm Chart
+    if install_airflow:
+        console.print('Installing Apache Airflow...')
+        airflow_override_file = "values-override-airflow.yaml"
+        with open(airflow_override_file, "w") as fp:
             yaml.dump(airflow_values_override_config, fp)
-            console.print('Installing Domino...')
-            commands = [
-                "helm", "install",
-                "-f", str(fp.name),
-                "domino",
-                f"{tmp_dir}/domino",
-                # "/media/luiz/storage2/Github/domino/helm/domino"  # TODO: remove this line, only for local dev
-            ]
-            subprocess.run(commands)
+        commands = [
+            "helm", "install",
+            "-f", airflow_override_file,
+            "airflow",
+            "apache-airflow/airflow",
+            "--version", " 1.9.0",
+        ]
+        subprocess.run(commands)
+
+    # TODO - install Domino from remote Helm chart
+    # with TemporaryDirectory() as tmp_dir:
+        # console.print("Downloading Domino Helm chart...")
+        # subprocess.run([
+        #     "helm",
+        #     "pull",
+        #     DOMINO_HELM_PATH,
+        #     "--version",
+        #     DOMINO_HELM_VERSION,
+        #     "--untar",
+        #     "-d",
+        #     tmp_dir
+        # ])
+        # with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+
+    # Install Domino Helm Chart
+    console.print('Installing Domino...')
+    domino_override_file = "values-override-domino.yaml"
+    with open(domino_override_file, "w") as fp:
+        yaml.dump(domino_values_override_config, fp)
+    commands = [
+        "helm", "install",
+        "-f", domino_override_file,
+        "domino",
+        #f"{tmp_dir}/domino",
+        # "/home/vinicius/Documents/work/tauffer/domino/helm/domino"  # TODO: remove this line, only for local dev
+        "/media/luiz/storage2/Github/domino/helm/domino" # TODO: remove this line, only for local
+    ]
+    subprocess.run(commands)
 
     # For each path create a pv and pvc
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
@@ -395,7 +421,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
 
         # Create service account role binding with admin access for airflow worker
         role_binding_name_worker = "full-access-user-clusterrolebinding-worker"
-        sa_name = "domino-airflow-worker"
+        sa_name = "airflow-worker"
         cluster_role_binding_worker = client.V1ClusterRoleBinding(
             metadata=client.V1ObjectMeta(name=role_binding_name_worker),
             subjects=[
@@ -415,7 +441,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
         v1.create_cluster_role_binding(cluster_role_binding_worker)
 
         role_binding_name_scheduler = "full-access-user-clusterrolebinding-scheduler"
-        sa_name = "domino-airflow-scheduler"
+        sa_name = "airflow-scheduler"
         cluster_role_binding_scheduler = client.V1ClusterRoleBinding(
             metadata=client.V1ObjectMeta(name=role_binding_name_scheduler),
             subjects=[
@@ -523,7 +549,7 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
                     storage_class_name="standard",
                     access_modes=["ReadWriteMany"],
                     capacity={"storage": "2Gi"},
-                    host_path=client.V1HostPathVolumeSource(path="/domino/domino_py"),
+                    host_path=client.V1HostPathVolumeSource(path="/domino/domino_py/src/domino"),
                     claim_ref=client.V1ObjectReference(
                         namespace="default",
                         name="domino-dev-volume-claim",
@@ -549,10 +575,24 @@ def create_platform(run_airflow: bool = True, use_gpu: bool = False) -> None:
 
     console.print("")
     console.print("K8s resources created successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
-
     console.print("You can now access the Domino frontend at: http://localhost/")
     console.print("Domino's REST API: http://localhost/api/")
     console.print("Domino's REST API Swagger: http://localhost/api/docs")
+    console.print("")
+
+
+def destroy_platform() -> None:
+    # Delete Kind cluster
+    with open("config-domino-local.toml", "rb") as f:
+        platform_config = tomli.load(f)
+    cluster_name = platform_config["kind"]["DOMINO_KIND_CLUSTER_NAME"]
+    console.print(f"Removing Kind cluster - {cluster_name}...")
+    result = subprocess.run(["kind", "delete", "cluster", "--name", cluster_name], capture_output=True, text=True)
+    if result.returncode != 0:
+        error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
+        raise Exception(f"An error occurred while deleting Kind cluster - {cluster_name}: {error_message}")
+    console.print("")
+    console.print("Kind cluster removed successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
     console.print("")
 
 
