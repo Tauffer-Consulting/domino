@@ -265,12 +265,9 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         nvidia_plugis_install_command = "helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false"
         subprocess.run(nvidia_plugis_install_command, shell=True)
 
-
-    # Install Domino Services
-    console.print("\nInstalling Domino Services...\n")
+    # Override values for Domino Helm chart
     token_pieces = platform_config["github"]["DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"]
     token_workflows = platform_config["github"]["DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS"]
-
     domino_values_override_config = {
         "github_access_token_pieces": token_pieces,
         "github_access_token_workflows": token_workflows,
@@ -285,7 +282,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         },
     }
 
-    # Create temporary airflow values with user provided arguments
+    # Override values for Airflow Helm chart
     airflow_ssh_config = dict(
         gitSshKey=f"{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY']}",
     )
@@ -382,6 +379,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             ]
             subprocess.run(commands)
 
+    # Install Domino Helm Chart
     local_domino_path = platform_config.get('dev', {}).get('DOMINO_LOCAL_DOMINO_PACKAGE')
     if platform_config.get('kind', {}).get('DOMINO_DEPLOY_MODE') == 'local-k8s-dev' and local_domino_path:
         console.print('Installing Domino using local helm...')
