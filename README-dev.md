@@ -44,3 +44,27 @@ The application will create a volume mapping between the path you specified and 
 
 
 ## Docker
+You can run your application in development mode using docker compose file.
+To do so, you should run using the `docker-compose-dev.yaml` file, as follows:
+```bash
+docker-compose -f docker-compose-dev.yaml up
+```
+This will activate some development features, such as:
+1. Hot reloading for local domino package in `worker` and `scheduler` containers.
+2. Hot reloading for `rest` code.
+3. Hot reloading for `frontend` code.
+
+**Important:** This will **not** activate hot reloading for your pieces repositories code and will **not** activate hot reloading for local domino package in the **pieces containers**. If you are running a piece and you need to have the domino package updated in the piece container you should update the piece image wit the domino development package you want to use.
+
+**Workaround:** As mentioned before, currently we don't have a direct way to allow hot reloading for domino package in pieces containers, however, you can use the following workaround:
+
+1. Go to `domino/src/domino/custom_operators/docker_operator.py` file.
+2. In the `__init__` method and start the `mounts` variable with the following code:
+```python
+mounts = [
+    Mount(source='/path/to/domino/src/domino', target='/home/domino/domino_py/', type='bind', read_only=True)
+]
+```
+The `source` must be the path to your local domino package. The `target` must be the path where the domino package will be mounted in the pieces container, by default the pieces images are built to use `/home/domino/domino_py/`.
+**DEPRECATED WARNING:** The target path will be deprecated in the next update since the pieces will be built using `/home/domino/domino_py/src/domino` as the default path for the domino package.
+
