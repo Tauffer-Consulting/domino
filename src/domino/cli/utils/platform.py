@@ -371,47 +371,55 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     # Install Airflow Helm Chart
     if install_airflow:
         console.print('Installing Apache Airflow...')
-        airflow_override_file = "values-override-airflow.yaml"
-        with open(airflow_override_file, "w") as fp:
+        # Create temporary file with airflow values
+        with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
             yaml.dump(airflow_values_override_config, fp)
-        commands = [
-            "helm", "install",
-            "-f", airflow_override_file,
-            "airflow",
-            "apache-airflow/airflow",
-            "--version", " 1.9.0",
-        ]
-        subprocess.run(commands)
+            commands = [
+                "helm", "install",
+                "-f", str(fp.name),
+                "airflow",
+                "apache-airflow/airflow",
+                "--version", " 1.9.0",
+            ]
+            subprocess.run(commands)
 
-    # TODO - install Domino from remote Helm chart
-    # with TemporaryDirectory() as tmp_dir:
-        # console.print("Downloading Domino Helm chart...")
-        # subprocess.run([
-        #     "helm",
-        #     "pull",
-        #     DOMINO_HELM_PATH,
-        #     "--version",
-        #     DOMINO_HELM_VERSION,
-        #     "--untar",
-        #     "-d",
-        #     tmp_dir
-        # ])
-        # with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
-
-    # Install Domino Helm Chart
-    console.print('Installing Domino...')
-    domino_override_file = "values-override-domino.yaml"
-    with open(domino_override_file, "w") as fp:
-        yaml.dump(domino_values_override_config, fp)
-    commands = [
-        "helm", "install",
-        "-f", domino_override_file,
-        "domino",
-        #f"{tmp_dir}/domino",
-        # "/home/vinicius/Documents/work/tauffer/domino/helm/domino"  # TODO: remove this line, only for local dev
-        "/media/luiz/storage2/Github/domino/helm/domino" # TODO: remove this line, only for local
-    ]
-    subprocess.run(commands)
+    local_domino_path = platform_config.get('dev', {}).get('DOMINO_LOCAL_DOMINO_PACKAGE')
+    if platform_config.get('kind', {}).get('DOMINO_DEPLOY_MODE') == 'local-k8s-dev' and local_domino_path:
+        console.print('Installing Domino using local helm...')
+        helm_domino_path = Path(local_domino_path).parent.parent / "helm/domino"
+        with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+            yaml.dump(domino_values_override_config, fp)
+            commands = [
+                "helm", "install",
+                "-f", str(fp.name),
+                "domino",
+                helm_domino_path
+            ]
+            subprocess.run(commands)
+    else:
+        console.print('Installing Domino using remote helm...')
+        with TemporaryDirectory() as tmp_dir:
+            console.print("Downloading Domino Helm chart...")
+            subprocess.run([
+                "helm",
+                "pull",
+                DOMINO_HELM_PATH,
+                "--version",
+                DOMINO_HELM_VERSION,
+                "--untar",
+                "-d",
+                tmp_dir
+            ])
+            with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+                yaml.dump(domino_values_override_config, fp)
+                console.print('Installing Domino...')
+                commands = [
+                    "helm", "install",
+                    "-f", str(fp.name),
+                    "domino",
+                    f"{tmp_dir}/domino",
+                ]
+                subprocess.run(commands)
 
     # For each path create a pv and pvc
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
