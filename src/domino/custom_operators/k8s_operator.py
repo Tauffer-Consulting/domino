@@ -142,15 +142,28 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             volume_dev = k8s.V1Volume(
                 name='jobs-persistent-storage-dev',
                 persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name=domino_package_local_claim_name),
-            )
+            ) 
+            """
+            # TODO
+            Remove deprecated_volume_mount_dev once we have all the pieces repositories updated
+            with the new base pod image
+            """
             volume_mount_dev = k8s.V1VolumeMount(
                 name='jobs-persistent-storage-dev', 
                 mount_path='/home/domino/domino_py/src/domino',
                 sub_path=None,
                 read_only=True
             )
+            deprecated_volume_mount_dev = k8s.V1VolumeMount(
+                name='jobs-persistent-storage-dev', 
+                mount_path='/home/domino/domino_py/domino',
+                sub_path=None,
+                read_only=True
+            )
             all_volumes.append(volume_dev)
             all_volume_mounts.append(volume_mount_dev)
+            # TODO remove
+            all_volume_mounts.append(deprecated_volume_mount_dev)
 
         return all_volumes, all_volume_mounts
 
