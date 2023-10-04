@@ -349,47 +349,42 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         for tid in task_ids:
             upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
         return upstream_xcoms_data
+    
+    def _get_piece_kwargs_value_from_upstream_xcom(
+        self, 
+        value: Any
+    ):
+        if isinstance(value, dict) and value.get("type") == "fromUpstream":
+            upstream_task_id = value["upstream_task_id"]
+            output_arg = value["output_arg"]
+            if upstream_task_id not in self.shared_storage_upstream_ids_list:
+                self.shared_storage_upstream_ids_list.append(upstream_task_id)
+            return self.upstream_xcoms_data[upstream_task_id][output_arg]
+        elif isinstance(value, list):
+            return [self._get_piece_kwargs_value_from_upstream_xcom(item) for item in value]
+        elif isinstance(value, dict):
+            return {
+                k: self._get_piece_kwargs_value_from_upstream_xcom(v) 
+                for k, v in value.items()
+            }
+        return value
 
-
-    def _get_piece_kwargs_with_upstream_xcom(self, upstream_xcoms_data: dict):
-        """
-        Update Operator kwargs with upstream tasks XCOM data
-        Also updates the list of upstream tasks for which we need to mount the results path
-        """
+    def _update_piece_kwargs_with_upstream_xcom(self):
         self.shared_storage_upstream_ids_list = list()
-        domino_k8s_run_op_kwargs = [var for var in self.env_vars if getattr(var, 'name', None) == 'DOMINO_RUN_PIECE_KWARGS']
-        if not domino_k8s_run_op_kwargs:
-            domino_k8s_run_op_kwargs = {
-                "name": "DOMINO_RUN_PIECE_KWARGS",
-                "value": {}
-            }
-        else:
-            domino_k8s_run_op_kwargs = domino_k8s_run_op_kwargs[0]
-            domino_k8s_run_op_kwargs = {
-                "name": "DOMINO_RUN_PIECE_KWARGS",
-                "value": ast.literal_eval(domino_k8s_run_op_kwargs.value)
-            }
-        updated_op_kwargs = dict()
-        for k, v in domino_k8s_run_op_kwargs.get('value').items():
-            if isinstance(v, dict) and v.get("type", None) == "fromUpstream":
-                upstream_task_id = v.get("upstream_task_id")
-                output_arg = v.get("output_arg")
-                output_value = upstream_xcoms_data[upstream_task_id][output_arg]
-                output_type = upstream_xcoms_data[upstream_task_id][f"{output_arg}_type"]
-                # If upstream output type is FilePath or DirectoryPath, we need to add the basic path prefix
-                # if output_type in ["file-path", "directory-path"]:
-                #     output_value = f"{self.shared_storage_base_mount_path}/{upstream_task_id}/results/{output_value}"
-                updated_op_kwargs[k] = output_value
-                if upstream_task_id not in self.shared_storage_upstream_ids_list:
-                    self.shared_storage_upstream_ids_list.append(upstream_task_id)
-            else:
-                updated_op_kwargs[k] = v
+        if not self.piece_input_kwargs:
+            self.piece_input_kwargs = dict()
+
+        updated_piece_kwargs = {
+            k: self._get_piece_kwargs_value_from_upstream_xcom(
+                value=v
+            ) for k, v in self.piece_input_kwargs.items()
+        }
+        self.piece_input_kwargs = updated_piece_kwargs
         self.env_vars.append({
             'name': 'AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE',
             'value': str(self.shared_storage_upstream_ids_list),
             'value_from': None
         })
-        return updated_op_kwargs
 
 
     def _update_env_var_value_from_name(self, name: str, value: str):
@@ -418,9 +413,9 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             'value_from': None
         })
         # Save updated piece input kwargs with upstream data to environment variable
-        upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
-        domino_k8s_run_op_kwargs = self._get_piece_kwargs_with_upstream_xcom(upstream_xcoms_data=upstream_xcoms_data)        
-        self._update_env_var_value_from_name(name='DOMINO_RUN_PIECE_KWARGS', value=str(domino_k8s_run_op_kwargs))
+        self.upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
+        self._update_piece_kwargs_with_upstream_xcom()
+        self._update_env_var_value_from_name(name='DOMINO_RUN_PIECE_KWARGS', value=str(self.piece_input_kwargs))
         
         # Add pieces secrets to environment variables
         piece_secrets = self._get_piece_secrets(

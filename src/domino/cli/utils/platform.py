@@ -120,11 +120,6 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         )
     )
     extra_mounts_local_repositories = []
-
-    if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
-        domino_airflow_image = platform_config['dev'].pop('DOMINO_AIRFLOW_IMAGE', None)
-        domino_rest_image = platform_config['dev'].pop('DOMINO_REST_IMAGE', None)
-        domino_frontend_image = platform_config['dev'].pop('DOMINO_FRONTEND_IMAGE', None)
     
     domino_dev_private_variables_list = [
         "DOMINO_LOCAL_DOMINO_PACKAGE",
@@ -226,25 +221,29 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     console.print("NGINX controller installed successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
     console.print("")
 
-    # Load images to Kind cluster
-    if domino_airflow_image:
-        console.print(f"Loading local Domino Airflow image {domino_airflow_image} to Kind cluster...")
-        subprocess.run(["kind", "load", "docker-image", domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
-        domino_airflow_image = f'docker.io/library/{domino_airflow_image}'
+    # Load local images to Kind cluster
+    local_domino_airflow_image = platform_config.get('dev', {}).get('DOMINO_AIRFLOW_IMAGE', None)
+    local_domino_frontend_image = platform_config.get('dev', {}).get('DOMINO_FRONTEND_IMAGE', None)
+    local_domino_rest_image = platform_config.get('dev', {}).get('DOMINO_REST_IMAGE', None)
+
+    if local_domino_airflow_image:
+        console.print(f"Loading local Domino Airflow image {local_domino_airflow_image} to Kind cluster...")
+        subprocess.run(["kind", "load", "docker-image", local_domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
+        domino_airflow_image = f'docker.io/library/{local_domino_airflow_image}'
     else:  
         domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest" 
 
-    if domino_frontend_image:
-        console.print(f"Loading local frontend image {domino_frontend_image} to Kind cluster...")
-        subprocess.run(["kind", "load", "docker-image", domino_frontend_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
-        domino_frontend_image = f"docker.io/library/{domino_frontend_image}"
+    if local_domino_frontend_image:
+        console.print(f"Loading local frontend image {local_domino_frontend_image} to Kind cluster...")
+        subprocess.run(["kind", "load", "docker-image", local_domino_frontend_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
+        domino_frontend_image = f"docker.io/library/{local_domino_frontend_image}"
     else:
         domino_frontend_image = "ghcr.io/tauffer-consulting/domino-frontend:k8s"
     
-    if domino_rest_image:
-        console.print(f"Loading local REST image {domino_rest_image} to Kind cluster...")
-        subprocess.run(["kind", "load", "docker-image", domino_rest_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
-        domino_rest_image = f'docker.io/library/{domino_rest_image}'
+    if local_domino_rest_image:
+        console.print(f"Loading local REST image {local_domino_rest_image} to Kind cluster...")
+        subprocess.run(["kind", "load", "docker-image", local_domino_rest_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
+        domino_rest_image = f'docker.io/library/{local_domino_rest_image}'
     else:  
         domino_rest_image = "ghcr.io/tauffer-consulting/domino-rest:latest" 
 
@@ -266,12 +265,9 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         nvidia_plugis_install_command = "helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false"
         subprocess.run(nvidia_plugis_install_command, shell=True)
 
-
-    # Install Domino Services
-    console.print("\nInstalling Domino Services...\n")
+    # Override values for Domino Helm chart
     token_pieces = platform_config["github"]["DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"]
     token_workflows = platform_config["github"]["DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS"]
-
     domino_values_override_config = {
         "github_access_token_pieces": token_pieces,
         "github_access_token_workflows": token_workflows,
@@ -286,7 +282,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         },
     }
 
-    # Create temporary airflow values with user provided arguments
+    # Override values for Airflow Helm chart
     airflow_ssh_config = dict(
         gitSshKey=f"{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY']}",
     )
@@ -371,47 +367,56 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     # Install Airflow Helm Chart
     if install_airflow:
         console.print('Installing Apache Airflow...')
-        airflow_override_file = "values-override-airflow.yaml"
-        with open(airflow_override_file, "w") as fp:
+        # Create temporary file with airflow values
+        with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
             yaml.dump(airflow_values_override_config, fp)
-        commands = [
-            "helm", "install",
-            "-f", airflow_override_file,
-            "airflow",
-            "apache-airflow/airflow",
-            "--version", " 1.9.0",
-        ]
-        subprocess.run(commands)
-
-    # TODO - install Domino from remote Helm chart
-    # with TemporaryDirectory() as tmp_dir:
-        # console.print("Downloading Domino Helm chart...")
-        # subprocess.run([
-        #     "helm",
-        #     "pull",
-        #     DOMINO_HELM_PATH,
-        #     "--version",
-        #     DOMINO_HELM_VERSION,
-        #     "--untar",
-        #     "-d",
-        #     tmp_dir
-        # ])
-        # with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+            commands = [
+                "helm", "install",
+                "-f", str(fp.name),
+                "airflow",
+                "apache-airflow/airflow",
+                "--version", " 1.9.0",
+            ]
+            subprocess.run(commands)
 
     # Install Domino Helm Chart
-    console.print('Installing Domino...')
-    domino_override_file = "values-override-domino.yaml"
-    with open(domino_override_file, "w") as fp:
-        yaml.dump(domino_values_override_config, fp)
-    commands = [
-        "helm", "install",
-        "-f", domino_override_file,
-        "domino",
-        #f"{tmp_dir}/domino",
-        # "/home/vinicius/Documents/work/tauffer/domino/helm/domino"  # TODO: remove this line, only for local dev
-        "/media/luiz/storage2/Github/domino/helm/domino" # TODO: remove this line, only for local
-    ]
-    subprocess.run(commands)
+    local_domino_path = platform_config.get('dev', {}).get('DOMINO_LOCAL_DOMINO_PACKAGE')
+    if platform_config.get('kind', {}).get('DOMINO_DEPLOY_MODE') == 'local-k8s-dev' and local_domino_path:
+        console.print('Installing Domino using local helm...')
+        helm_domino_path = Path(local_domino_path).parent.parent / "helm/domino"
+        with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+            yaml.dump(domino_values_override_config, fp)
+            commands = [
+                "helm", "install",
+                "-f", str(fp.name),
+                "domino",
+                helm_domino_path
+            ]
+            subprocess.run(commands)
+    else:
+        console.print('Installing Domino using remote helm...')
+        with TemporaryDirectory() as tmp_dir:
+            console.print("Downloading Domino Helm chart...")
+            subprocess.run([
+                "helm",
+                "pull",
+                DOMINO_HELM_PATH,
+                "--version",
+                DOMINO_HELM_VERSION,
+                "--untar",
+                "-d",
+                tmp_dir
+            ])
+            with NamedTemporaryFile(suffix='.yaml', mode="w") as fp:
+                yaml.dump(domino_values_override_config, fp)
+                console.print('Installing Domino...')
+                commands = [
+                    "helm", "install",
+                    "-f", str(fp.name),
+                    "domino",
+                    f"{tmp_dir}/domino",
+                ]
+                subprocess.run(commands)
 
     # For each path create a pv and pvc
     if platform_config['kind']['DOMINO_DEPLOY_MODE'] == 'local-k8s-dev':
