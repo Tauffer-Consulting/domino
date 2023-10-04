@@ -32,6 +32,16 @@ As the frontend image, if you want to run your cluster with a local rest image y
 This will load your local rest image in the kind cluster.
 **Important:** This will not activate hot reloading for your local rest code. If you need to update your rest code in the cluster you should build the image again.
 
+### 5. Using local airflow base image
+If you need to update the base airflow image used in worker and scheduler containers you can do it by following the next steps:
+1. Build your local airflow base image. You can use the following command from the root of the project: `DOCKER_BUILDKIT=1 docker build -f Dockerfile-airflow-domino-base-dev -t domino-airflow .`
+2. Addthe key `DOMINO_AIRFLOW_IMAGE` with the value `domino-airflow` (or other tag you choose) to your `config.toml` file in the `dev` section.
+
+This will load your local airflow base image in the kind cluster.
+**Important:** This is useful if you want to update airflow image dependencies.
+To update only the domino package code in the airflow containers you don't need to build the image again, you can use the hot reloading feature for local domino package describe in the section 1.
+
+
 ### 5. Activating hot reloading for local pieces repositories code
 You can activate hot reloading for the local code of your pieces repositories. To do so, you should follow the next steps:
 1. Go to your `config.toml` file in the `dev` section
