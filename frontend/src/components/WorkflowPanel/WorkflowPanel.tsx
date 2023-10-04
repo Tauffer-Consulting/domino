@@ -26,6 +26,9 @@ import ReactFlow, {
   type ReactFlowInstance,
   type XYPosition,
   ControlButton,
+  MarkerType,
+  type EdgeTypes,
+  type NodeTypes,
 } from "reactflow";
 
 import DefaultEdge from "./DefaultEdge";
@@ -34,15 +37,15 @@ import RunNodeComponent from "./RunNode";
 import "reactflow/dist/style.css";
 
 // Load CustomNode
-const DEFAULT_NODE_TYPES = {
+const DEFAULT_NODE_TYPES: NodeTypes = {
   CustomNode: DefaultNodeComponent,
 };
 
-const RUN_NODE_TYPES = {
+const RUN_NODE_TYPES: NodeTypes = {
   CustomNode: RunNodeComponent,
 };
 
-const EDGE_TYPES = {
+const EDGE_TYPES: EdgeTypes = {
   default: DefaultEdge,
 };
 type OnInit<NodeData = any, EdgeData = any> =
@@ -169,7 +172,19 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
     );
 
     const onConnect = useCallback((connection: Connection) => {
-      setEdges((prevEdges: Edge[]) => addEdge(connection, prevEdges));
+      setEdges((prevEdges: Edge[]) =>
+        addEdge(
+          {
+            ...connection,
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 20,
+              height: 20,
+            },
+          },
+          prevEdges,
+        ),
+      );
     }, []);
 
     const autoLayout = useCallback(async () => {
