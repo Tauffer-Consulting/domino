@@ -1,9 +1,16 @@
-import { Paper } from "@mui/material";
+import { Container, Paper, Typography } from "@mui/material";
 import { NoDataOverlay } from "components/NoDataOverlay";
+import {
+  useAuthenticatedGetWorkflowRunTaskLogs,
+  useAuthenticatedGetWorkflowRunTaskResult,
+} from "features/workflows/api";
 import React, { useCallback, useMemo, useState } from "react";
+import { useInterval } from "utils";
 
 import { CustomTabMenu, CustomTabPanel } from "./CustomTabMenu";
 import { TaskDetails } from "./CustomTabMenu/TaskDetail";
+import { TaskLogs } from "./CustomTabMenu/TaskLogs";
+import { TaskResult } from "./CustomTabMenu/TaskResult";
 
 import { type IWorkflowRunTaskExtended } from ".";
 
@@ -11,12 +18,16 @@ interface Props {
   runId: string | null;
   nodeId: string | null;
   tasks: IWorkflowRunTaskExtended[] | null;
+  workflowId: string;
+  autoUpdate: boolean;
 }
 
 export const WorkflowRunDetail: React.FC<Props> = ({
   runId,
   nodeId,
   tasks,
+  workflowId,
+  autoUpdate,
 }) => {
   const [value, setValue] = useState(0);
 
@@ -26,10 +37,27 @@ export const WorkflowRunDetail: React.FC<Props> = ({
         return task.task_id === nodeId;
       });
 
-      console.log(task);
       return task;
     }
   }, [nodeId, tasks]);
+
+  const { data: taskLogs } = useAuthenticatedGetWorkflowRunTaskLogs({
+    runId: runId ?? "",
+    taskId: taskData?.task_id ?? "",
+    taskTryNumber: String(taskData?.try_number) ?? "",
+    workflowId,
+  });
+
+  const {
+    data: taskResult,
+    isLoading,
+    mutate,
+  } = useAuthenticatedGetWorkflowRunTaskResult({
+    runId: runId ?? "",
+    taskId: taskData?.task_id ?? "",
+    taskTryNumber: String(taskData?.try_number) ?? "",
+    workflowId,
+  });
 
   const handleChange = useCallback(
     (_event: React.SyntheticEvent, newValue: number) => {
@@ -37,6 +65,8 @@ export const WorkflowRunDetail: React.FC<Props> = ({
     },
     [],
   );
+
+  useInterval(mutate, 1000, autoUpdate);
 
   return (
     <Paper sx={{ height: "46vh" }}>
@@ -53,10 +83,14 @@ export const WorkflowRunDetail: React.FC<Props> = ({
                   <TaskDetails taskData={taskData} />
                 </CustomTabPanel>
                 <CustomTabPanel index={1} value={value}>
-                  Selected task {taskData.task_id}
+                  <TaskLogs logs={taskLogs?.data ?? []} />
                 </CustomTabPanel>
                 <CustomTabPanel index={2} value={value}>
-                  Selected task {taskData.task_id}
+                  <TaskResult
+                    isLoading={isLoading}
+                    base64_content={taskResult?.base64_content}
+                    file_type={taskResult?.file_type}
+                  />
                 </CustomTabPanel>
               </>
             )}
@@ -67,7 +101,17 @@ export const WorkflowRunDetail: React.FC<Props> = ({
             value={value}
             handleChange={handleChange}
           >
-            Select one piece
+            <Container
+              sx={{
+                height: "90%",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="h2">Select a domino piece</Typography>
+            </Container>
           </CustomTabMenu>
         )
       ) : (

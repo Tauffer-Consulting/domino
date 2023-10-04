@@ -1,32 +1,52 @@
-import { Box, CircularProgress } from "@mui/material";
+import { CircularProgress, Container, Typography } from "@mui/material";
+import { type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 // import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 interface ITaskResultProps {
-  base64_content: string;
-  file_type: string;
+  isLoading: boolean;
+  base64_content?: string;
+  file_type?: string;
 }
 
 export const TaskResult = (props: ITaskResultProps) => {
   const { base64_content, file_type } = props;
 
+  const style: CSSProperties = {
+    height: "100%",
+    overflowY: "scroll",
+    overflowX: "hidden",
+    wordWrap: "break-word",
+    whiteSpace: "pre-wrap",
+  };
+
   const renderContent = () => {
-    if (!base64_content || !file_type) {
+    if (props.isLoading) {
       return <CircularProgress />;
     }
+
+    if (!base64_content || !file_type) {
+      return (
+        <Container
+          sx={{
+            height: "90%",
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="h2">No content</Typography>
+        </Container>
+      );
+    }
+
     switch (file_type) {
       case "txt":
-        return <pre>{window.atob(base64_content)}</pre>;
+        return <pre style={style}>{window.atob(base64_content)}</pre>;
       case "json":
         return (
-          <pre
-            style={{
-              maxHeight: "100%",
-              overflowY: "auto",
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word",
-            }}
-          >
+          <pre style={style}>
             {JSON.stringify(JSON.parse(window.atob(base64_content)), null, 2)}
           </pre>
         );
@@ -39,7 +59,7 @@ export const TaskResult = (props: ITaskResultProps) => {
           <img
             src={`data:image/${file_type};base64,${base64_content}`}
             alt="Content"
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
+            style={{ maxWidth: "100%", maxHeight: "100%", ...style }}
           />
         );
       case "svg":
@@ -47,7 +67,7 @@ export const TaskResult = (props: ITaskResultProps) => {
           <object
             type="image/svg+xml"
             data={`data:image/svg+xml;base64,${base64_content}`}
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
+            style={{ maxWidth: "100%", maxHeight: "100%", ...style }}
           >
             Your browser does not support SVG
           </object>
@@ -56,7 +76,7 @@ export const TaskResult = (props: ITaskResultProps) => {
         return <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
       case "pdf":
         return (
-          <div style={{ width: "100%", height: "500px" }}>
+          <div style={{ width: "100%", ...style }}>
             PDF result display not yet implemented
             {/* <PDFViewer>
                             <Document file={`data:application/pdf;base64,${base64_content}`}>
@@ -67,7 +87,7 @@ export const TaskResult = (props: ITaskResultProps) => {
         );
       case "html":
         return (
-          <div style={{ width: "100%", height: "500px" }}>
+          <div style={{ width: "100%", ...style }}>
             HTML result display not yet implemented
           </div>
           // <iframe
@@ -81,8 +101,16 @@ export const TaskResult = (props: ITaskResultProps) => {
   };
 
   return (
-    <Box width={1} sx={{ height: "inherit" }}>
+    <Container
+      sx={{
+        height: "90%",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       {renderContent()}
-    </Box>
+    </Container>
   );
 };

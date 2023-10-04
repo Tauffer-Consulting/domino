@@ -3,7 +3,7 @@ import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { NoDataOverlay } from "components/NoDataOverlay";
 import { useAuthenticatedGetWorkflowRuns } from "features/workflows/api";
 import { type IWorkflowRuns } from "features/workflows/types";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useInterval } from "utils";
 
 import { States } from "./States";
@@ -12,6 +12,8 @@ import { WorkflowRunTableFooter } from "./WorkflowRunTableFooter";
 interface Props {
   workflowId: string;
   selectedRun: IWorkflowRuns | null;
+  autoUpdate: boolean;
+  setAutoUpdate: React.Dispatch<React.SetStateAction<boolean>>;
   onSelectedRunChange: (run: IWorkflowRuns | null) => void;
   triggerRun: () => void;
 }
@@ -21,8 +23,10 @@ export const WorkflowRunsTable: React.FC<Props> = ({
   selectedRun,
   onSelectedRunChange: setSelectedRun,
   triggerRun,
+  autoUpdate,
+  setAutoUpdate,
 }) => {
-  const [paginationModel, setPaginationModel] = React.useState({
+  const [paginationModel, setPaginationModel] = useState({
     pageSize: 10,
     page: 0,
   });
@@ -30,12 +34,26 @@ export const WorkflowRunsTable: React.FC<Props> = ({
   const {
     data: workflowRuns,
     isLoading,
-    mutate: handleRefreshWorkflowsRun,
+    mutate: refetchWorkflowsRun,
   } = useAuthenticatedGetWorkflowRuns({
     page: paginationModel.page,
     pageSize: paginationModel.pageSize,
     workflowId,
   });
+
+  const handleRefreshWorkflowsRuns = useCallback(async () => {
+    if (
+      workflowRuns &&
+      workflowRuns.data?.some(
+        (wr) => wr.state !== "success" && wr.state !== "failed",
+      )
+    ) {
+      setAutoUpdate(true);
+    } else if (workflowRuns) {
+      setAutoUpdate(false);
+    }
+    void refetchWorkflowsRun();
+  }, [workflowRuns, setAutoUpdate]);
 
   const columns = useMemo<Array<GridColDef<IWorkflowRuns>>>(
     () => [
@@ -103,12 +121,12 @@ export const WorkflowRunsTable: React.FC<Props> = ({
     }
   }, [isLoading, workflowRuns]);
 
-  useInterval(handleRefreshWorkflowsRun, 3000);
+  useInterval(handleRefreshWorkflowsRuns, 3000, autoUpdate);
 
   const newRun = useCallback(() => {
     triggerRun();
-    void handleRefreshWorkflowsRun();
-  }, [triggerRun, handleRefreshWorkflowsRun]);
+    setAutoUpdate(true);
+  }, [triggerRun, setAutoUpdate]);
 
   return (
     <Grid container spacing={3}>

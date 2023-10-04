@@ -40,11 +40,11 @@ export interface IWorkflowRuns {
 export interface IWorkflowRunTasks {
   workflow_uuid: string;
   workflow_run_id: string;
-  duration: number;
-  start_date: string;
-  end_date: string;
+  duration: number | null;
+  start_date: string | null;
+  end_date: string | null;
   execution_date: string;
-  docker_image: string;
+  docker_image: string | null;
   task_id: string;
   try_number: number;
   state: taskState;

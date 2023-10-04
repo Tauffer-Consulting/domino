@@ -78,7 +78,6 @@ export interface WorkflowPanelRef {
   edges: Edge[];
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
-  autoLayout: () => void;
 }
 const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
   (props: Props, ref: ForwardedRef<WorkflowPanelRef>) => {
@@ -237,7 +236,6 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           nodes,
           setEdges,
           setNodes,
-          autoLayout,
         };
       },
       [edges, nodes, setEdges, setNodes],

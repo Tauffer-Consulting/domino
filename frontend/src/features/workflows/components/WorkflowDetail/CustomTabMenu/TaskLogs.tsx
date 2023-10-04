@@ -1,67 +1,63 @@
 import {
-  Grid,
-  TextareaAutosize,
   Switch,
   FormControlLabel,
   FormGroup,
+  Typography,
+  Box,
 } from "@mui/material";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, type CSSProperties } from "react";
 
 interface ITaskLogsProps {
   logs: string[];
 }
 
-export const TaskLogs = (props: ITaskLogsProps) => {
-  // @todo use style components instead of inline styles
-  const { logs } = props;
-  const [logContent, setLogContent] = useState<string>("");
+export const TaskLogs = ({ logs }: ITaskLogsProps) => {
   const [renderOverflowX, setRenderOverflowX] = useState<boolean>(true);
 
-  // @todo
-  // const logsTypeColorMap = {
-  //     'INFO': '#64df46',
-  //     'ERROR': '#f00',
-  //     'WARNING': '#f90',
-  //     'DEBUG': '#00f',
-  // }
+  /* @todo
+   * const logsTypeColorMap = {
+   *     'INFO': '#64df46',
+   *     'ERROR': '#f00',
+   *     'WARNING': '#f90',
+   *     'DEBUG': '#00f',
+   * }
+   */
 
-  useEffect(() => {
-    setLogContent(logs.join("\n"));
+  const logContent = useMemo(() => {
+    return logs.length ? logs.join("\n") : "No logs available";
   }, [logs]);
 
-  const textareaStyle: any = useMemo(() => {
+  const textareaStyle: CSSProperties = useMemo(() => {
     return {
       width: "100%",
+      height: "100%",
       border: "none",
       overflowX: renderOverflowX ? "hidden" : "scroll",
+      overflowY: "scroll",
       whiteSpace: renderOverflowX ? "pre-wrap" : "pre",
+      wordWrap: renderOverflowX ? "break-word" : "normal",
       outline: "none",
     };
   }, [renderOverflowX]);
 
   return (
-    <Grid container mt={5}>
-      <Grid item xs={12}>
-        <FormGroup sx={{ marginBottom: "8px" }}>
-          <FormControlLabel
-            control={
-              <Switch
-                defaultChecked
-                onChange={() => {
-                  setRenderOverflowX(!renderOverflowX);
-                }}
-              />
-            }
-            label="Wrap text horizontally."
-          />
-        </FormGroup>
-        <TextareaAutosize
-          defaultValue={logContent}
-          style={textareaStyle}
-          minRows={25}
-          maxRows={35}
+    <Box sx={{ p: 3, height: "95%" }}>
+      <FormGroup sx={{ marginBottom: "8px" }}>
+        <FormControlLabel
+          control={
+            <Switch
+              defaultChecked
+              onChange={() => {
+                setRenderOverflowX(!renderOverflowX);
+              }}
+            />
+          }
+          label="Wrap text horizontally."
         />
-      </Grid>
-    </Grid>
+      </FormGroup>
+      <Typography component="pre" variant="body1" sx={textareaStyle}>
+        {logContent}
+      </Typography>
+    </Box>
   );
 };

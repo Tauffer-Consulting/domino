@@ -58,9 +58,7 @@ export const WorkflowList: React.FC = () => {
     }
   }, []);
 
-  const pauseWorkflow = useCallback((id: IWorkflow["id"]) => {
-    console.log(id);
-  }, []);
+  const pauseWorkflow = useCallback((_id: IWorkflow["id"]) => {}, []);
 
   const { rows, totalRows } = useMemo(
     () => ({

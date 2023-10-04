@@ -56,6 +56,7 @@ class DominoDockerOperator(DockerOperator):
         mounts=[
             # TODO remove
             # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/home/domino/domino_py/src/domino', type='bind', read_only=True),
+            # Mount(source='/home/nathan/Documentos/github.com/Tauffer-Consulting/domino/src/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
             # Mount(source='/media/luiz/storage2/Github/domino/src/domino', target='/home/domino/domino_py/src/domino', type='bind', read_only=True),
             # Mount(source='/media/luiz/storage2/Github/default_domino_pieces', target='/home/domino/pieces_repository/', type='bind', read_only=True),
         ]
@@ -80,16 +81,16 @@ class DominoDockerOperator(DockerOperator):
 
     def _get_piece_secrets(self) -> Dict[str, Any]:
         """Get piece secrets values from Domino API"""
+        params = {
+            "workspace_id": self.workspace_id,
+            "url": self.repository_url,
+            "version": self.repository_version,
+            "page": 0,
+            "page_size": 1,
+        }
+
         piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
-            params={
-                "workspace_id": self.workspace_id,
-                "filters": {
-                    "url": self.repository_url,
-                    "version": self.repository_version,
-                },
-                "page": 0,
-                "page_size": 1,
-            }
+            params=params
         ).json()
         secrets_response = self.domino_client.get_piece_secrets(
             piece_repository_id=piece_repository_data["data"][0]["id"],

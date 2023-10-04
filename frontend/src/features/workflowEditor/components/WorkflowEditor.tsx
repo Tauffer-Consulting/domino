@@ -1,5 +1,4 @@
 import { Settings as SettingsSuggestIcon } from "@mui/icons-material";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
 import SaveIcon from "@mui/icons-material/Save";
@@ -292,7 +291,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
     ) {
       return;
     }
-    console.log("here");
     setSidebarSettingsDrawer(open);
   };
 
@@ -353,16 +351,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 onClick={handleClear}
               >
                 Clear
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                color="primary"
-                variant="contained"
-                startIcon={<AutoFixHighIcon />}
-                onClick={() => workflowPanelRef.current?.autoLayout()}
-              >
-                Auto Layout
               </Button>
             </Grid>
           </Grid>

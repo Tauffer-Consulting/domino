@@ -39,7 +39,7 @@ export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
-  const [shouldIntervalRun, setShouldIntervalRun] = useState(true);
+  const [autoUpdate, setAutoUpdate] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedRun, setSelectedRun] = useState<IWorkflowRuns | null>(null);
   const [tasks, setTasks] = useState<IWorkflowRunTaskExtended[]>([]);
@@ -54,15 +54,6 @@ export const WorkflowDetail: React.FC = () => {
   const handleFetchWorkflowRunTasks = useCallback(async () => {
     if (selectedRun && workflow) {
       try {
-        if (
-          selectedRun &&
-          (selectedRun.state === "success" || selectedRun.state === "failed")
-        ) {
-          setShouldIntervalRun(false);
-        } else {
-          setShouldIntervalRun(true);
-        }
-        console.log("I RUN");
         const pageSize = 100;
         const result = await fetchWorkflowTasks({
           workflowId: id as string,
@@ -136,6 +127,14 @@ export const WorkflowDetail: React.FC = () => {
           workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
           workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
           setTasks(tasks);
+          if (
+            selectedRun &&
+            (selectedRun.state === "success" || selectedRun.state === "failed")
+          ) {
+            setAutoUpdate(false);
+          } else {
+            setAutoUpdate(true);
+          }
         }
       } catch (e) {
         if (e instanceof AxiosError) {
@@ -144,12 +143,16 @@ export const WorkflowDetail: React.FC = () => {
         console.log(e);
       }
     }
-  }, [selectedRun, workflow, fetchWorkflowTasks]);
+  }, [selectedRun, workflow, fetchWorkflowTasks, autoUpdate]);
 
-  const handleSelectRun = useCallback((run: IWorkflowRuns | null) => {
-    setShouldIntervalRun(true);
-    setSelectedRun(run);
-  }, []);
+  const handleSelectRun = useCallback(
+    (run: IWorkflowRuns | null) => {
+      setAutoUpdate(true);
+      setSelectedRun(run);
+      void handleFetchWorkflowRunTasks();
+    },
+    [handleFetchWorkflowRunTasks],
+  );
 
   const onNodeDoubleClick = useCallback<NodeMouseHandler>(
     (_, node: RunNode) => {
@@ -158,7 +161,7 @@ export const WorkflowDetail: React.FC = () => {
     [],
   );
 
-  useInterval(handleFetchWorkflowRunTasks, 1000, shouldIntervalRun);
+  useInterval(handleFetchWorkflowRunTasks, 1000, autoUpdate);
 
   return (
     <Grid container spacing={3}>
@@ -175,6 +178,8 @@ export const WorkflowDetail: React.FC = () => {
           selectedRun={selectedRun}
           onSelectedRunChange={handleSelectRun}
           workflowId={id as string}
+          autoUpdate={autoUpdate}
+          setAutoUpdate={setAutoUpdate}
         />
       </Grid>
       <Grid item xs={7}>
@@ -191,6 +196,8 @@ export const WorkflowDetail: React.FC = () => {
           runId={selectedRun?.workflow_run_id ?? null}
           tasks={tasks}
           nodeId={selectedNodeId}
+          workflowId={id as string}
+          autoUpdate={autoUpdate}
         />
       </Grid>
     </Grid>
