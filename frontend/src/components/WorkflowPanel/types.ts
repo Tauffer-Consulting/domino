@@ -3,7 +3,7 @@ import { type CSSProperties } from "react";
 import { type Node, type NodeProps } from "reactflow";
 
 interface IStyleData {
-  nodeType: "default" | "input" | "output";
+  nodeType: "default" | "source" | "sink";
   nodeStyle: CSSProperties;
   useIcon: boolean;
   iconId: string;
@@ -17,6 +17,7 @@ interface DefaultNodeData {
   name: string;
   style: IStyleData;
   validationError: boolean;
+  orientation: "vertical" | "horizontal";
 }
 
 interface RunNodeData {
@@ -24,6 +25,7 @@ interface RunNodeData {
   name: string;
   style: IStyleData;
   state: taskState;
+  orientation: "vertical" | "horizontal";
 }
 
 export type DefaultNode = Node<DefaultNodeData>;

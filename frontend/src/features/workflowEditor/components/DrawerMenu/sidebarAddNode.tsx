@@ -5,12 +5,10 @@ import {
   AccordionSummary,
   Alert,
   Box,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type FC, useState, useCallback } from "react";
+import { type FC, useState } from "react";
 
 import PiecesSidebarNode from "./sidebarNode";
 
@@ -19,64 +17,19 @@ import PiecesSidebarNode from "./sidebarNode";
  * @todo move pieces rules to create workflow context
  * @todo improve loading/error/empty states
  */
+
 const SidebarAddNode: FC = () => {
   const { repositories, repositoriesLoading, repositoryPieces } =
     useWorkflowsEditor();
-  const [nodeDirection, setNodeDirection] = useState<"horizontal" | "vertical">(
-    "horizontal",
-  );
+
   const [piecesMap, setPiecesMap] = useState<Record<string, Piece[]>>({});
   const [expandedRepos, setExpandedRepos] = useState<string[]>([]);
 
-  const toggleNodeDirection = useCallback(() => {
-    setNodeDirection((nd) => (nd === "horizontal" ? "vertical" : "horizontal"));
-  }, []);
   /** controls if an accordion is loading Pieces */
   const [loadingPieces, setLoadingPieces] = useState<string | false>(false);
 
   return (
     <Box className="add-node-panel" sx={{ padding: "0px 0px 0px 0px" }}>
-      <Box sx={{ display: "flex", flexDirection: "column", mb: 1 }}>
-        <ToggleButtonGroup
-          value={nodeDirection}
-          exclusive
-          onChange={toggleNodeDirection}
-          aria-label="Node direction"
-          sx={{
-            width: "100%",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-          }}
-        >
-          <ToggleButton
-            value="horizontal"
-            aria-label="left aligned"
-            sx={{ padding: "0px 0px 0px 0px", width: "120px" }}
-          >
-            horizontal
-          </ToggleButton>
-          <ToggleButton
-            value="vertical"
-            aria-label="centered"
-            sx={{ padding: "0px 0px 0px 0px", width: "120px" }}
-          >
-            vertical
-          </ToggleButton>
-        </ToggleButtonGroup>
-
-        {/* <TextField
-          variant='outlined'
-          margin='normal'
-          label='Search repository'
-          type='search'
-          name='search-form'
-          id='search-form'
-          className='search-input'
-          value={search}
-        onChange={(e) => handleSearch(e.target.value)}
-        /> */}
-      </Box>
-
       {repositoriesLoading && (
         <Alert severity="info">Loading repositories...</Alert>
       )}

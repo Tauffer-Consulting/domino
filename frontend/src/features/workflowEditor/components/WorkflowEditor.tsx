@@ -232,6 +232,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
         name: data.name,
         style: data.style,
         validationError: false,
+        orientation: workflowPanelRef.current?.orientation ?? "horizontal",
       };
 
       const newNode = {
