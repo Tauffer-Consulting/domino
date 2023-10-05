@@ -147,9 +147,11 @@ export const WorkflowDetail: React.FC = () => {
 
   const handleSelectRun = useCallback(
     (run: IWorkflowRuns | null) => {
-      setAutoUpdate(true);
+      if (!(run?.state === "success") && !(run?.state === "failed")) {
+        setAutoUpdate(true);
+      }
+
       setSelectedRun(run);
-      void handleFetchWorkflowRunTasks();
     },
     [handleFetchWorkflowRunTasks],
   );

@@ -17,7 +17,7 @@ const getWorkflowRunTaskResultUrl = (
   taskId: string,
   taskTryNumber: string,
 ) => {
-  if (workspace && workflowId && runId && taskId && taskTryNumber)
+  if (workspace && workflowId && runId && taskId && Number(taskTryNumber))
     return `/workspaces/${workspace}/workflows/${workflowId}/runs/${runId}/tasks/${taskId}/${taskTryNumber}/result`;
 };
 
@@ -34,14 +34,16 @@ const getWorkflowRunTaskResult: (
 ) => Promise<
   AxiosResponse<{ base64_content: string; file_type: string }> | undefined
 > = async (workspace, workflowId, runId, taskId, taskTryNumber) => {
-  const url = getWorkflowRunTaskResultUrl(
-    workspace,
-    workflowId,
-    runId,
-    taskId,
-    taskTryNumber,
-  );
-  if (url) return await dominoApiClient.get(url);
+  if (workspace && workflowId && runId && taskId && taskTryNumber) {
+    const url = getWorkflowRunTaskResultUrl(
+      workspace,
+      workflowId,
+      runId,
+      taskId,
+      taskTryNumber,
+    );
+    if (url) return await dominoApiClient.get(url);
+  }
 };
 
 /**
