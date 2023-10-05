@@ -11,7 +11,8 @@ import copy
 from domino.utils import dict_deep_update
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas import WorkflowSharedStorage, ContainerResourcesModel
-
+from domino.storage.s3 import S3StorageRepository
+from domino.logger import get_configured_logger
 
 class DominoKubernetesPodOperator(KubernetesPodOperator):
     def __init__(
@@ -28,6 +29,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         container_resources: Optional[Dict] = None,
         **k8s_operator_kwargs
     ):
+        self.logger = get_configured_logger("DominoKubernetesPodOperator")
         self.task_id = task_id
         self.piece_name = piece_name
         self.deploy_mode = deploy_mode
@@ -142,15 +144,28 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             volume_dev = k8s.V1Volume(
                 name='jobs-persistent-storage-dev',
                 persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name=domino_package_local_claim_name),
-            )
+            ) 
+            """
+            # TODO
+            Remove deprecated_volume_mount_dev once we have all the pieces repositories updated
+            with the new base pod image
+            """
             volume_mount_dev = k8s.V1VolumeMount(
                 name='jobs-persistent-storage-dev', 
                 mount_path='/home/domino/domino_py/src/domino',
                 sub_path=None,
                 read_only=True
             )
+            deprecated_volume_mount_dev = k8s.V1VolumeMount(
+                name='jobs-persistent-storage-dev', 
+                mount_path='/home/domino/domino_py/domino',
+                sub_path=None,
+                read_only=True
+            )
             all_volumes.append(volume_dev)
             all_volume_mounts.append(volume_mount_dev)
+            # TODO remove
+            all_volume_mounts.append(deprecated_volume_mount_dev)
 
         return all_volumes, all_volume_mounts
 
@@ -166,7 +181,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
 
         if not self.workflow_shared_storage or self.workflow_shared_storage.mode.name == 'none':
             return pod
-        if  self.workflow_shared_storage.source.name in ["aws_s3", "gcs"]:
+        if self.workflow_shared_storage.source.name in ["aws_s3", "gcs"]:
             pod = self.add_shared_storage_sidecar(pod)
         elif self.workflow_shared_storage.source.name == "local":
             pod = self.add_local_shared_storage_volumes(pod)
@@ -205,6 +220,16 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         )
         return pod_cp
 
+    def _validate_storage_piece_secrets(self, storage_piece_secrets: Dict[str, Any]):
+        validated = False
+        if self.workflow_shared_storage.source.name == 'aws_s3':
+            s3_storage_repository = S3StorageRepository()
+            validated = s3_storage_repository.validate_s3_credentials_access(
+                access_key=storage_piece_secrets.get('AWS_ACCESS_KEY_ID'),
+                secret_key=storage_piece_secrets.get('AWS_SECRET_ACCESS_KEY'),
+                bucket=self.workflow_shared_storage.bucket,
+            )
+        return validated
 
     def add_shared_storage_sidecar(self, pod: k8s.V1Pod) -> k8s.V1Pod:
         """
@@ -276,6 +301,10 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
                 piece_name=self.workflow_shared_storage.storage_piece_name,
                 source='default',
             )
+        if not self._validate_storage_piece_secrets(storage_piece_secrets):
+            self.logger.error("Invalid storage piece secrets. Aborting pod creation.")
+            raise Exception("Invalid storage piece secrets. Aborting pod creation.")
+
         self.workflow_shared_storage.source = self.workflow_shared_storage.source.name
         sidecar_env_vars = {
             'DOMINO_WORKFLOW_SHARED_STORAGE': self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
@@ -349,7 +378,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         for tid in task_ids:
             upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
         return upstream_xcoms_data
-    
+
     def _get_piece_kwargs_value_from_upstream_xcom(
         self, 
         value: Any
