@@ -57,7 +57,10 @@ def prepare_platform(
     github_workflows_token: str,
     deploy_mode: str,
     local_pieces_repository_path: list,
-    local_domino_path: str
+    local_domino_path: str,
+    local_rest_image: str,
+    local_frontend_image: str,
+    local_airflow_image: str,
 ) -> None:
     # Create local configuration file updated with user-provided arguments
     config_file_path = Path(__file__).resolve().parent / "config-domino-local.toml"
@@ -70,9 +73,9 @@ def prepare_platform(
     config_dict['kind']['DOMINO_DEPLOY_MODE'] = deploy_mode
 
     if deploy_mode == 'local-k8s-dev':
-        config_dict['dev']['DOMINO_AIRFLOW_IMAGE'] = ""
-        config_dict['dev']['DOMINO_REST_IMAGE'] = ""
-        config_dict['dev']['DOMINO_FRONTEND_IMAGE'] = ""
+        config_dict['dev']['DOMINO_AIRFLOW_IMAGE'] = local_airflow_image
+        config_dict['dev']['DOMINO_REST_IMAGE'] = local_rest_image
+        config_dict['dev']['DOMINO_FRONTEND_IMAGE'] = local_frontend_image
         config_dict['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'] = local_domino_path
         for local_pieces_repository in local_pieces_repository_path:
             # Read repo config.toml to get repo name to map it to cluster path
