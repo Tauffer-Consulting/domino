@@ -1,93 +1,74 @@
 import { Paper } from "@mui/material";
 import {
   DataGrid,
-  type GridColumns,
+  type GridColDef,
   type GridEventListener,
 } from "@mui/x-data-grid";
-import { AxiosError } from "axios";
-import { useWorkflows } from "features/workflows/context";
+import { NoDataOverlay } from "components/NoDataOverlay";
+import {
+  useAuthenticatedDeleteWorkflowId,
+  useAuthenticatedGetWorkflows,
+  useAuthenticatedPostWorkflowRunId,
+} from "features/workflows/api";
 import { type IWorkflow } from "features/workflows/types";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useInterval } from "utils";
 
-import Actions from "./Actions";
+import { Actions } from "./Actions";
 import { Status } from "./Status";
+import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
 /**
- * @todo Trigger run. [x]
- * @todo Delete workflow. [x]
  * @todo Cancel run. []
  * @todo Pause run. []
  */
 
 export const WorkflowList: React.FC = () => {
-  const {
-    workflows,
-    tablePage,
-    setTablePage,
-    handleRunWorkflow,
-    handleDeleteWorkflow,
-    handleRefreshWorkflows,
-  } = useWorkflows();
   const navigate = useNavigate();
+  const [paginationModel, setPaginationModel] = React.useState({
+    pageSize: 10,
+    page: 0,
+  });
+
+  const {
+    data: workflows,
+    isLoading,
+    mutate: handleRefreshWorkflows,
+  } = useAuthenticatedGetWorkflows(
+    paginationModel.page,
+    paginationModel.pageSize,
+  );
+  const handleDeleteWorkflow = useAuthenticatedDeleteWorkflowId();
+  const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
   const deleteWorkflow = useCallback(async (id: IWorkflow["id"]) => {
     try {
-      await handleDeleteWorkflow(String(id));
-      handleRefreshWorkflows();
-      toast.success("Workflow deleted.");
+      await handleDeleteWorkflow({ id: String(id) });
+      await handleRefreshWorkflows();
     } catch (e) {
-      if (e instanceof AxiosError) {
-        if (e?.response?.status === 403) {
-          toast.error("You are not allowed to delete this workflow.");
-        } else if (e?.response?.status === 404) {
-          toast.error("Workflow not found.");
-        } else if (e?.response?.status === 409) {
-          toast.error("Workflow is not in a valid state. ");
-        } else {
-          console.error(e);
-          toast.error("Something went wrong.");
-        }
-      } else {
-        console.error(e);
-      }
+      console.error(e);
     }
   }, []);
   const runWorkflow = useCallback(async (id: IWorkflow["id"]) => {
     try {
-      await handleRunWorkflow(String(id));
-      toast.info("Workflow started");
+      await handleRunWorkflow({ id: String(id) });
     } catch (e) {
-      if (e instanceof AxiosError) {
-        if (e?.response?.status === 403) {
-          toast.error("You are not allowed to run this workflow.");
-        } else if (e?.response?.status === 404) {
-          toast.error("Workflow not found.");
-        } else if (e?.response?.status === 409) {
-          toast.error("Workflow is not in a valid state. ");
-        } else {
-          console.error(e);
-          toast.error("Something went wrong when starting the workflow.");
-        }
-      } else {
-        console.error(e);
-      }
+      console.error(e);
     }
   }, []);
-  const pauseWorkflow = useCallback((id: IWorkflow["id"]) => {
-    console.log(id);
-  }, []);
+
+  const pauseWorkflow = useCallback((_id: IWorkflow["id"]) => {}, []);
 
   const { rows, totalRows } = useMemo(
     () => ({
-      rows: workflows.data ?? [],
-      totalRows: workflows.metadata?.total ?? 0,
+      rows: workflows?.data ?? [],
+      totalRows: workflows?.metadata?.total ?? 0,
     }),
     [workflows],
   );
 
-  const columns = useMemo<GridColumns<IWorkflow>>(
+  const columns = useMemo<Array<GridColDef<IWorkflow>>>(
     () => [
       {
         field: "id",
@@ -172,9 +153,11 @@ export const WorkflowList: React.FC = () => {
     [navigate],
   );
 
-  useEffect(() => {
-    handleRefreshWorkflows();
-  }, []);
+  useInterval(handleRefreshWorkflows, 5000);
+
+  if (isLoading) {
+    return <WorkflowsListSkeleton />;
+  }
 
   return (
     <>
@@ -186,15 +169,20 @@ export const WorkflowList: React.FC = () => {
           onRowClick={handleRowClick}
           pagination
           paginationMode="server"
-          pageSize={10}
-          page={tablePage}
+          pageSizeOptions={[5, 10, 25]}
+          initialState={{
+            pagination: {
+              paginationModel,
+            },
+          }}
           rowCount={totalRows}
-          onPageChange={setTablePage}
+          onPaginationModelChange={setPaginationModel}
           disableDensitySelector
-          disableSelectionOnClick
+          disableRowSelectionOnClick
           hideFooterSelectedRowCount
           disableColumnMenu
           disableColumnSelector
+          slots={{ noRowsOverlay: NoDataOverlay }}
           sx={{
             "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
               outline: "none",

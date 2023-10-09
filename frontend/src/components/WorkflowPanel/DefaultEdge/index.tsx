@@ -1,10 +1,4 @@
-import {
-  BaseEdge,
-  type EdgeProps,
-  // getSmoothStepPath,
-  getBezierPath,
-  MarkerType,
-} from "reactflow";
+import { BaseEdge, type EdgeProps, getBezierPath } from "reactflow";
 
 const DefaultEdge: React.FC<EdgeProps> = ({
   id,
@@ -14,6 +8,7 @@ const DefaultEdge: React.FC<EdgeProps> = ({
   targetY,
   sourcePosition,
   targetPosition,
+  markerEnd,
 }: EdgeProps) => {
   const [edgePath] = getBezierPath({
     sourceX,
@@ -28,13 +23,9 @@ const DefaultEdge: React.FC<EdgeProps> = ({
     <BaseEdge
       id={id}
       path={edgePath}
-      markerEnd={MarkerType.ArrowClosed}
+      markerEnd={markerEnd}
       style={{
-        position: "absolute",
-        color: "#6a6a6e",
-        width: 60,
-        height: 60,
-        pointerEvents: "all",
+        strokeWidth: 2,
       }}
     />
   );

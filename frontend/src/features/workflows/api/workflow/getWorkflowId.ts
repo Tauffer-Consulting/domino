@@ -2,6 +2,7 @@ import { type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
 import { type IGetWorkflowIdResponseInterface } from "features/workflows/types/workflow";
 import { dominoApiClient } from "services/clients/domino.client";
+import useSWR from "swr";
 
 interface IGetWorkflowIdParams {
   id: string;
@@ -29,7 +30,7 @@ const getWorkflowId: (
  * @param params `{ workspaceId: number, id: string }`
  * @returns workflow fetcher fn
  */
-export const useAuthenticatedGetWorkflowId = () => {
+export const useAuthenticatedGetWorkflowId = ({ id }: { id: string }) => {
   const { workspace } = useWorkspaces();
 
   if (!workspace)
@@ -42,5 +43,12 @@ export const useAuthenticatedGetWorkflowId = () => {
     return await getWorkflowId(workspace.id, params).then((data) => data.data);
   };
 
-  return fetcher;
+  return useSWR(
+    getWorkflowUrl(workspace.id, id),
+    async () => await fetcher({ id }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
 };

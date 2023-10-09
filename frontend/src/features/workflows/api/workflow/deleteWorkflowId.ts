@@ -1,6 +1,7 @@
-import { type AxiosResponse } from "axios";
+import { AxiosError, type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
 import { type IDeleteWorkflowIdResponseInterface } from "features/workflows/types/workflow";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface IDeleteWorkflowIdParams {
@@ -36,6 +37,26 @@ export const useAuthenticatedDeleteWorkflowId = () => {
     );
 
   const fetcher = async (params: IDeleteWorkflowIdParams) =>
-    await deleteWorkflowId(workspace.id, params).then((data) => data);
+    await deleteWorkflowId(workspace.id, params)
+      .then((data) => {
+        toast.success("Workflow deleted.");
+        return data;
+      })
+      .catch((e) => {
+        if (e instanceof AxiosError) {
+          if (e?.response?.status === 403) {
+            toast.error("You are not allowed to delete this workflow.");
+          } else if (e?.response?.status === 404) {
+            toast.error("Workflow not found.");
+          } else if (e?.response?.status === 409) {
+            toast.error("Workflow is not in a valid state. ");
+          } else {
+            console.error(e);
+            toast.error("Something went wrong. ");
+          }
+        } else {
+          throw e;
+        }
+      });
   return fetcher;
 };

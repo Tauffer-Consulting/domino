@@ -1,20 +1,21 @@
 import { Settings as SettingsSuggestIcon } from "@mui/icons-material";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
 import SaveIcon from "@mui/icons-material/Save";
 import { Button, Grid, Paper } from "@mui/material";
 import { AxiosError } from "axios";
 import Loading from "components/Loading";
-import WorkflowPanel, { type WorkflowPanelRef } from "components/WorkflowPanel";
-import { type INodeData } from "components/WorkflowPanel/DefaultNode";
+import {
+  type WorkflowPanelRef,
+  WorkflowPanel,
+  type DefaultNode,
+} from "components/WorkflowPanel";
 import { useWorkspaces } from "context/workspaces";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { type Edge, type Node, type XYPosition } from "reactflow";
-import { yupResolver } from "utils";
-import { useAutoSave } from "utils/useAutoSave";
+import { yupResolver, useInterval } from "utils";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
@@ -62,7 +63,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     }
   }, [workflowPanelRef.current]);
 
-  useAutoSave(saveDataToLocalForage, 3000);
+  useInterval(saveDataToLocalForage, 3000);
 
   const {
     clearForageData,
@@ -115,7 +116,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       if (!Object.keys(validatedData.errors).length) {
         workflowPanelRef?.current?.setNodes((nodes) =>
           nodes.map((n) => {
-            n = { ...n, data: { ...n.data, error: false } };
+            n = { ...n, data: { ...n.data, validationError: false } };
             return n;
           }),
         );
@@ -124,7 +125,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
         workflowPanelRef?.current?.setNodes((nodes) => [
           ...nodes.map((n) => {
             if (nodeIds.includes(n.id)) {
-              n = { ...n, data: { ...n.data, error: true } };
+              n = { ...n, data: { ...n.data, validationError: true } };
             }
 
             return n;
@@ -227,10 +228,11 @@ export const WorkflowsEditorComponent: React.FC = () => {
       const nodeData = event.dataTransfer.getData("application/reactflow");
       const { ...data } = JSON.parse(nodeData);
 
-      const newNodeData: INodeData = {
+      const newNodeData: DefaultNode["data"] = {
         name: data.name,
         style: data.style,
-        error: false,
+        validationError: false,
+        orientation: workflowPanelRef.current?.orientation ?? "horizontal",
       };
 
       const newNode = {
@@ -290,7 +292,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
     ) {
       return;
     }
-    console.log("here");
     setSidebarSettingsDrawer(open);
   };
 
@@ -351,16 +352,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 onClick={handleClear}
               >
                 Clear
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                color="primary"
-                variant="contained"
-                startIcon={<AutoFixHighIcon />}
-                onClick={() => workflowPanelRef.current?.autoLayout()}
-              >
-                Auto Layout
               </Button>
             </Grid>
           </Grid>

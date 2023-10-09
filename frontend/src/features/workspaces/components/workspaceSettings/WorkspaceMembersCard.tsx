@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import {
   DataGrid,
-  type GridColumns,
+  type GridColDef,
   GridActionsCellItem,
 } from "@mui/x-data-grid";
 import { useWorkspaces } from "context/workspaces";
@@ -36,7 +36,7 @@ const WorkspaceMembersCard = () => {
   const [removeUserId, setRemoveUserId] = useState<any>("");
   const [isOpenRemoveDialog, setIsOpenRemoveDialog] = useState<boolean>(false);
 
-  const columns = useMemo<GridColumns<any>>(
+  const columns = useMemo<Array<GridColDef<any>>>(
     () => [
       {
         field: "id",
@@ -171,28 +171,30 @@ const WorkspaceMembersCard = () => {
         <CardContent>
           <div style={{ height: 350, width: "100%" }}>
             <DataGrid
-              autoHeight
               rows={rowsData}
               columns={columns}
-              rowsPerPageOptions={[5, 10, 20]}
-              pageSize={workspaceUsersTablePageSize}
-              onPageSizeChange={(newPageSize) => {
-                setWorkspaceUsersTablePageSize(newPageSize);
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    page: workspaceUsersTablePage,
+                    pageSize: workspaceUsersTablePageSize,
+                  },
+                },
+              }}
+              pageSizeOptions={[5, 10, 25]}
+              onPaginationModelChange={(model) => {
+                setWorkspaceUsersTablePage(model.page);
+                setWorkspaceUsersTablePageSize(model.pageSize);
               }}
               paginationMode="server"
               pagination
-              page={workspaceUsersTablePage}
               rowCount={totalRows}
-              onPageChange={(page) => {
-                setWorkspaceUsersTablePage(page);
-              }}
               sx={{
                 "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
                   outline: "none",
                 },
               }}
               keepNonExistentRowsSelected
-              // onSelectionModelChange={handleSelectionModelChange}
             />
           </div>
         </CardContent>

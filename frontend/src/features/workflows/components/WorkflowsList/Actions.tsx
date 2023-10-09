@@ -17,7 +17,7 @@ interface Props extends CommonProps {
   pauseFn: () => void;
 }
 
-const Actions: React.FC<Props> = ({ runFn, deleteFn, className }) => {
+export const Actions: React.FC<Props> = ({ runFn, deleteFn, className }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [newFeatureModal, setNewFeatureModal] = useState(false);
 
@@ -75,5 +75,3 @@ const Actions: React.FC<Props> = ({ runFn, deleteFn, className }) => {
     </>
   );
 };
-
-export default Actions;
