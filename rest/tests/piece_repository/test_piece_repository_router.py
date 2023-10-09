@@ -31,9 +31,9 @@ class TestPieceRepositoryRouter:
         mock_response = CreateRepositoryReponse(
             id=piece_repository.id, 
             name=piece_repository.name,
-            label=piece_repository.label,
             created_at=piece_repository.created_at,
             source=piece_repository.source,
+            label=piece_repository.label,
             path=piece_repository.path,
             version=piece_repository.version,
             workspace_id=piece_repository.workspace_id

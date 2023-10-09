@@ -31,7 +31,8 @@ def add_piece_repository(client: ApiTestClient, authorization_token: Dict, piece
         workspace_id=piece_repository.workspace_id,
         source=piece_repository.source,
         path=piece_repository.path,
-        version=piece_repository.version
+        version=piece_repository.version,
+        url=piece_repository.url
     )
     body = json.loads(add_piece_repository_request.json())
     response = client.post(
