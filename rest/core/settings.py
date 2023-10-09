@@ -93,7 +93,7 @@ class LocalK8sSettings(Settings):
         "allow_methods": ["*"],
         "allow_headers": ["*"],
     }
-    ROOT_PATH = '/'
+    ROOT_PATH = '/api'
 
 
 class LocalComposeSettings(Settings):
