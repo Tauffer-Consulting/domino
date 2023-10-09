@@ -1,17 +1,17 @@
 import { Paper, Typography } from "@mui/material";
 import theme from "providers/theme.config";
-import React, { type CSSProperties, memo, useMemo, useState } from "react";
+import React, { type CSSProperties, memo, useMemo } from "react";
 import { Handle, Position } from "reactflow";
-import { getUuidSlice } from "utils";
+import { getUuidSlice, useMouseProximity } from "utils";
 
 import { type DefaultNodeProps } from "../types";
 
 export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
-  const [hovered, setHovered] = useState(false);
+  const [isNear, ElementRef] = useMouseProximity(150);
 
   const handleStyle = useMemo<CSSProperties>(
     () =>
-      hovered
+      isNear
         ? {
             border: 0,
             borderRadius: "16px",
@@ -28,7 +28,7 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
             transition: "ease 100",
             zIndex: 2,
           },
-    [hovered],
+    [isNear],
   );
 
   const extendedClassExt = useMemo<"input" | "default" | "output">(() => {
@@ -121,16 +121,7 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
           style={handleStyle}
         />
       )}
-      <Paper
-        elevation={selected ? 12 : 3}
-        onMouseEnter={() => {
-          setHovered(true);
-        }}
-        onMouseLeave={() => {
-          setHovered(false);
-        }}
-        sx={nodeStyle}
-      >
+      <Paper elevation={selected ? 12 : 3} sx={nodeStyle} ref={ElementRef}>
         <div
           style={{
             display: "flex",
