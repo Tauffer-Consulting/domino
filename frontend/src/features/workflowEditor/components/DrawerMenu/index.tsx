@@ -24,11 +24,15 @@ interface PermanentDrawerRightWorkflowsProps {
   handleClose: () => void;
   children?: ReactNode;
   sidePanel?: ReactNode;
+  setOrientation: React.Dispatch<
+    React.SetStateAction<"horizontal" | "vertical">
+  >;
+  orientation: "vertical" | "horizontal";
 }
 
 export const PermanentDrawerRightWorkflows: FC<
   PermanentDrawerRightWorkflowsProps
-> = () => {
+> = ({ setOrientation, orientation }) => {
   const theme = useTheme();
   const [openDrawer, setOpenDrawer] = useState(true);
 
@@ -59,7 +63,10 @@ export const PermanentDrawerRightWorkflows: FC<
               <Divider />
               <ListItem>
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <SidebarAddNode />
+                  <SidebarAddNode
+                    orientation={orientation}
+                    setOrientation={setOrientation}
+                  />
                 </Box>
               </ListItem>
             </>
