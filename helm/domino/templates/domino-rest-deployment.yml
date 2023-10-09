@@ -1,0 +1,89 @@
+# Domino REST Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-rest
+  labels:
+    app: {{ .Release.Name }}-rest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-rest
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-rest
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-rest
+          image: {{ .Values.rest.image }}
+          {{- if .Values.rest.entrypointCommand }}
+          command:
+            {{ toYaml .Values.rest.entrypointCommand | indent 12 }}
+          args:
+            {{ toYaml .Values.rest.entrypointArgs | indent 12 }}
+          {{- end }}
+
+          ports:
+            - containerPort: 8000
+          imagePullPolicy: IfNotPresent
+          env: 
+            # TODO use load balancer instead of service ip for airflow webserver ?
+            - name: AIRFLOW_WEBSERVER_HOST
+              value: http://airflow-webserver:8080
+            - name: DOMINO_DEPLOY_MODE
+              value: {{ .Values.rest.deployMode }}
+            - name: DOMINO_DB_HOST
+              value: {{ .Release.Name }}-postgres-service
+            - name: DOMINO_DB_NAME
+              value: {{ .Values.database.name }}
+            - name: DOMINO_DB_USER
+              value: {{ .Values.database.user }}
+            - name: DOMINO_DB_PASSWORD
+              value: {{ .Values.database.password }}
+            - name: DOMINO_DB_PORT
+              value: "5432"
+            - name: "DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  key:  github_access_token_pieces
+                  name: {{ .Release.Name }}-secrets
+            - name: "DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS"
+              valueFrom:
+                secretKeyRef:
+                  key:  github_access_token_workflows
+                  name: {{ .Release.Name }}-secrets
+            - name: DOMINO_GITHUB_WORKFLOWS_REPOSITORY
+              value: {{ .Values.rest.workflowsRepository }}
+          {{- if .Values.rest.extraVolumeMounts }}
+          volumeMounts:             
+{{ toYaml .Values.rest.extraVolumeMounts | indent 12 }}
+          {{- end }}
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+      {{- if .Values.rest.extraVolumes }}
+      volumes:
+{{ toYaml .Values.rest.extraVolumes | indent 8 }}
+      {{- end }}
+
+---
+# Domino API Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-rest-service
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Release.Name }}-rest
+  ports:
+  - port: 8000
+      #- protocol: "TCP"
+      #targetPort: 8000
+

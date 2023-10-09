@@ -1,6 +1,8 @@
 from pydantic import BaseSettings, validators
 from typing import Optional
 import os
+from database.models.enums import RepositorySource
+
 
 
 def empty_to_none(v: str) -> Optional[str]:
@@ -48,9 +50,10 @@ class Settings(BaseSettings):
 
     # Default domino pieces repository
     DOMINO_DEFAULT_PIECES_REPOSITORY = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY', "Tauffer-Consulting/default_domino_pieces")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.3.11")
+    DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.3.12")
     DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE', "github")
     DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: EmptyStrToNone = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', "")
+    DOMINO_DEFAULT_PIECES_REPOSITORY_URL: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_URL', 'https://github.com/Tauffer-Consulting/default_domino_pieces')
     
     # Default DB mock data
     RUN_CREATE_MOCK_DATA = False
@@ -65,7 +68,13 @@ class Settings(BaseSettings):
     AIRFLOW_WEBSERVER_HOST = os.environ.get('AIRFLOW_WEBSERVER_HOST', "http://airflow-webserver:8080/")
 
     # Default repositories
-    DEFAULT_STORAGE_REPOSITORY_NAME = 'default_storage_repository'
+    DEFAULT_STORAGE_REPOSITORY = dict(
+        name="default_storage_repository",
+        path="default_storage_repository",
+        source=getattr(RepositorySource, 'default').value,
+        version="0.0.1",
+        url="domino-default/default_storage_repository"
+    )
 
     DEPLOY_MODE = os.environ.get('DOMINO_DEPLOY_MODE', 'local-k8s')
 

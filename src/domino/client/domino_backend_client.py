@@ -14,7 +14,7 @@ class DominoBackendRestClient(requests.Session):
         else:
             self.base_url = os.environ.get("DOMINO_BACKEND_HOST", "http://localhost:8000")
 
-    def request(self, method, resource, **kwargs):
+    def request(self, method, resource, **kwargs) -> requests.Response:
         try:
             url = urljoin(self.base_url, resource)
             return super(DominoBackendRestClient, self).request(method, url, **kwargs)
@@ -22,7 +22,7 @@ class DominoBackendRestClient(requests.Session):
             self.logger.exception(e)
             raise e
 
-    def health_check(self):
+    def health_check(self) -> requests.Response:
         resource = "/health-check"
         response = self.request(
             method="get",
@@ -30,7 +30,7 @@ class DominoBackendRestClient(requests.Session):
         )
         return response
 
-    def get_piece_secrets(self, piece_repository_id: int, piece_name: str):
+    def get_piece_secrets(self, piece_repository_id: int, piece_name: str) -> requests.Response:
         resource = f"/pieces-repositories/{piece_repository_id}/secrets/{piece_name}"
         response = self.request(
             method='get',
@@ -38,7 +38,7 @@ class DominoBackendRestClient(requests.Session):
         )
         return response
 
-    def get_piece_repository(self, piece_repository_id: int):
+    def get_piece_repository(self, piece_repository_id: int) -> requests.Response:
         resource = f"/pieces-repositories/{piece_repository_id}"
         response = self.request(
             method='get',
@@ -46,12 +46,12 @@ class DominoBackendRestClient(requests.Session):
         )
         return response
 
-    def get_piece_repositories(self, workspace_id: int, filters: dict):
-        resource = f"/workspaces/{workspace_id}/pieces-repositories"
+    def get_piece_repositories_from_workspace_id(self, params: dict) -> requests.Response:
+        resource = "/pieces-repositories"
         response = self.request(
             method='get',
             resource=resource,
-            params=filters
+            params=params
         )
         return response
     

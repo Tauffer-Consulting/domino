@@ -225,7 +225,7 @@ services:
   # Modified Airflow Scheduler with Domino
   airflow-scheduler:
     <<: *airflow-common
-    # image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
+    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
     build:
       context: .
       dockerfile: Dockerfile-airflow-domino-base-dev
@@ -260,7 +260,7 @@ services:
   # Modified Airflow Worker with Domino
   airflow-worker:
     <<: *airflow-common
-    # image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
+    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
     build:
       context: .
       dockerfile: Dockerfile-airflow-domino-base-dev
@@ -309,7 +309,7 @@ services:
       - DOMINO_DB_HOST=domino_postgres
       - DOMINO_DB_PORT=5432
       - DOMINO_DB_NAME=postgres
-      - DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION=0.3.9
+      - DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION=0.3.12
       - DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN=${DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN}
       - DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS=${DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS}
       - DOMINO_GITHUB_WORKFLOWS_REPOSITORY=${DOMINO_GITHUB_WORKFLOWS_REPOSITORY}

@@ -27,6 +27,6 @@ COPY pyproject.toml /home/domino/domino_py/
 COPY src/domino /home/domino/domino_py/src/domino
 WORKDIR /home/domino/domino_py
 RUN chmod -R 777 .
-RUN pip install --no-cache -e .
+RUN pip install --no-cache -e .[piece]
 
 WORKDIR /home

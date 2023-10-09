@@ -32,7 +32,7 @@ def validate_github_token_workflows(value):
     return None
 
 
-def validate_github_token_operators(value):
+def validate_github_token(value):
     if value and value.startswith("ghp_"):
         return value
     return None
@@ -56,9 +56,6 @@ def get_github_token_workflows_from_env():
 
 def get_workflows_repository_from_env():
     return os.environ.get("DOMINO_GITHUB_WORKFLOWS_REPOSITORY", None)
-
-def get_local_operators_repository_path():
-    return ""
 
 def get_registry_token_from_env():
     return os.environ.get('GHCR_PASSWORD', "")
@@ -96,15 +93,15 @@ def get_registry_token_from_env():
 )
 @click.option(
     '--deploy-mode',
-    prompt='Development mode',
+    prompt='Deploy mode',
     default="local-k8s",
-    help='Development mode - either "local" or "remote". If local it will allow you to use hot reloading for local operators repositories'
+    help='Deploy mode - either "local" or "remote".'
 )
 @click.option(
     '--local-pieces-repository-path',
     prompt='Local pieces repository path. Example: ["/path/to/repo1", "/path/to/"repo2"]',
     default=[],
-    help='List of local pieces repository paths. It is used only if dev-mode is set to "local" and it will allow you to use hot reloading for local operators repositories. Example: ["path/to/repo1", "path/to/"repo2"]',
+    help='List of local pieces repository paths.',
 )
 @click.option(
     "--local-domino-path",
@@ -137,19 +134,9 @@ def cli_prepare_platform(
 
 @click.command()
 @click.option(
-    "--domino-frontend-image", 
-    default=None,
-    help="Load a local Domino frontend image to cluster."
-)
-@click.option(
-    "--domino-rest-image", 
-    default=None,
-    help="Load a local Domino REST image to cluster."
-)
-@click.option(
-    "--run-airflow", 
+    "--install-airflow", 
     default=True,
-    help="Run Domino Airflow services."
+    help="Install Airflow services."
 )
 @click.option(
     "--use-gpu",
@@ -158,9 +145,15 @@ def cli_prepare_platform(
     help="Allow the platform to use GPUs. It will install NVIDIA plugins.",
     default=False
 )
-def cli_create_platform(domino_frontend_image, domino_rest_image, run_airflow, use_gpu):
+def cli_create_platform(install_airflow, use_gpu):
     """Create cluster, install services and run Domino platform."""
-    platform.create_platform(domino_frontend_image, domino_rest_image, run_airflow, use_gpu)
+    platform.create_platform(install_airflow, use_gpu)
+
+
+@click.command()
+def cli_destroy_platform():
+    """Destroy Kind cluster."""
+    platform.destroy_platform()
 
 
 @click.command()
@@ -208,11 +201,12 @@ def cli_platform(ctx):
 
 cli_platform.add_command(cli_prepare_platform, name="prepare")
 cli_platform.add_command(cli_create_platform, name="create")
+cli_platform.add_command(cli_destroy_platform, name="destroy")
 cli_platform.add_command(cli_run_platform_compose, name="run-compose")
 
 
 ###############################################################################
-# OPERATORS REPOSITORY 
+# PIECES REPOSITORY 
 ###############################################################################
 
 def generate_random_repo_name():

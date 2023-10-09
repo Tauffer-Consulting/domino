@@ -61,7 +61,6 @@ def build_images_from_pieces_repository():
     Each dependencies group will need to have its own Docker image built and published to be used by Domino.
     This is because the Pieces source code goes baked in the images.
     """
-
     dependencies_path = Path(".") / "dependencies"
     domino_path = Path(".") / ".domino"
     config_path = Path(".") / "config.toml"
@@ -91,7 +90,6 @@ def build_images_from_pieces_repository():
         # If no extra dependency, use base Pod image and just copy the Pieces source code
         if not any([dependency_dockerfile, dependency_requirements]):
             pieces_dependencies_map[group]["source_image"] = source_image_name
-            # TODO change base image to domino when we have it
             dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
@@ -109,7 +107,6 @@ COPY .domino domino/pieces_repository/.domino
         # If dependency is defined as a requirements.txt
         elif dependency_requirements:
             pieces_dependencies_map[group]["source_image"] = source_image_name
-
             dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces

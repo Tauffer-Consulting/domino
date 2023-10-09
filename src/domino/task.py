@@ -23,6 +23,7 @@ class Task(object):
         self, 
         dag: DAG, 
         task_id: str,
+        workspace_id: int,
         piece: dict,
         piece_input_kwargs: dict,
         workflow_shared_storage: dict = None,
@@ -31,11 +32,13 @@ class Task(object):
     ) -> None:
         # Task configuration and attributes
         self.task_id = task_id
+        self.workspace_id = workspace_id
         self.logger = get_configured_logger(f"{self.__class__.__name__ }-{self.task_id}")
         self.logger.info('### Configuring task object ###')
         self.dag = dag
         self.dag_id = self.dag.dag_id
-        self.repository_id = piece["repository_id"]
+        self.repository_url = piece["repository_url"]
+        self.repository_version = piece["repository_version"]
         self.piece = piece
         self.piece_input_kwargs = piece_input_kwargs
         if "execution_mode" not in self.piece:
@@ -108,7 +111,9 @@ class Task(object):
                 task_id=self.task_id,
                 piece_name=self.piece.get('name'),
                 deploy_mode=self.deploy_mode,
-                repository_id=self.repository_id,
+                repository_url=self.repository_url,
+                repository_version=self.repository_version,
+                workspace_id=self.workspace_id,
                 piece_input_kwargs=self.piece_input_kwargs,
                 workflow_shared_storage=self.workflow_shared_storage,
                 container_resources=self.container_resources,
@@ -132,7 +137,9 @@ class Task(object):
                 task_id=self.task_id,
                 piece_name=self.piece.get('name'),
                 deploy_mode=self.deploy_mode,
-                repository_id=self.repository_id,
+                repository_url=self.repository_url,
+                repository_version=self.repository_version,
+                workspace_id=self.workspace_id,
                 piece_input_kwargs=self.piece_input_kwargs,
                 workflow_shared_storage=self.workflow_shared_storage,
                 # ----------------- Docker -----------------

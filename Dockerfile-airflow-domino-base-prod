@@ -7,4 +7,5 @@ USER root
 RUN apt-get update
 
 USER airflow
-RUN pip install domino-py
+RUN pip install --upgrade pip \
+    pip install domino-py[airflow]
