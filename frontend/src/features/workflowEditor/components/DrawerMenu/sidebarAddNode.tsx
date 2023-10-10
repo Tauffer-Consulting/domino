@@ -5,6 +5,8 @@ import {
   AccordionSummary,
   Alert,
   Box,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
@@ -18,7 +20,14 @@ import PiecesSidebarNode from "./sidebarNode";
  * @todo improve loading/error/empty states
  */
 
-const SidebarAddNode: FC = () => {
+interface Props {
+  setOrientation: React.Dispatch<
+    React.SetStateAction<"horizontal" | "vertical">
+  >;
+  orientation: "vertical" | "horizontal";
+}
+
+const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
   const { repositories, repositoriesLoading, repositoryPieces } =
     useWorkflowsEditor();
 
@@ -32,6 +41,24 @@ const SidebarAddNode: FC = () => {
     <Box className="add-node-panel" sx={{ padding: "0px 0px 0px 0px" }}>
       {repositoriesLoading && (
         <Alert severity="info">Loading repositories...</Alert>
+      )}
+      {!repositoriesLoading && (
+        <ToggleButtonGroup
+          sx={{ width: "100%", display: "flex" }}
+          value={orientation}
+          exclusive
+          onChange={(_, value) => {
+            console.log("value", value);
+            if (value) setOrientation(value);
+          }}
+        >
+          <ToggleButton value="horizontal" sx={{ flex: 1 }}>
+            horizontal
+          </ToggleButton>
+          <ToggleButton value="vertical" sx={{ flex: 1 }}>
+            vertical
+          </ToggleButton>
+        </ToggleButtonGroup>
       )}
       {!repositoriesLoading &&
         repositories.map((repo) => (

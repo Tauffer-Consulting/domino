@@ -184,8 +184,13 @@ export const WorkflowList: React.FC = () => {
           disableColumnSelector
           slots={{ noRowsOverlay: NoDataOverlay }}
           sx={{
+            // disable cell selection style
             "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
               outline: "none",
+            },
+            // pointer cursor on ALL rows
+            "& .MuiDataGrid-row:hover": {
+              cursor: "pointer",
             },
           }}
         />
