@@ -51,6 +51,9 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const [formSchema, setFormSchema] = useState<any>({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setBackdropIsOpen] = useState(false);
+  const [orientation, setOrientation] = useState<"horizontal" | "vertical">(
+    "horizontal",
+  );
 
   const { workspace } = useWorkspaces();
 
@@ -228,12 +231,16 @@ export const WorkflowsEditorComponent: React.FC = () => {
       const nodeData = event.dataTransfer.getData("application/reactflow");
       const { ...data } = JSON.parse(nodeData);
 
+      console.log("orientation", orientation);
+
       const newNodeData: DefaultNode["data"] = {
         name: data.name,
         style: data.style,
         validationError: false,
-        orientation: workflowPanelRef.current?.orientation ?? "horizontal",
+        orientation,
       };
+
+      console.log("newNodeData", newNodeData);
 
       const newNode = {
         id: getId(data.id),
@@ -267,6 +274,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       return newNode;
     },
     [
+      orientation,
       fetchForagePieceById,
       setForageWorkflowPieces,
       getForageWorkflowPieces,
@@ -369,6 +377,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
         </Grid>
         <Grid item xs={2}>
           <PermanentDrawerRightWorkflows
+            setOrientation={setOrientation}
+            orientation={orientation}
             handleClose={() => {
               setMenuOpen(!menuOpen);
             }}
