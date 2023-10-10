@@ -143,6 +143,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
   const handleSaveWorkflow = useCallback(async () => {
     try {
+      await saveDataToLocalForage();
       setBackdropIsOpen(true);
       if (!workspace?.id) {
         throw new Error("No selected Workspace");
@@ -231,16 +232,12 @@ export const WorkflowsEditorComponent: React.FC = () => {
       const nodeData = event.dataTransfer.getData("application/reactflow");
       const { ...data } = JSON.parse(nodeData);
 
-      console.log("orientation", orientation);
-
       const newNodeData: DefaultNode["data"] = {
         name: data.name,
         style: data.style,
         validationError: false,
         orientation,
       };
-
-      console.log("newNodeData", newNodeData);
 
       const newNode = {
         id: getId(data.id),
