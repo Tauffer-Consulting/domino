@@ -29,7 +29,6 @@ export const CustomConnectionLine: React.FC<ConnectionLineComponentProps> = ({
         style={{
           strokeWidth: 2,
         }}
-        markerEnd={`url(#custom-arrow)`}
       />
     </g>
   );

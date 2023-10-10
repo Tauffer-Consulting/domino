@@ -1,5 +1,4 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
-import { MenuItem, Select } from "@mui/material";
 import Elk from "elkjs";
 import theme from "providers/theme.config";
 import React, {
@@ -31,8 +30,6 @@ import ReactFlow, {
   MarkerType,
   type EdgeTypes,
   type NodeTypes,
-  Panel,
-  Position,
 } from "reactflow";
 
 import { CustomConnectionLine } from "./ConnectionLine";
@@ -67,8 +64,6 @@ type OnDrop =
   | ((event: DragEvent<HTMLDivElement>, position: XYPosition) => Node)
   | ((event: DragEvent<HTMLDivElement>, position: XYPosition) => Promise<Node>);
 
-export type WorkflowOrientation = "horizontal" | "vertical";
-
 type Props =
   | {
       editable: true;
@@ -89,7 +84,6 @@ export interface WorkflowPanelRef {
   edges: Edge[];
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
-  orientation: WorkflowOrientation;
 }
 const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
   (props: Props, ref: ForwardedRef<WorkflowPanelRef>) => {
@@ -97,45 +91,40 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
     const [instance, setInstance] = useState<ReactFlowInstance | null>(null);
     const [rawNodes, setNodes, onNodesChange] = useNodesState([]);
     const [rawEdges, setEdges, onEdgesChange] = useEdgesState([]);
-    const [orientation, setOrientation] =
-      useState<WorkflowOrientation>("vertical");
 
-    const onInit = useCallback(async (instance: ReactFlowInstance) => {
-      setInstance(instance);
-      if (props.onInit) {
-        const result = props.onInit(instance);
-        if (result instanceof Promise) {
-          result
-            .then(({ nodes, edges }) => {
-              if (nodes.length && nodes[0].data.orientation) {
-                setOrientation(nodes[0].data.orientation);
-              }
-              setNodes(nodes);
-              setEdges(edges);
-            })
-            .catch((error) => {
-              console.error("Error from Promise-returning function:", error);
-            });
-        } else {
-          const { nodes, edges } = result;
-          if (nodes.length && nodes[0].data.orientation) {
-            setOrientation(nodes[0].data.orientation);
+    const onInit = useCallback(
+      async (instance: ReactFlowInstance) => {
+        setInstance(instance);
+        if (props.onInit) {
+          const result = props.onInit(instance);
+          if (result instanceof Promise) {
+            result
+              .then(({ nodes, edges }) => {
+                setNodes(nodes);
+                setEdges(edges);
+              })
+              .catch((error) => {
+                console.error("Error from Promise-returning function:", error);
+              });
+          } else {
+            const { nodes, edges } = result;
+            setNodes(nodes);
+            setEdges(edges);
           }
-          setNodes(nodes);
-          setEdges(edges);
         }
-      }
-      window.requestAnimationFrame(() => instance.fitView());
-    }, []);
+        window.requestAnimationFrame(() => instance.fitView());
+      },
+      [props],
+    );
 
     const onNodesDelete = useCallback(
       props.editable ? props.onNodesDelete : () => {},
-      [],
+      [props],
     );
 
     const onEdgesDelete = useCallback(
       props.editable ? props.onEdgesDelete : () => {},
-      [],
+      [props],
     );
 
     const onNodeDoubleClick = useCallback<NodeMouseHandler>(
@@ -148,7 +137,7 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           instance.setCenter(n.position.x + nodeCenter, n.position.y);
         }
       },
-      [instance],
+      [instance, props],
     );
 
     const onDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -186,7 +175,7 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           }
         }
       },
-      [instance, setNodes],
+      [instance, setNodes, props],
     );
 
     const onConnect = useCallback((connection: Connection) => {
@@ -211,12 +200,7 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
       const elk = new Elk();
 
       try {
-        const elkLayout = await elk.layout(elkGraph, {
-          layoutOptions: {
-            "org.eclipse.elk.direction":
-              orientation === "horizontal" ? "RIGHT" : "DOWN",
-          },
-        });
+        const elkLayout = await elk.layout(elkGraph);
 
         if (elkLayout?.children && elkLayout.edges) {
           const updatedNodes = elkLayout.children.map((elkNode) => {
@@ -230,9 +214,6 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
             ) {
               return {
                 ...node,
-                targetPosition: orientation === "horizontal" ? "left" : "top",
-                sourcePosition:
-                  orientation === "horizontal" ? "right" : "bottom",
                 position: {
                   x: elkNode.x - elkNode.width / 2,
                   y: elkNode.y - elkNode.height / 2,
@@ -253,33 +234,29 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
       } catch (error) {
         console.error("Error during layout:", error);
       }
-    }, [rawNodes, rawEdges, orientation]);
+    }, [rawNodes, rawEdges]);
 
     const { nodes, edges } = useMemo(() => {
-      const sourcePosition =
-        orientation === "horizontal" ? Position.Right : Position.Bottom;
-      const targetPosition =
-        orientation === "horizontal" ? Position.Left : Position.Top;
-
       const nodes = [...rawNodes].map((node: Node) => ({
         ...node,
-        targetPosition,
-        sourcePosition,
         data: {
           ...node.data,
-          orientation,
         },
       }));
       const edges = [...rawEdges].map((edge: Edge) => ({
         ...edge,
-        markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20 },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+        },
       }));
 
       return {
         nodes,
         edges,
       };
-    }, [rawNodes, rawEdges, orientation]);
+    }, [rawNodes, rawEdges]);
 
     useImperativeHandle(
       ref,
@@ -289,10 +266,9 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           nodes: rawNodes,
           setEdges,
           setNodes,
-          orientation,
         };
       },
-      [rawEdges, rawNodes, setEdges, setNodes, orientation, setOrientation],
+      [rawEdges, rawNodes, setEdges, setNodes],
     );
 
     return (
@@ -320,17 +296,6 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
               onDrop={onDrop}
               onDragOver={onDragOver}
             >
-              <Panel position="top-right">
-                <Select
-                  value={orientation}
-                  onChange={(e) => {
-                    setOrientation(e.target.value as any);
-                  }}
-                >
-                  <MenuItem value={"horizontal"}>horizontal</MenuItem>
-                  <MenuItem value={"vertical"}>vertical</MenuItem>
-                </Select>
-              </Panel>
               <Controls
                 position="bottom-center"
                 style={{
@@ -348,8 +313,8 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
             <ReactFlow
               nodeTypes={RUN_NODE_TYPES}
               edgeTypes={EDGE_TYPES}
-              nodes={rawNodes}
-              edges={rawEdges}
+              nodes={nodes}
+              edges={edges}
               onInit={onInit}
               onNodeDoubleClick={onNodeDoubleClick}
               fitView={true}

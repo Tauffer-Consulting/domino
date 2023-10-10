@@ -177,6 +177,9 @@ export const WorkflowRunsTable: React.FC<Props> = ({
                 "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
                   outline: "none",
                 },
+                "& .MuiDataGrid-row:hover": {
+                  cursor: "pointer",
+                },
               }}
             />
           )}
