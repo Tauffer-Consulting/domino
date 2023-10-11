@@ -361,7 +361,7 @@ services:
     container_name: domino-frontend
     command: yarn start:local
     environment:
-      - REACT_APP_DOMINO_DEPLOY_MODE=local-compose
+      - VITE_DOMINO_DEPLOY_MODE=local-compose
     ports:
       - 3000:3000
     volumes:

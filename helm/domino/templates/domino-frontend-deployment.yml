@@ -28,7 +28,7 @@ spec:
             ["-c","yarn start"]
           {{- end }}
           env:
-            - name: REACT_APP_API_URL
+            - name: VITE_API_URL
               value: http://domino-rest-service:8000
           # resources:
           #   limits:

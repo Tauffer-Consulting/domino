@@ -26,6 +26,7 @@
     "@types/react-dom": "^18.0.9",
     "@types/uuid": "^9.0.0",
     "@uiw/react-textarea-code-editor": "^2.1.1",
+    "@vitejs/plugin-react": "^4.1.0",
     "ag-grid-community": "^28.2.1",
     "ag-grid-react": "^28.2.1",
     "axios": "^1.2.1",
@@ -43,24 +44,24 @@
     "react-hook-form": "^7.45.1",
     "react-markdown": "^8.0.7",
     "react-router-dom": "^6.6.0",
-    "react-scripts": "^5.0.1",
     "react-toastify": "^9.1.1",
     "reactflow": "^11.4.0",
     "swr": "^2.0.0",
     "typescript": "*",
     "uuid": "^9.0.0",
+    "vite": "^4.4.11",
+    "vite-plugin-svgr": "^2.2.1",
+    "vite-tsconfig-paths": "^3.5.0",
     "web-worker": "^1.2.0",
     "yup": "^1.2.0"
   },
   "scripts": {
-    "start": "cross-env REACT_APP_API_ENV=dev DISABLE_ESLINT_PLUGIN=true react-scripts start",
-    "start:local": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local react-scripts start",
-    "start:mock": "cross-env NODE_OPTIONS=--openssl-legacy-provider REACT_APP_API_ENV=local REACT_APP_USE_MOCK=true react-scripts start",
-    "build": "cross-env react-scripts build",
+    "start": "cross-env VITE_API_ENV=dev DISABLE_ESLINT_PLUGIN=true vite",
+    "start:local": "cross-env NODE_OPTIONS=--openssl-legacy-provider VITE_API_ENV=local vite",
+    "start:mock": "cross-env NODE_OPTIONS=--openssl-legacy-provider VITE_API_ENV=local VITE_USE_MOCK=true vite",
+    "build": "cross-env tsc && vite build",
     "lint": "eslint . --ext js,jsx,ts,tsx",
-    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
-    "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts test",
-    "eject": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts eject"
+    "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix"
   },
   "eslintConfig": {
     "extends": [

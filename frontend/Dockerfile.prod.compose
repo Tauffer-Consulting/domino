@@ -1,4 +1,4 @@
-FROM node:19.9.0 as build
+FROM node:18-slim as build
 
 # Set the working directory
 WORKDIR /app
@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy the package.json and yarn.lock files
 COPY package.json yarn.lock ./
 
-ENV REACT_APP_API_ENV=local
-ENV REACT_APP_DOMINO_DEPLOY_MODE=local-compose
+ENV VITE_API_ENV=local
+ENV VITE_DOMINO_DEPLOY_MODE=local-compose
 
 # Install dependencies
 RUN yarn install
