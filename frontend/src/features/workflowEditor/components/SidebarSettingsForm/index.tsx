@@ -40,7 +40,7 @@ const defaultSettingsData: IWorkflowSettings = {
 };
 
 const storageSourceOptions =
-  process.env.REACT_APP_DOMINO_DEPLOY_MODE === "local-compose"
+  import.meta.env.VITE_DOMINO_DEPLOY_MODE === "local-compose"
     ? [
         {
           label: "None",

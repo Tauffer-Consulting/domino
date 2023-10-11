@@ -14,7 +14,7 @@ export interface IEnvironment {
  * Stores all environment variables for easier access
  */
 export const environment: IEnvironment = {
-  NODE_ENV: process.env.NODE_ENV as INodeEnv,
-  API_ENV: process.env.REACT_APP_API_ENV as IApiEnv,
-  USE_MOCK: !!process.env.REACT_APP_USE_MOCK,
+  NODE_ENV: import.meta.env.NODE_ENV as INodeEnv,
+  API_ENV: import.meta.env.VITE_API_ENV as IApiEnv,
+  USE_MOCK: !!import.meta.env.VITE_USE_MOCK,
 };

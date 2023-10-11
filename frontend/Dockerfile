@@ -1,10 +1,10 @@
 # Refs:
 # https://dev.to/otomato_io/how-to-optimize-production-docker-images-running-nodejs-with-yarn-504b
 # https://snyk.io/blog/10-best-practices-to-containerize-nodejs-web-applications-with-docker/
-FROM node:19.2-bullseye-slim
+FROM node:18-slim
 
-ENV REACT_APP_API_ENV=local
-ENV REACT_APP_DOMINO_DEPLOY_MODE=local-compose
+ENV VITE_API_ENV=local
+ENV VITE_DOMINO_DEPLOY_MODE=local-compose
 
 # ENV PATH /app/node_modules/.bin:$PATH
 WORKDIR /usr/src/app
