@@ -20,7 +20,7 @@ So, edit your helm charts in the `path/to/your/domino/helm/domino` folder and th
 
 ### 3. Using local frontend image in cluster
 If you want to run your cluster with a local frontend image you should follow the next steps:
-1. Build your local frontend image. You can use the following command from the root of the project: `DOCKER_BUILDKIT=1 docker build -f ./frontend/Dockerfile.dev.k8s -t domino-frontend ./frontend`
+1. Build your local frontend image. You can use the following command from the root of the project: `DOCKER_BUILDKIT=1 docker build -f ./frontend/Dockerfile.dev -t domino-frontend ./frontend`
 2. Add the key `DOMINO_FRONTEND_IMAGE` with the value `domino-frontend` (or other tag you choose) to your `config.toml` file in the `dev` section.
 **Important:** This will not activate hot reloading for your local frontend code. If you need to update your frontend code in the cluster you should build the image again.
 
