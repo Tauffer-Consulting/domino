@@ -54,7 +54,12 @@ class WorkflowBaseSettings(BaseModel):
     @validator('start_date')
     def start_date_validator(cls, v):
         try:
-            converted_date =  datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ").date()
+            if '.' in v:
+                v = v.split('.')[0]
+            if 'T' in v:
+                converted_date =  datetime.strptime(v, "%Y-%m-%dT%H:%M:%S").date()
+            else:
+                converted_date =  datetime.strptime(v, "%Y-%m-%d").date()
             if converted_date < datetime.now().date():
                 raise ValueError("Start date must be in the future")
             return converted_date.isoformat()
