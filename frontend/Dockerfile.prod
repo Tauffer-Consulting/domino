@@ -10,6 +10,9 @@ COPY package.json yarn.lock ./
 # Install dependencies
 RUN yarn install --production --frozen-lockfile && yarn cache clean
 
+RUN npx pkg ./node_modules/@import-meta-env/cli/bin/import-meta-env.js \
+  -o import-meta-env -y
+
 # Copy the rest of the source code
 COPY . .
 
@@ -21,12 +24,15 @@ FROM nginx:1.25.2
 
 # Copy the build output from the previous stage
 COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/import-meta-env /usr/share/nginx/html
 
 # Configure nginx to serve the app
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY entrypoint.sh /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
 
 # Run NGINX in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["sh","/usr/share/nginx/html/entrypoint.sh"]
