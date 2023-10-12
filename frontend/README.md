@@ -38,4 +38,10 @@ Running Domino frontend locally:
 yarn start
 ```
 
+## Build image
+
+```bash
+DOCKER_BUILDKIT=1 docker build -f ./Dockerfile.prod -t domino-frontend .
+```
+
 ### [Project Structure](./docs/project-structure.md)
