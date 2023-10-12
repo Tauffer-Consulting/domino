@@ -6,7 +6,6 @@ on:
       - main
       - dev
       - test/*
-      - fix/tests
 
 jobs:
   api-tests:
@@ -32,9 +31,9 @@ jobs:
         with:
           install_only: true
 
-      - name: Print Current Working Directory
+      - name: Print list domino src dir
         run: |
-          pwd
+          ls ./src/domino
 
       - name: Prepare and create cluster.
         run: |
