@@ -234,6 +234,8 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         console.print(f"Loading local Domino Airflow image {local_domino_airflow_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", local_domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
         domino_airflow_image = f'docker.io/library/{local_domino_airflow_image}'
+    elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev':
+        domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest-dev" 
     else:  
         domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest" 
 
@@ -241,6 +243,8 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         console.print(f"Loading local frontend image {local_domino_frontend_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", local_domino_frontend_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
         domino_frontend_image = f"docker.io/library/{local_domino_frontend_image}"
+    elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev':
+        domino_frontend_image = "ghcr.io/tauffer-consulting/domino-frontend:k8s-dev"
     else:
         domino_frontend_image = "ghcr.io/tauffer-consulting/domino-frontend:k8s"
     
@@ -248,7 +252,9 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         console.print(f"Loading local REST image {local_domino_rest_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", local_domino_rest_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
         domino_rest_image = f'docker.io/library/{local_domino_rest_image}'
-    else:  
+    elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev':
+        domino_rest_image = "ghcr.io/tauffer-consulting/domino-rest:latest-dev" 
+    else:
         domino_rest_image = "ghcr.io/tauffer-consulting/domino-rest:latest" 
 
     # In order to use nvidia gpu in our cluster we need nvidia plugins to be installed.

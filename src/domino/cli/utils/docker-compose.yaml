@@ -224,7 +224,7 @@ services:
   # Modified Airflow Scheduler with Domino
   airflow-scheduler:
     <<: *airflow-common
-    image: ghcr.io/tauffer-consulting/domino-airflow-base${DOMINO_COMPOSE_DEV}:latest
+    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest${DOMINO_COMPOSE_DEV}
     container_name: airflow-domino-scheduler
     command: scheduler
     healthcheck:
@@ -255,7 +255,7 @@ services:
   # Modified Airflow Worker with Domino
   airflow-worker:
     <<: *airflow-common
-    image: ghcr.io/tauffer-consulting/domino-airflow-base${DOMINO_COMPOSE_DEV}:latest
+    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest${DOMINO_COMPOSE_DEV}
     container_name: airflow-domino-worker
     command: celery worker
     healthcheck:
@@ -287,7 +287,7 @@ services:
 
   # Domino REST Api
   domino_rest:
-    image: ghcr.io/tauffer-consulting/domino-rest${DOMINO_COMPOSE_DEV}:latest
+    image: ghcr.io/tauffer-consulting/domino-rest:latest${DOMINO_COMPOSE_DEV}
     container_name: domino-rest
     command: bash -c "alembic upgrade heads && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
     ports:
@@ -339,7 +339,7 @@ services:
 
   # Domino Frontend
   domino_frontend:
-    image: ghcr.io/tauffer-consulting/domino-frontend${DOMINO_COMPOSE_DEV}:compose
+    image: ghcr.io/tauffer-consulting/domino-frontend:compose${DOMINO_COMPOSE_DEV}
     container_name: domino-frontend
     ports:
       - "3000:80"

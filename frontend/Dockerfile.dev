@@ -10,6 +10,8 @@ WORKDIR /usr/src/app
 COPY --chown=node:node . /usr/src/app
 RUN mkdir -p node_modules/.cache
 RUN chmod -R 777 node_modules/.cache
+RUN mkdir -p node_modules/.vite
+RUN chmod -R 777 node_modules/.vite
 
 RUN yarn install --frozen-lockfile && yarn cache clean
 
