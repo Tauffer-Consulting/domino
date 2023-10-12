@@ -109,6 +109,24 @@ def get_registry_token_from_env():
     default="",
     help="Local Domino path. It is used only if dev-mode is set to 'local' and it will allow you to use hot reloading for local Domino.",
 )
+@click.option(
+    '--local-rest-image',
+    prompt='Local Domino REST image to use if local-k8s-dev deploy mode.',
+    default="",
+    help='Local Domino REST image to use if local-k8s-dev deploy mode.',
+)
+@click.option(
+    '--local-frontend-image',
+    prompt='Local Domino Front image to use if local-k8s-dev deploy mode.',
+    default="",
+    help='Local Domino Front image to use if local-k8s-dev deploy mode.',
+)
+@click.option(
+    '--local-airflow-image',
+    prompt='Local Domino Airflow image to use if local-k8s-dev deploy mode.',
+    default="",
+    help='Local Domino Airflow image to use if local-k8s-dev deploy mode.',
+)
 def cli_prepare_platform(
     cluster_name,
     workflows_repository,
@@ -117,7 +135,11 @@ def cli_prepare_platform(
     github_workflows_token,
     deploy_mode,
     local_pieces_repository_path,
-    local_domino_path
+    local_domino_path,
+    local_rest_image,
+    local_frontend_image,
+    local_airflow_image
+
 ):
     """Prepare local folder for running a Domino platform."""
     platform.prepare_platform(
@@ -128,7 +150,10 @@ def cli_prepare_platform(
         github_workflows_token=github_workflows_token,
         deploy_mode=deploy_mode,
         local_pieces_repository_path=ast.literal_eval(local_pieces_repository_path),
-        local_domino_path=local_domino_path
+        local_domino_path=local_domino_path,
+        local_rest_image=local_rest_image,
+        local_frontend_image=local_frontend_image,
+        local_airflow_image=local_airflow_image
     )
 
 

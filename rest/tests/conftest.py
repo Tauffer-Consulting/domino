@@ -56,7 +56,8 @@ def piece_repository():
         source="github",
         path="Tauffer-Consulting/default_domino_pieces_tests",
         version="0.0.2",
-        workspace_id=1
+        workspace_id=1,
+        url='https://github.com/Tauffer-Consulting/default_domino_pieces'
     )
 
 @pytest.fixture(scope="class")

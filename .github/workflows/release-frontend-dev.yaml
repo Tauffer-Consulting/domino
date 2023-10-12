@@ -53,4 +53,4 @@ jobs:
           push: true # Push is a shorthand for --output=type=registry
           tags: ghcr.io/tauffer-consulting/domino-frontend-dev:compose
           context: frontend
-          file: frontend/Dockerfile.compose # Path to the Dockerfile
+          file: frontend/Dockerfile.prod.compose # Path to the Dockerfile
