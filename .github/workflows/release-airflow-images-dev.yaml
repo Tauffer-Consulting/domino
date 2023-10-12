@@ -28,7 +28,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-base-dev:latest
+          tags: ghcr.io/tauffer-consulting/domino-airflow-base:latest-dev
           context: .
           file: Dockerfile-airflow-domino-base-dev 
 
@@ -52,7 +52,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod-dev:latest
+          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:latest-dev
           context: .
           file: Dockerfile-airflow-domino-pod-dev
 
@@ -76,7 +76,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod-dev:gpu
+          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:gpu-dev
           context: .
           file: Dockerfile-airflow-domino-pod-gpu
 
@@ -100,6 +100,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-shared-storage-sidecar-dev:latest
+          tags: ghcr.io/tauffer-consulting/domino-shared-storage-sidecar:latest-dev
           context: src/domino/custom_operators/sidecar
           file: src/domino/custom_operators/sidecar/Dockerfile
