@@ -357,10 +357,11 @@ services:
     #image: ghcr.io/tauffer-consulting/domino-frontend:compose
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: domino-frontend
-    command: yarn start:local
+    command: yarn start
     environment:
+      - VITE_API_ENV=local
       - VITE_DOMINO_DEPLOY_MODE=local-compose
     ports:
       - 3000:3000
