@@ -142,9 +142,10 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
                 )
             )
         if platform_config['dev'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
+            domino_local_package_absolute_path = Path(platform_config['dev']['DOMINO_LOCAL_DOMINO_PACKAGE']).resolve()
             extra_mounts_local_repositories.append(
                 dict(
-                    hostPath=platform_config['dev']['DOMINO_LOCAL_DOMINO_PACKAGE'],
+                    hostPath=str(domino_local_package_absolute_path),
                     containerPath=f"/domino/domino_py/src/domino",
                     readOnly=True,
                     propagation='HostToContainer'
