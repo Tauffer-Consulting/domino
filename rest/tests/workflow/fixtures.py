@@ -16,14 +16,12 @@ pytest_plugins = [
 
 @pytest.fixture(scope="class")
 def create_workflow(client: ApiTestClient, authorization_token: Dict, edit_workflow_request_model: Dict, workflow: Workflow, default_workspace: Workspace):
-    # all_pieces = get_pieces.json()
-    # example_piece = [i for i in all_pieces if i["name"]=="SimpleLogPiece"][0]
     workflow_request_model = edit_workflow_request_model
     body = workflow_request_model
     response = client.post(
         f"/workspaces/{default_workspace.id}/workflows",
-        headers = {"Authorization": authorization_token["header"]},
-        json = body
+        headers={"Authorization": authorization_token["header"]},
+        json=body
     )
     content = response.json()
     workflow.id = content.get("id")
@@ -68,16 +66,12 @@ def edit_workflow_request_model(client: ApiTestClient, authorization_token: Dict
     possible_pieces = response.json()
     example_piece = [i for i in possible_pieces if i["name"]=="SimpleLogPiece"][0]
 
-    workflow_request_model["tasks"]["task_1"]["piece"]["id"] = example_piece["id"]
-    workflow_request_model["tasks"]["task_2"]["piece"]["id"] = example_piece["id"]
-    
-    curret_id = workflow_request_model['ui_schema']['nodes']['task_1']['id']
-    current_db_id = curret_id.split("_")[0]
-    workflow_request_model["ui_schema"]["nodes"]["task_1"]["id"] = curret_id.replace(f"{current_db_id}", str(example_piece["id"]))
+    mock_task_id = 'SimpleLogP_0298c1669d404e08b631ebe1490e1c45'
 
-    curret_id = workflow_request_model['ui_schema']['nodes']['task_2']['id']
+    workflow_request_model["tasks"][mock_task_id]["piece"]["id"] = example_piece["id"]
+    curret_id = workflow_request_model['ui_schema']['nodes'][mock_task_id]['id']
     current_db_id = curret_id.split("_")[0]
-    workflow_request_model["ui_schema"]["nodes"]["task_2"]["id"] = curret_id.replace(f"{current_db_id}", str(example_piece["id"]))
-    
+    workflow_request_model["ui_schema"]["nodes"][mock_task_id]["id"] = curret_id.replace(f"{current_db_id}", str(example_piece["id"]))
+
     return workflow_request_model
 

@@ -1,4 +1,4 @@
-# Domino REST API
+# Domino REST API 
 
 ## Running Domino Rest API locally:
   

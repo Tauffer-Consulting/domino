@@ -3,10 +3,11 @@ from typing import Dict, List, Optional
 from enum import Enum
 from pydantic import BaseModel, validator, Field
 from datetime import datetime
-from constants.default_pieces.storage import AWSS3DefaultPiece
+from constants.default_pieces.storage import AWSS3StoragePiece
+
 
 """
-     Auxiliary data models
+Auxiliary data models
 """
 class ScheduleIntervalType(str, Enum):
     none = "none"
@@ -30,6 +31,10 @@ class WorkflowStorage(BaseModel):
     storage_source: Optional[str] # TODO use enum ?
     base_folder: Optional[str]
 
+class SelectEndDate(str, Enum):
+    never = "never"
+    user_defined = "User defined"
+
 class WorkflowBaseSettings(BaseModel):
     # TODO remove regex ?
     name: str = Field(
@@ -37,18 +42,24 @@ class WorkflowBaseSettings(BaseModel):
         example="workflow_name", 
         regex=r"^[\w]*$",
     )
-    start_date: str
-    end_date: Optional[str] # TODO add end date to UI?
-    schedule_interval: ScheduleIntervalType
+    start_date: str = Field(alias="startDateTime")
+    select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
+    end_date: Optional[str] = Field(alias='endDateTime')
+    schedule_interval: ScheduleIntervalType = Field(alias="scheduleInterval")
     catchup: Optional[bool] = False # TODO add catchup to UI?
-    generate_report: Optional[bool] = False
+    generate_report: Optional[bool] = Field(alias="generateReport", default=False) # TODO add generate report to UI?
     description: Optional[str] # TODO add description to UI?
     
 
     @validator('start_date')
     def start_date_validator(cls, v):
         try:
-            converted_date =  datetime.fromisoformat(v).date()
+            if '.' in v:
+                v = v.split('.')[0]
+            if 'T' in v:
+                converted_date =  datetime.strptime(v, "%Y-%m-%dT%H:%M:%S").date()
+            else:
+                converted_date =  datetime.strptime(v, "%Y-%m-%d").date()
             if converted_date < datetime.now().date():
                 raise ValueError("Start date must be in the future")
             return converted_date.isoformat()
@@ -62,17 +73,26 @@ class WorkflowBaseSettings(BaseModel):
             if 'start_date' not in values:
                 raise ValueError("Start date must be provided")
             converted_start_date =  datetime.fromisoformat(values['start_date'])
-            converted_end_date = datetime.fromisoformat(v)
+            if 'select_end_date' not in values:
+                raise ValueError("Select end date must be provided")
+            
+            if values['select_end_date'] == SelectEndDate.never.value:
+                return None
+
+            converted_end_date = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ").date()
             if converted_end_date <= converted_start_date:
                 raise ValueError("End date must greater than start date")
             return converted_end_date.isoformat()
         except ValueError:
             raise ValueError(f"Invalid end date: {v}")
+    
+    class Config:
+        allow_population_by_field_name = True
 
 
 storage_default_piece_model_map = {
     'none': None,
-    'aws_s3': AWSS3DefaultPiece
+    'aws_s3': AWSS3StoragePiece
 }
 
 class WorkflowSharedStorageSourceEnum(str, Enum):
@@ -118,12 +138,12 @@ class TasksDataModel(BaseModel):
     dependencies: Optional[List[str]]
 
 """
-     Request data models
+Request data models
 """
 class CreateWorkflowRequest(BaseModel):
     workflow: WorkflowBaseSettings
     tasks: Dict[
-        str,
+        str, # str === TasksDataModel['task_id']
         TasksDataModel
     ]
     ui_schema: UiSchema

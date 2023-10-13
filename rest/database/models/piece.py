@@ -11,7 +11,7 @@ class Piece(Base, BaseDatabaseModel):
     dependency = Column(JSON, nullable=True)
     source_image = Column(String, nullable=True)
     input_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb"))
-    output_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb")) # Using server default empty JSON object for avoid null value in database
+    output_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb")) # Using server default empty JSON object to avoid null value in database
     secrets_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb"))
     style = Column(JSON, nullable=True)
     source_url = Column(String, nullable=True)

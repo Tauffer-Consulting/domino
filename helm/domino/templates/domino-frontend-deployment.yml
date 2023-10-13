@@ -25,11 +25,14 @@ spec:
           command:
             {{ toYaml .Values.frontend.entrypointCommand | indent 12 }}
           args:
-            ["-c","yarn start:local"]
+            ["-c","yarn start"]
           {{- end }}
           env:
-            - name: REACT_APP_API_URL
-              value: http://domino-rest-service:8000
+            - name: API_ENV
+              value: {{ .Values.frontend.apiEnv }}
+            - name: DOMINO_DEPLOY_MODE
+              value: {{ .Values.frontend.deployMode }}
+
           # resources:
           #   limits:
           #     memory: {{ .Values.frontend.memoryLimit }}

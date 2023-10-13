@@ -63,7 +63,7 @@ The Domino Python package can be installed via pip. We reccommend you install Do
 pip install domino-py
 ```
 
-You can then use Domino command line interface to easily run the Domino platform locally (requires Docker compose). Go to a new, empty directory and run the following command:
+You can then use Domino command line interface to easily run the Domino platform locally (requires [Docker Compose V2](https://docs.docker.com/compose/)). Go to a new, empty directory and run the following command:
 
 ```bash
 domino platform run-compose

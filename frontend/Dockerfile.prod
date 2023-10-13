@@ -1,13 +1,17 @@
-FROM node:14-alpine as build
+# Stage 1: Build the React app
+FROM node:18-slim as build
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the package.json and yarn.lock files
+# Copy package.json and yarn.lock files
 COPY package.json yarn.lock ./
 
 # Install dependencies
-RUN yarn install
+RUN yarn install --production --frozen-lockfile && yarn cache clean
+
+RUN npx pkg ./node_modules/@import-meta-env/cli/bin/import-meta-env.js \
+  -o import-meta-env -y
 
 # Copy the rest of the source code
 COPY . .
@@ -15,17 +19,20 @@ COPY . .
 # Build the app for production
 RUN yarn build
 
-# Use nginx as the web server
-FROM nginx:1.19-alpine
+# Stage 2: Create a minimal NGINX image
+FROM nginx:1.25.2
 
 # Copy the build output from the previous stage
 COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/import-meta-env /usr/share/nginx/html
 
 # Configure nginx to serve the app
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+COPY entrypoint.sh /usr/share/nginx/html
+
 # Expose port 80
 EXPOSE 80
 
-# Run nginx in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Run NGINX in the foreground
+ENTRYPOINT ["sh","/usr/share/nginx/html/entrypoint.sh"]

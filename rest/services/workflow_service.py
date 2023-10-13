@@ -193,14 +193,14 @@ class WorkflowService(object):
             is_dag_broken = dag_uuid in import_errors_uuids
 
             schedule_interval = 'none'
-            is_active = 'creating'
-            is_paused = 'creating'
+            is_active = False
+            is_paused = False
             status = WorkflowStatus.creating.value
             if is_dag_broken:
                 status = WorkflowStatus.failed.value
                 schedule_interval = 'failed'
-                is_active = 'failed'
-                is_paused = 'failed'
+                is_active = False
+                is_paused = False
 
             if response and not is_dag_broken:
                 schedule_interval = response.get("schedule_interval")
@@ -397,6 +397,7 @@ class WorkflowService(object):
         - end_date (not none)
         """
         workflow_kwargs['dag_id'] = workflow_kwargs.pop('id')
+        select_end_date = workflow_kwargs.pop('select_end_date') # TODO define how to use select end date
         workflow_kwargs['schedule_interval'] = None if workflow_kwargs['schedule_interval'] == 'none' else f"@{workflow_kwargs['schedule_interval']}"
 
         workflow_processed_schema = {
@@ -412,11 +413,6 @@ class WorkflowService(object):
         for key in remove_from_dag_kwargs:
             if key in workflow_kwargs:
                 workflow_kwargs.pop(key)
-
-        workspace_storage_repository = self._get_storage_repository_from_tasks(tasks=tasks, workspace_id=workspace_id)
-        workspace_storage_repository_id = None
-        if workspace_storage_repository:
-            workspace_storage_repository_id = workspace_storage_repository.id
 
         pieces_repositories_ids = set()
         stream_tasks_dict = dict()
@@ -439,26 +435,60 @@ class WorkflowService(object):
                     input_kwargs[input_key]['type'] = 'fromUpstream'
                     input_kwargs[input_key]['upstream_task_id'] = input_value['upstreamTaskId']
                     input_kwargs[input_key]['output_arg'] = input_value['upstreamArgument']
+                elif isinstance(input_value['value'], list):
+                    array_input_kwargs = []
+                    for element_idx, element in enumerate(input_value['value']):
+                        element_from_upstream = element['fromUpstream']
+                        # simple array
+                        # TODO we must handle fromUpstream at item level in Task domino class
+                        if isinstance(element_from_upstream, bool):
+                            if element_from_upstream:
+                                array_input_kwargs.append({
+                                    'type': 'fromUpstream',
+                                    'upstream_task_id': element['upstreamTaskId'],
+                                    'output_arg': element['upstreamArgument'],
+                                })
+                                continue
+                            array_input_kwargs.append(element['value'])
+
+                        # TODO composite array
+                        elif isinstance(element_from_upstream, dict):
+                            value_dict = {}
+                            for _key, from_upstream in element_from_upstream.items():
+                                if from_upstream:
+                                    value_dict[_key] = {
+                                        'type': 'fromUpstream',
+                                        'upstream_task_id': element['upstreamTaskId'][_key],
+                                        'output_arg': element['upstreamArgument'][_key],
+                                    }
+                                else:
+                                    value_dict[_key] = element['value'][_key]
+                            array_input_kwargs.append(value_dict)
+                    input_kwargs[input_key] = array_input_kwargs
                 else:
                     input_kwargs[input_key] = input_value['value']
-
-            if workflow_shared_storage:
-                workflow_shared_storage['storage_repository_id'] = workspace_storage_repository_id
+            
+            # workspace_storage_repository = self._get_storage_repository_from_tasks(tasks=tasks, workspace_id=workspace_id)
+            # if workflow_shared_storage:
+            #     ...
+                #workflow_shared_storage['storage_repository_url'] = workspace_storage_repository.url if workspace_storage_repository else None
+                #workflow_shared_storage['storage_repository_version'] = workspace_storage_repository.version if workspace_storage_repository else None
 
             piece_db = self.piece_repository.find_by_id(piece_request.get('id'))
+            piece_repository_db = self.piece_repository_repository.find_by_id(piece_db.repository_id)
             pieces_repositories_ids.add(piece_db.repository_id)
             stream_tasks_dict[task_key] = {
                 'task_id': task_key,
+                'workspace_id': workspace_id,
                 'piece': {
                     'name': piece_db.name,
                     'source_image': piece_db.source_image,
-                    'repository_id': piece_db.repository_id,
-                    # 'id': piece_db.id,
-                    # 'dependency': piece_db.dependency_group_name,
+                    'repository_url': piece_repository_db.url,
+                    'repository_version': piece_repository_db.version,
                 },
+                'input_kwargs': input_kwargs,
                 'workflow_shared_storage': workflow_shared_storage,
                 'container_resources': container_resources,
-                'input_kwargs': input_kwargs
             }
             if 'dependencies' in task_value and task_value['dependencies']:
                 stream_tasks_dict[task_key]['upstream'] = task_value.get('dependencies')
@@ -665,10 +695,8 @@ class WorkflowService(object):
     @staticmethod
     def parse_log(log_text: str, task_id: str, piece_name: str):
         # Get the log lines between the start and stop patterns
-        # The start pattern is where we find the first ocurrence of the users pieces logger output
-        start_command_pattern = f'domino-.{piece_name}-{task_id}'
-        # The stop pattern is the xcom export output log line, after that we are sure we don't have more logs from the user
-        stop_command_pattern = 'Running command... if [ -s \/airflow\/xcom\/return.json ]'
+        start_command_pattern = "Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
+        stop_command_pattern = "End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
         # Find all lines between the start and stop patterns
         # We are using re.DOTALL to match newlines
         log = re.findall(f"[^\n]*{start_command_pattern}.*?{stop_command_pattern}[^\n]*", log_text, re.DOTALL)
@@ -691,8 +719,9 @@ class WorkflowService(object):
             if len(matches) > 1:
                 l = re.sub(datetime_pattern, '', l, len(matches) -1)
 
-            # Remove the stop pattern
-            l = re.sub(stop_command_pattern, '', l)
+            # Remove the start and stop patterns
+            if stop_command_pattern in l or start_command_pattern in l:
+                continue
             # Strip all extra spaces
             l = " ".join(l.split())
 
