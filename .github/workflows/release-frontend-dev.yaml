@@ -30,9 +30,9 @@ jobs:
           push: true # Push is a shorthand for --output=type=registry
           tags: ghcr.io/tauffer-consulting/domino-frontend:k8s-dev
           context: frontend
-          file: frontend/Dockerfile.dev # Path to the Dockerfile
+          file: frontend/Dockerfile.prod # Path to the Dockerfile
         env:
-          VITE_API_ENV: dev
+          API_ENV: dev
 
   release-domino-frontend-compose:
     name: Domino Frontend Image
@@ -56,7 +56,7 @@ jobs:
           push: true # Push is a shorthand for --output=type=registry
           tags: ghcr.io/tauffer-consulting/domino-frontend:compose-dev
           context: frontend
-          file: frontend/Dockerfile.dev # Path to the Dockerfile
+          file: frontend/Dockerfile.prod # Path to the Dockerfile
         env:
-          VITE_API_ENV: local
-          VITE_DOMINO_DEPLOY_MODE: local-compose
+          API_ENV: local
+          DOMINO_DEPLOY_MODE: local-compose
