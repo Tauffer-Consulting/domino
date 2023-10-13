@@ -346,6 +346,9 @@ services:
     depends_on:
       domino_rest:
         condition: service_started
+    environment:
+      - API_ENV=local
+      - DOMINO_DEPLOY_MODE=local-compose
   
   # Domino Docker proxy
   docker-proxy:

@@ -15,6 +15,6 @@ export interface IEnvironment {
  */
 export const environment: IEnvironment = {
   NODE_ENV: import.meta.env.NODE_ENV as INodeEnv,
-  API_ENV: import.meta.env.VITE_API_ENV as IApiEnv,
+  API_ENV: import.meta.env.API_ENV as IApiEnv,
   USE_MOCK: !!import.meta.env.VITE_USE_MOCK,
 };
