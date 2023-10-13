@@ -18,7 +18,6 @@ class Task(object):
     The Task object represents a task in a workflow. 
     It is only instantiated by processes parsing dag files in Airflow.
     """
-    
     def __init__(
         self, 
         dag: DAG, 
