@@ -20,7 +20,7 @@ spec:
           image: {{ .Values.frontend.image }}
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 3000 #80
+            - containerPort: 80
           {{- if .Values.frontend.entrypointCommand }}
           command:
             {{ toYaml .Values.frontend.entrypointCommand | indent 12 }}
@@ -28,8 +28,11 @@ spec:
             ["-c","yarn start"]
           {{- end }}
           env:
-            - name: VITE_API_URL
-              value: http://domino-rest-service:8000
+            - name: API_ENV
+              value: {{ .Values.frontend.apiEnv }}
+            - name: DOMINO_DEPLOY_MODE
+              value: {{ .Values.frontend.deployMode }}
+
           # resources:
           #   limits:
           #     memory: {{ .Values.frontend.memoryLimit }}
@@ -49,7 +52,7 @@ spec:
     app: {{ .Release.Name }}-frontend
   ports:
   - port: 80
-    targetPort: 3000
+    #targetPort: 3000
     #nodePort: 30030
   #type: NodePort
 {{- end}}

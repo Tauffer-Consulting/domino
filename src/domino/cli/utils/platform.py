@@ -284,6 +284,8 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         "frontend": {
             "enabled": True,
             "image": domino_frontend_image,
+            "apiEnv": "dev" if platform_config['kind']["DOMINO_DEPLOY_MODE"] in ['local-k8s-dev', 'local-k8s'] else 'prod',
+            "deployMode": platform_config['kind']["DOMINO_DEPLOY_MODE"]
         },
         "rest": {
             "enabled": True,
