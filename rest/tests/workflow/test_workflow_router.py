@@ -25,11 +25,11 @@ class TestWorkflowRouter:
     @staticmethod
     def test_create_workflow(patch_piece_secret: Response, create_workflow: Response, piece_repository: PieceRepository, user: User):
         mock_response = CreateWorkflowResponse(
-            id = 1,
-            name = workflow_request_model["workflow"]["name"],
-            created_at = datetime.utcnow(),
-            schema = WorkflowSchemaBaseModel(
-                workflow = {
+            id=1,
+            name=workflow_request_model["workflow"]["name"],
+            created_at=datetime.utcnow(),
+            schema=WorkflowSchemaBaseModel(
+                workflow={
                     "name": workflow_request_model["workflow"]["name"],
                     "start_date": workflow_request_model["workflow"]["start_date"],
                     "end_date": None,
@@ -38,39 +38,15 @@ class TestWorkflowRouter:
                     "generate_report": False,
                     "description": None
                 },
-                tasks = {
-                    "task_1":{
-                        "task_id": workflow_request_model["tasks"]["task_1"]["task_id"],
-                        "piece": {
-                            "name": workflow_request_model["tasks"]["task_1"]["piece"]["name"],
-                            "source_image": "taufferconsulting/example_project_image_1:0.2.0",
-                            "repository_id": piece_repository.id
-                        },
-                        "input_kwargs":{
-                            "input_arg_1": dict()
-                        }
-                    },
-                    "task_2":{
-                        "task_id": workflow_request_model["tasks"]["task_2"]["task_id"],
-                        "piece": {
-                            "name": workflow_request_model["tasks"]["task_2"]["piece"]["name"],
-                            "source_image": "taufferconsulting/example_project_image_1:0.2.0",
-                            "repository_id": piece_repository.id
-                        },
-                        "input_kwargs":{
-                            "input_arg_1": dict()
-                        },
-                        "upstream": workflow_request_model["tasks"]["task_2"]["dependencies"]
-                    }
-                }
+                tasks=workflow_request_model['tasks']
             ),
-            created_by = user.id,
-            last_changed_at = datetime.utcnow(),
-            last_changed_by = user.id
+            created_by=user.id,
+            last_changed_at=datetime.utcnow(),
+            last_changed_by=user.id
         )
-        response = create_workflow
-        content = response.json()
-        mock_response_content = json.loads(mock_response.json(by_alias=True))
+        response=create_workflow
+        content=response.json()
+        mock_response_content=json.loads(mock_response.json(by_alias=True))
 
         assert response.status_code == 201
         assert content.keys() == mock_response_content.keys()
@@ -88,7 +64,7 @@ class TestWorkflowRouter:
             assert content["schema"]["tasks"][task[0]]["piece"].get("repository_id") == mock_response_content["schema"]["tasks"][task[0]]["piece"].get("repository_id")
             if "upstream" in content["schema"]["tasks"][task[0]]:
                 assert content["schema"]["tasks"][task[0]].get("upstream") == mock_response_content["schema"]["tasks"][task[0]].get("upstream")
-            
+
         assert content.get("created_by") == mock_response_content.get("created_by")
         assert content.get("last_changed_by") == mock_response_content.get("last_changed_by")
 

@@ -155,12 +155,11 @@ class PieceService(object):
         pieces = []
         for piece_metadata in DEFAULT_STORAGE_PIECES:
             model = piece_metadata.get('model')()
-            secrets_model = piece_metadata.get('secrets_model')()
-
             piece = Piece(
                 name=model.name,
                 description=model.description,
-                secrets_schema=secrets_model.schema(),
+                secrets_schema=model.secrets_schema,
+                input_schema=model.input_schema,
                 repository_id=piece_repository_id
             )
             pieces.append(piece)

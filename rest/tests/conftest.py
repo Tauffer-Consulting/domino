@@ -4,6 +4,7 @@ from typing import Dict
 from database.models import User, PieceRepository, Workflow, Workspace
 import os
 
+
 def pytest_collection_modifyitems(items):
     CLASS_ORDER = [
         "TestAuthRouter", 
@@ -55,7 +56,8 @@ def piece_repository():
         source="github",
         path="Tauffer-Consulting/default_domino_pieces_tests",
         version="0.0.2",
-        workspace_id=1
+        workspace_id=1,
+        url='https://github.com/Tauffer-Consulting/default_domino_pieces'
     )
 
 @pytest.fixture(scope="class")

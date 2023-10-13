@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - domino/**
+      - src/domino/**
 
 jobs:
   github-release:

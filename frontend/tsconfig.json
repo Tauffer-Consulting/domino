@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es5",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+    "types": ["vite/client", "vite-plugin-svgr/client"],
     "baseUrl": "src",
     "allowJs": true,
     "skipLibCheck": true,
@@ -23,5 +24,8 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

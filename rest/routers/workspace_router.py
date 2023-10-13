@@ -7,7 +7,6 @@ from schemas.requests.workspace import CreateWorkspaceRequest, AssignWorkspaceRe
 from schemas.responses.workspace import (
     CreateWorkspaceResponse, 
     ListUserWorkspacesResponse, 
-    AssignWorkspaceResponse, 
     GetWorkspaceResponse, 
     PatchWorkspaceResponse, 
     ListWorkspaceUsersResponse
@@ -278,4 +277,3 @@ def list_workspace_users(
         )
     except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-

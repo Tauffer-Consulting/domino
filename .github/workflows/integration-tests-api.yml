@@ -16,8 +16,7 @@ jobs:
       - name: Install Domino.
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -e .
+          pip install -e .[cli]
 
       - name: Build REST image.
         uses: docker/build-push-action@v3
@@ -32,10 +31,14 @@ jobs:
         with:
           install_only: true
 
+      - name: Print list domino src dir
+        run: |
+          ls ./src/domino
+
       - name: Prepare and create cluster.
         run: |
-          domino platform prepare --cluster-name=domino-cluster --workflows-repository=${{secrets.TESTS_WORKFLOWS_REPOSITORY}} --github-workflows-ssh-private-key=None --github-workflows-token=${{ secrets.TESTS_GITHUB_WORKFLOWS_TOKEN }} --github-default-pieces-repository-token=${{ secrets.TESTS_GITHUB_PIECES_TOKEN }} --deploy-mode=local-k8s --local-pieces-repository-path=[] --local-domino-path=''
-          domino platform create --domino-rest-image=domino-rest:test --run-airflow=False
+          domino platform prepare --cluster-name=domino-cluster --workflows-repository=${{secrets.TESTS_WORKFLOWS_REPOSITORY}} --github-workflows-ssh-private-key='' --github-workflows-token=${{ secrets.TESTS_GITHUB_WORKFLOWS_TOKEN }} --github-default-pieces-repository-token=${{ secrets.TESTS_GITHUB_PIECES_TOKEN }} --deploy-mode=local-k8s-dev --local-pieces-repository-path=[] --local-domino-path='./src/domino' --local-rest-image='domino-rest:test' --local-frontend-image='' --local-airflow-image=''
+          domino platform create --install-airflow=False
 
       - name: Install tests dependencies.
         run: pip install -r rest/requirements-test.txt
@@ -51,7 +54,6 @@ jobs:
           DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: ${{ secrets.TESTS_GITHUB_PIECES_TOKEN }}
           DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS: ${{ secrets.TESTS_GITHUB_WORKFLOWS_TOKEN }}
           DOMINO_GITHUB_WORKFLOWS_REPOSITORY: ${{secrets.TESTS_WORKFLOWS_REPOSITORY}}
-          
         run: pytest rest/tests/ -v
 
       - name: Delete cluster
