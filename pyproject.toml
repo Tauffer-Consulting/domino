@@ -50,6 +50,7 @@ domino = [
     'custom_operators/sidecar/sidecar_lifecycle.sh',
     'custom_operators/sidecar/rclone.conf',
     'custom_operators/sidecar/fuse.conf',
+    'VERSION'
 ]
 
 [tool.setuptools.dynamic]
