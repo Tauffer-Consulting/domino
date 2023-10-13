@@ -1,5 +1,5 @@
 [project]
-name = "domino"
+name = "domino-py"
 dynamic = ["version", "readme"]
 description = "Python package for Domino."
 authors = [
@@ -50,12 +50,12 @@ domino = [
     'custom_operators/sidecar/sidecar_lifecycle.sh',
     'custom_operators/sidecar/rclone.conf',
     'custom_operators/sidecar/fuse.conf',
-    'VERSION'
+    'VERSION',
 ]
 
 [tool.setuptools.dynamic]
 version = { attr = "domino.__version__" }
-readme = { file = "README.md" }
+readme = { file = "README-pypi.md" }
 
 [project.scripts]
 domino = "domino.cli.cli:cli"
