@@ -55,7 +55,7 @@ domino = [
 
 [tool.setuptools.dynamic]
 version = { attr = "domino.__version__" }
-readme = { file = "README-pypi.md" }
+readme = { file = 'README.md', content-type = 'text/markdown' }
 
 [project.scripts]
 domino = "domino.cli.cli:cli"
