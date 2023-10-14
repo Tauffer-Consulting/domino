@@ -90,7 +90,7 @@ def build_images_from_pieces_repository():
         # If no extra dependency, use base Pod image and just copy the Pieces source code
         if not any([dependency_dockerfile, dependency_requirements]):
             pieces_dependencies_map[group]["source_image"] = source_image_name
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
+            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-base-piece:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino
@@ -107,7 +107,7 @@ COPY .domino domino/pieces_repository/.domino
         # If dependency is defined as a requirements.txt
         elif dependency_requirements:
             pieces_dependencies_map[group]["source_image"] = source_image_name
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-airflow-pod:latest
+            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-base-piece:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino
