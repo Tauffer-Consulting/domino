@@ -34,7 +34,7 @@ This will load your local rest image in the kind cluster.
 
 ### 5. Using local airflow base image
 If you need to update the base airflow image used in worker and scheduler containers you can do it by following the next steps:
-1. Build your local airflow base image. You can use the following command from the root of the project: `DOCKER_BUILDKIT=1 docker build -f Dockerfile-airflow-domino-base-dev -t domino-airflow .`
+1. Build your local airflow base image. You can use the following command from the root of the project: `DOCKER_BUILDKIT=1 docker build -f Dockerfile-airflow-domino.dev -t domino-airflow .`
 2. Addthe key `DOMINO_AIRFLOW_IMAGE` with the value `domino-airflow` (or other tag you choose) to your `config.toml` file in the `dev` section.
 
 This will load your local airflow base image in the kind cluster.

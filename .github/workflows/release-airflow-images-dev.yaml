@@ -30,10 +30,10 @@ jobs:
           push: true
           tags: ghcr.io/tauffer-consulting/domino-airflow-base:latest-dev
           context: .
-          file: Dockerfile-airflow-domino-base-dev 
+          file: Dockerfile-airflow-domino.dev 
 
-  domino-pod-base:
-    name: Domino Base Pod Image
+  domino-base-piece:
+    name: Domino Base Piece Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,16 +48,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Domino POD Base image
+      - name: Build and push Domino Base Piece Image
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:latest-dev
+          tags: ghcr.io/tauffer-consulting/domino-base-piece:latest-dev
           context: .
-          file: Dockerfile-airflow-domino-pod-dev
+          file: Dockerfile-domino-piece.dev
 
-  domino-pod-gpu-base:
-    name: Domino Base Pod GPU Image
+  domino-base-piece-gpu:
+    name: Domino Base Piece GPU Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -72,13 +72,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Domino POD Base image with GPU support
+      - name: Build and push Domino Base Piece Image with GPU support
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:gpu-dev
+          tags: ghcr.io/tauffer-consulting/domino-base-piece:gpu-dev
           context: .
-          file: Dockerfile-airflow-domino-pod-gpu
+          file: Dockerfile-domino-piece.gpu-dev
 
   domino-storage-sidecar:
     name: Domino Storage Sidecar Image
