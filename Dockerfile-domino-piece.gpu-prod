@@ -31,7 +31,6 @@ RUN chmod -R 777 .
 
 # pip install Domino from PyPI
 RUN python3 -m pip install --upgrade pip \
-    pip install domino-py[piece] \
     pip install domino-py[cli]
 
 WORKDIR /home

@@ -61,7 +61,6 @@ readme = { file = 'README.md', content-type = 'text/markdown' }
 domino = "domino.cli.cli:cli"
 
 [project.optional-dependencies]
-piece = ["bottle==0.12.25"]
 cli = [
     "urllib3== 1.26.15",
     "cryptography==39.0.1",
@@ -69,6 +68,7 @@ cli = [
     "PyGithub==1.55",
     "docker>=6.0.1",
     "kubernetes==23.6.0",
+    "bottle==0.12.25"
 ]
 airflow = [
     "apache-airflow==2.6.3",
