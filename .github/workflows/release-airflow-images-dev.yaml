@@ -78,7 +78,7 @@ jobs:
           push: true
           tags: ghcr.io/tauffer-consulting/domino-base-piece:gpu-dev
           context: .
-          file: Dockerfile-airflow-domino-pod-gpu
+          file: Dockerfile-domino-piece.gpu-dev
 
   domino-storage-sidecar:
     name: Domino Storage Sidecar Image

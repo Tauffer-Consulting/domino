@@ -88,7 +88,7 @@ jobs:
           push: true
           tags: ghcr.io/tauffer-consulting/domino-base-piece:gpu
           context: .
-          file: Dockerfile-airflow-domino-pod-gpu
+          file: Dockerfile-domino-piece.gpu
 
   domino-storage-sidecar:
     #if: ${{ github.event.workflow_run.conclusion == 'success' }}
