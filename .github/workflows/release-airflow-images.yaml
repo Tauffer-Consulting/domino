@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - src/domino/**
+      - Dockerfile-airflow-domino.prod
+      - Dockerfile-domino-piece.gpu-prod
+      - Dockerfile-domino-piece.prod
   # workflow_run:
   #   workflows:
   #     - "Build and publish domino-py package"

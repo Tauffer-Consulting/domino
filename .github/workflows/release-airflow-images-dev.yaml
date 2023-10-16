@@ -6,6 +6,9 @@ on:
       - dev
     paths:
       - src/domino/**
+      - Dockerfile-airflow-domino.dev
+      - Dockerfile-domino-piece.gpu-dev
+      - Dockerfile-domino-piece.dev
 
 jobs:
   domino-airflow-base:
