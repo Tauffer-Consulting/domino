@@ -30,7 +30,7 @@ WORKDIR /airflow/xcom
 RUN chmod -R 777 .
 
 # pip install Domino from PyPI
-RUN /usr/local/bin/python -m pip install --upgrade pip \
+RUN python3 -m pip install --upgrade pip \
     pip install domino-py[piece]
 
 WORKDIR /home
