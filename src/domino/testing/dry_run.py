@@ -34,6 +34,7 @@ def piece_dry_run(
     logger = get_configured_logger("piece_dry_run")
 
     pieces_images_map = os.environ.get("PIECES_IMAGES_MAP", {})
+    http_server = None
     if pieces_images_map and piece_name in pieces_images_map:
         try:
             from domino.testing.http_client import TestingHttpClient
@@ -51,8 +52,9 @@ def piece_dry_run(
             return dry_run_response.json()
         except Exception as e:
             logger.error(f"Error running dry run with http client: {e}")
-            http_server.stop()
-            http_server.remove()
+            if http_server:
+                http_server.stop()
+                http_server.remove()
             raise e
 
     if not repository_folder_path:
