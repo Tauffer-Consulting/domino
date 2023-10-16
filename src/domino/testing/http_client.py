@@ -3,12 +3,13 @@ from requests.exceptions import ConnectionError, Timeout
 import time
 import docker
 from domino.logger import get_configured_logger
+from domino.testing import http_server
+from pathlib import Path
 
 
 class TestingHttpClient:
 
     docker_client = docker.from_env()
-    DOMINO_HTTP_SERVER_PATH = 'domino/domino_py/src/domino/testing/http_server.py'
     DOMINO_INTERNAL_REPOSITORY_FOLDER_PATH = "/home/domino/pieces_repository/"
     BASE_HTTP_SERVER_HOST_URL = "http://0.0.0.0:8080"
     logger = get_configured_logger("TestingHttpClient")
@@ -35,9 +36,9 @@ class TestingHttpClient:
         try:
             container = cls.docker_client.containers.run(
                 image=image,
-                command=f"python {cls.DOMINO_HTTP_SERVER_PATH}",
+                command=["bash", "-c", "python -c 'from domino.testing import http_server; http_server.run_server()'"],
                 ports={'8080/tcp': ('0.0.0.0', 8080)},
-                detach=True
+                detach=True,
             )
             container_state = container.attrs.get('State').get('Running')
             container_status = container.attrs.get('State').get('Status', None)

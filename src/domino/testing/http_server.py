@@ -16,6 +16,5 @@ def run_test():
 def health_check():
     return {"status": "ok"}
 
-
-if __name__ == '__main__':
+def run_server():
     run(app=app, host='0.0.0.0', port=8080)
