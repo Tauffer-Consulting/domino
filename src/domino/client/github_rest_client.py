@@ -1,5 +1,4 @@
 from github import Github
-import os
 
 
 class GithubRestClient(Github):
