@@ -343,7 +343,6 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             "useDefaultImageForMigration": False,
             "airflow": {
                 "repository": domino_airflow_image,
-                "tag": "latest",
                 "pullPolicy": "IfNotPresent"
             }
         },
