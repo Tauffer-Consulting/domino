@@ -1,0 +1,73 @@
+<mxfile host="app.diagrams.net" modified="2023-10-16T11:44:55.462Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36" etag="k2Qu1AQlp9Hyz39Is4Qb" version="22.0.4" type="device">
+  <diagram name="Página-1" id="PIrt1TJSi0ybACVaFFVr">
+    <mxGraphModel dx="2002" dy="803" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="6IB9ruLF5S7RQaVnEalg-1" target="6IB9ruLF5S7RQaVnEalg-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-1" value="User Test" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="6IB9ruLF5S7RQaVnEalg-2" target="6IB9ruLF5S7RQaVnEalg-5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-2" value="Domino piece_dry_run" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="220" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="6IB9ruLF5S7RQaVnEalg-5" target="6IB9ruLF5S7RQaVnEalg-7" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="6IB9ruLF5S7RQaVnEalg-5" target="6IB9ruLF5S7RQaVnEalg-17" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-5" value="isLocal ?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="410" y="230" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="6IB9ruLF5S7RQaVnEalg-7" target="6IB9ruLF5S7RQaVnEalg-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-7" value="Execute BasePiece.dry_run in local env" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="380" y="80" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-9" value="Run docker image starting http server" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="730" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="6IB9ruLF5S7RQaVnEalg-11" target="6IB9ruLF5S7RQaVnEalg-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-11" value="Send http request to run BasePiece.dry_run in docker env" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="515" y="390" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-13" value="yes" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="440" y="180" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-14" value="no" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="490" y="240" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="6IB9ruLF5S7RQaVnEalg-17" target="6IB9ruLF5S7RQaVnEalg-9" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="6IB9ruLF5S7RQaVnEalg-17" target="6IB9ruLF5S7RQaVnEalg-11" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-17" value="isServerUp?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="560" y="230" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-18" value="no" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="640" y="240" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-22" value="yes" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="540" y="330" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-25" value="return results" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="280" y="90" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6IB9ruLF5S7RQaVnEalg-26" value="return results" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="370" y="390" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

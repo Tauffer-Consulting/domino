@@ -30,7 +30,7 @@ jobs:
           push: true
           tags: ghcr.io/tauffer-consulting/domino-airflow-base:latest-dev
           context: .
-          file: Dockerfile-airflow-domino-base-dev 
+          file: Dockerfile-airflow-domino.dev 
 
   domino-base-piece:
     name: Domino Base Piece Image
