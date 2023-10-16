@@ -19,7 +19,7 @@ RUN mkdir -p domino/run_data
 # Need to copy operators source code
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
-COPY .domini domino/pieces_repository/.domino
+COPY .domino domino/pieces_repository/.domino
 
 # Install specific python dependencies
 RUN pip install --no-cache-dir opencv-python scipy boto3
