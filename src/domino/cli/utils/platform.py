@@ -230,14 +230,14 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     local_domino_frontend_image = platform_config.get('dev', {}).get('DOMINO_FRONTEND_IMAGE', None)
     local_domino_rest_image = platform_config.get('dev', {}).get('DOMINO_REST_IMAGE', None)
 
+    domino_airflow_image_tag = 'latest'
+    domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base" 
     if local_domino_airflow_image:
         console.print(f"Loading local Domino Airflow image {local_domino_airflow_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", local_domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
         domino_airflow_image = f'docker.io/library/{local_domino_airflow_image}'
-    elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev':
-        domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest-dev" 
-    else:  
-        domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest" 
+    elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev' and not local_domino_airflow_image:
+        domino_airflow_image_tag = 'latest-dev'
 
     if local_domino_frontend_image:
         console.print(f"Loading local frontend image {local_domino_frontend_image} to Kind cluster...")
@@ -343,6 +343,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             "useDefaultImageForMigration": False,
             "airflow": {
                 "repository": domino_airflow_image,
+                "tag": domino_airflow_image_tag,
                 "pullPolicy": "IfNotPresent"
             }
         },
