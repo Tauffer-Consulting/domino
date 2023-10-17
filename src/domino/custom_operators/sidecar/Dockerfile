@@ -1,7 +1,6 @@
 FROM bitnami/python:3.8
 
 RUN apt update \
-    && apt install fuse -y \
     && apt -y install fuse3 \
     && apt install curl -y \
     && apt install p7zip-full -y \
