@@ -173,6 +173,7 @@ class SharedStorageMount(object):
         ]
         self.logger.info("Mount command: %s", " ".join(command))
         subprocess.run(command, stdout=subprocess.PIPE)
+        self.logger.info("Mount finished")
         self.generate_paths(task_id=self.task_id)
         self.logger.info("Mount daemon process running")
 
