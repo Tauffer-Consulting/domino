@@ -162,7 +162,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     } catch (err) {
       setBackdropIsOpen(false);
       if (err instanceof AxiosError) {
-        toast.error(JSON.stringify(err?.response?.data));
+        console.log(err);
       } else if (err instanceof Error) {
         console.log(err);
         toast.error(
