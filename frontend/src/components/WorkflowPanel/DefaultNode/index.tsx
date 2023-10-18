@@ -111,7 +111,11 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
       const name = data.style.iconClassName;
       return {
         name,
-        style: data.style.iconStyle,
+        style: {
+          width: "20px",
+          height: "20px",
+          ...data.style.iconStyle,
+        },
       };
     }
   }, [data]);
@@ -142,7 +146,6 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            marginLeft: "8px",
           }}
         >
           <Typography
