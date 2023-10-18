@@ -14,6 +14,7 @@ DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY = ""
 DOMINO_GITHUB_WORKFLOWS_SSH_PUBLIC_KEY = ""
 
 [domino_db]
+DOMINO_CREATE_DATABASE = true # Changing to false will use the existing database defined by below variables
 DOMINO_DB_HOST = "postgres"
 DOMINO_DB_PORT = "postgres"
 DOMINO_DB_USER = "postgres"

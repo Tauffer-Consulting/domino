@@ -614,13 +614,28 @@ def destroy_platform() -> None:
 
 
 def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False) -> None:
+    # Database default settings
+    create_database = True
     if use_config_file:
         console.print("Using config file...")
         with open("config-domino-local.toml", "rb") as f:
             platform_config = tomli.load(f)
         token_pieces = platform_config["github"].get("DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN")
         os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = token_pieces
+        create_database = platform_config['domino_db'].get('DOMINO_CREATE_DATABASE', True)
+        if not create_database:
+            os.environ['DOMINO_DB_HOST'] = platform_config['domino_db'].get("DOMINO_DB_HOST", 'postgres')
+            os.environ['DOMINO_DB_PORT'] = platform_config['domino_db'].get("DOMINO_DB_PORT", 5432)
+            os.environ['DOMINO_DB_USER'] = platform_config['domino_db'].get("DOMINO_DB_USER", 'postgres')
+            os.environ['DOMINO_DB_PASSWORD'] = platform_config['domino_db'].get("DOMINO_DB_PASSWORD", 'postgres')
+            os.environ['DOMINO_DB_NAME'] = platform_config['domino_db'].get("DOMINO_DB_NAME", 'postgres')
+            os.environ['NETWORK_MODE'] = 'none'
 
+        # If running database in an external local container, set network mode to host
+        if platform_config['domino_db'].get('DOMINO_DB_HOST') in ['localhost', '0.0.0.0', '127.0.0.1']:
+            os.environ['NETWORK_MODE'] = 'host'
+
+    
     # Create local directories
     local_path = Path(".").resolve()
     domino_dir = local_path / "domino_data"
@@ -635,9 +650,11 @@ def run_platform_compose(detached: bool = False, use_config_file: bool = False, 
     subprocess.run(["chmod", "-R", "777", "airflow"])    
 
     # Copy docker-compose.yaml file from package to local path
-    docker_compose_path = Path(__file__).resolve().parent / "docker-compose.yaml"
-    subprocess.run(["cp", str(docker_compose_path), "."])
-
+    if create_database:
+        docker_compose_path = Path(__file__).resolve().parent / "docker-compose.yaml"
+    else:
+        docker_compose_path = Path(__file__).resolve().parent / "docker-compose-without-database.yaml"
+    subprocess.run(["cp", str(docker_compose_path), "./docker-compose.yaml"])
     # Run docker-compose up
     cmd = [
         "docker", 
