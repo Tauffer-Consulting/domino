@@ -1,4 +1,5 @@
 # Domino Database resource
+{{- if .Values.database.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,9 +38,10 @@ spec:
         - hostPath:
             path: "/home/docker/pgdata"
           name: pgdata
-
 ---
+{{- end }}
 # Domino Postgres Service
+{{- if .Values.database.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -52,3 +54,4 @@ spec:
     - protocol: "TCP"
       port: 5432
       targetPort: 5432
+{{- end }}

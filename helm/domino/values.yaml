@@ -20,7 +20,9 @@ rest:
 
 # Change this if using external Database
 database:
+  enabled: true
   image: postgres:13
   name: postgres
   user: postgres
   password: postgres
+  port: "5432"
