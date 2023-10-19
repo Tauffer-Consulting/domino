@@ -26,19 +26,7 @@ export const TaskResult = (props: ITaskResultProps) => {
     }
 
     if (!base64_content || !file_type) {
-      return (
-        <Container
-          sx={{
-            height: "90%",
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="h2">No content</Typography>
-        </Container>
-      );
+      return <Typography variant="h2">No content</Typography>;
     }
 
     switch (file_type) {
@@ -106,6 +94,7 @@ export const TaskResult = (props: ITaskResultProps) => {
         height: "90%",
         width: "100%",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
       }}

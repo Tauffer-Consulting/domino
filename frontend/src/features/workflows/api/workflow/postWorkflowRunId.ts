@@ -49,16 +49,7 @@ export const useAuthenticatedPostWorkflowRunId = () => {
       })
       .catch((e) => {
         if (e instanceof AxiosError) {
-          if (e?.response?.status === 403) {
-            toast.error("You are not allowed to run this workflow.");
-          } else if (e?.response?.status === 404) {
-            toast.error("Workflow not found.");
-          } else if (e?.response?.status === 409) {
-            toast.error("Workflow is not in a valid state. ");
-          } else {
-            console.error(e);
-            toast.error("Something went wrong. ");
-          }
+          console.error(e);
         } else {
           throw e;
         }
