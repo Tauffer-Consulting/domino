@@ -158,7 +158,8 @@ def run_workflow(
 ):
     try:
         return workflow_service.run_workflow(
-            workflow_id=workflow_id
+            workflow_id=workflow_id,
+            auth_context=auth_context
         )
     except (BaseException, ForbiddenException, ResourceNotFoundException, ConflictException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)

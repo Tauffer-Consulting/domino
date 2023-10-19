@@ -510,7 +510,7 @@ class WorkflowService(object):
             all_pieces.append(v["piece"])
         return list(dict.fromkeys(all_pieces))
 
-    def run_workflow(self, workflow_id: int):
+    def run_workflow(self, workflow_id: int, auth_context: AuthorizationContextData):
         workflow = self.workflow_repository.find_by_id(id=workflow_id)
         if not workflow:
             raise ResourceNotFoundException("Workflow not found")
@@ -533,7 +533,7 @@ class WorkflowService(object):
             self.logger.error(update_response.json())
             raise BaseException("Error while trying to run workflow")
 
-        run_dag_response = self.airflow_client.run_dag(dag_id=airflow_workflow_id)
+        run_dag_response = self.airflow_client.run_dag(dag_id=airflow_workflow_id, auth_token=auth_context.token)
         if run_dag_response.status_code != 200:
             self.logger.error(f"Error while trying to run workflow {workflow_id}")
             self.logger.error(run_dag_response.json())

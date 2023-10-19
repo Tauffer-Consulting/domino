@@ -10,4 +10,5 @@ class WorkspaceAuthorizerData(BaseModel):
 
 class AuthorizationContextData(BaseModel):
     user_id: int = Field(title='User id')
+    token: str = Field(title='Token')
     workspace: Optional[WorkspaceAuthorizerData] = Field(title='Workspace', default=None)

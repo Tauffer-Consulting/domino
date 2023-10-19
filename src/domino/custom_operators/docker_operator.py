@@ -54,7 +54,7 @@ class DominoDockerOperator(DockerOperator):
         
         # TODO remove - used in DEV only
         mounts=[
-            # TODO remove
+            # TODO remove /usr/local/lib/python3.11/site-packages/domino/
             # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/home/domino/domino_py/src/domino', type='bind', read_only=True),
             # Mount(source='/home/nathan/Documentos/github.com/Tauffer-Consulting/domino/src/domino', target='/home/domino/domino_py/domino', type='bind', read_only=True),
             # Mount(source='/media/luiz/storage2/Github/domino/src/domino', target='/home/domino/domino_py/src/domino', type='bind', read_only=True),
@@ -88,13 +88,18 @@ class DominoDockerOperator(DockerOperator):
             "page": 0,
             "page_size": 1,
         }
+        headers = {
+            "Authorization": f"Bearer {self.auth_token}"
+        }
 
         piece_repository_data = self.domino_client.get_piece_repositories_from_workspace_id(
-            params=params
+            params=params,
+            headers=headers
         ).json()
         secrets_response = self.domino_client.get_piece_secrets(
             piece_repository_id=piece_repository_data["data"][0]["id"],
-            piece_name=self.piece_name
+            piece_name=self.piece_name,
+            headers=headers
         )
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
@@ -155,6 +160,7 @@ class DominoDockerOperator(DockerOperator):
         - add shared storage volume mounts to the pod - if shared storage is NFS based or local
         """
         # Fetch upstream tasks ids and save them in an ENV var
+        self.auth_token = context['dag_run'].conf['token']
         upstream_task_ids = [t.task_id for t in self.get_direct_relatives(upstream=True)]
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS'] = str(upstream_task_ids)
         self.environment['DOMINO_WORKFLOW_SHARED_STORAGE_SOURCE_NAME'] = str(self.workflow_shared_storage.source.name) if self.workflow_shared_storage else None

@@ -56,12 +56,15 @@ class AirflowRestClient(requests.Session):
         data = await response.json()
         return data
 
-    def run_dag(self, dag_id):
+    def run_dag(self, dag_id, auth_token: str):
         resource = f"api/v1/dags/{dag_id}/dagRuns"
         dag_run_uuid = str(uuid.uuid4())
         payload = {
             "dag_run_id": f"rest-client-{dag_run_uuid}",
-            "logical_date": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+            "logical_date": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            "conf": {
+                "token": auth_token
+            }
         }
         response = self.request(
             method="post",

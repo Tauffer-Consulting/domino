@@ -30,11 +30,12 @@ class DominoBackendRestClient(requests.Session):
         )
         return response
 
-    def get_piece_secrets(self, piece_repository_id: int, piece_name: str) -> requests.Response:
+    def get_piece_secrets(self, piece_repository_id: int, piece_name: str, **kwargs) -> requests.Response:
         resource = f"/pieces-repositories/{piece_repository_id}/secrets/{piece_name}"
         response = self.request(
             method='get',
-            resource=resource
+            resource=resource,
+            **kwargs
         )
         return response
 
@@ -46,12 +47,13 @@ class DominoBackendRestClient(requests.Session):
         )
         return response
 
-    def get_piece_repositories_from_workspace_id(self, params: dict) -> requests.Response:
+    def get_piece_repositories_from_workspace_id(self, params: dict, **kwargs) -> requests.Response:
         resource = "/pieces-repositories"
         response = self.request(
             method='get',
             resource=resource,
-            params=params
+            params=params,
+            **kwargs
         )
         return response
     

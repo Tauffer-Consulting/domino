@@ -77,13 +77,12 @@ def update_repository_secret(
         status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError}
     },
-    include_in_schema=False
+    include_in_schema=False,
+    dependencies=[Depends(auth_service.piece_repository_workspace_read_access_authorizer)]
 )
-#@auth_service.authorize_repository_workspace_access # TODO authorize only worker
 def get_piece_secrets(
     piece_repository_id: int,
-    piece_name: str, # TODO check what is better to use. query or path ?
-    #auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    piece_name: str,
 ) -> List[GetSecretsByPieceResponse]:
     """Get secrets for a specific Piece from an piece repository, in a specific workspace"""
     try:
