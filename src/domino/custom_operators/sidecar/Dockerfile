@@ -6,7 +6,7 @@ RUN apt update \
     && apt install p7zip-full -y \
     && apt-get install psmisc -y \
     && apt-get install -y man-db \
-    && curl -O https://downloads.rclone.org/v1.64.0/rclone-v1.64.0-linux-amd64.zip && unzip rclone-v1.64.0-linux-amd64.zip && cd rclone-*-linux-amd64 && cp rclone /usr/bin/ \
+    && curl -O https://downloads.rclone.org/v1.64.2/rclone-v1.64.2-linux-amd64.zip && unzip rclone-v1.64.2-linux-amd64.zip && cd rclone-*-linux-amd64 && cp rclone /usr/bin/ \
     && chown root:root /usr/bin/rclone && chmod 755 /usr/bin/rclone \
     && mkdir -p /usr/local/share/man/man1 && cp rclone.1 /usr/local/share/man/man1/ && mandb 
 
@@ -16,4 +16,4 @@ COPY fuse.conf /etc/fuse.conf
 COPY sidecar_lifecycle.sh .
 RUN chmod u+x sidecar_lifecycle.sh
 COPY logger.py . 
-COPY mount.py .    
+COPY mount.py .
