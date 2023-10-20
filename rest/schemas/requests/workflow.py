@@ -108,7 +108,6 @@ class WorkflowSharedStorageModeEnum(str, Enum):
 
 class WorkflowSharedStorageDataModel(BaseModel):
     source: Optional[WorkflowSharedStorageSourceEnum]
-    base_folder: Optional[str]
     mode: Optional[WorkflowSharedStorageModeEnum]
     provider_options: Optional[Dict]
 

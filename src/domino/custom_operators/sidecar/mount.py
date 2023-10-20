@@ -68,7 +68,7 @@ class SharedStorageMount(object):
             raise Exception("Shared Storage Mode is not set")
 
     def _set_remote_base_folder_path(self):
-        self.remote_base_folder_path = self.workflow_shared_storage.get("base_folder", "/")
+        self.remote_base_folder_path = self.workflow_shared_storage.get("provider_options", {}).get("base_folder","/")
         if self.remote_base_folder_path == "":
             self.remote_base_folder_path = "/"
         if self.remote_base_folder_path[-1] != "/":

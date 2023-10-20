@@ -36,9 +36,14 @@ interface UiSchema {
 
 interface WorkflowSharedStorageDataModel {
   source: StorageSourcesLocal | StorageSourcesAWS;
-  base_folder?: string;
+
   mode: StorageAccessModes;
-  provider_options?: Record<string, unknown>;
+  provider_options?: ProviderOptionS3;
+}
+
+interface ProviderOptionS3 {
+  bucket?: string;
+  base_folder?: string;
 }
 
 interface SystemRequirementsModel {
