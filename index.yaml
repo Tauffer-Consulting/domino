@@ -2,6 +2,19 @@ apiVersion: v1
 entries:
   domino:
   - apiVersion: v2
+    appVersion: 0.1.7
+    created: "2023-10-20T19:06:44.633941734Z"
+    description: A Helm chart for Domino
+    digest: bd9f9d0844424b0da7240b6311b6a4a6b2ecab6b9535670498e0e4c52988cf89
+    home: https://github.com/Tauffer-Consulting/domino
+    name: domino
+    sources:
+    - https://github.com/Tauffer-Consulting/domino
+    type: application
+    urls:
+    - https://github.com/Tauffer-Consulting/domino/releases/download/domino-0.1.7/domino-0.1.7.tgz
+    version: 0.1.7
+  - apiVersion: v2
     appVersion: 0.1.6
     created: "2023-10-16T17:08:58.245304049Z"
     description: A Helm chart for Domino
@@ -113,4 +126,4 @@ entries:
     urls:
     - https://github.com/Tauffer-Consulting/domino/releases/download/domino-0.1.0/domino-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-16T17:08:58.24533935Z"
+generated: "2023-10-20T19:06:44.633967434Z"
