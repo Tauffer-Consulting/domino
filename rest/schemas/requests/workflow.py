@@ -27,10 +27,6 @@ class UiSchema(BaseModel):
     edges: List[Dict]
 
 
-class WorkflowStorage(BaseModel):
-    storage_source: Optional[str] # TODO use enum ?
-    base_folder: Optional[str]
-
 class SelectEndDate(str, Enum):
     never = "never"
     user_defined = "User defined"
