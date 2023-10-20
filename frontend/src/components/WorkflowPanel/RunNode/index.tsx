@@ -1,4 +1,5 @@
 /* eslint-disable no-prototype-builtins */
+import { Icon } from "@iconify/react";
 import { Paper, Typography } from "@mui/material";
 import { taskState } from "features/workflows/types";
 import theme from "providers/theme.config";
@@ -117,6 +118,20 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
     [data],
   );
 
+  const icon = useMemo(() => {
+    if (data.style.useIcon) {
+      const name = data.style.iconClassName;
+      return {
+        name,
+        style: {
+          width: "20px",
+          height: "20px",
+          ...data.style.iconStyle,
+        },
+      };
+    }
+  }, [data]);
+
   return (
     <>
       {nodeTypeRenderHandleMap[extendedClassExt].renderSourceHandle && (
@@ -136,6 +151,7 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
         />
       )}
       <Paper elevation={selected ? 12 : 3} sx={nodeStyle}>
+        {icon && <Icon icon={icon.name} style={icon.style} />}
         <div
           style={{
             display: "flex",

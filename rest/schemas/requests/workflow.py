@@ -27,10 +27,6 @@ class UiSchema(BaseModel):
     edges: List[Dict]
 
 
-class WorkflowStorage(BaseModel):
-    storage_source: Optional[str] # TODO use enum ?
-    base_folder: Optional[str]
-
 class SelectEndDate(str, Enum):
     never = "never"
     user_defined = "User defined"
@@ -108,7 +104,6 @@ class WorkflowSharedStorageModeEnum(str, Enum):
 
 class WorkflowSharedStorageDataModel(BaseModel):
     source: Optional[WorkflowSharedStorageSourceEnum]
-    base_folder: Optional[str]
     mode: Optional[WorkflowSharedStorageModeEnum]
     provider_options: Optional[Dict]
 

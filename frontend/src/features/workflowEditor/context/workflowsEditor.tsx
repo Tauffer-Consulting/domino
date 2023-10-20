@@ -167,11 +167,10 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 
       const workflowSharedStorage = {
         source: storageSource,
-        ...(baseFolder !== "" ? { base_folder: baseFolder } : {}),
         ...{ mode: elementData?.storage?.storageAccessMode },
         provider_options: {
           ...(providerOptions && providerOptions.bucket !== ""
-            ? { bucket: providerOptions.bucket }
+            ? { bucket: providerOptions.bucket, base_folder: baseFolder }
             : {}),
         },
       };

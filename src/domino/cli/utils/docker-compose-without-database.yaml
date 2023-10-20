@@ -5,7 +5,6 @@ version: '3.8'
 x-airflow-common:
   &airflow-common
   image: apache/airflow:2.6.3-python3.9
-  # build: .
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -32,7 +31,7 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
-services:
+services: 
   postgres:
     image: postgres:13
     container_name: airflow-postgres
@@ -225,10 +224,7 @@ services:
   # Modified Airflow Scheduler with Domino
   airflow-scheduler:
     <<: *airflow-common
-    # # image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
-    build:
-      context: .
-      dockerfile: Dockerfile-airflow-domino.dev
+    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest${DOMINO_COMPOSE_DEV}
     container_name: airflow-domino-scheduler
     command: scheduler
     healthcheck:
@@ -251,7 +247,6 @@ services:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
-      - ./src/domino/:/opt/airflow/domino/domino_py/src/domino # Hot reload domino package - remove in production
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -260,10 +255,7 @@ services:
   # Modified Airflow Worker with Domino
   airflow-worker:
     <<: *airflow-common
-    # image: ghcr.io/tauffer-consulting/domino-airflow-base:latest
-    build:
-      context: .
-      dockerfile: Dockerfile-airflow-domino.dev
+    image: ghcr.io/tauffer-consulting/domino-airflow-base:latest${DOMINO_COMPOSE_DEV}
     container_name: airflow-domino-worker
     command: celery worker
     healthcheck:
@@ -282,12 +274,12 @@ services:
       DOMINO_DEPLOY_MODE: local-compose
       LOCAL_DOMINO_SHARED_DATA_PATH: ${PWD}/domino_data
     restart: always
+
     volumes:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
       - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
       - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
       - ${PWD}/domino_data:/home/shared_storage
-      - ./src/domino/:/opt/airflow/domino/domino_py/src/domino # Enable hot reload for domino package - remove in production
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -295,83 +287,39 @@ services:
 
   # Domino REST Api
   domino_rest:
-    # image: ghcr.io/tauffer-consulting/domino-rest:latest
-    build:
-      context: ./rest
-      dockerfile: Dockerfile
+    image: ghcr.io/tauffer-consulting/domino-rest:latest${DOMINO_COMPOSE_DEV}
     container_name: domino-rest
-    command: bash -c "alembic upgrade heads && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
+    command: bash -c "uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
     ports:
       - 8000:8000
     environment:
-      - DOMINO_DB_USER=postgres
-      - DOMINO_DB_PASSWORD=postgres
-      - DOMINO_DB_HOST=domino_postgres
-      - DOMINO_DB_PORT=5432
-      - DOMINO_DB_NAME=postgres
-      - DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION=0.3.14
+      - DOMINO_DB_USER=${DOMINO_DB_USER}
+      - DOMINO_DB_PASSWORD=${DOMINO_DB_PASSWORD}
+      - DOMINO_DB_HOST=${DOMINO_DB_HOST}
+      - DOMINO_DB_PORT=${DOMINO_DB_PORT}
+      - DOMINO_DB_NAME=${DOMINO_DB_NAME}
       - DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN=${DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN}
-      - DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS=${DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS}
-      - DOMINO_GITHUB_WORKFLOWS_REPOSITORY=${DOMINO_GITHUB_WORKFLOWS_REPOSITORY}
       - DOMINO_DEPLOY_MODE=local-compose
       - AIRFLOW_ADMIN_USERNAME=airflow
       - AIRFLOW_ADMIN_PASSWORD=airflow
-    networks:
-      - domino-postgres-network
-      - default
+    network_mode: ${NETWORK_MODE}
     volumes:
-      - ./rest/:/rest # Enable hot reload for backend
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
-    depends_on:
-      domino_postgres:
-        condition: service_healthy
-
-  # Domino Postgres
-  domino_postgres:
-    image: postgres:13
-    container_name: domino-postgres
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - domino-postgres-volume:/var/lib/postgresql/data
-    networks:
-      - domino-postgres-network
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
-        ]
-      interval: 10s
-      timeout: 60s
-      retries: 5
-      start_period: 2s
-    ports:
-      - "5433:5432"
-    restart: always
 
   # Domino Frontend
   domino_frontend:
-    #image: ghcr.io/tauffer-consulting/domino-frontend:compose
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+    image: ghcr.io/tauffer-consulting/domino-frontend:compose${DOMINO_COMPOSE_DEV}
     container_name: domino-frontend
-    command: yarn start
-    environment:
-      - API_ENV=local
-      - DOMINO_DEPLOY_MODE=local-compose
     ports:
-      - 3000:3000
-    volumes:
-      - ./frontend:/usr/src/app # Enable hot reload for frontend
+      - "3000:80"
     depends_on:
       domino_rest:
         condition: service_started
-
-  # Domino Docker Proxy
+    environment:
+      - API_ENV=local
+      - DOMINO_DEPLOY_MODE=local-compose
+  
+  # Domino Docker proxy
   docker-proxy:
     image: bobrik/socat
     container_name: domino-docker-proxy
@@ -387,6 +335,4 @@ volumes:
 
 networks:
   domino-postgres-network:
-    driver: bridge
-  domino-services-network:
-    driver: bridge
+    driver: host

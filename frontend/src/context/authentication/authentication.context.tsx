@@ -1,4 +1,3 @@
-import { AxiosError } from "axios";
 import localforage from "localforage";
 import React, {
   type ReactNode,
@@ -70,18 +69,10 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const authenticate = useCallback(
     async (email: string, password: string) => {
       setAuthLoading(true);
-      postAuthLogin({ email, password })
+      void postAuthLogin({ email, password })
         .then((res) => {
           if (res.status === 200) {
             login(res.data.access_token, res.data.user_id);
-          }
-        })
-        .catch((e) => {
-          if (e instanceof AxiosError) {
-            toast.error(
-              e.response?.data?.detail ??
-                "Error on login, please review your inputs and try again",
-            );
           }
         })
         .finally(() => {

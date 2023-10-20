@@ -20,7 +20,7 @@
 
 <br>
 
-![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_create_workflow.gif)
+![create-workflow](https://github.com/Tauffer-Consulting/domino/assets/54302847/34d619fa-4b6c-4761-8b24-3ca829cfc28c)
 
 # Table of contents
 - [About](#about)
@@ -119,8 +119,8 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Create Workflows by dragging and dropping Pieces to the canvas, and connecting them. <br></br>
 
-  ![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_create_workflow.gif)
-
+  ![create-workflow](https://github.com/Tauffer-Consulting/domino/assets/54302847/34d619fa-4b6c-4761-8b24-3ca829cfc28c)
+  
 </details>
 
 <details>
@@ -129,7 +129,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system. <br></br>
 
-  ![edit pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/8_edit_pieces.gif)
+  ![edit pieces](https://github.com/Tauffer-Consulting/domino/assets/54302847/d453ac81-5485-4159-b2f3-bf57eb969906)
 
 </details>
 
@@ -139,7 +139,8 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
 
-  ![schedule workflows](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/9_edit_workflow.gif)
+  ![schedule workflows](https://github.com/Tauffer-Consulting/domino/assets/54302847/e881d225-e8e0-4344-bc3f-c170cb820274)
+
 </details>
 
 <details>
@@ -148,7 +149,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Monitor Workflows in real time, including the status of each Piece, the logs and results of each run. <br></br>
 
-  ![monitor workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/10_monitor_workflow.gif)
+  ![run-pieces7](https://github.com/Tauffer-Consulting/domino/assets/54302847/fb5a30c5-0314-4271-bb46-81a159ab2696)
 
 </details>
 
