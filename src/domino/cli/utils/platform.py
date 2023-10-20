@@ -435,8 +435,6 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
                 "helm",
                 "pull",
                 DOMINO_HELM_PATH,
-                "--version",
-                DOMINO_HELM_VERSION,
                 "--untar",
                 "-d",
                 tmp_dir
