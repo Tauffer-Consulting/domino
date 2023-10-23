@@ -1,4 +1,3 @@
-import localforage from "localforage";
 import React, {
   type ReactNode,
   useCallback,
@@ -9,6 +8,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import localForage from "services/config/localForage.config";
 import { createCustomContext } from "utils";
 
 import { postAuthLogin, postAuthRegister } from "./api";
@@ -54,7 +54,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
 
   const logout = useCallback(() => {
     localStorage.clear();
-    void localforage.clear();
+    void localForage.clear();
     isLogged.current = false;
     setStore((store) => ({
       ...store,
