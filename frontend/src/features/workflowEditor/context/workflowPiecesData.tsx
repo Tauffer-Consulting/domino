@@ -4,7 +4,7 @@ import { createCustomContext, getUuid } from "utils";
 
 import { type IWorkflowPieceData } from "./types";
 
-type ForagePiecesData = Record<string, IWorkflowPieceData>;
+export type ForagePiecesData = Record<string, IWorkflowPieceData>;
 
 export interface IWorkflowPiecesDataContext {
   setForageWorkflowPiecesData: (

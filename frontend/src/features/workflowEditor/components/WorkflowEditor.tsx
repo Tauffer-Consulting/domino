@@ -1,8 +1,9 @@
 import { Settings as SettingsSuggestIcon } from "@mui/icons-material";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
+import IosShareIcon from "@mui/icons-material/IosShare";
 import SaveIcon from "@mui/icons-material/Save";
-import { Button, Grid, Paper } from "@mui/material";
+import { Button, Grid, Paper, styled } from "@mui/material";
 import { AxiosError } from "axios";
 import Loading from "components/Loading";
 import {
@@ -15,11 +16,12 @@ import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { type Edge, type Node, type XYPosition } from "reactflow";
-import { yupResolver, useInterval } from "utils";
+import { yupResolver, useInterval, exportToJson } from "utils";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
 import { type IWorkflowPieceData, storageAccessModes } from "../context/types";
+import { type DominoWorkflowForage } from "../context/workflowsEditor";
 import { containerResourcesSchema } from "../schemas/containerResourcesSchemas";
 import { extractDefaultInputValues, extractDefaultValues } from "../utils";
 
@@ -41,6 +43,18 @@ import SidebarSettingsForm, {
 const getId = (module_name: string) => {
   return `${module_name}_${uuidv4()}`;
 };
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
 export const WorkflowsEditorComponent: React.FC = () => {
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
@@ -70,7 +84,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
   const {
     clearForageData,
-    workflowsEditorBodyFromFlowchart,
+    generateWorkflowsEditorBodyParams,
     fetchWorkflowForage,
     handleCreateWorkflow,
     fetchForagePieceById,
@@ -153,7 +167,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       await validateWorkflowPiecesData(payload);
       await validateWorkflowSettings(payload);
 
-      const data = await workflowsEditorBodyFromFlowchart();
+      const data = await generateWorkflowsEditorBodyParams(payload);
 
       await handleCreateWorkflow({ workspace_id: workspace?.id, ...data });
 
@@ -175,7 +189,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     handleCreateWorkflow,
     validateWorkflowPiecesData,
     validateWorkflowSettings,
-    workflowsEditorBodyFromFlowchart,
+    generateWorkflowsEditorBodyParams,
     workspace?.id,
   ]);
 
@@ -184,6 +198,76 @@ export const WorkflowsEditorComponent: React.FC = () => {
     workflowPanelRef.current?.setEdges([]);
     workflowPanelRef.current?.setNodes([]);
   }, [clearForageData]);
+
+  const handleExport = useCallback(async () => {
+    await saveDataToLocalForage();
+    const payload = await fetchWorkflowForage();
+    exportToJson(payload, payload.workflowSettingsData?.config?.name);
+  }, []);
+
+  const validateJsonImported = useCallback(
+    async (json: DominoWorkflowForage) => {
+      const getRepositories = function (
+        workflowPieces: DominoWorkflowForage["workflowPieces"],
+      ) {
+        return [
+          ...new Set(
+            Object.values(workflowPieces)
+              .reduce<Array<string | null>>((acc, next) => {
+                acc.push(next.source_image);
+                return acc;
+              }, [])
+              .filter((su) => !!su) as string[],
+          ),
+        ];
+      };
+
+      const { workflowPieces } = await fetchWorkflowForage();
+
+      const currentRepositories = getRepositories(workflowPieces);
+      const incomeRepositories = getRepositories(json.workflowPieces);
+      const differences = currentRepositories.filter(
+        (x) => !incomeRepositories.includes(x),
+      );
+
+      return differences.length ? differences : null;
+    },
+    [fetchWorkflowForage],
+  );
+
+  const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const jsonData = JSON.parse(
+            e.target?.result as string,
+          ) as DominoWorkflowForage;
+
+          validateJsonImported(jsonData)
+            .then((diferences) => {
+              if (diferences) {
+                alert(
+                  `Missing some repositories: ${JSON.stringify(diferences)}`,
+                );
+              } else {
+                alert("Same itens");
+              }
+            })
+            .catch((e) => {
+              alert(e);
+            });
+        } catch (error) {
+          console.error("Error parsing JSON file:", error);
+        }
+      };
+
+      reader.readAsText(file);
+    }
+  }, []);
 
   const onNodesDelete = useCallback(
     async (nodes: any) => {
@@ -344,11 +428,23 @@ export const WorkflowsEditorComponent: React.FC = () => {
               <Button
                 color="primary"
                 variant="contained"
-                startIcon={<DownloadIcon />}
+                startIcon={<IosShareIcon />}
+                onClick={handleExport}
               >
-                Load
+                Export
               </Button>
             </Grid>
+            <Grid item>
+              <Button
+                component="label"
+                variant="contained"
+                startIcon={<DownloadIcon />}
+              >
+                Import
+                <VisuallyHiddenInput type="file" onChange={handleImport} />
+              </Button>
+            </Grid>
+
             <Grid item>
               <Button
                 color="primary"
