@@ -74,7 +74,10 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.number().typeError("Must must be a number").required();
+        if (schema?.required) {
+          return yup.number().typeError("Must must be a number").required();
+        }
+        return yup.number().typeError("Must must be a number").notRequired();
       }),
     });
   } else if (schema.type === "integer" && !schema.format) {
@@ -84,11 +87,18 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
+        if (schema?.required) {
+          return yup
+            .number()
+            .integer()
+            .typeError("Must must be a number")
+            .required();
+        }
         return yup
           .number()
           .integer()
           .typeError("Must must be a number")
-          .required();
+          .notRequired();
       }),
     });
   } else if (schema.type === "boolean" && !schema.format) {
@@ -98,7 +108,10 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.boolean().required();
+        if (schema?.required) {
+          return yup.string().required();
+        }
+        return yup.string().notRequired();
       }),
     });
   } else if (schema.type === "string" && schema.format === "date") {
@@ -108,7 +121,10 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        if (schema?.required) {
+          return yup.string().required();
+        }
+        return yup.string().notRequired();
       }),
     });
   } else if (schema.type === "string" && schema?.format === "time") {
@@ -118,7 +134,10 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        if (schema?.required) {
+          return yup.string().required();
+        }
+        return yup.string().notRequired();
       }),
     });
   } else if (schema.type === "string" && schema?.format === "date-time") {
@@ -128,7 +147,10 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        if (schema?.required) {
+          return yup.string().required();
+        }
+        return yup.string().notRequired();
       }),
     });
   } else if (schema.type === "string" && schema?.widget === "codeeditor") {
@@ -138,7 +160,10 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string();
+        if (schema?.required) {
+          return yup.string().required();
+        }
+        return yup.string().notRequired();
       }),
     });
   } else if (schema.type === "string" && !schema.format) {
@@ -148,7 +173,10 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        if (schema?.required) {
+          return yup.string().required();
+        }
+        return yup.string().notRequired();
       }),
     });
   } else if (schema.type === "object") {
@@ -176,6 +204,7 @@ export function createInputsSchemaValidation(schema: any) {
           const subItemSchemaName = subSchema.items.$ref.split("/").pop();
           subItemSchema = schema.definitions?.[subItemSchemaName];
         }
+        subItemSchema.required = !!subSchema?.required;
         inputSchema = yup.object({
           ...defaultValidation,
           value: yup
