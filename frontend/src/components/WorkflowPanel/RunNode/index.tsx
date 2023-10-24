@@ -88,7 +88,7 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
       ...data.style.nodeStyle,
       display: "flex",
       flexDirection: "row",
-      justifyContent: "center",
+      justifyContent: "space-evenly",
       alignItems: "center",
       textAlign: "center",
       position: "relative",
