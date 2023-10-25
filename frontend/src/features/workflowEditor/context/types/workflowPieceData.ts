@@ -75,3 +75,8 @@ export interface CreateWorkflowRequest {
   tasks: TasksDict;
   ui_schema: UiSchema;
 }
+export interface CreateWorkflowPieceRequest {
+  workflow: WorkflowBaseSettings;
+  tasks: TasksDict;
+  ui_schema: UiSchema;
+}

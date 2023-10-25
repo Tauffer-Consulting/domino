@@ -34,6 +34,7 @@ interface IWorkflowsEditorContext
   handleCreateWorkflow: (
     params: IPostWorkflowParams,
   ) => Promise<IPostWorkflowResponseInterface>;
+  handleCreateWorkflowPiece: (params: any) => Promise<any>; // TODO add type
   clearForageData: () => Promise<void>;
 }
 
@@ -90,6 +91,16 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
   } = useWorkflowSettings();
 
   const handleCreateWorkflow = useCallback(
+    async (payload: IPostWorkflowParams) => {
+      return await postWorkflow({
+        ...payload,
+        workspace_id: workspace?.id ?? "",
+      });
+    },
+    [postWorkflow, workspace],
+  );
+
+  const handleCreateWorkflowPiece = useCallback(
     async (payload: IPostWorkflowParams) => {
       return await postWorkflow({
         ...payload,
@@ -296,6 +307,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     clearWorkflowSettingsData,
 
     handleCreateWorkflow,
+    handleCreateWorkflowPiece,
     fetchWorkflowForage,
     workflowsEditorBodyFromFlowchart,
     clearForageData,

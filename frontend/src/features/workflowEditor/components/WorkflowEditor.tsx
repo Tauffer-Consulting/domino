@@ -1,4 +1,5 @@
 import { Settings as SettingsSuggestIcon } from "@mui/icons-material";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
 import SaveIcon from "@mui/icons-material/Save";
@@ -73,6 +74,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     workflowsEditorBodyFromFlowchart,
     fetchWorkflowForage,
     handleCreateWorkflow,
+    handleCreateWorkflowPiece,
     fetchForagePieceById,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
@@ -173,6 +175,44 @@ export const WorkflowsEditorComponent: React.FC = () => {
   }, [
     fetchWorkflowForage,
     handleCreateWorkflow,
+    validateWorkflowPiecesData,
+    validateWorkflowSettings,
+    workflowsEditorBodyFromFlowchart,
+    workspace?.id,
+  ]);
+
+  const handleSaveWorkflowPiece = useCallback(async () => {
+    try {
+      await saveDataToLocalForage();
+      setBackdropIsOpen(true);
+      if (!workspace?.id) {
+        throw new Error("No selected Workspace");
+      }
+      const payload = await fetchWorkflowForage();
+
+      await validateWorkflowPiecesData(payload);
+      await validateWorkflowSettings(payload);
+
+      const data = await workflowsEditorBodyFromFlowchart();
+
+      await handleCreateWorkflowPiece({ workspace_id: workspace?.id, ...data });
+
+      toast.success("Piece created successfully.");
+      setBackdropIsOpen(false);
+    } catch (err) {
+      setBackdropIsOpen(false);
+      if (err instanceof AxiosError) {
+        console.log(err);
+      } else if (err instanceof Error) {
+        console.log(err);
+        toast.error(
+          "Error while creating Piece, check your workflow settings and tasks.",
+        );
+      }
+    }
+  }, [
+    fetchWorkflowForage,
+    handleCreateWorkflowPiece,
     validateWorkflowPiecesData,
     validateWorkflowSettings,
     workflowsEditorBodyFromFlowchart,
@@ -337,7 +377,17 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 startIcon={<SaveIcon />}
                 onClick={handleSaveWorkflow}
               >
-                Save
+                Save as workflow
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                startIcon={<AttachFileIcon />}
+                onClick={handleSaveWorkflowPiece}
+              >
+                Save as piece
               </Button>
             </Grid>
             <Grid item>
