@@ -127,6 +127,7 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
         style: {
           width: "20px",
           height: "20px",
+          margin: "5px",
           ...data.style.iconStyle,
         },
       };
