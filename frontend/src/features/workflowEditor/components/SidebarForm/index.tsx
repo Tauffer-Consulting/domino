@@ -193,7 +193,13 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
         </Typography>
 
         <Grid container>
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxWidth: "100%",
+            }}
+          >
             <Grid container spacing={2} sx={{ marginBottom: "20px" }}>
               <Grid item xs={10}>
                 <Typography
