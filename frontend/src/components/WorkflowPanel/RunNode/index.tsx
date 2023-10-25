@@ -90,8 +90,9 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center",
-
+      textAlign: "center",
       position: "relative",
+      padding: 1,
       width: 150,
       height: 70,
       lineHeight: "60px",
@@ -126,6 +127,7 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
         style: {
           width: "20px",
           height: "20px",
+          margin: "5px",
           ...data.style.iconStyle,
         },
       };
