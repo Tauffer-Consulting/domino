@@ -64,7 +64,7 @@ const validationObject = () => {
   });
 };
 
-function getValidationValueBySchemaType(schema: any) {
+function getValidationValueBySchemaType(schema: any, required: boolean) {
   let inputSchema;
 
   if (schema.type === "number" && !schema.format) {
@@ -74,7 +74,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.number().typeError("Must must be a number").required();
+        return yup.number().typeError("Must must be a number").required(); // number is always required
       }),
     });
   } else if (schema.type === "integer" && !schema.format) {
@@ -88,7 +88,7 @@ function getValidationValueBySchemaType(schema: any) {
           .number()
           .integer()
           .typeError("Must must be a number")
-          .required();
+          .required(); // number is always required
       }),
     });
   } else if (schema.type === "boolean" && !schema.format) {
@@ -98,7 +98,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.boolean().required();
+        return yup.boolean().required(); // boolean is always required
       }),
     });
   } else if (schema.type === "string" && schema.format === "date") {
@@ -108,7 +108,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.date().required();
+        return yup.date().required(); // date is always required
       }),
     });
   } else if (schema.type === "string" && schema?.format === "time") {
@@ -120,11 +120,11 @@ function getValidationValueBySchemaType(schema: any) {
         }
         return yup
           .string()
-          .required("Time is required") // Change the error message as needed
+          .required("Time is required")
           .test("valid-datetime", "Invalid time format", (value) => {
             const timeRegex = /^\d{2}:\d{2}(:\d{2})?$/;
             return timeRegex.test(value);
-          });
+          }); // Time is always required
       }),
     });
   } else if (schema.type === "string" && schema?.format === "date-time") {
@@ -141,7 +141,7 @@ function getValidationValueBySchemaType(schema: any) {
             const dateTimeRegex =
               /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(?:\.\d{1,3})?)?Z?$/;
             return dateTimeRegex.test(value);
-          });
+          }); // Datetime is always required
       }),
     });
   } else if (schema.type === "string" && schema?.widget === "codeeditor") {
@@ -151,7 +151,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string();
+        return required ? yup.string().required() : yup.string();
       }),
     });
   } else if (schema.type === "string" && !schema.format) {
@@ -161,7 +161,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        return required ? yup.string().required() : yup.string();
       }),
     });
   } else if (schema.type === "object") {
@@ -178,6 +178,8 @@ export function createInputsSchemaValidation(schema: any) {
     return yup.mixed().notRequired();
   }
 
+  const requiredFields = schema?.required || [];
+
   const validationSchema = Object.entries(schema.properties).reduce(
     (acc, cur: [string, any]) => {
       const [key, subSchema] = cur;
@@ -189,14 +191,16 @@ export function createInputsSchemaValidation(schema: any) {
           const subItemSchemaName = subSchema.items.$ref.split("/").pop();
           subItemSchema = schema.definitions?.[subItemSchemaName];
         }
+        const required = true; // for arrays, we always require the value
         inputSchema = yup.object({
           ...defaultValidation,
           value: yup
             .array()
-            .of(getValidationValueBySchemaType(subItemSchema) as any),
+            .of(getValidationValueBySchemaType(subItemSchema, required) as any),
         });
       } else {
-        inputSchema = getValidationValueBySchemaType(subSchema);
+        const required = requiredFields.includes(key);
+        inputSchema = getValidationValueBySchemaType(subSchema, required);
       }
 
       return { ...acc, [key]: inputSchema };
