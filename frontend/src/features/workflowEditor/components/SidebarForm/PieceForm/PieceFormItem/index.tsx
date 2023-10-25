@@ -187,7 +187,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       alignItems="flex-start"
       sx={{ paddingTop: "10px" }}
     >
-      <Grid item xs={12}>
+      <Grid item xs={10}>
         {inputElement}
       </Grid>
 
