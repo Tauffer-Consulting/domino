@@ -28,7 +28,6 @@ export const TaskResult = (props: ITaskResultProps) => {
     if (!base64_content || !file_type) {
       return <Typography variant="h2">No content</Typography>;
     }
-
     switch (file_type) {
       case "txt":
         return <pre style={style}>{window.atob(base64_content)}</pre>;
@@ -61,7 +60,12 @@ export const TaskResult = (props: ITaskResultProps) => {
           </object>
         );
       case "md":
-        return <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
+        return (
+          <div style={{ overflow: "auto" }} className="markdown-container">
+            <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
+          </div>
+        );
+
       case "pdf":
         return (
           <div style={{ width: "100%", ...style }}>
