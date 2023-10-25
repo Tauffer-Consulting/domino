@@ -108,7 +108,7 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        return yup.date().required();
       }),
     });
   } else if (schema.type === "string" && schema?.format === "time") {
@@ -118,7 +118,13 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        return yup
+          .string()
+          .required("Time is required") // Change the error message as needed
+          .test("valid-datetime", "Invalid time format", (value) => {
+            const timeRegex = /^\d{2}:\d{2}(:\d{2})?$/;
+            return timeRegex.test(value);
+          });
       }),
     });
   } else if (schema.type === "string" && schema?.format === "date-time") {
@@ -128,7 +134,14 @@ function getValidationValueBySchemaType(schema: any) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.string().required();
+        return yup
+          .string()
+          .required("Datetime is required") // Change the error message as needed
+          .test("valid-datetime", "Invalid datetime format", (value) => {
+            const dateTimeRegex =
+              /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(?:\.\d{1,3})?)?Z?$/;
+            return dateTimeRegex.test(value);
+          });
       }),
     });
   } else if (schema.type === "string" && schema?.widget === "codeeditor") {
