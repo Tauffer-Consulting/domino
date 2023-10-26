@@ -3,7 +3,7 @@ from services.auth_service import AuthService
 from services.piece_service import PieceService
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.piece import ListPiecesFilters
-from schemas.responses.piece import GetPiecesResponse
+from schemas.responses.piece import {GetPiecesResponse , CreatePieceResponse}
 from schemas.exceptions.base import BaseException, ForbiddenException, ResourceNotFoundException
 from schemas.errors.base import SomethingWrongError, ForbiddenError
 from typing import List
@@ -42,4 +42,29 @@ def get_pieces(
         )
         return response
     except (BaseException, ForbiddenException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+
+@router.post(
+    path="",
+    status_code=201,
+    responses={
+        status.HTTP_201_CREATED: {"model": CreatePieceResponse},
+        status.HTTP_409_CONFLICT: {"model": ConflictError},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError}
+    },
+)
+def create_piece(
+    piece_repository_id: int,
+    body: CreatePieceRequest, 
+    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+) -> CreatePieceResponse:
+    """Create a new piece"""
+    try:
+        return piece_service.create_piece(
+            piece_repository_id=piece_repository_id,
+            body=body,
+            auth_context=auth_context
+        )
+    except (BaseException, ConflictException, ForbiddenException, ResourceNotFoundException, BadRequestException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
