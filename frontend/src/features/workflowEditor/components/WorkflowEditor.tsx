@@ -6,6 +6,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import { Button, Grid, Paper, styled } from "@mui/material";
 import { AxiosError } from "axios";
 import Loading from "components/Loading";
+import { Modal, type ModalRef } from "components/Modal";
 import {
   type WorkflowPanelRef,
   WorkflowPanel,
@@ -16,6 +17,7 @@ import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { type Edge, type Node, type XYPosition } from "reactflow";
+import localForage from "services/config/localForage.config";
 import { yupResolver, useInterval, exportToJson } from "utils";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
@@ -69,6 +71,9 @@ export const WorkflowsEditorComponent: React.FC = () => {
     "horizontal",
   );
 
+  const incompatiblePiecesModalRef = useRef<ModalRef>(null);
+  const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
+
   const { workspace } = useWorkspaces();
 
   const saveDataToLocalForage = useCallback(async () => {
@@ -95,7 +100,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
     removeForageWorkflowPiecesById,
     removeForageWorkflowPieceDataById,
     fetchWorkflowPieceById,
-    setForageWorkflowPiecesData,
+    setForageWorkflowPiecesDataById,
+    importWorkflowToForage,
     clearDownstreamDataById,
     setWorkflowEdges,
     setWorkflowNodes,
@@ -222,12 +228,17 @@ export const WorkflowsEditorComponent: React.FC = () => {
         ];
       };
 
-      const { workflowPieces } = await fetchWorkflowForage();
-
-      const currentRepositories = getRepositories(workflowPieces);
+      const currentRepositories = [
+        ...new Set(
+          Object.values((await localForage.getItem("pieces")) as any)?.map(
+            (p: any) => p?.source_image,
+          ),
+        ),
+      ];
       const incomeRepositories = getRepositories(json.workflowPieces);
-      const differences = currentRepositories.filter(
-        (x) => !incomeRepositories.includes(x),
+
+      const differences = incomeRepositories.filter(
+        (x) => !currentRepositories.includes(x),
       );
 
       return differences.length ? differences : null;
@@ -235,39 +246,53 @@ export const WorkflowsEditorComponent: React.FC = () => {
     [fetchWorkflowForage],
   );
 
-  const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImport = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
 
-    if (file) {
-      const reader = new FileReader();
+      if (file) {
+        const reader = new FileReader();
 
-      reader.onload = (e) => {
-        try {
-          const jsonData = JSON.parse(
-            e.target?.result as string,
-          ) as DominoWorkflowForage;
+        reader.onload = (e) => {
+          try {
+            const jsonData = JSON.parse(
+              e.target?.result as string,
+            ) as DominoWorkflowForage;
 
-          validateJsonImported(jsonData)
-            .then((diferences) => {
-              if (diferences) {
-                alert(
-                  `Missing some repositories: ${JSON.stringify(diferences)}`,
-                );
-              } else {
-                alert("Same itens");
-              }
-            })
-            .catch((e) => {
-              alert(e);
-            });
-        } catch (error) {
-          console.error("Error parsing JSON file:", error);
-        }
-      };
+            validateJsonImported(jsonData)
+              .then((diferences) => {
+                if (diferences) {
+                  toast.error(
+                    "Some repositories are missing or incompatible version",
+                  );
+                  setIncompatiblesPieces(diferences);
+                  incompatiblePiecesModalRef.current?.open();
+                  return;
+                }
 
-      reader.readAsText(file);
-    }
-  }, []);
+                workflowPanelRef?.current?.setNodes(jsonData.workflowNodes);
+                workflowPanelRef?.current?.setEdges(jsonData.workflowEdges);
+                void importWorkflowToForage(jsonData);
+              })
+              .catch((e) => {
+                console.log(e);
+              });
+          } catch (error) {
+            console.error("Error parsing JSON file:", error);
+          }
+        };
+
+        reader.readAsText(file);
+      }
+    },
+    [
+      validateJsonImported,
+      workflowPanelRef,
+      importWorkflowToForage,
+      setIncompatiblesPieces,
+      incompatiblePiecesModalRef,
+    ],
+  );
 
   const onNodesDelete = useCallback(
     async (nodes: any) => {
@@ -351,7 +376,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
         inputs: defaultInputs,
       };
 
-      await setForageWorkflowPiecesData(newNode.id, defaultWorkflowPieceData);
+      await setForageWorkflowPiecesDataById(
+        newNode.id,
+        defaultWorkflowPieceData,
+      );
       return newNode;
     },
     [
@@ -359,7 +387,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       fetchForagePieceById,
       setForageWorkflowPieces,
       getForageWorkflowPieces,
-      setForageWorkflowPiecesData,
+      setForageWorkflowPiecesDataById,
     ],
   );
 
@@ -442,6 +470,17 @@ export const WorkflowsEditorComponent: React.FC = () => {
               >
                 Import
                 <VisuallyHiddenInput type="file" onChange={handleImport} />
+                <Modal
+                  title="Missing or incompatibles pieces"
+                  content={
+                    <ul>
+                      {incompatiblesPieces.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  }
+                  ref={incompatiblePiecesModalRef}
+                />
               </Button>
             </Grid>
 

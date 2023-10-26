@@ -7,10 +7,11 @@ import { type IWorkflowPieceData } from "./types";
 export type ForagePiecesData = Record<string, IWorkflowPieceData>;
 
 export interface IWorkflowPiecesDataContext {
-  setForageWorkflowPiecesData: (
+  setForageWorkflowPiecesDataById: (
     id: string,
     pieceData: IWorkflowPieceData,
   ) => Promise<void>;
+  setForageWorkflowPiecesData: (pieceData: ForagePiecesData) => Promise<void>;
   fetchForageWorkflowPiecesData: () => Promise<ForagePiecesData>;
   fetchForageWorkflowPiecesDataById: (
     id: string,
@@ -26,7 +27,7 @@ export const [WorkflowPiecesDataContext, useWorkflowPiecesData] =
 const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const setForageWorkflowPiecesData = useCallback(
+  const setForageWorkflowPiecesDataById = useCallback(
     async (id: string, pieceData: IWorkflowPieceData) => {
       let currentData =
         await localForage.getItem<ForagePiecesData>("workflowPiecesData");
@@ -35,6 +36,12 @@ const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       currentData[id] = pieceData;
       await localForage.setItem("workflowPiecesData", currentData);
+    },
+    [],
+  );
+  const setForageWorkflowPiecesData = useCallback(
+    async (pieceData: ForagePiecesData) => {
+      await localForage.setItem("workflowPiecesData", pieceData);
     },
     [],
   );
@@ -120,6 +127,7 @@ const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const value: IWorkflowPiecesDataContext = {
+    setForageWorkflowPiecesDataById,
     setForageWorkflowPiecesData,
     fetchForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,

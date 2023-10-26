@@ -1,6 +1,7 @@
 import { Paper } from "@mui/material";
 import {
   DataGrid,
+  type GridRowParams,
   type GridColDef,
   type GridEventListener,
 } from "@mui/x-data-grid";
@@ -141,13 +142,13 @@ export const WorkflowList: React.FC = () => {
   );
 
   const handleRowClick = useCallback<GridEventListener<"rowClick">>(
-    (row, event) => {
+    (params: GridRowParams<IWorkflow>, event) => {
       const isActionButtonClick =
         event.target instanceof Element &&
         event.target.classList.contains(".action-button");
       if (!isActionButtonClick) {
-        // Handle row click logic only if it's not an action button click
-        navigate(`/workflows/${row.id}`);
+        if (params.row.status !== "failed" && params.row.status !== "creating")
+          navigate(`/workflows/${params.id}`);
       }
     },
     [navigate],
@@ -166,6 +167,9 @@ export const WorkflowList: React.FC = () => {
           density="comfortable"
           columns={columns}
           rows={rows}
+          isRowSelectable={(params) =>
+            params.row.status !== "failed" && params.row.status !== "creating"
+          }
           onRowClick={handleRowClick}
           pagination
           paginationMode="server"

@@ -50,10 +50,13 @@ interface IWorkflowsEditorContext
     IWorkflowSettingsContext,
     IWorkflowPieceContext,
     IWorkflowPiecesDataContext {
-  fetchWorkflowForage: () => Promise<DominoWorkflowForage>; // TODO add type
+  fetchWorkflowForage: () => Promise<DominoWorkflowForage>;
+  importWorkflowToForage: (
+    importedWorkflow: DominoWorkflowForage,
+  ) => Promise<void>;
   generateWorkflowsEditorBodyParams: (
     p: GenerateWorkflowsParams,
-  ) => Promise<CreateWorkflowRequest>; // TODO add type
+  ) => Promise<CreateWorkflowRequest>;
   handleCreateWorkflow: (
     params: IPostWorkflowParams,
   ) => Promise<IPostWorkflowResponseInterface>;
@@ -101,6 +104,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     fetchForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
     setForageWorkflowPiecesData,
+    setForageWorkflowPiecesDataById,
     clearForageWorkflowPiecesData,
     removeForageWorkflowPieceDataById,
     clearDownstreamDataById,
@@ -141,6 +145,23 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     fetchWorkflowSettingsData,
     getForageWorkflowPieces,
   ]);
+
+  const importWorkflowToForage = useCallback(
+    async (dominoWorkflow: DominoWorkflowForage) => {
+      await setForageWorkflowPieces(dominoWorkflow.workflowPieces);
+      await setForageWorkflowPiecesData(dominoWorkflow.workflowPiecesData);
+      await setWorkflowSettingsData(dominoWorkflow.workflowSettingsData);
+      await setWorkflowNodes(dominoWorkflow.workflowNodes);
+      await setWorkflowEdges(dominoWorkflow.workflowEdges);
+    },
+    [
+      setForageWorkflowPieces,
+      setForageWorkflowPiecesData,
+      setWorkflowSettingsData,
+      setWorkflowNodes,
+      setWorkflowEdges,
+    ],
+  );
 
   const generateWorkflowsEditorBodyParams = useCallback(
     async ({
@@ -303,6 +324,8 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     search,
     handleSearch,
 
+    importWorkflowToForage,
+
     setWorkflowEdges,
     setWorkflowNodes,
     fetchForageWorkflowEdges,
@@ -317,6 +340,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     clearForageWorkflowPieces,
 
     setForageWorkflowPiecesData,
+    setForageWorkflowPiecesDataById,
     fetchForageWorkflowPiecesData,
     fetchForageWorkflowPiecesDataById,
     removeForageWorkflowPieceDataById,
