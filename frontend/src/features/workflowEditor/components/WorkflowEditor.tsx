@@ -246,6 +246,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
     [fetchWorkflowForage],
   );
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -277,6 +279,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
               .catch((e) => {
                 console.log(e);
               });
+
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
           } catch (error) {
             console.error("Error parsing JSON file:", error);
           }
@@ -291,6 +297,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       importWorkflowToForage,
       setIncompatiblesPieces,
       incompatiblePiecesModalRef,
+      fileInputRef,
     ],
   );
 
@@ -469,7 +476,11 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 startIcon={<DownloadIcon />}
               >
                 Import
-                <VisuallyHiddenInput type="file" onChange={handleImport} />
+                <VisuallyHiddenInput
+                  type="file"
+                  onChange={handleImport}
+                  ref={fileInputRef}
+                />
                 <Modal
                   title="Missing or incompatibles pieces"
                   content={
