@@ -155,10 +155,40 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     "type" in schema &&
     "widget" in schema &&
     schema.type === "string" &&
-    schema.widget === "codeeditor"
+    (schema.widget === "codeeditor" || schema.widget === "codeeditor-python")
   ) {
     inputElement = (
-      <CodeEditorInput<IWorkflowPieceData> name={`inputs.${itemKey}.value`} />
+      <CodeEditorInput<IWorkflowPieceData>
+        name={`inputs.${itemKey}.value`}
+        language="python"
+        placeholder="Enter Python code."
+      />
+    );
+  } else if (
+    "type" in schema &&
+    "widget" in schema &&
+    schema.type === "string" &&
+    schema.widget === "codeeditor-json"
+  ) {
+    inputElement = (
+      <CodeEditorInput<IWorkflowPieceData>
+        name={`inputs.${itemKey}.value`}
+        language="json"
+        placeholder="Enter JSON code."
+      />
+    );
+  } else if (
+    "type" in schema &&
+    "widget" in schema &&
+    schema.type === "string" &&
+    schema.widget === "codeeditor-sql"
+  ) {
+    inputElement = (
+      <CodeEditorInput<IWorkflowPieceData>
+        name={`inputs.${itemKey}.value`}
+        language="sql"
+        placeholder="Enter SQL code."
+      />
     );
   } else if (
     "type" in schema &&
