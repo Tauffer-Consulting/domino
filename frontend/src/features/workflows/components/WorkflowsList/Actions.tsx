@@ -3,10 +3,10 @@ import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import { IconButton } from "@mui/material";
 import { type CommonProps } from "@mui/material/OverridableComponent";
-import { NewFeatureDialog } from "components/NewFeatureDialog";
+import { Modal, type ModalRef } from "components/Modal";
 import { type IWorkflow } from "features/workflows/types";
 import theme from "providers/theme.config";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 
@@ -19,7 +19,7 @@ interface Props extends CommonProps {
 
 export const Actions: React.FC<Props> = ({ runFn, deleteFn, className }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [newFeatureModal, setNewFeatureModal] = useState(false);
+  const newFeatureModal = useRef<ModalRef>(null);
 
   return (
     <>
@@ -31,7 +31,7 @@ export const Actions: React.FC<Props> = ({ runFn, deleteFn, className }) => {
       <IconButton
         className={className}
         onClick={() => {
-          setNewFeatureModal(true);
+          newFeatureModal.current?.open();
         }}
       >
         <PauseCircleOutlineIcon
@@ -48,11 +48,11 @@ export const Actions: React.FC<Props> = ({ runFn, deleteFn, className }) => {
           style={{ pointerEvents: "none", color: theme.palette.error.main }}
         />
       </IconButton>
-      <NewFeatureDialog
-        isOpen={newFeatureModal}
-        confirmFn={() => {
-          setNewFeatureModal(false);
-        }}
+      <Modal
+        title="New Feature"
+        content="This feature is not ready yet! We launch new versions every time,
+          check out our changelog for more information !"
+        ref={newFeatureModal}
       />
       <ConfirmDeleteModal
         isOpen={deleteModalOpen}

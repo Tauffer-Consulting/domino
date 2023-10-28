@@ -7,3 +7,4 @@ export { getDefinition } from "./getDefinition";
 export { lazyImport } from "./lazyImports";
 export { useInterval } from "./useInterval";
 export { useMouseProximity } from "./useMouseProximity";
+export { exportToJson } from "./downloadJson";
