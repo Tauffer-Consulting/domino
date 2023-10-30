@@ -123,13 +123,15 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
 
   const loadData = useCallback(async () => {
     const data = await fetchWorkflowSettingsData();
+    console.log("aq");
     if (Object.keys(data).length === 0) {
       reset(defaultSettingsData);
+      await setWorkflowSettingsData(defaultSettingsData);
     } else {
       reset(data);
     }
     setLoaded(true);
-  }, [reset, fetchWorkflowSettingsData]);
+  }, [reset, fetchWorkflowSettingsData, setWorkflowSettingsData]);
 
   const saveData = useCallback(async () => {
     if (open) {
@@ -138,10 +140,8 @@ const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
   }, [formData, open, setWorkflowSettingsData]);
 
   useEffect(() => {
-    if (open) {
-      void loadData();
-    }
-  }, [open, loadData]);
+    void loadData();
+  }, [loadData]);
 
   useEffect(() => {
     void saveData();
