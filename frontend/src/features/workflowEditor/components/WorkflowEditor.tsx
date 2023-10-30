@@ -228,7 +228,14 @@ export const WorkflowsEditorComponent: React.FC = () => {
           ...new Set(
             Object.values(workflowPieces)
               .reduce<Array<string | null>>((acc, next) => {
-                acc.push(next.source_image);
+                acc.push(
+                  `${next.source_image.split("ghcr.io/")[1].split(":")[0]}:${
+                    next.source_image
+                      .split("ghcr.io/")[1]
+                      .split(":")[1]
+                      .split("-")[0]
+                  }`,
+                );
                 return acc;
               }, [])
               .filter((su) => !!su) as string[],
@@ -490,7 +497,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   ref={fileInputRef}
                 />
                 <Modal
-                  title="Missing or incompatibles pieces"
+                  title="Missing or incompatibles Pieces Repositories"
                   content={
                     <ul>
                       {incompatiblesPieces.map((item) => (
