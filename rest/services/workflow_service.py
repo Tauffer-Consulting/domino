@@ -349,7 +349,7 @@ class WorkflowService(object):
             )
             for secret in piece_secrets:
                 if not secret.value:
-                    raise ResourceNotFoundException(f"Piece {piece.name} have missing secrets.")
+                    raise ResourceNotFoundException(f"Secret {secret.name} missing for {piece.name}.")
         return True
 
     def _get_storage_repository_from_tasks(self, tasks: list, workspace_id: int):
