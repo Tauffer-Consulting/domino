@@ -40,6 +40,7 @@ export const WorkflowList: React.FC = () => {
     paginationModel.page,
     paginationModel.pageSize,
   );
+
   const handleDeleteWorkflow = useAuthenticatedDeleteWorkflowId();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
@@ -107,12 +108,22 @@ export const WorkflowList: React.FC = () => {
         headerAlign: "center",
       },
       {
-        field: "schedule_interval",
-        headerName: "Schedule Interval",
+        field: "schedule",
+        headerName: "Schedule",
         flex: 1,
         align: "center",
         headerAlign: "center",
         sortable: false,
+      },
+      {
+        field: "next_dagrun",
+        headerName: "Next Run",
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        valueFormatter: ({ value }) =>
+          value ? new Date(value).toLocaleString() : "none",
       },
       {
         field: "actions",

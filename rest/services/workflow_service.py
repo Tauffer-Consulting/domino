@@ -84,7 +84,7 @@ class WorkflowService(object):
             last_changed_at=datetime.utcnow(),
             start_date=body.workflow.start_date,
             end_date=body.workflow.end_date,
-            schedule_interval=body.workflow.schedule_interval,
+            schedule=body.workflow.schedule,
             last_changed_by=auth_context.user_id,
             workspace_id=workspace_id
         )
@@ -192,25 +192,27 @@ class WorkflowService(object):
 
             is_dag_broken = dag_uuid in import_errors_uuids
 
-            schedule_interval = 'none'
+            schedule = 'none'
             is_active = False
             is_paused = False
+            next_dagrun = None
             status = WorkflowStatus.creating.value
             if is_dag_broken:
                 status = WorkflowStatus.failed.value
-                schedule_interval = 'failed'
+                schedule = 'failed'
                 is_active = False
                 is_paused = False
 
             if response and not is_dag_broken:
-                schedule_interval = response.get("schedule_interval")
-                if isinstance(schedule_interval, dict):
-                    schedule_interval = schedule_interval.get("value")
+                schedule = response.get("schedule")
+                if isinstance(schedule, dict):
+                    schedule = schedule.get("value")
                 status = WorkflowStatus.active.value
 
                 is_paused = response.get("is_paused")
                 is_active = response.get("is_active")
-
+                next_dagrun = response.get("next_dagrun")
+            
             data.append(
                 GetWorkflowsResponseData(
                     id=dag_data.id,
@@ -223,7 +225,8 @@ class WorkflowService(object):
                     is_paused=is_paused,
                     is_active=is_active,
                     status=status,
-                    schedule_interval=schedule_interval
+                    schedule=schedule,
+                    next_dagrun=next_dagrun
                 )
             )
 
@@ -259,7 +262,7 @@ class WorkflowService(object):
                 'is_subdag': 'creating',
                 'last_pickled': 'creating',
                 'last_expired': 'creating',
-                'schedule_interval': 'creating',
+                'schedule': 'creating',
                 'max_active_tasks': 'creating',
                 'max_active_runs': 'creating',
                 'has_task_concurrency_limits': 'creating',
@@ -271,9 +274,10 @@ class WorkflowService(object):
         else:
             airflow_dag_info = airflow_dag_info.json()
         
-        schedule_interval = airflow_dag_info.pop("schedule_interval")
-        if isinstance(schedule_interval, dict):
-            schedule_interval = schedule_interval.get("value")
+        # Airflow 2.4.0 deprecated schedule_interval in dag but the API (2.7.2) still using it
+        schedule = airflow_dag_info.pop("schedule_interval")
+        if isinstance(schedule, dict):
+            schedule = schedule.get("value")
 
         response = GetWorkflowResponse(
             id=workflow.id,
@@ -285,7 +289,7 @@ class WorkflowService(object):
             last_changed_by=workflow.last_changed_by,
             created_by=workflow.created_by,
             workspace_id=workflow.workspace_id,
-            schedule_interval=schedule_interval,
+            schedule=schedule,
             **airflow_dag_info
         )
 
@@ -392,13 +396,13 @@ class WorkflowService(object):
         """
         Format workflow kwargs to the formmate required by airflow. It should contain only the following kwargs:
         - dag_id
-        - schedule_interval
+        - schedule
         - start_date
         - end_date (not none)
         """
         workflow_kwargs['dag_id'] = workflow_kwargs.pop('id')
         select_end_date = workflow_kwargs.pop('select_end_date') # TODO define how to use select end date
-        workflow_kwargs['schedule_interval'] = None if workflow_kwargs['schedule_interval'] == 'none' else f"@{workflow_kwargs['schedule_interval']}"
+        workflow_kwargs['schedule'] = None if workflow_kwargs['schedule'] == 'none' else f"@{workflow_kwargs['schedule']}"
 
         workflow_processed_schema = {
             'workflow': deepcopy(workflow_kwargs),

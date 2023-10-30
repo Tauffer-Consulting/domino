@@ -217,7 +217,7 @@ const SidebarSettingsForm = forwardRef<
                     name="config.scheduleInterval"
                     defaultValue={defaultSettingsData.config.scheduleInterval}
                     options={Object.values(scheduleIntervals)}
-                    label="Schedule Interval"
+                    label="Schedule"
                   />
                 </Grid>
                 <Grid item xs={12}>

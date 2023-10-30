@@ -30,7 +30,7 @@ export interface IWorkflow {
   status: workflowStatus;
   is_subdag: boolean;
   last_pickled: string;
-  schedule_interval: string;
+  schedule: string;
   max_active_tasks: number;
   max_active_runs: number;
   has_task_concurrency_limits: boolean;
@@ -61,7 +61,7 @@ export interface IWorkflowConfig {
   name: string;
   start_date: string;
   end_date: string;
-  schedule_interval: string;
+  schedule: string;
   catchup: boolean;
   generate_report: string;
   description: string;
