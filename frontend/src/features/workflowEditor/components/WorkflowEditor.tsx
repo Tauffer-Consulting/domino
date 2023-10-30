@@ -32,8 +32,10 @@ import SidebarPieceForm from "./SidebarForm";
 import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
 import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
 import { storageFormSchema } from "./SidebarForm/StorageForm";
-import SidebarSettingsForm, {
+import {
+  SidebarSettingsForm,
   WorkflowSettingsFormSchema,
+  type SidebarSettingsFormRef,
 } from "./SidebarSettingsForm";
 
 /**
@@ -60,6 +62,7 @@ const VisuallyHiddenInput = styled("input")({
 
 export const WorkflowsEditorComponent: React.FC = () => {
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
+  const sidebarSettingsRef = useRef<SidebarSettingsFormRef>(null);
   const [sidebarSettingsDrawer, setSidebarSettingsDrawer] = useState(false);
   const [sidebarPieceDrawer, setSidebarPieceDrawer] = useState(false);
   const [formId, setFormId] = useState<string>("");
@@ -203,6 +206,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     await clearForageData();
     workflowPanelRef.current?.setEdges([]);
     workflowPanelRef.current?.setNodes([]);
+    await sidebarSettingsRef.current?.loadData();
   }, [clearForageData]);
 
   const handleExport = useCallback(async () => {
@@ -538,6 +542,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       <SidebarSettingsForm
         onClose={toggleSidebarSettingsDrawer(false)}
         open={sidebarSettingsDrawer}
+        ref={sidebarSettingsRef}
       />
     </>
   );
