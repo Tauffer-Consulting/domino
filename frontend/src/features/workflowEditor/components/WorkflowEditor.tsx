@@ -212,6 +212,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const handleExport = useCallback(async () => {
     await saveDataToLocalForage();
     const payload = await fetchWorkflowForage();
+    if (Object.keys(payload.workflowPieces).length === 0) {
+      toast.error("Workflow must have at least one piece to be exported.");
+      return;
+    }
     exportToJson(payload, payload.workflowSettingsData?.config?.name);
   }, []);
 
