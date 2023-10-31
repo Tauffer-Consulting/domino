@@ -228,14 +228,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
           ...new Set(
             Object.values(workflowPieces)
               .reduce<Array<string | null>>((acc, next) => {
-                acc.push(
-                  `${next.source_image.split("ghcr.io/")[1].split(":")[0]}:${
-                    next.source_image
-                      .split("ghcr.io/")[1]
-                      .split(":")[1]
-                      .split("-")[0]
-                  }`,
-                );
+                acc.push(next.source_image);
                 return acc;
               }, [])
               .filter((su) => !!su) as string[],
@@ -501,7 +494,14 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   content={
                     <ul>
                       {incompatiblesPieces.map((item) => (
-                        <li key={item}>{item}</li>
+                        <li key={item}>
+                          {`${item.split("ghcr.io/")[1].split(":")[0]}:  ${
+                            item
+                              .split("ghcr.io/")[1]
+                              .split(":")[1]
+                              .split("-")[0]
+                          }`}
+                        </li>
                       ))}
                     </ul>
                   }
