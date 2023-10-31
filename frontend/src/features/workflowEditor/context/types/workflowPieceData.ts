@@ -21,7 +21,7 @@ interface WorkflowBaseSettings {
   name: string;
   start_date: string; // ISOFormat
   select_end_date: EndDateTypes;
-  schedule_interval: ScheduleIntervals;
+  schedule: ScheduleIntervals;
 
   end_date?: string; // ISOFormat
   catchup?: boolean;
@@ -36,9 +36,14 @@ interface UiSchema {
 
 interface WorkflowSharedStorageDataModel {
   source: StorageSourcesLocal | StorageSourcesAWS;
-  base_folder?: string;
+
   mode: StorageAccessModes;
-  provider_options?: Record<string, unknown>;
+  provider_options?: ProviderOptionS3;
+}
+
+interface ProviderOptionS3 {
+  bucket?: string;
+  base_folder?: string;
 }
 
 interface SystemRequirementsModel {

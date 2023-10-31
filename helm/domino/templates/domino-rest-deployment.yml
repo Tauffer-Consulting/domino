@@ -35,7 +35,7 @@ spec:
             - name: DOMINO_DEPLOY_MODE
               value: {{ .Values.rest.deployMode }}
             - name: DOMINO_DB_HOST
-              value: {{ .Release.Name }}-postgres-service
+              value: {{ if .Values.database.enabled }}"{{ .Release.Name }}-postgres-service"{{ else }}{{ .Values.database.host }}{{ end }}
             - name: DOMINO_DB_NAME
               value: {{ .Values.database.name }}
             - name: DOMINO_DB_USER
@@ -43,7 +43,7 @@ spec:
             - name: DOMINO_DB_PASSWORD
               value: {{ .Values.database.password }}
             - name: DOMINO_DB_PORT
-              value: "5432"
+              value: "{{ .Values.database.port }}"
             - name: "DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"
               valueFrom:
                 secretKeyRef:

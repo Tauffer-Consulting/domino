@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import { Paper, Typography } from "@mui/material";
 import theme from "providers/theme.config";
 import React, { type CSSProperties, memo, useMemo } from "react";
@@ -70,10 +71,12 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
       ...data.style.nodeStyle,
       display: "flex",
       flexDirection: "row",
-      justifyContent: "center",
+      justifyContent: "space-evenly",
       alignItems: "center",
 
       position: "relative",
+      padding: 1,
+      textAlign: "center",
       width: 150,
       height: 70,
       lineHeight: "60px",
@@ -85,7 +88,7 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
         backgroundColor: theme.palette.error.light,
         color: theme.palette.error.contrastText,
       }),
-    };
+    } satisfies CSSProperties;
   }, [data, selected]);
 
   const { sourcePosition, targetPosition } = useMemo(
@@ -102,6 +105,21 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
     }),
     [data],
   );
+
+  const icon = useMemo(() => {
+    if (data.style.useIcon) {
+      const name = data.style.iconClassName;
+      return {
+        name,
+        style: {
+          width: "20px",
+          height: "20px",
+          margin: "5px",
+          ...data.style.iconStyle,
+        },
+      };
+    }
+  }, [data]);
 
   return (
     <>
@@ -122,6 +140,7 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
         />
       )}
       <Paper elevation={selected ? 12 : 3} sx={nodeStyle} ref={ElementRef}>
+        {icon && <Icon icon={icon.name} style={icon.style} />}
         <div
           style={{
             display: "flex",

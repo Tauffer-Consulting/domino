@@ -18,7 +18,7 @@ jobs:
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .
+          pip install .[cli]
 
       - name: Create Release
         env:
@@ -39,11 +39,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install wheel
+          pip install build
           pip install twine
       - name: Build and publish to PyPI
         run: |
-          python setup.py sdist bdist_wheel
+          python -m build
           twine upload dist/*
         env:
           TWINE_USERNAME: __token__

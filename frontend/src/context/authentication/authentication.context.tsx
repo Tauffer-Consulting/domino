@@ -1,5 +1,3 @@
-import { AxiosError } from "axios";
-import localforage from "localforage";
 import React, {
   type ReactNode,
   useCallback,
@@ -10,6 +8,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import localForage from "services/config/localForage.config";
 import { createCustomContext } from "utils";
 
 import { postAuthLogin, postAuthRegister } from "./api";
@@ -55,7 +54,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
 
   const logout = useCallback(() => {
     localStorage.clear();
-    void localforage.clear();
+    void localForage.clear();
     isLogged.current = false;
     setStore((store) => ({
       ...store,
@@ -70,18 +69,10 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const authenticate = useCallback(
     async (email: string, password: string) => {
       setAuthLoading(true);
-      postAuthLogin({ email, password })
+      void postAuthLogin({ email, password })
         .then((res) => {
           if (res.status === 200) {
             login(res.data.access_token, res.data.user_id);
-          }
-        })
-        .catch((e) => {
-          if (e instanceof AxiosError) {
-            toast.error(
-              e.response?.data?.detail ??
-                "Error on login, please review your inputs and try again",
-            );
           }
         })
         .finally(() => {

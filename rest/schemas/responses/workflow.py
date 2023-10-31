@@ -1,6 +1,6 @@
 from schemas.responses.base import PaginationSet
 from pydantic import BaseModel, Field, validator
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional, List, Union
 from enum import Enum
 
@@ -48,15 +48,15 @@ class WorkflowConfigResponse(BaseModel):
     name: str
     start_date: str
     end_date: Optional[str]
-    schedule_interval: Optional[ScheduleIntervalTypeResponse]
+    schedule: Optional[ScheduleIntervalTypeResponse]
     catchup: bool = False
     generate_report: bool = False
     description: Optional[str]
 
 
-    @validator('schedule_interval')
-    def set_schedule_interval(cls, schedule_interval):
-        return schedule_interval or ScheduleIntervalTypeResponse.none
+    @validator('schedule')
+    def set_schedule(cls, schedule):
+        return schedule or ScheduleIntervalTypeResponse.none
     
 class BaseWorkflowModel(BaseModel):
     workflow: WorkflowConfigResponse
@@ -76,11 +76,31 @@ class GetWorkflowsResponseData(BaseModel):
     is_paused: bool
     is_active: bool
     status: WorkflowStatus
-    schedule_interval: Optional[ScheduleIntervalTypeResponse]
+    schedule: Optional[ScheduleIntervalTypeResponse]
+    next_dagrun: Optional[datetime]
 
-    @validator('schedule_interval')
-    def set_schedule_interval(cls, schedule_interval):
-        return schedule_interval or ScheduleIntervalTypeResponse.none
+    @validator('schedule')
+    def set_schedule(cls, schedule):
+        return schedule or ScheduleIntervalTypeResponse.none
+    
+
+    @validator('created_at', pre=True, always=True)
+    def add_utc_timezone_created_at(cls, v):
+        if isinstance(v, datetime) and v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+        return v
+    
+    @validator('last_changed_at', pre=True, always=True)
+    def add_utc_timezone_last_changed_at(cls, v):
+        if isinstance(v, datetime) and v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+        return v
+    
+    @validator('next_dagrun', pre=True, always=True)
+    def add_utc_timezone_next_dagrun(cls, v):
+        if isinstance(v, datetime) and v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+        return v
 
 class GetWorkflowsResponse(BaseModel):
     data: List[GetWorkflowsResponseData]
@@ -107,7 +127,7 @@ class GetWorkflowResponse(BaseModel):
     is_subdag: Optional[Union[bool, WorkflowStatus]] # Whether the DAG is SubDAG.
     last_pickled: Optional[Union[datetime, WorkflowStatus]] # The last time the DAG was pickled.
     last_expired: Optional[Union[datetime, WorkflowStatus]] # Time when the DAG last received a refresh signal (e.g. the DAG's "refresh" button was clicked in the web UI)
-    schedule_interval: Optional[Union[ScheduleIntervalTypeResponse, WorkflowStatus]] # The schedule interval for the DAG.
+    schedule: Optional[Union[ScheduleIntervalTypeResponse, WorkflowStatus]] # The schedule interval for the DAG.
     max_active_tasks: Optional[Union[int, WorkflowStatus]]  # Maximum number of active tasks that can be run on the DAG
     max_active_runs: Optional[Union[int, WorkflowStatus]] # Maximum number of active DAG runs for the DAG
     has_task_concurrency_limits: Optional[Union[bool, WorkflowStatus]] # Whether the DAG has task concurrency limits
@@ -116,9 +136,9 @@ class GetWorkflowResponse(BaseModel):
     next_dagrun_data_interval_start: Optional[Union[datetime, WorkflowStatus]] # The start date of the next dag run.
     next_dagrun_data_interval_end: Optional[Union[datetime, WorkflowStatus]] # The end date of the next dag run.
 
-    @validator('schedule_interval')
-    def set_schedule_interval(cls, schedule_interval):
-        return schedule_interval or ScheduleIntervalTypeResponse.none
+    @validator('schedule')
+    def set_schedule(cls, schedule):
+        return schedule or ScheduleIntervalTypeResponse.none
 
 
 class GetWorkflowRunsResponseData(BaseModel):

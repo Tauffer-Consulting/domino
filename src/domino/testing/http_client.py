@@ -3,19 +3,20 @@ from requests.exceptions import ConnectionError, Timeout
 import time
 import docker
 from domino.logger import get_configured_logger
+from pathlib import Path
 
 
 class TestingHttpClient:
 
     docker_client = docker.from_env()
-    DOMINO_HTTP_SERVER_PATH = 'domino/domino_py/src/domino/testing/http_server.py'
+    DOMINO_TESTING_CONTAINER_NAME = 'domino_testing_http_server'
     DOMINO_INTERNAL_REPOSITORY_FOLDER_PATH = "/home/domino/pieces_repository/"
     BASE_HTTP_SERVER_HOST_URL = "http://0.0.0.0:8080"
     logger = get_configured_logger("TestingHttpClient")
 
     @classmethod
     def wait_health_check(cls):
-        max_retries = 10
+        max_retries = 30
         retry_delay_in_seconds = 1
         url = f'{cls.BASE_HTTP_SERVER_HOST_URL}/health-check'
         for _ in range(max_retries):
@@ -35,9 +36,10 @@ class TestingHttpClient:
         try:
             container = cls.docker_client.containers.run(
                 image=image,
-                command=f"python {cls.DOMINO_HTTP_SERVER_PATH}",
+                command=["bash", "-c", "python -c 'from domino.testing import http_server; http_server.run_server()'"],
                 ports={'8080/tcp': ('0.0.0.0', 8080)},
-                detach=True
+                name=cls.DOMINO_TESTING_CONTAINER_NAME,
+                detach=True,
             )
             container_state = container.attrs.get('State').get('Running')
             container_status = container.attrs.get('State').get('Status', None)
@@ -50,7 +52,7 @@ class TestingHttpClient:
             cls.wait_health_check()
             return container
         except Exception as e:
-            container = cls.docker_client.containers.get('domino_testing_http_server')
+            container = cls.docker_client.containers.get(cls.DOMINO_TESTING_CONTAINER_NAME)
             if container:
                 container.stop()
                 container.remove()

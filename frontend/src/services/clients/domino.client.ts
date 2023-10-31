@@ -1,6 +1,7 @@
 import axios from "axios";
 import { environment } from "config/environment.config";
 import { dispatchLogout } from "context/authentication";
+import { toast } from "react-toastify";
 
 import { endpoints } from "../config/endpoints.config";
 
@@ -26,6 +27,19 @@ dominoApiClient.interceptors.response.use(
     if (error.response.status === 401) {
       dispatchLogout();
     }
+
+    const message =
+      error.response?.data?.detail ||
+      error.response?.data?.message ||
+      error?.message ||
+      "Something went wrong";
+
+    if (Array.isArray(message)) {
+      toast.error(message[0].msg);
+    } else {
+      toast.error(message);
+    }
+
     return await Promise.reject(error);
   },
 );

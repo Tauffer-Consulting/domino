@@ -51,7 +51,7 @@ function DatetimeInput<T extends FieldValues>({
                   format="DD/MM/YYYY HH:mm"
                   value={dayjs(value)}
                   onChange={(e) => {
-                    onChange(dayjs(e).toISOString() as any);
+                    e?.isValid() ? onChange(e.toISOString()) : onChange(null);
                   }}
                   {...rest}
                 />

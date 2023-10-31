@@ -96,6 +96,8 @@ export const extractDefaultValues = (
         output[key] = value.default;
       } else if ("properties" in value) {
         output[key] = extractDefaultValues(value as any, output[key]);
+      } else {
+        output[key] = "";
       }
     }
   }

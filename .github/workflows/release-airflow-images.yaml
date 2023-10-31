@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - src/domino/**
+      - Dockerfile-airflow-domino.prod
+      - Dockerfile-domino-piece.gpu-prod
+      - Dockerfile-domino-piece.prod
   # workflow_run:
   #   workflows:
   #     - "Build and publish domino-py package"
@@ -38,11 +41,11 @@ jobs:
           push: true
           tags: ghcr.io/tauffer-consulting/domino-airflow-base:latest
           context: .
-          file: Dockerfile-airflow-domino-base-prod
+          file: Dockerfile-airflow-domino.prod
 
-  domino-pod-base:
+  domino-base-piece:
     #if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Domino Base Pod Image
+    name: Domino Base Piece Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -57,17 +60,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Domino POD Base image
+      - name: Build and push Domino Base Piece Image
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:latest
+          tags: ghcr.io/tauffer-consulting/domino-base-piece:latest
           context: .
-          file: Dockerfile-airflow-domino-pod-prod
+          file: Dockerfile-domino-piece.prod
 
-  domino-pod-gpu-base:
+  domino-base-piece-gpu:
     #if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Domino Base Pod GPU Image
+    name: Domino Base Piece GPU Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -82,13 +85,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Domino POD Base image with GPU support
+      - name: Build and push Domino Base Piece Image with GPU support
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ghcr.io/tauffer-consulting/domino-airflow-pod:gpu
+          tags: ghcr.io/tauffer-consulting/domino-base-piece:gpu
           context: .
-          file: Dockerfile-airflow-domino-pod-gpu
+          file: Dockerfile-domino-piece.gpu-prod
 
   domino-storage-sidecar:
     #if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -112,5 +115,6 @@ jobs:
         with:
           push: true
           tags: ghcr.io/tauffer-consulting/domino-shared-storage-sidecar:latest
-          context: domino/custom_operators/sidecar
-          file: domino/custom_operators/sidecar/Dockerfile
+          context: src/domino/custom_operators/sidecar
+          file: src/domino/custom_operators/sidecar/Dockerfile
+

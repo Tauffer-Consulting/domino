@@ -29,12 +29,8 @@ RUN echo "{}" > /airflow/xcom/return.json
 WORKDIR /airflow/xcom
 RUN chmod -R 777 .
 
-# Editable pip install for Domino from local folder
-RUN mkdir -p /home/domino/domino_py
-COPY pyproject.toml /home/domino/domino_py/
-COPY src/domino /home/domino/domino_py/src/domino
-WORKDIR /home/domino/domino_py
-RUN chmod -R 777 .
-RUN pip install --no-cache -e .[piece]
+# pip install Domino from PyPI
+RUN python3 -m pip install --upgrade pip \
+    pip install domino-py[cli]
 
 WORKDIR /home

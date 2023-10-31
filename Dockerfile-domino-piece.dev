@@ -1,9 +1,9 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Create folders to store source code
+# Create folders to store source code 
 RUN mkdir -p /home/domino/pieces_repository
 
 # Create folder to store run data results
@@ -18,7 +18,11 @@ WORKDIR /airflow/xcom
 RUN chmod -R 777 .
 
 # Editable pip install for Domino from local folder
-RUN /usr/local/bin/python -m pip install --upgrade pip \
-    pip install domino-py[piece]
+RUN mkdir -p /home/domino/domino_py
+COPY pyproject.toml /home/domino/domino_py/
+COPY src/domino /home/domino/domino_py/src/domino
+WORKDIR /home/domino/domino_py
+RUN chmod -R 777 .
+RUN pip install --no-cache -e .[cli]
 
 WORKDIR /home

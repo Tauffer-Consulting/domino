@@ -27,10 +27,6 @@ class UiSchema(BaseModel):
     edges: List[Dict]
 
 
-class WorkflowStorage(BaseModel):
-    storage_source: Optional[str] # TODO use enum ?
-    base_folder: Optional[str]
-
 class SelectEndDate(str, Enum):
     never = "never"
     user_defined = "User defined"
@@ -45,7 +41,7 @@ class WorkflowBaseSettings(BaseModel):
     start_date: str = Field(alias="startDateTime")
     select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
     end_date: Optional[str] = Field(alias='endDateTime')
-    schedule_interval: ScheduleIntervalType = Field(alias="scheduleInterval")
+    schedule: ScheduleIntervalType = Field(alias="scheduleInterval")
     catchup: Optional[bool] = False # TODO add catchup to UI?
     generate_report: Optional[bool] = Field(alias="generateReport", default=False) # TODO add generate report to UI?
     description: Optional[str] # TODO add description to UI?
@@ -108,7 +104,6 @@ class WorkflowSharedStorageModeEnum(str, Enum):
 
 class WorkflowSharedStorageDataModel(BaseModel):
     source: Optional[WorkflowSharedStorageSourceEnum]
-    base_folder: Optional[str]
     mode: Optional[WorkflowSharedStorageModeEnum]
     provider_options: Optional[Dict]
 
@@ -164,5 +159,5 @@ class ListWorkflowsFilters(BaseModel):
     start_date__gt: Optional[str]
     end_date: Optional[str]
     end_date__gt: Optional[str]
-    schedule_interval: Optional[ScheduleIntervalType]
+    schedule: Optional[ScheduleIntervalType]
 

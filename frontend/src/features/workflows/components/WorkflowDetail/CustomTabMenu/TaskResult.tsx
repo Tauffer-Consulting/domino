@@ -14,6 +14,7 @@ export const TaskResult = (props: ITaskResultProps) => {
 
   const style: CSSProperties = {
     height: "100%",
+    width: "100%",
     overflowY: "scroll",
     overflowX: "hidden",
     wordWrap: "break-word",
@@ -26,21 +27,8 @@ export const TaskResult = (props: ITaskResultProps) => {
     }
 
     if (!base64_content || !file_type) {
-      return (
-        <Container
-          sx={{
-            height: "90%",
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="h2">No content</Typography>
-        </Container>
-      );
+      return <Typography variant="h2">No content</Typography>;
     }
-
     switch (file_type) {
       case "txt":
         return <pre style={style}>{window.atob(base64_content)}</pre>;
@@ -73,7 +61,12 @@ export const TaskResult = (props: ITaskResultProps) => {
           </object>
         );
       case "md":
-        return <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
+        return (
+          <div style={{ overflow: "auto" }} className="markdown-container">
+            <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
+          </div>
+        );
+
       case "pdf":
         return (
           <div style={{ width: "100%", ...style }}>
@@ -106,6 +99,7 @@ export const TaskResult = (props: ITaskResultProps) => {
         height: "90%",
         width: "100%",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
       }}

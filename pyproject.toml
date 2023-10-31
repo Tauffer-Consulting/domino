@@ -1,5 +1,5 @@
 [project]
-name = "domino"
+name = "domino-py"
 dynamic = ["version", "readme"]
 description = "Python package for Domino."
 authors = [
@@ -50,17 +50,17 @@ domino = [
     'custom_operators/sidecar/sidecar_lifecycle.sh',
     'custom_operators/sidecar/rclone.conf',
     'custom_operators/sidecar/fuse.conf',
+    'VERSION',
 ]
 
 [tool.setuptools.dynamic]
 version = { attr = "domino.__version__" }
-readme = { file = "README.md" }
+readme = { file = 'README.md', content-type = 'text/markdown' }
 
 [project.scripts]
 domino = "domino.cli.cli:cli"
 
 [project.optional-dependencies]
-piece = ["bottle==0.12.25"]
 cli = [
     "urllib3== 1.26.15",
     "cryptography==39.0.1",
@@ -68,6 +68,7 @@ cli = [
     "PyGithub==1.55",
     "docker>=6.0.1",
     "kubernetes==23.6.0",
+    "bottle==0.12.25"
 ]
 airflow = [
     "apache-airflow==2.6.3",

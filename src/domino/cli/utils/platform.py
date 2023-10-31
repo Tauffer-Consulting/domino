@@ -15,6 +15,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from kubernetes import client, config
 
 from domino.cli.utils.constants import COLOR_PALETTE, DOMINO_HELM_PATH, DOMINO_HELM_VERSION, DOMINO_HELM_REPOSITORY
+import shutil
 
 
 class AsLiteral(str):
@@ -230,14 +231,14 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     local_domino_frontend_image = platform_config.get('dev', {}).get('DOMINO_FRONTEND_IMAGE', None)
     local_domino_rest_image = platform_config.get('dev', {}).get('DOMINO_REST_IMAGE', None)
 
+    domino_airflow_image_tag = 'latest'
+    domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base" 
     if local_domino_airflow_image:
         console.print(f"Loading local Domino Airflow image {local_domino_airflow_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", local_domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
         domino_airflow_image = f'docker.io/library/{local_domino_airflow_image}'
-    elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev':
-        domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest-dev" 
-    else:  
-        domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base:latest" 
+    elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev' and not local_domino_airflow_image:
+        domino_airflow_image_tag = 'latest-dev'
 
     if local_domino_frontend_image:
         console.print(f"Loading local frontend image {local_domino_frontend_image} to Kind cluster...")
@@ -274,8 +275,10 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         # We don't need driver as we are using kind and our host machine already has nvidia driver that is why we are disabling it.
         nvidia_plugis_install_command = "helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false"
         subprocess.run(nvidia_plugis_install_command, shell=True)
-
+    
+    
     # Override values for Domino Helm chart
+    db_enabled = platform_config['domino_db'].get("DOMINO_CREATE_DATABASE", True)
     token_pieces = platform_config["github"]["DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"]
     token_workflows = platform_config["github"]["DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS"]
     domino_values_override_config = {
@@ -292,7 +295,27 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             "image": domino_rest_image,
             "workflowsRepository": platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'],
         },
+        "database": {
+            "enabled": db_enabled,
+            "image": "postgres:13",
+            "name": "postgres",
+            "user": "postgres",
+            "password": "postgres",
+            "port": "5432"
+        }
     }
+
+    # Only add database values if database is enabled
+    # If not enabled will use always the default values
+    if not db_enabled:
+        domino_values_override_config['database'] = {
+            **domino_values_override_config['database'],
+            "host": platform_config['domino_db']["DOMINO_DB_HOST"],
+            "name":  platform_config['domino_db']["DOMINO_DB_NAME"],
+            "user": platform_config['domino_db']["DOMINO_DB_USER"],
+            "password": platform_config['domino_db']["DOMINO_DB_PASSWORD"],
+            "port": str(platform_config['domino_db'].get("DOMINO_DB_PORT", 5432))
+        }
 
     # Override values for Airflow Helm chart
     airflow_ssh_config = dict(
@@ -343,7 +366,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             "useDefaultImageForMigration": False,
             "airflow": {
                 "repository": domino_airflow_image,
-                "tag": "latest",
+                "tag": domino_airflow_image_tag,
                 "pullPolicy": "IfNotPresent"
             }
         },
@@ -413,8 +436,6 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
                 "helm",
                 "pull",
                 DOMINO_HELM_PATH,
-                "--version",
-                DOMINO_HELM_VERSION,
                 "--untar",
                 "-d",
                 tmp_dir
@@ -614,30 +635,49 @@ def destroy_platform() -> None:
 
 
 def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False) -> None:
+    # Database default settings
+    create_database = True
     if use_config_file:
         console.print("Using config file...")
         with open("config-domino-local.toml", "rb") as f:
             platform_config = tomli.load(f)
         token_pieces = platform_config["github"].get("DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN")
         os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = token_pieces
+        create_database = platform_config['domino_db'].get('DOMINO_CREATE_DATABASE', True)
+        if not create_database:
+            os.environ['DOMINO_DB_HOST'] = platform_config['domino_db'].get("DOMINO_DB_HOST", 'postgres')
+            os.environ['DOMINO_DB_PORT'] = platform_config['domino_db'].get("DOMINO_DB_PORT", 5432)
+            os.environ['DOMINO_DB_USER'] = platform_config['domino_db'].get("DOMINO_DB_USER", 'postgres')
+            os.environ['DOMINO_DB_PASSWORD'] = platform_config['domino_db'].get("DOMINO_DB_PASSWORD", 'postgres')
+            os.environ['DOMINO_DB_NAME'] = platform_config['domino_db'].get("DOMINO_DB_NAME", 'postgres')
+            os.environ['NETWORK_MODE'] = 'bridge'
 
+        # If running database in an external local container, set network mode to host
+        if platform_config['domino_db'].get('DOMINO_DB_HOST') in ['localhost', '0.0.0.0', '127.0.0.1']:
+            os.environ['NETWORK_MODE'] = 'host'
+
+    
     # Create local directories
     local_path = Path(".").resolve()
     domino_dir = local_path / "domino_data"
     domino_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["chmod", "-R", "777", "domino_data"])
-    airflow_logs_dir = local_path / "airflow/logs"
+    domino_dir.chmod(0o777)
+
+    airflow_base = local_path / 'airflow'
+    airflow_logs_dir = airflow_base / "logs"
     airflow_logs_dir.mkdir(parents=True, exist_ok=True)
-    airflow_dags_dir = local_path / "airflow/dags"
+    airflow_dags_dir = airflow_base / "dags"
     airflow_dags_dir.mkdir(parents=True, exist_ok=True)
-    airflow_plugins_dir = local_path / "airflow/plugins"
+    airflow_plugins_dir = airflow_base / "plugins"
     airflow_plugins_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["chmod", "-R", "777", "airflow"])    
+    airflow_base.chmod(0o777)
 
     # Copy docker-compose.yaml file from package to local path
-    docker_compose_path = Path(__file__).resolve().parent / "docker-compose.yaml"
-    subprocess.run(["cp", str(docker_compose_path), "."])
-
+    if create_database:
+        docker_compose_path = Path(__file__).resolve().parent / "docker-compose.yaml"
+    else:
+        docker_compose_path = Path(__file__).resolve().parent / "docker-compose-without-database.yaml"
+    shutil.copy(str(docker_compose_path), "./docker-compose.yaml")
     # Run docker-compose up
     cmd = [
         "docker", 

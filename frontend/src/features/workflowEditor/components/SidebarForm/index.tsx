@@ -33,7 +33,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   const { schema, formId, open, onClose, title } = props;
 
   const {
-    setForageWorkflowPiecesData,
+    setForageWorkflowPiecesDataById,
     fetchForageWorkflowPiecesDataById,
     setForageWorkflowPiecesOutputSchema,
     clearDownstreamDataById,
@@ -141,10 +141,10 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
 
   const saveData = useCallback(async () => {
     if (formId && open) {
-      await setForageWorkflowPiecesData(formId, data as IWorkflowPieceData);
+      await setForageWorkflowPiecesDataById(formId, data as IWorkflowPieceData);
       await updateOutputSchema();
     }
-  }, [formId, open, setForageWorkflowPiecesData, data, updateOutputSchema]);
+  }, [formId, open, setForageWorkflowPiecesDataById, data, updateOutputSchema]);
 
   // load forage
   useEffect(() => {
@@ -193,7 +193,13 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
         </Typography>
 
         <Grid container>
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxWidth: "100%",
+            }}
+          >
             <Grid container spacing={2} sx={{ marginBottom: "20px" }}>
               <Grid item xs={10}>
                 <Typography

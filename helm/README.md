@@ -1,4 +1,4 @@
-# Install Domino helm chart
+# Install Domino helm chart 
 Add the Domino helm repo:
 ```bash
 helm repo add domino https://tauffer-consulting.github.io/domino/

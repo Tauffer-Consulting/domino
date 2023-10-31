@@ -2,7 +2,7 @@ from datetime import datetime
 
 workflow_request_model = {
     "workflow": {
-        "schedule_interval": "none",
+        "schedule": "none",
         "name": "WorkflowTest",
         "select_end_date": "never",
         "start_date": str(datetime.utcnow().date())

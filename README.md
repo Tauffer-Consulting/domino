@@ -9,14 +9,18 @@
   <a href="https://artifacthub.io/packages/helm/domino/domino">
     <img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/domino">
   </a>
-  <a href="https://domino-py.readthedocs.io/en/latest/">
+  <a href="https://tauffer-consulting.github.io/domino-docs/docs/intro">
     <img alt="Read the Docs" src="https://img.shields.io/readthedocs/domino-py?label=Docs&logo=Read%20the%20Docs&logoColor=white">
+  </a>
+  <a href="https://github.com/sponsors/Tauffer-Consulting">
+    <img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86">
   </a>
 </p>
 
+
 <br>
 
-![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_create_workflow.gif)
+![create-workflow](https://github.com/Tauffer-Consulting/domino/assets/54302847/34d619fa-4b6c-4761-8b24-3ca829cfc28c)
 
 # Table of contents
 - [About](#about)
@@ -29,14 +33,14 @@
 <br>
 
 # About
-Domino is an open source workflow management platform, with:
+**Domino is an open source workflow management platform**, with:
 
 - :desktop_computer: an intuitive [Graphical User Interface](#gui) that facilitates creating, editing and monitoring any type of Workflow, from data processing to machine learning
 - :package: a standard way of writing and publishing functional [Pieces](#pieces), which follows good practices for data modeling, documentation and distribution
 - :gear: a [REST API](#rest) that controls a running Apache Airflow instance
 
 
-Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas, and connecting them. The user can also schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
+Creating Workflows in the GUI is as simple as dragging and dropping Pieces to the canvas, and connecting them. The user can schedule the Workflow to run periodically, at a specific date/time, or trigger it manually. The monitoring page shows the status of each Workflow Piece in real time, including the logs and results of each run.
 
 Pieces are functional units that can be reused in multiple Workflows. Pieces can execute anything that can be written in Python, and can be easily distributed and installed directly from Github repositories to be used in Domino Workflows.
 
@@ -60,7 +64,7 @@ You can think of Domino as Airflow with superpowers:
 The Domino Python package can be installed via pip. We reccommend you install Domino in a separate Python environment.
 
 ```bash
-pip install domino-py
+pip install domino-py[cli]
 ```
 
 You can then use Domino command line interface to easily run the Domino platform locally (requires [Docker Compose V2](https://docs.docker.com/compose/)). Go to a new, empty directory and run the following command:
@@ -69,11 +73,10 @@ You can then use Domino command line interface to easily run the Domino platform
 domino platform run-compose
 ```
 
-After all processes started successfully, navigate to `localhost:3000` to access the Domino frontend service.
+After all processes started successfully, navigate to `localhost:3000` to access the Domino frontend service. <br>
+Obs.: the first time you run the platform, it may take a few minutes to download the Docker images.
 
-Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you install Domino in a Kubernetes cluster:
-- Running Domino in a [local Kubernetes cluster with Kind](https://domino-py.readthedocs.io/en/latest/pages/platform.html)
-- Running Domino in a [remote Kubernetes cluster](https://domino-py.readthedocs.io/en/latest/pages/deployment_cloud.html)
+Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you install Domino in a Kubernetes cluster. For local testing, check out the instructions for running Domino in a [local Kubernetes cluster with Kind](https://domino-py.readthedocs.io/en/latest/pages/platform.html).
 
 <br>
 
@@ -116,8 +119,8 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Create Workflows by dragging and dropping Pieces to the canvas, and connecting them. <br></br>
 
-  ![create workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/7_create_workflow.gif)
-
+  ![create-workflow](https://github.com/Tauffer-Consulting/domino/assets/54302847/34d619fa-4b6c-4761-8b24-3ca829cfc28c)
+  
 </details>
 
 <details>
@@ -126,7 +129,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system. <br></br>
 
-  ![edit pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/8_edit_pieces.gif)
+  ![edit pieces](https://github.com/Tauffer-Consulting/domino/assets/54302847/d453ac81-5485-4159-b2f3-bf57eb969906)
 
 </details>
 
@@ -136,7 +139,8 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
 
-  ![schedule workflows](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/9_edit_workflow.gif)
+  ![schedule workflows](https://github.com/Tauffer-Consulting/domino/assets/54302847/e881d225-e8e0-4344-bc3f-c170cb820274)
+
 </details>
 
 <details>
@@ -145,7 +149,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Monitor Workflows in real time, including the status of each Piece, the logs and results of each run. <br></br>
 
-  ![monitor workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/10_monitor_workflow.gif)
+  ![run-pieces7](https://github.com/Tauffer-Consulting/domino/assets/54302847/fb5a30c5-0314-4271-bb46-81a159ab2696)
 
 </details>
 
@@ -164,9 +168,9 @@ Pieces are the secret sauce of Domino, they are functional units that can be dis
 
 It is very easy to create and share your own Pieces:
 
-1️⃣ write your Python function as a Piece <br>
-2️⃣ define the data types, dependencies, metadata and tests <br>
-3️⃣ publish in a git repository (public or private)
+1. write your Python function as a Piece <br>
+2. define the data types, dependencies, metadata and tests <br>
+3. publish in a git repository (public or private)
 
 The [Pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
 
