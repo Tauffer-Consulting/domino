@@ -15,6 +15,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from kubernetes import client, config
 
 from domino.cli.utils.constants import COLOR_PALETTE, DOMINO_HELM_PATH, DOMINO_HELM_VERSION, DOMINO_HELM_REPOSITORY
+import shutil
 
 
 class AsLiteral(str):
@@ -660,21 +661,23 @@ def run_platform_compose(detached: bool = False, use_config_file: bool = False, 
     local_path = Path(".").resolve()
     domino_dir = local_path / "domino_data"
     domino_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["chmod", "-R", "777", "domino_data"])
-    airflow_logs_dir = local_path / "airflow/logs"
+    domino_dir.chmod(0o777)
+
+    airflow_base = local_path / 'airflow'
+    airflow_logs_dir = airflow_base / "logs"
     airflow_logs_dir.mkdir(parents=True, exist_ok=True)
-    airflow_dags_dir = local_path / "airflow/dags"
+    airflow_dags_dir = airflow_base / "dags"
     airflow_dags_dir.mkdir(parents=True, exist_ok=True)
-    airflow_plugins_dir = local_path / "airflow/plugins"
+    airflow_plugins_dir = airflow_base / "plugins"
     airflow_plugins_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["chmod", "-R", "777", "airflow"])    
+    airflow_base.chmod(0o777)
 
     # Copy docker-compose.yaml file from package to local path
     if create_database:
         docker_compose_path = Path(__file__).resolve().parent / "docker-compose.yaml"
     else:
         docker_compose_path = Path(__file__).resolve().parent / "docker-compose-without-database.yaml"
-    subprocess.run(["cp", str(docker_compose_path), "./docker-compose.yaml"])
+    shutil.copy(str(docker_compose_path), "./docker-compose.yaml")
     # Run docker-compose up
     cmd = [
         "docker", 

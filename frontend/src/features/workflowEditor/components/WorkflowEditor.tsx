@@ -32,8 +32,10 @@ import SidebarPieceForm from "./SidebarForm";
 import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
 import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
 import { storageFormSchema } from "./SidebarForm/StorageForm";
-import SidebarSettingsForm, {
+import {
+  SidebarSettingsForm,
   WorkflowSettingsFormSchema,
+  type SidebarSettingsFormRef,
 } from "./SidebarSettingsForm";
 
 /**
@@ -60,6 +62,7 @@ const VisuallyHiddenInput = styled("input")({
 
 export const WorkflowsEditorComponent: React.FC = () => {
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
+  const sidebarSettingsRef = useRef<SidebarSettingsFormRef>(null);
   const [sidebarSettingsDrawer, setSidebarSettingsDrawer] = useState(false);
   const [sidebarPieceDrawer, setSidebarPieceDrawer] = useState(false);
   const [formId, setFormId] = useState<string>("");
@@ -203,11 +206,16 @@ export const WorkflowsEditorComponent: React.FC = () => {
     await clearForageData();
     workflowPanelRef.current?.setEdges([]);
     workflowPanelRef.current?.setNodes([]);
+    await sidebarSettingsRef.current?.loadData();
   }, [clearForageData]);
 
   const handleExport = useCallback(async () => {
     await saveDataToLocalForage();
     const payload = await fetchWorkflowForage();
+    if (Object.keys(payload.workflowPieces).length === 0) {
+      toast.error("Workflow must have at least one piece to be exported.");
+      return;
+    }
     exportToJson(payload, payload.workflowSettingsData?.config?.name);
   }, []);
 
@@ -220,7 +228,14 @@ export const WorkflowsEditorComponent: React.FC = () => {
           ...new Set(
             Object.values(workflowPieces)
               .reduce<Array<string | null>>((acc, next) => {
-                acc.push(next.source_image);
+                acc.push(
+                  `${next.source_image.split("ghcr.io/")[1].split(":")[0]}:${
+                    next.source_image
+                      .split("ghcr.io/")[1]
+                      .split(":")[1]
+                      .split("-")[0]
+                  }`,
+                );
                 return acc;
               }, [])
               .filter((su) => !!su) as string[],
@@ -482,7 +497,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   ref={fileInputRef}
                 />
                 <Modal
-                  title="Missing or incompatibles pieces"
+                  title="Missing or incompatibles Pieces Repositories"
                   content={
                     <ul>
                       {incompatiblesPieces.map((item) => (
@@ -538,6 +553,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       <SidebarSettingsForm
         onClose={toggleSidebarSettingsDrawer(false)}
         open={sidebarSettingsDrawer}
+        ref={sidebarSettingsRef}
       />
     </>
   );

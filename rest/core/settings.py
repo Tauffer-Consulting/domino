@@ -50,7 +50,7 @@ class Settings(BaseSettings):
 
     # Default domino pieces repository
     DOMINO_DEFAULT_PIECES_REPOSITORY = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY', "Tauffer-Consulting/default_domino_pieces")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.4.2")
+    DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.4.3")
     DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE', "github")
     DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: EmptyStrToNone = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', "")
     DOMINO_DEFAULT_PIECES_REPOSITORY_URL: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_URL', 'https://github.com/Tauffer-Consulting/default_domino_pieces')

@@ -15,7 +15,14 @@ import {
   storageSourcesAWS,
   storageSourcesLocal,
 } from "features/workflowEditor/context/types";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  type ForwardedRef,
+} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "utils";
 import * as yup from "yup";
@@ -100,181 +107,203 @@ export const WorkflowSettingsFormSchema: ValidationSchema = yup.object().shape({
   }),
 });
 
-const SidebarSettingsForm = (props: ISidebarSettingsFormProps) => {
-  const { open, onClose } = props;
+export interface SidebarSettingsFormRef {
+  loadData: () => Promise<void>;
+}
 
-  const { fetchWorkflowSettingsData, setWorkflowSettingsData } =
-    useWorkflowsEditor();
+const SidebarSettingsForm = forwardRef<
+  SidebarSettingsFormRef,
+  ISidebarSettingsFormProps
+>(
+  (
+    props: ISidebarSettingsFormProps,
+    ref: ForwardedRef<SidebarSettingsFormRef>,
+  ) => {
+    const { open, onClose } = props;
 
-  const resolver = yupResolver(WorkflowSettingsFormSchema);
-  const methods = useForm<IWorkflowSettings>({ mode: "onChange", resolver });
-  const { register, watch, reset, trigger, getValues } = methods;
-  const formData = watch();
+    const { fetchWorkflowSettingsData, setWorkflowSettingsData } =
+      useWorkflowsEditor();
 
-  const [loaded, setLoaded] = useState(false);
+    const resolver = yupResolver(WorkflowSettingsFormSchema);
+    const methods = useForm<IWorkflowSettings>({ mode: "onChange", resolver });
+    const { register, watch, reset, trigger, getValues } = methods;
+    const formData = watch();
 
-  const validate = useCallback(() => {
-    if (loaded) void trigger();
-  }, [loaded, trigger]);
+    const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    validate();
-  }, [validate]);
+    const validate = useCallback(() => {
+      if (loaded) void trigger();
+    }, [loaded, trigger]);
 
-  const loadData = useCallback(async () => {
-    const data = await fetchWorkflowSettingsData();
-    if (Object.keys(data).length === 0) {
-      reset(defaultSettingsData);
-    } else {
-      reset(data);
-    }
-    setLoaded(true);
-  }, [reset, fetchWorkflowSettingsData]);
+    useEffect(() => {
+      validate();
+    }, [validate]);
 
-  const saveData = useCallback(async () => {
-    if (open) {
-      await setWorkflowSettingsData(formData);
-    }
-  }, [formData, open, setWorkflowSettingsData]);
+    const loadData = useCallback(async () => {
+      const data = await fetchWorkflowSettingsData();
+      if (Object.keys(data).length === 0) {
+        reset(defaultSettingsData);
+        await setWorkflowSettingsData(defaultSettingsData);
+      } else {
+        reset(data);
+      }
+      setLoaded(true);
+    }, [reset, fetchWorkflowSettingsData, setWorkflowSettingsData]);
 
-  useEffect(() => {
-    if (open) {
+    const saveData = useCallback(async () => {
+      if (open) {
+        await setWorkflowSettingsData(formData);
+      }
+    }, [formData, open, setWorkflowSettingsData]);
+
+    useEffect(() => {
       void loadData();
+    }, [loadData]);
+
+    useEffect(() => {
+      void saveData();
+    }, [saveData]);
+
+    useImperativeHandle(
+      ref,
+      () => {
+        return {
+          loadData,
+        };
+      },
+      [loadData],
+    );
+
+    if (Object.keys(formData).length === 0) {
+      return null;
     }
-  }, [open, loadData]);
 
-  useEffect(() => {
-    void saveData();
-  }, [saveData]);
-
-  if (Object.keys(formData).length === 0) {
-    return null;
-  }
-
-  return (
-    <Drawer
-      anchor="left"
-      open={open}
-      onClose={onClose}
-      sx={{
-        "& .MuiDrawer-paper": {
-          marginTop: "4rem",
-          width: "33%",
-          maxWidth: "500px",
-          minWidth: "300px",
-        },
-      }}
-      BackdropProps={{ style: { backgroundColor: "transparent" } }}
-    >
-      <Grid container>
-        <Grid container padding={1}>
-          <Typography
-            variant="h5"
-            component="h5"
-            sx={{ marginTop: "20px", marginBottom: "20px" }}
-          >
-            Settings
-          </Typography>
-          <FormProvider {...methods}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextInput
-                  variant="outlined"
-                  name="config.name"
-                  label="Name"
-                  defaultValue={defaultSettingsData.config.name}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <SelectInput
-                  name="config.scheduleInterval"
-                  defaultValue={defaultSettingsData.config.scheduleInterval}
-                  options={Object.values(scheduleIntervals)}
-                  label="Schedule Interval"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <DatetimeInput
-                  name="config.startDate"
-                  label="Start Date/Time"
-                  type="date-time"
-                />
-              </Grid>
-              <Grid
-                container
-                spacing={2}
-                alignItems="center"
-                sx={{ margin: "0px" }}
-              >
-                <Grid item xs={4}>
-                  <SelectInput
-                    name="config.endDateType"
-                    label="End Date/Time"
-                    options={Object.values(endDateTypes)}
-                    defaultValue={defaultSettingsData.config.endDateType}
-                  />
-                </Grid>
-                {getValues().config.endDateType ===
-                  endDateTypes.UserDefined && (
-                  <Grid item xs={8}>
-                    <DatetimeInput
-                      name="config.endDate"
-                      label="End Date/Time"
-                      type="date-time"
-                    />
-                  </Grid>
-                )}
-              </Grid>
-            </Grid>
-          </FormProvider>
-        </Grid>
-        <Grid container padding={1}>
-          <Grid item xs={12}>
+    return (
+      <Drawer
+        anchor="left"
+        open={open}
+        onClose={onClose}
+        sx={{
+          "& .MuiDrawer-paper": {
+            marginTop: "4rem",
+            width: "33%",
+            maxWidth: "500px",
+            minWidth: "300px",
+          },
+        }}
+        BackdropProps={{ style: { backgroundColor: "transparent" } }}
+      >
+        <Grid container>
+          <Grid container padding={1}>
             <Typography
               variant="h5"
               component="h5"
               sx={{ marginTop: "20px", marginBottom: "20px" }}
             >
-              Storage
+              Settings
             </Typography>
-          </Grid>
-          <FormProvider {...methods}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <SelectInput
-                  label="Storage Source"
-                  name="storage.storageSource"
-                  options={storageSourceOptions}
-                  defaultValue={defaultSettingsData.storage.storageSource}
-                />
+            <FormProvider {...methods}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextInput
+                    variant="outlined"
+                    name="config.name"
+                    label="Name"
+                    defaultValue={defaultSettingsData.config.name}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <SelectInput
+                    name="config.scheduleInterval"
+                    defaultValue={defaultSettingsData.config.scheduleInterval}
+                    options={Object.values(scheduleIntervals)}
+                    label="Schedule"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <DatetimeInput
+                    name="config.startDate"
+                    label="Start Date/Time"
+                    type="date-time"
+                  />
+                </Grid>
+                <Grid
+                  container
+                  spacing={2}
+                  alignItems="center"
+                  sx={{ margin: "0px" }}
+                >
+                  <Grid item xs={4}>
+                    <SelectInput
+                      name="config.endDateType"
+                      label="End Date/Time"
+                      options={Object.values(endDateTypes)}
+                      defaultValue={defaultSettingsData.config.endDateType}
+                    />
+                  </Grid>
+                  {getValues().config.endDateType ===
+                    endDateTypes.UserDefined && (
+                    <Grid item xs={8}>
+                      <DatetimeInput
+                        name="config.endDate"
+                        label="End Date/Time"
+                        type="date-time"
+                      />
+                    </Grid>
+                  )}
+                </Grid>
               </Grid>
-              {formData.storage.storageSource === storageSourcesAWS.AWS_S3 ? (
-                <>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Bucket"
-                      defaultValue={defaultSettingsData.storage.bucket}
-                      required
-                      fullWidth
-                      {...register("storage.bucket")}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Base Folder"
-                      defaultValue={defaultSettingsData.storage.baseFolder}
-                      required
-                      fullWidth
-                      {...register("storage.baseFolder")}
-                    />
-                  </Grid>
-                </>
-              ) : null}
+            </FormProvider>
+          </Grid>
+          <Grid container padding={1}>
+            <Grid item xs={12}>
+              <Typography
+                variant="h5"
+                component="h5"
+                sx={{ marginTop: "20px", marginBottom: "20px" }}
+              >
+                Storage
+              </Typography>
             </Grid>
-          </FormProvider>
+            <FormProvider {...methods}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <SelectInput
+                    label="Storage Source"
+                    name="storage.storageSource"
+                    options={storageSourceOptions}
+                    defaultValue={defaultSettingsData.storage.storageSource}
+                  />
+                </Grid>
+                {formData.storage.storageSource === storageSourcesAWS.AWS_S3 ? (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Bucket"
+                        defaultValue={defaultSettingsData.storage.bucket}
+                        required
+                        fullWidth
+                        {...register("storage.bucket")}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Base Folder"
+                        defaultValue={defaultSettingsData.storage.baseFolder}
+                        required
+                        fullWidth
+                        {...register("storage.baseFolder")}
+                      />
+                    </Grid>
+                  </>
+                ) : null}
+              </Grid>
+            </FormProvider>
+          </Grid>
         </Grid>
-      </Grid>
-    </Drawer>
-  );
-};
-export default SidebarSettingsForm;
+      </Drawer>
+    );
+  },
+);
+SidebarSettingsForm.displayName = "SidebarSettingsForm";
+export { SidebarSettingsForm };

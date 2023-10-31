@@ -172,7 +172,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     }: GenerateWorkflowsParams) => {
       const workflow: CreateWorkflowRequest["workflow"] = {
         name: workflowSettingsData.config.name,
-        schedule_interval: workflowSettingsData.config.scheduleInterval,
+        schedule: workflowSettingsData.config.scheduleInterval,
         select_end_date: workflowSettingsData.config.endDateType,
         start_date: workflowSettingsData.config.startDate,
         end_date: workflowSettingsData.config.endDate,

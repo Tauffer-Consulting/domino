@@ -21,7 +21,7 @@ interface WorkflowBaseSettings {
   name: string;
   start_date: string; // ISOFormat
   select_end_date: EndDateTypes;
-  schedule_interval: ScheduleIntervals;
+  schedule: ScheduleIntervals;
 
   end_date?: string; // ISOFormat
   catchup?: boolean;
