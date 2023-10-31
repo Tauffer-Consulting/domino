@@ -158,7 +158,7 @@ const SidebarSettingsForm = forwardRef<
 
     useEffect(() => {
       void loadData();
-    }, [loadData]);
+    }, [open, loadData]);
 
     useEffect(() => {
       void saveData();
