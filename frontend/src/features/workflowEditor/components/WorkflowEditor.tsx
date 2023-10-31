@@ -4,6 +4,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import SaveIcon from "@mui/icons-material/Save";
 import { Button, Grid, Paper, styled } from "@mui/material";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import { AxiosError } from "axios";
 import Loading from "components/Loading";
 import { Modal, type ModalRef } from "components/Modal";
@@ -14,7 +16,7 @@ import {
 } from "components/WorkflowPanel";
 import { useWorkspaces } from "context/workspaces";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type DragEvent, useCallback, useRef, useState } from "react";
+import React, { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { type Edge, type Node, type XYPosition } from "reactflow";
 import localForage from "services/config/localForage.config";
@@ -73,6 +75,9 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const [orientation, setOrientation] = useState<"horizontal" | "vertical">(
     "horizontal",
   );
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const importMenuOpen = Boolean(anchorEl);
 
   const incompatiblePiecesModalRef = useRef<ModalRef>(null);
   const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
@@ -427,6 +432,20 @@ export const WorkflowsEditorComponent: React.FC = () => {
     setSidebarSettingsDrawer(open);
   };
 
+  const handleClickImportMenu = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorEl(event.currentTarget);
+    },
+    [],
+  );
+
+  const handleImportFromFile = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+    setAnchorEl(null);
+  }, [fileInputRef]);
+
   return (
     <>
       {loading && <Loading />}
@@ -479,16 +498,20 @@ export const WorkflowsEditorComponent: React.FC = () => {
             </Grid>
             <Grid item>
               <Button
-                component="label"
                 variant="contained"
                 startIcon={<DownloadIcon />}
+                id="import-button"
+                aria-controls={importMenuOpen ? "import-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={importMenuOpen ? "true" : undefined}
+                onClick={handleClickImportMenu}
               >
-                Import
                 <VisuallyHiddenInput
                   type="file"
                   onChange={handleImport}
                   ref={fileInputRef}
                 />
+                Import
                 <Modal
                   title="Missing or incompatibles Pieces Repositories"
                   content={
@@ -508,6 +531,35 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   ref={incompatiblePiecesModalRef}
                 />
               </Button>
+              <Menu
+                id="import-menu"
+                anchorEl={anchorEl}
+                open={importMenuOpen}
+                onClose={() => {
+                  setAnchorEl(null);
+                }}
+                MenuListProps={{
+                  "aria-labelledby": "import-button",
+                }}
+              >
+                <MenuItem onClick={handleImportFromFile}>
+                  Import from file
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                  }}
+                >
+                  Import from examples
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                  }}
+                >
+                  Import from workflows
+                </MenuItem>
+              </Menu>
             </Grid>
 
             <Grid item>
