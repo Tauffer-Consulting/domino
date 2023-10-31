@@ -33,7 +33,7 @@ class TestWorkflowRouter:
                     "name": workflow_request_model["workflow"]["name"],
                     "start_date": workflow_request_model["workflow"]["start_date"],
                     "end_date": None,
-                    "schedule_interval": None,
+                    "schedule": None,
                     "catchup": False,
                     "generate_report": False,
                     "description": None

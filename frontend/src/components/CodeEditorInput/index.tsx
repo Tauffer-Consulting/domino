@@ -7,11 +7,16 @@ import {
   useFormContext,
 } from "react-hook-form";
 
-const CodeEditorItem = React.forwardRef<HTMLTextAreaElement>(
-  ({ ...register }, ref) => (
+interface Props {
+  language?: string;
+  placeholder?: string;
+}
+
+const CodeEditorItem = React.forwardRef<HTMLTextAreaElement, Props>(
+  ({ language = "python", placeholder, ...register }, ref) => (
     <CodeEditor
-      language="python"
-      placeholder="Enter Python code."
+      language={language}
+      placeholder={placeholder ?? ""}
       padding={15}
       style={{
         fontSize: 12,
@@ -33,18 +38,30 @@ const CodeEditorItem = React.forwardRef<HTMLTextAreaElement>(
 
 CodeEditorItem.displayName = "CodeEditorItem";
 
-interface Props<T> {
+interface CodeEditorInputProps<T> {
   name: Path<T>;
+  language?: string;
+  placeholder?: string;
 }
 
-function CodeEditorInput<T extends FieldValues>({ name }: Props<T>) {
+function CodeEditorInput<T extends FieldValues>({
+  name,
+  language,
+  placeholder,
+}: CodeEditorInputProps<T>) {
   const { control } = useFormContext();
 
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field }) => <CodeEditorItem {...field} />}
+      render={({ field }) => (
+        <CodeEditorItem
+          language={language}
+          placeholder={placeholder}
+          {...field}
+        />
+      )}
     />
   );
 }

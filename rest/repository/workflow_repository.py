@@ -131,7 +131,7 @@ class WorkflowRepository(object):
             saved_workflow.last_changed_at = workflow.last_changed_at
             saved_workflow.start_date = workflow.start_date
             saved_workflow.end_date = workflow.end_date
-            saved_workflow.schedule_interval = workflow.schedule_interval
+            saved_workflow.schedule = workflow.schedule
             saved_workflow.last_changed_by = workflow.last_changed_by
             session.flush()
             session.expunge(saved_workflow)

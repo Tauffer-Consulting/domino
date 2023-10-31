@@ -18,7 +18,7 @@ class Workflow(Base):
     last_changed_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
-    schedule_interval = Column(Enum(WorkflowScheduleInterval), nullable=True, default=WorkflowScheduleInterval.none.value)
+    schedule = Column(Enum(WorkflowScheduleInterval), nullable=True, default=WorkflowScheduleInterval.none.value)
     workspace_id = Column(Integer, ForeignKey("workspace.id", ondelete='cascade'), nullable=False)
     last_changed_by = Column(Integer, ForeignKey("user.id"), nullable=False)
 

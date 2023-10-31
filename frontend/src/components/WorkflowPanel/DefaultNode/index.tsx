@@ -71,7 +71,7 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
       ...data.style.nodeStyle,
       display: "flex",
       flexDirection: "row",
-      justifyContent: "center",
+      justifyContent: "space-evenly",
       alignItems: "center",
 
       position: "relative",
@@ -88,7 +88,7 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
         backgroundColor: theme.palette.error.light,
         color: theme.palette.error.contrastText,
       }),
-    };
+    } satisfies CSSProperties;
   }, [data, selected]);
 
   const { sourcePosition, targetPosition } = useMemo(

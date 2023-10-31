@@ -131,4 +131,5 @@ class SecretService(object):
                     value=decoded_value
                 )
             )
+
         return response
