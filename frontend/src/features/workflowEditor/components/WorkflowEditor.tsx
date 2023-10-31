@@ -39,6 +39,7 @@ import {
   WorkflowSettingsFormSchema,
   type SidebarSettingsFormRef,
 } from "./SidebarSettingsForm";
+import { WorkflowExamplesGalleryModal } from "./WorkflowExamplesGalleryModal";
 
 /**
  * Create workflow tab
@@ -80,6 +81,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const importMenuOpen = Boolean(anchorEl);
 
   const incompatiblePiecesModalRef = useRef<ModalRef>(null);
+  const workflowsGalleryModalRef = useRef<ModalRef>(null);
   const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
 
   const { workspace } = useWorkspaces();
@@ -446,6 +448,11 @@ export const WorkflowsEditorComponent: React.FC = () => {
     setAnchorEl(null);
   }, [fileInputRef]);
 
+  const handleImportFromExamples = useCallback(() => {
+    setAnchorEl(null);
+    workflowsGalleryModalRef.current?.open();
+  }, [workflowsGalleryModalRef]);
+
   return (
     <>
       {loading && <Loading />}
@@ -545,23 +552,20 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 <MenuItem onClick={handleImportFromFile}>
                   Import from file
                 </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setAnchorEl(null);
-                  }}
-                >
+                <MenuItem onClick={handleImportFromExamples}>
                   Import from examples
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
                   }}
+                  disabled
                 >
                   Import from workflows
                 </MenuItem>
               </Menu>
+              <WorkflowExamplesGalleryModal ref={workflowsGalleryModalRef} />
             </Grid>
-
             <Grid item>
               <Button
                 color="primary"
