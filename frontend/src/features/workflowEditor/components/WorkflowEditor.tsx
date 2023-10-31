@@ -14,7 +14,7 @@ import {
   WorkflowPanel,
   type DefaultNode,
 } from "components/WorkflowPanel";
-import { useWorkspaces } from "context/workspaces";
+import { useWorkspaces, usesPieces } from "context/workspaces";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import React, { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -102,7 +102,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
     generateWorkflowsEditorBodyParams,
     fetchWorkflowForage,
     handleCreateWorkflow,
-    fetchForagePieceById,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
     setForageWorkflowPieces,
@@ -116,6 +115,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
     setWorkflowEdges,
     setWorkflowNodes,
   } = useWorkflowsEditor();
+
+  const { fetchForagePieceById } = usesPieces();
 
   const validateWorkflowSettings = useCallback(async (payload: any) => {
     const resolver = yupResolver(WorkflowSettingsFormSchema);

@@ -11,7 +11,6 @@ import React, { type FC, useCallback } from "react";
 import { type Edge } from "reactflow";
 import { createCustomContext, generateTaskName, getIdSlice } from "utils";
 
-import { usesPieces, type IPiecesContext } from "./pieces";
 import {
   useReactWorkflowPersistence,
   type IReactWorkflowPersistenceContext,
@@ -45,8 +44,7 @@ export type DominoWorkflowForage = GenerateWorkflowsParams & {
 };
 
 interface IWorkflowsEditorContext
-  extends IPiecesContext,
-    IReactWorkflowPersistenceContext,
+  extends IReactWorkflowPersistenceContext,
     IWorkflowSettingsContext,
     IWorkflowPieceContext,
     IWorkflowPiecesDataContext {
@@ -71,17 +69,6 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 }) => {
   const { workspace } = useWorkspaces();
   const postWorkflow = useAuthenticatedPostWorkflow();
-
-  const {
-    repositories,
-    repositoriesError,
-    repositoriesLoading,
-    repositoryPieces,
-    fetchForagePieceById,
-    fetchRepoById,
-    search,
-    handleSearch,
-  } = usesPieces();
 
   const {
     setWorkflowEdges,
@@ -314,15 +301,6 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
   ]);
 
   const value: IWorkflowsEditorContext = {
-    repositories,
-    repositoryPieces,
-    repositoriesError,
-    repositoriesLoading,
-    fetchRepoById,
-    fetchForagePieceById,
-    search,
-    handleSearch,
-
     importWorkflowToForage,
 
     setWorkflowEdges,

@@ -2,6 +2,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { AuthenticationProvider } from "context/authentication";
 import { WorkspacesProvider } from "context/workspaces";
+import PiecesProvider from "context/workspaces/repositories";
 import { type FC } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -23,7 +24,9 @@ export const App: FC = () => (
     <BrowserRouter>
       <AuthenticationProvider>
         <WorkspacesProvider>
-          <ApplicationRoutes />
+          <PiecesProvider>
+            <ApplicationRoutes />
+          </PiecesProvider>
         </WorkspacesProvider>
       </AuthenticationProvider>
     </BrowserRouter>
