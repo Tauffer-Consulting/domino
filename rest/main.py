@@ -2,7 +2,6 @@ import uvicorn
 from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from routers.auth_router import router as auth_router
 from routers.user_router import router as user_router
 from routers.workflow_router import router as workflow_router
