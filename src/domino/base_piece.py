@@ -150,8 +150,8 @@ class BasePiece(metaclass=abc.ABCMeta):
         Returns:
             dict: XCOM dictionary
         """
-        # xcom_obj = output_obj.dict()
-        xcom_obj = json.loads(output_obj.json())
+        # xcom_obj = output_obj.model_dump()
+        xcom_obj = json.loads(output_obj.model_dump_json())
         if not isinstance(xcom_obj, dict):
             self.logger.info(f"Piece {self.__class__.__name__} is not returning a valid XCOM object. Auto-generating a base XCOM for it...")
             xcom_obj = dict()

@@ -49,7 +49,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
                 "dag_id": dag_id,
             }),
             "DOMINO_RUN_PIECE_KWARGS": str(piece_input_kwargs),
-            "DOMINO_WORKFLOW_SHARED_STORAGE": workflow_shared_storage.json() if workflow_shared_storage else "",
+            "DOMINO_WORKFLOW_SHARED_STORAGE": workflow_shared_storage.model_dump_json() if workflow_shared_storage else "",
             "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
             "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
         }
@@ -62,7 +62,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             limits={"cpu": "100m", "memory": "128Mi"},
             use_gpu=False,
         )
-        basic_container_resources = base_container_resources_model.dict()
+        basic_container_resources = base_container_resources_model.model_dump()
         updated_container_resources = dict_deep_update(basic_container_resources, container_resources)
         use_gpu = updated_container_resources.pop("use_gpu", False)
         if use_gpu:
@@ -307,7 +307,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
 
         self.workflow_shared_storage.source = self.workflow_shared_storage.source.name
         sidecar_env_vars = {
-            'DOMINO_WORKFLOW_SHARED_STORAGE': self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
+            'DOMINO_WORKFLOW_SHARED_STORAGE': self.workflow_shared_storage.model_dump_json() if self.workflow_shared_storage else "",
             'DOMINO_WORKFLOW_SHARED_STORAGE_SECRETS': str(storage_piece_secrets),
             'DOMINO_INSTANTIATE_PIECE_KWARGS': str({
                 "deploy_mode": self.deploy_mode,
