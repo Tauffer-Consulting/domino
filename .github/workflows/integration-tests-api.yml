@@ -6,7 +6,7 @@ on:
       - main
       - dev
       - test/*
-      # - chore/update-airflow-pydantic
+      - chore/update-airflow-pydantic
 
 jobs:
   api-tests:
