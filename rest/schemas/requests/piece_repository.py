@@ -10,11 +10,11 @@ class RepositorySourceRequestEnum(str, enum.Enum):
         use_enum_values = True
 
 class ListRepositoryFilters(BaseModel):
-    name__like: Optional[str]
-    path__like: Optional[str]
-    version: Optional[str]
-    url: Optional[str]
-    workspace_id: Optional[int]
+    name__like: Optional[str] = None
+    path__like: Optional[str] = None
+    version: Optional[str] = None
+    url: Optional[str] = None
+    workspace_id: Optional[int] = None
     source: Optional[RepositorySource] = Field(description="Source of the repository.", default=RepositorySource.github.value)
 
 class CreateRepositoryRequest(BaseModel):
