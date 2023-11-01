@@ -51,8 +51,10 @@ const WorkflowExamplesGalleryModal = forwardRef(
             {cardsContents.map((card, index) => (
               <Grid item key={index} xs={12} sm={6} md={6}>
                 <Card
+                  elevation={4}
                   sx={{
                     height: "200px",
+                    backgroundColor: theme.palette.grey[100],
                   }}
                 >
                   <CardActionArea
@@ -61,19 +63,26 @@ const WorkflowExamplesGalleryModal = forwardRef(
                       setSelected((s) => (s === index ? null : index));
                     }}
                   >
-                    <CardContent>
+                    <CardContent
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-evenly",
+                        height: "100%",
+                      }}
+                    >
                       {selected === index && (
                         <CheckCircleIcon
                           sx={{
                             position: "absolute",
-                            top: 0,
-                            right: 0,
+                            top: 10,
+                            right: 10,
                             color: theme.palette.success.light,
                             borderRadius: "50%",
                           }}
                         />
                       )}
-                      <Typography variant="h6">{card.title}</Typography>
+                      <Typography variant="h3">{card.title}</Typography>
                       <Typography>{card.description}</Typography>
                     </CardContent>
                   </CardActionArea>
