@@ -61,7 +61,6 @@ export interface TasksDataModel {
   container_resources: ContainerResourcesDataModel;
   task_id: string;
   piece: {
-    id: number;
     name: string;
   };
   piece_input_kwargs: Record<string, any>;

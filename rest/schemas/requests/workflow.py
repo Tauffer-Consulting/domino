@@ -111,7 +111,6 @@ class WorkflowSharedStorageDataModel(BaseModel):
         use_enum_values = True
 
 class TaskPieceDataModel(BaseModel):
-    id: int
     name: str
 
 class SystemRequirementsModel(BaseModel):

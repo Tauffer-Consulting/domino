@@ -264,7 +264,6 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
         const taskDataModel: TasksDataModel = {
           task_id: taskName,
           piece: {
-            id: numberId,
             name: element.data.name,
           },
           dependencies,
