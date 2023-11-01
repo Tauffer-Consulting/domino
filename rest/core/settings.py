@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional, Union
+from typing import Union
 import os
 from database.models.enums import RepositorySource
 
@@ -39,9 +39,8 @@ class Settings(BaseSettings):
     DOMINO_DEFAULT_PIECES_REPOSITORY: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY', "Tauffer-Consulting/default_domino_pieces")
     DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.4.3")
     DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE', "github")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: Union[str, None] = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', None)
-    if DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN.strip() == '':
-        DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN = None
+    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: Union[str, None] = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', '')
+
     DOMINO_DEFAULT_PIECES_REPOSITORY_URL: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_URL', 'https://github.com/Tauffer-Consulting/default_domino_pieces')
     
     # Default DB mock data
