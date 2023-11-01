@@ -1,52 +1,95 @@
+import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // You can replace this with your own selected icon
 import {
-  Drawer,
   Grid,
   Typography,
-  TextField,
   Card,
   CardContent,
-  Dialog,
+  CardActionArea,
 } from "@mui/material";
 import { Modal, type ModalRef } from "components/Modal";
-import {
-  useCallback,
-  useEffect,
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  type ForwardedRef,
-} from "react";
+import theme from "providers/theme.config";
+import { forwardRef, type ForwardedRef, useState } from "react";
+
+import LogWorkflow from "../../utils/workflows/simple_log_workflow.json";
+import YoutubeWorkflow from "../../utils/workflows/youtube_workflow.json";
+
+interface WorkflowGalleryModalRef extends ModalRef {}
+
+interface WorkflowGalleryModalProps {
+  confirmFn: (json: any) => void;
+}
 
 const WorkflowExamplesGalleryModal = forwardRef(
-  (props: any, ref: ForwardedRef<any>) => {
+  (
+    props: WorkflowGalleryModalProps,
+    ref: ForwardedRef<WorkflowGalleryModalRef>,
+  ) => {
+    const [selected, setSelected] = useState<number | null>(null);
+
     const cardsContents = [
       {
-        title: "First card",
-        description: "First description",
+        title: "Youtube Summarizer",
+        description:
+          "This workflow allows you to download and summarize youtube audios, and send then to emails.",
+        jsonFile: YoutubeWorkflow,
       },
       {
-        title: "Second card",
-        description: "Second description",
+        title: "Simple Log Workflow",
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut laoreet turpis.",
+        jsonFile: LogWorkflow,
       },
     ];
 
     return (
       <Modal
         title="Example Workflows Gallery"
+        maxWidth={"md"}
+        fullWidth={true}
         content={
           <Grid container spacing={2}>
             {cardsContents.map((card, index) => (
-              <Grid item key={index} xs={12} sm={6} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">{card.title}</Typography>
-                    <Typography>{card.description}</Typography>
-                  </CardContent>
+              <Grid item key={index} xs={12} sm={6} md={6}>
+                <Card
+                  sx={{
+                    height: "200px",
+                  }}
+                >
+                  <CardActionArea
+                    sx={{ height: "100%" }}
+                    onClick={() => {
+                      setSelected((s) => (s === index ? null : index));
+                    }}
+                  >
+                    <CardContent>
+                      {selected === index && (
+                        <CheckCircleIcon
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            right: 0,
+                            color: theme.palette.success.light,
+                            borderRadius: "50%",
+                          }}
+                        />
+                      )}
+                      <Typography variant="h6">{card.title}</Typography>
+                      <Typography>{card.description}</Typography>
+                    </CardContent>
+                  </CardActionArea>
                 </Card>
               </Grid>
             ))}
           </Grid>
         }
+        confirmFn={() => {
+          if (selected !== null) {
+            props.confirmFn(cardsContents[selected].jsonFile);
+          }
+        }}
+        cancelFn={() => {
+          setSelected(null);
+        }}
         ref={ref}
       />
     );
