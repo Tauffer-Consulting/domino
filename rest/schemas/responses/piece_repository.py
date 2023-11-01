@@ -10,8 +10,8 @@ class GetWorkspaceRepositoriesData(BaseModel):
     name: str
     label: str
     source: RepositorySource
-    path: Optional[str]
-    version: Optional[str]
+    path: Optional[str] = None
+    version: Optional[str] = None
     workspace_id: int
 
 class GetWorkspaceRepositoriesResponse(BaseModel):
@@ -29,7 +29,7 @@ class CreateRepositoryReponse(BaseModel):
     source: RepositorySource = Field(..., description="Source of the repository")
     label: str = Field(..., description="Label of the repository")
     path: str = Field(..., description="Path of the repository")
-    version: Optional[str] = Field(None, description="Version of the repository")
+    version: Optional[str] = Field(default=None, description="Version of the repository")
     workspace_id: int = Field(..., description="Workspace id the repository belongs to")
 
 
@@ -43,7 +43,7 @@ class GetRepositoryReleasesResponse(BaseModel):
 
 class GetRepositoryReleaseDataResponse(BaseModel):
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     pieces: List[str]
 
 class GetRepositoryResponse(BaseModel):
@@ -51,7 +51,7 @@ class GetRepositoryResponse(BaseModel):
     created_at: datetime
     name: str
     source: RepositorySource
-    path: Optional[str]
-    version: Optional[str]
+    path: Optional[str] = None
+    version: Optional[str] = None
     workspace_id: int
     #secrets: List[RepositorySecret]

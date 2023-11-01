@@ -79,7 +79,7 @@ class WorkflowService(object):
             uuid_name=workflow_id,
             created_at=datetime.utcnow(),
             schema={},
-            ui_schema=body.ui_schema.dict(),
+            ui_schema=body.ui_schema.model_dump(),
             created_by=auth_context.user_id,
             last_changed_at=datetime.utcnow(),
             start_date=body.workflow.start_date,
@@ -90,7 +90,7 @@ class WorkflowService(object):
         )
         workflow = self.workflow_repository.create(new_workflow)
         
-        data_dict = body.dict()
+        data_dict = body.model_dump()
         data_dict['workflow']['id'] = workflow_id
         
         try:

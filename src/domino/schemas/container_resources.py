@@ -2,8 +2,8 @@ from pydantic import BaseModel, Field
 
 
 class SystemRequirementsModel(BaseModel):
-    cpu: str = Field(regex=r"^\d+\.*\d*m$")
-    memory: str = Field(regex=r"^\d+\.*\d*Mi$")
+    cpu: str = Field(pattern=r"^\d+\.*\d*m$")
+    memory: str = Field(pattern=r"^\d+\.*\d*Mi$")
 
 
 class ContainerResourcesModel(BaseModel):
