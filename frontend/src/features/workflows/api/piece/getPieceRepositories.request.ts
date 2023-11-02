@@ -18,6 +18,9 @@ const getPiecesRepositoriesUrl = (
   workspace: string,
   filters: IGetPieceRepositoryFilters,
 ) => {
+  if (!workspace) {
+    return null;
+  }
   const query = new URLSearchParams();
   query.set("workspace_id", workspace);
   for (const [key, value] of Object.entries(filters)) {
@@ -33,14 +36,15 @@ const getPiecesRepositoriesUrl = (
 const getPiecesRepositories: (
   workspace: string,
   filters: IGetPieceRepositoryFilters,
-) => Promise<AxiosResponse<IGetPiecesRepositoriesResponseInterface>> = async (
-  workspace,
-  filters,
-) => {
+) => Promise<
+  AxiosResponse<IGetPiecesRepositoriesResponseInterface> | undefined
+> = async (workspace, filters) => {
   //
-  return await dominoApiClient.get(
-    getPiecesRepositoriesUrl(workspace, filters),
-  );
+  if (workspace) {
+    return await dominoApiClient.get(
+      getPiecesRepositoriesUrl(workspace, filters) as string,
+    );
+  }
 };
 
 /**
@@ -59,7 +63,7 @@ export const useAuthenticatedGetPieceRepositories = (
 
   const fetcher = async (filters: IGetPieceRepositoryFilters) =>
     await getPiecesRepositories(workspace.id, filters).then(
-      (data) => data.data,
+      (data) => data?.data,
     );
 
   return useSWR(
