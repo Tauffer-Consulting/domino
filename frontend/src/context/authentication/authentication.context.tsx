@@ -53,7 +53,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       localStorage.setItem("auth_token", token);
       localStorage.setItem("userId", userId);
       localStorage.setItem(
-        "tokenExpiresInTimestamp",
+        "tokenExpiresAtTimestamp",
         tokenExpirationDate.getTime().toString(),
       );
       navigate(redirect);
