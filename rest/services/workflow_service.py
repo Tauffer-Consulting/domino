@@ -304,9 +304,11 @@ class WorkflowService(object):
         # get all workspaces ids necessary for repositories referenced by tasks
         # check if user has access to all necessary workspaces
         pieces_names = set()
+        pieces_source_images = set()
         shared_storage_sources = []
         for v in tasks_dict.values():
             pieces_names.add(v['piece']['name'])
+            pieces_source_images.add(v['piece']['source_image'])
             shared_storage_sources.append(v['workflow_shared_storage']['source'])
         
         shared_storage_source = list(set(shared_storage_sources))
@@ -336,6 +338,7 @@ class WorkflowService(object):
         # Find necessary repositories from pieces names and workspace_id
         necessary_repositories_and_pieces = self.piece_repository.find_repositories_by_piece_name_and_workspace_id(
             pieces_names=pieces_names,
+            sources_images=pieces_source_images,
             workspace_id=workspace_id
         )
 
