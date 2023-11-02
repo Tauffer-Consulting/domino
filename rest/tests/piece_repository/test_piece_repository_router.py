@@ -21,7 +21,7 @@ class TestPieceRepositoryRouter:
         ]
         response = get_repository_releases
         content = response.json()
-        mock_response_content = json.loads(mock_response[0].json())
+        mock_response_content = json.loads(mock_response[0].model_dump_json())
 
         assert response.status_code == 200
         assert content[0].keys() == mock_response_content.keys()
@@ -41,7 +41,7 @@ class TestPieceRepositoryRouter:
         response = add_piece_repository
         content = response.json()
         if content.get("id") != None:
-            mock_response_content = json.loads(mock_response.json())
+            mock_response_content = json.loads(mock_response.model_dump_json())
 
             assert response.status_code == 200       
             assert content.keys() == mock_response_content.keys()
@@ -72,7 +72,7 @@ class TestPieceRepositoryRouter:
         )
         response = get_pieces_repositories
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -92,7 +92,7 @@ class TestPieceRepositoryRouter:
         )
         response = get_piece_repository_release_data
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -112,7 +112,7 @@ class TestPieceRepositoryRouter:
         )
         response = get_piece_repository_by_id
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -133,7 +133,7 @@ class TestPieceRepositoryRouter:
         )
         response = patch_piece_repository
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()

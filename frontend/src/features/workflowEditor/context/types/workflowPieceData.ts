@@ -62,6 +62,7 @@ export interface TasksDataModel {
   task_id: string;
   piece: {
     name: string;
+    source_image: string;
   };
   piece_input_kwargs: Record<string, any>;
   dependencies?: string[];

@@ -69,7 +69,7 @@ def create_workspace(client: ApiTestClient, authorization_token: Dict, workspace
     create_workspace_request = CreateWorkspaceRequest(
         name = workspace.name
     )
-    body = json.loads(create_workspace_request.json())
+    body = json.loads(create_workspace_request.model_dump_json())
     response = client.post(
         "/workspaces",
         headers = {"Authorization": authorization_token["header"]},

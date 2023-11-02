@@ -22,7 +22,7 @@ class PieceRepository(object):
                 session.expunge_all()
         return result
     
-    def find_repositories_by_piece_name_and_workspace_id(self, pieces_names: list, workspace_id):
+    def find_repositories_by_piece_name_and_workspace_id(self, pieces_names: list, sources_images: list, workspace_id):
         # Find pieces repositories by pieces names and workspace_id
         with session_scope() as session:
             query = session.query(
@@ -32,7 +32,8 @@ class PieceRepository(object):
             )\
                 .filter(PieceRepositoryDatabaseModel.workspace_id == workspace_id)\
                     .join(Piece, Piece.repository_id == PieceRepositoryDatabaseModel.id)\
-                        .filter(Piece.name.in_(pieces_names))
+                        .filter(Piece.name.in_(pieces_names))\
+                            .filter(Piece.source_image.in_(sources_images))
 
             result = query.all()
             session.flush()

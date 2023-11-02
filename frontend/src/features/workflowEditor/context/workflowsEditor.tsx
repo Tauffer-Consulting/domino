@@ -152,6 +152,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 
   const generateWorkflowsEditorBodyParams = useCallback(
     async ({
+      workflowPieces,
       workflowPiecesData,
       workflowSettingsData,
       workflowNodes,
@@ -174,8 +175,8 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 
       for (const element of workflowNodes) {
         const elementData = workflowPiecesData[element.id];
+        const pieceData = workflowPieces[element.id];
 
-        const numberId = getIdSlice(element.id);
         const taskName = generateTaskName(element.data.name, element.id);
 
         ui_schema.nodes[taskName] = element;
@@ -252,6 +253,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
           task_id: taskName,
           piece: {
             name: element.data.name,
+            source_image: pieceData.source_image,
           },
           dependencies,
           piece_input_kwargs: pieceInputKwargs,

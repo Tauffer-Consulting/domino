@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from enum import Enum
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from pydantic_core.core_schema import FieldValidationInfo
 from datetime import datetime
 from constants.default_pieces.storage import AWSS3StoragePiece
@@ -82,8 +82,8 @@ class WorkflowBaseSettings(BaseModel):
         except ValueError:
             raise ValueError(f"Invalid end date: {v}")
     
-    class Config:
-        populate_by_name = True
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 storage_default_piece_model_map = {
@@ -107,11 +107,12 @@ class WorkflowSharedStorageDataModel(BaseModel):
     mode: Optional[WorkflowSharedStorageModeEnum] = None
     provider_options: Optional[Dict] = None
 
-    class Config:
-        use_enum_values = True
+    
+    model_config = ConfigDict(use_enum_values=True)
 
 class TaskPieceDataModel(BaseModel):
     name: str
+    source_image: str
 
 class SystemRequirementsModel(BaseModel):
     cpu: float
