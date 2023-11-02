@@ -38,15 +38,24 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const isLogged = useRef(!!store.token);
 
   const login = useCallback(
-    (token: string, userId: string, redirect = "") => {
+    (token: string, userId: string, tokenExpiresIn: number, redirect = "") => {
       isLogged.current = true;
       setStore((store) => ({
         ...store,
         token,
         userId,
+        tokenExpiresIn,
       }));
+      const currentDate = new Date();
+      const tokenExpirationDate = new Date(
+        currentDate.getTime() + tokenExpiresIn * 1000,
+      );
       localStorage.setItem("auth_token", token);
       localStorage.setItem("userId", userId);
+      localStorage.setItem(
+        "tokenExpiresInTimestamp",
+        tokenExpirationDate.getTime().toString(),
+      );
       navigate(redirect);
     },
     [navigate],
@@ -72,7 +81,11 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       void postAuthLogin({ email, password })
         .then((res) => {
           if (res.status === 200) {
-            login(res.data.access_token, res.data.user_id);
+            login(
+              res.data.access_token,
+              res.data.user_id,
+              res.data.token_expires_in,
+            );
           }
         })
         .finally(() => {

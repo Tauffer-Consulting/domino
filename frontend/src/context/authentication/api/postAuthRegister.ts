@@ -7,8 +7,9 @@ interface IPostAuthRegisterParams {
 }
 
 interface IPostAuthRegisterResponseInterface {
-  id: string;
+  user_id: string;
   email: string;
+  token_expires_in: number;
   groups: Array<{ group_id: number; group_name: string }>;
 }
 
@@ -27,7 +28,8 @@ export const postAuthRegister: (
 
 export const postAuthRegisterMockResponse: IPostAuthRegisterResponseInterface =
   {
-    id: "some_id",
+    user_id: "some_id",
     email: "some@email.com",
+    token_expires_in: 3600,
     groups: [{ group_id: 0, group_name: "some group" }],
   };

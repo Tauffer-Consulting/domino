@@ -44,10 +44,12 @@ class UserService(object):
             )
             user_default_workspace_id = user_default_workspace.id
 
+            token_info = self.auth_service.encode_token(user_id=user.id)
             response = RegisterResponse(
-                id=user.id,
+                user_id=user.id,
                 email=user.email,
-                access_token=self.auth_service.encode_token(user_id=user.id),
+                access_token=token_info.get('token'),
+                token_expires_in=token_info.get('expires_in'),
                 workspaces_ids=[user_default_workspace_id]
             )
 
@@ -71,8 +73,14 @@ class UserService(object):
         if not self.auth_service.verify_password(password.get_secret_value(), user.password):
             raise UnauthorizedException()
 
-        token = self.auth_service.encode_token(user_id=user.id)
-        return LoginResponse(access_token=token, user_id=user.id, workspaces_ids=[workspace.workspace.id for workspace in user.workspaces])
+        token_info = self.auth_service.encode_token(user_id=user.id)
+        return LoginResponse(
+            access_token=token_info.get('token'), 
+            user_id=user.id, 
+            email=user.email,
+            workspaces_ids=[workspace.workspace.id for workspace in user.workspaces],
+            token_expires_in=token_info.get('expires_in')
+        )
 
     async def delete_user(self, user_id: int, auth_context: AuthorizationContextData) -> None:
         self.logger.info(f"Deleting user with id: {user_id}")
