@@ -227,7 +227,13 @@ export const WorkflowsEditorComponent: React.FC = () => {
       toast.error("Workflow must have at least one piece to be exported.");
       return;
     }
-    exportToJson(payload, payload.workflowSettingsData?.config?.name);
+    const name = payload.workflowSettingsData?.config?.name;
+
+    const exportedJson: any = { ...payload };
+
+    delete exportedJson.workflowSettingsData;
+
+    exportToJson(exportedJson, name);
   }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -445,7 +451,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 startIcon={<SaveIcon />}
                 onClick={handleSaveWorkflow}
               >
-                Save
+                Create
               </Button>
             </Grid>
             <Grid item>
@@ -509,11 +515,9 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   "aria-labelledby": "import-button",
                 }}
               >
-                <MenuItem onClick={handleImportFromFile}>
-                  Import from file
-                </MenuItem>
+                <MenuItem onClick={handleImportFromFile}>from file</MenuItem>
                 <MenuItem onClick={handleImportFromExamples}>
-                  Import from examples
+                  from examples gallery
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -521,7 +525,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   }}
                   disabled
                 >
-                  Import from workflows
+                  from my workflows
                 </MenuItem>
               </Menu>
               <WorkflowExamplesGalleryModal
