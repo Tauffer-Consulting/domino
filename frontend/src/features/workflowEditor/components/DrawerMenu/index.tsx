@@ -69,6 +69,23 @@ export const PermanentDrawerRightWorkflows: FC<
                   />
                 </Box>
               </ListItem>
+              <Divider />
+              <DrawerHeader>
+                {openDrawer && (
+                  <Typography variant="h1" sx={{ display: "flex", flex: 1 }}>
+                    assembled pieces
+                  </Typography>
+                )}
+              </DrawerHeader>
+              <Divider />
+              <ListItem>
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <SidebarAddNode
+                    orientation={orientation}
+                    setOrientation={setOrientation}
+                  />
+                </Box>
+              </ListItem>
             </>
           )}
         </Drawer>

@@ -6,3 +6,4 @@ from database.models.user_workspace_associative import UserWorkspaceAssociative
 from database.models.piece_repository import PieceRepository
 from database.models.secret import Secret
 from database.models.workflow_piece_repository_associative import WorkflowPieceRepositoryAssociative
+from database.models.assembled_piece import AssembledPiece

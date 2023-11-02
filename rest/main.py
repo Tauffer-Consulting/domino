@@ -7,6 +7,7 @@ from routers.auth_router import router as auth_router
 from routers.user_router import router as user_router
 from routers.workflow_router import router as workflow_router
 from routers.piece_router import router as piece_router
+from routers.assembled_piece_router import router as assembled_piece_router
 from routers.workspace_router import router as workspace_router
 from routers.piece_repository_router import router as piece_repository_router
 from routers.secret_router import router as secret_router
@@ -41,6 +42,7 @@ def configure_app():
     app.include_router(user_router, tags=["User"])
     app.include_router(piece_repository_router, tags=['Piece Repository'])
     app.include_router(piece_router, tags=["Piece"])
+    app.include_router(assembled_piece_router, tags=["Assembled Piece"])
     app.include_router(workflow_router, tags=["Workflow"])
     app.include_router(workspace_router, tags=["Workspace"])
     app.include_router(secret_router, tags=["Secret"])
