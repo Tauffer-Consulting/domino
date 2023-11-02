@@ -15,5 +15,6 @@ class CreateAssembledPieceRequest(BaseModel):
     style: Optional[dict] = Field(None, description="Style of the assembled piece.")
 
 class ListAssembledPiecesFilters(BaseModel):
-    name__like: Optional[str]
-    workflow_id: Optional[int]
+    name__like: Optional[str] = Field(alias="name")
+    workflow_id__like: Optional[str] = Field(alias="workflow_id")
+    

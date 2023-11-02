@@ -18,6 +18,7 @@ import {
 import { type FC, type ReactNode, useState } from "react";
 
 import SidebarAddNode from "./sidebarAddNode";
+import SidebarAddAssembledNode from "./sidebarAddAssembledNode";
 
 interface PermanentDrawerRightWorkflowsProps {
   isOpen?: boolean;
@@ -80,7 +81,7 @@ export const PermanentDrawerRightWorkflows: FC<
               <Divider />
               <ListItem>
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <SidebarAddNode
+                  <SidebarAddAssembledNode
                     orientation={orientation}
                     setOrientation={setOrientation}
                   />

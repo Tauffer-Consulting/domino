@@ -1,3 +1,4 @@
+import asyncio
 from clients.airflow_client import AirflowRestClient
 from clients.local_files_client import LocalFilesClient
 from clients.github_rest_client import GithubRestClient
@@ -70,5 +71,33 @@ class AssembledPieceService(object):
             self.logger.info(f"Created assembled piece {body.name}")
             return response
         except (BaseException, ConflictException, ForbiddenException, ResourceNotFoundException) as custom_exception:
-                asyncio.run(self.delete_workflow(workflow_id=workflow.id, workspace_id=workspace_id))
+                asyncio.run(self.assembled_piece_repository.delete_by_id(assembled_piece.id))
                 raise custom_exception
+        
+    async def list_assembled_pieces(
+        self,
+        filters: ListAssembledPiecesFilters,
+    ) -> GetAssembledPiecesResponse:
+        """List assembled_pieces"""
+        self.logger.info(f"Listing assembled pieces")
+        try:
+            assembled_pieces = self.assembled_piece_repository.find_all()
+            response = GetAssembledPiecesResponse(
+                assembled_pieces=[
+                    GetAssembledPieceResponse(
+                        id=assembled_piece.id,
+                        name=assembled_piece.name,
+                        workflow_id=assembled_piece.workflow_id,
+                        description=assembled_piece.description,
+                        dependency=assembled_piece.dependency,
+                        input_schema=assembled_piece.input_schema,
+                        output_schema=assembled_piece.output_schema,
+                        secrets_schema=assembled_piece.secrets_schema,
+                        style=assembled_piece.style,
+                    ) for assembled_piece in assembled_pieces
+                ]
+            )
+            self.logger.info(f"Listed assembled pieces")
+            return response
+        except (BaseException, ConflictException, ForbiddenException, ResourceNotFoundException) as custom_exception:
+            raise custom_exception

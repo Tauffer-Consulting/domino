@@ -53,14 +53,14 @@ def create_assembled_piece(
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError}
     },
 )
-def list_assembled_pieces(
-    filters: ListAssembledPiecesFilters,
+async def list_assembled_pieces(
+    filters: ListAssembledPiecesFilters= Depends(),
 ) -> GetAssembledPiecesResponse:
     """List assembled_pieces"""
     try:
-        return assembled_piece_service.list_assembled_pieces(
+        return await assembled_piece_service.list_assembled_pieces(
             filters=filters,
         )
-    except (BaseException, ConflictException, ForbiddenException, ResourceNotFoundException, BadRequestException) as e:
+    except (BaseException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 

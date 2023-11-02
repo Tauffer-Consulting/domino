@@ -10,6 +10,11 @@ class AssembledPieceRepository(object):
         with session_scope() as session:
             session.query(AssembledPiece).delete()
             session.flush()
+
+    def delete_by_id(self, id: int):
+        with session_scope() as session:
+            session.query(AssembledPiece).filter(AssembledPiece.id == id).delete()
+            session.flush()
     
     def find_by_id(self, id: int):
         with session_scope() as session:
