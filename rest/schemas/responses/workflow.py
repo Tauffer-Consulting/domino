@@ -1,5 +1,5 @@
 from schemas.responses.base import PaginationSet
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime, timezone
 from typing import Dict, Optional, List, Union
 from enum import Enum
@@ -154,8 +154,7 @@ class GetWorkflowRunsResponseData(BaseModel):
         return state or WorkflowRunState.none
     
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GetWorkflowRunsResponse(BaseModel):
@@ -179,8 +178,8 @@ class GetWorkflowRunTasksResponseData(BaseModel):
     def set_state(cls, state):
         return state or WorkflowRunTaskState.none
 
-    class Config:
-        populate_by_name = True
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GetWorkflowRunTasksResponse(BaseModel):
