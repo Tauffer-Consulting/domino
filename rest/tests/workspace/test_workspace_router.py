@@ -23,7 +23,7 @@ class TestWorkspaceRouter:
         )
         response = create_workspace
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
         
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -43,7 +43,7 @@ class TestWorkspaceRouter:
         ]
         response = get_workspaces
         content = response.json()
-        mock_response_content = json.loads(mock_response[0].json())
+        mock_response_content = json.loads(mock_response[0].model_dump_json())
         
         assert response.status_code == 200
         assert content[0]["workspace_name"].startswith("Default")
@@ -63,7 +63,7 @@ class TestWorkspaceRouter:
         )
         response = get_workspace
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
         
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -97,7 +97,7 @@ class TestWorkspaceRouter:
         )
         response = reject_invite
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -121,7 +121,7 @@ class TestWorkspaceRouter:
         )
         response = accept_invite
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -162,7 +162,7 @@ class TestWorkspaceRouter:
         )
         response = list_workspace_users
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
@@ -189,7 +189,7 @@ class TestWorkspaceRouter:
         )
         response = patch_workspace
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
         for key in content.keys():
