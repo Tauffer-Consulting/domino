@@ -1,4 +1,4 @@
-import { type taskState } from "features/workflows/types";
+import { type taskState } from "features/myWorkflows/types";
 import { type CSSProperties } from "react";
 import { type Node, type NodeProps } from "reactflow";
 

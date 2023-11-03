@@ -1,7 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { Icon } from "@iconify/react";
 import { Paper, Typography } from "@mui/material";
-import { taskState } from "features/workflows/types";
+import { taskState } from "features/myWorkflows/types";
 import theme from "providers/theme.config";
 import React, { type CSSProperties, memo, useCallback, useMemo } from "react";
 import { Position, Handle } from "reactflow";

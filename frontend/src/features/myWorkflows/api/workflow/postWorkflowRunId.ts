@@ -1,7 +1,7 @@
 // TODO move to /runs
 import { AxiosError, type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
-import { type IPostWorkflowRunIdResponseInterface } from "features/workflows/types/workflow";
+import { type IPostWorkflowRunIdResponseInterface } from "features/myWorkflows/types/workflow";
 import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 

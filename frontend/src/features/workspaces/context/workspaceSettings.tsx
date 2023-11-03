@@ -14,7 +14,7 @@ import {
   useAuthenticatedDeleteRepository,
   useAuthenticatedGetPieceRepositories,
   useAuthenticatedGetPieceRepositoriesReleases,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import { type FC, useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import { createCustomContext } from "utils";

@@ -10,8 +10,8 @@ import {
   useAuthenticatedDeleteWorkflowId,
   useAuthenticatedGetWorkflows,
   useAuthenticatedPostWorkflowRunId,
-} from "features/workflows/api";
-import { type IWorkflow } from "features/workflows/types";
+} from "features/myWorkflows/api";
+import { type IWorkflow } from "features/myWorkflows/types";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useInterval } from "utils";

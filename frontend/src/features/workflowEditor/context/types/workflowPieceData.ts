@@ -1,4 +1,4 @@
-import { type IWorkflowElement } from "features/workflows/types";
+import { type IWorkflowElement } from "features/myWorkflows/types";
 import { type Edge } from "reactflow";
 
 import { type IContainerResourceFormData } from "./containerResources";

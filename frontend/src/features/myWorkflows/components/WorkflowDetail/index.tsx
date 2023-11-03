@@ -11,11 +11,11 @@ import {
   useAuthenticatedGetWorkflowId,
   useAuthenticatedGetWorkflowRunTasks,
   useAuthenticatedPostWorkflowRunId,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import {
   type IWorkflowRuns,
   type IWorkflowRunTasks,
-} from "features/workflows/types";
+} from "features/myWorkflows/types";
 import React, { useCallback, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { type NodeMouseHandler } from "reactflow";
