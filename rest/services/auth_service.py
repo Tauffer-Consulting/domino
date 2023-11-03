@@ -40,7 +40,9 @@ class AuthService():
         exp = datetime.utcnow() + timedelta(days=0, minutes=cls.expire)
         current_date = datetime.utcnow()
         expires_in = floor((exp - current_date).total_seconds())
-        
+        if expires_in >= 120:
+            expires_in = expires_in - 120
+
         payload = {
             'exp': datetime.utcnow() + timedelta(days=0, minutes=cls.expire),
             'iat': datetime.utcnow(),
