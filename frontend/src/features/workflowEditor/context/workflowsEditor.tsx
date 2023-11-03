@@ -9,9 +9,8 @@ import {
 } from "features/workflows/types";
 import React, { type FC, useCallback } from "react";
 import { type Edge } from "reactflow";
-import { createCustomContext, generateTaskName, getIdSlice } from "utils";
+import { createCustomContext, generateTaskName } from "utils";
 
-import { usesPieces, type IPiecesContext } from "./pieces";
 import {
   useReactWorkflowPersistence,
   type IReactWorkflowPersistenceContext,
@@ -33,26 +32,22 @@ import {
 } from "./workflowSettingsData";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type GenerateWorkflowsParams = {
+export type GenerateWorkflowsParams = {
+  workflowPieces: Record<string, Piece>;
   workflowPiecesData: ForagePiecesData;
   workflowSettingsData: IWorkflowSettings;
   workflowNodes: IWorkflowElement[];
   workflowEdges: Edge[];
 };
 
-export type DominoWorkflowForage = GenerateWorkflowsParams & {
-  workflowPieces: Record<string, Piece>;
-};
-
 interface IWorkflowsEditorContext
-  extends IPiecesContext,
-    IReactWorkflowPersistenceContext,
+  extends IReactWorkflowPersistenceContext,
     IWorkflowSettingsContext,
     IWorkflowPieceContext,
     IWorkflowPiecesDataContext {
-  fetchWorkflowForage: () => Promise<DominoWorkflowForage>;
+  fetchWorkflowForage: () => Promise<GenerateWorkflowsParams>;
   importWorkflowToForage: (
-    importedWorkflow: DominoWorkflowForage,
+    importedWorkflow: GenerateWorkflowsParams,
   ) => Promise<void>;
   generateWorkflowsEditorBodyParams: (
     p: GenerateWorkflowsParams,
@@ -71,17 +66,6 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 }) => {
   const { workspace } = useWorkspaces();
   const postWorkflow = useAuthenticatedPostWorkflow();
-
-  const {
-    repositories,
-    repositoriesError,
-    repositoriesLoading,
-    repositoryPieces,
-    fetchForagePieceById,
-    fetchRepoById,
-    search,
-    handleSearch,
-  } = usesPieces();
 
   const {
     setWorkflowEdges,
@@ -132,7 +116,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     const workflowSettingsData = await fetchWorkflowSettingsData();
     const workflowNodes = await fetchForageWorkflowNodes();
     const workflowEdges = await fetchForageWorkflowEdges();
-    const result: DominoWorkflowForage = {
+    const result: GenerateWorkflowsParams = {
       workflowPieces,
       workflowPiecesData,
       workflowSettingsData,
@@ -147,7 +131,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
   ]);
 
   const importWorkflowToForage = useCallback(
-    async (dominoWorkflow: DominoWorkflowForage) => {
+    async (dominoWorkflow: GenerateWorkflowsParams) => {
       await setForageWorkflowPieces(dominoWorkflow.workflowPieces);
       await setForageWorkflowPiecesData(dominoWorkflow.workflowPiecesData);
       await setWorkflowSettingsData(dominoWorkflow.workflowSettingsData);
@@ -316,15 +300,6 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
   ]);
 
   const value: IWorkflowsEditorContext = {
-    repositories,
-    repositoryPieces,
-    repositoriesError,
-    repositoriesLoading,
-    fetchRepoById,
-    fetchForagePieceById,
-    search,
-    handleSearch,
-
     importWorkflowToForage,
 
     setWorkflowEdges,

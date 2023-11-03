@@ -112,7 +112,6 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         })
         .catch((error) => {
           console.log("Removing user error:", error.response.data.detail);
-          toast.error(error.response.data.detail);
         });
     },
     [removeUserWorkspace, workspacesRefresh],
@@ -134,7 +133,6 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         })
         .catch((error) => {
           console.log("Inviting user error:", error.response.data.detail);
-          toast.error(error.response.data.detail);
         });
     },
     [inviteWorkspace, workspaceUsersRefresh()],
