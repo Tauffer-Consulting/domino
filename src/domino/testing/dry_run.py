@@ -96,4 +96,4 @@ def piece_dry_run(
         secrets_data=secrets_data,
         results_path=str(results_path)
     )
-    return json.loads(output.json())
+    return json.loads(output.model_dump_json())
