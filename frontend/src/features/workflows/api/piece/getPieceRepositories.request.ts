@@ -15,9 +15,12 @@ interface IGetPieceRepositoryFilters {
 }
 
 const getPiecesRepositoriesUrl = (
-  workspace: string,
   filters: IGetPieceRepositoryFilters,
+  workspace?: string,
 ) => {
+  if (!workspace) {
+    return null;
+  }
   const query = new URLSearchParams();
   query.set("workspace_id", workspace);
   for (const [key, value] of Object.entries(filters)) {
@@ -31,16 +34,17 @@ const getPiecesRepositoriesUrl = (
  * @returns Piece
  */
 const getPiecesRepositories: (
-  workspace: string,
   filters: IGetPieceRepositoryFilters,
-) => Promise<AxiosResponse<IGetPiecesRepositoriesResponseInterface>> = async (
-  workspace,
-  filters,
-) => {
+  workspace?: string,
+) => Promise<
+  AxiosResponse<IGetPiecesRepositoriesResponseInterface> | undefined
+> = async (filters, workspace) => {
   //
-  return await dominoApiClient.get(
-    getPiecesRepositoriesUrl(workspace, filters),
-  );
+  if (workspace) {
+    return await dominoApiClient.get(
+      getPiecesRepositoriesUrl(filters, workspace) as string,
+    );
+  }
 };
 
 /**
@@ -52,18 +56,13 @@ export const useAuthenticatedGetPieceRepositories = (
 ) => {
   const { workspace } = useWorkspaces();
 
-  if (!workspace)
-    throw new Error(
-      "Impossible to fetch pieces repositories without specifying a workspace",
-    );
-
   const fetcher = async (filters: IGetPieceRepositoryFilters) =>
-    await getPiecesRepositories(workspace.id, filters).then(
-      (data) => data.data,
+    await getPiecesRepositories(filters, workspace?.id).then(
+      (data) => data?.data,
     );
 
   return useSWR(
-    getPiecesRepositoriesUrl(workspace.id, filters),
+    getPiecesRepositoriesUrl(filters, workspace?.id),
     async () => await fetcher(filters),
     {
       revalidateOnFocus: false,

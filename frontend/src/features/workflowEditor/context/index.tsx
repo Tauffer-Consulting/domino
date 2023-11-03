@@ -1,4 +1,3 @@
-import PiecesProvider from "./pieces";
 import ReactWorkflowPersistenceProvider from "./reactWorkflowPersistence";
 import WorkflowPiecesProvider from "./workflowPieces";
 import WorkflowPiecesDataProvider from "./workflowPiecesData";
@@ -14,17 +13,15 @@ const WorkflowsEditorProviderWrapper: React.FC<{
 }> = ({ children }) => {
   return (
     <WorkflowSettingsDataProvider>
-      <PiecesProvider>
-        <ReactWorkflowPersistenceProvider>
-          <WorkflowPiecesProvider>
-            <WorkflowPiecesDataProvider>
-              <WorkflowsEditorProviderItem>
-                {children}
-              </WorkflowsEditorProviderItem>
-            </WorkflowPiecesDataProvider>
-          </WorkflowPiecesProvider>
-        </ReactWorkflowPersistenceProvider>
-      </PiecesProvider>
+      <ReactWorkflowPersistenceProvider>
+        <WorkflowPiecesProvider>
+          <WorkflowPiecesDataProvider>
+            <WorkflowsEditorProviderItem>
+              {children}
+            </WorkflowsEditorProviderItem>
+          </WorkflowPiecesDataProvider>
+        </WorkflowPiecesProvider>
+      </ReactWorkflowPersistenceProvider>
     </WorkflowSettingsDataProvider>
   );
 };
