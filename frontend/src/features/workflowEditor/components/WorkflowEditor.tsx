@@ -24,7 +24,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
 
 import { type IWorkflowPieceData, storageAccessModes } from "../context/types";
-import { type DominoWorkflowForage } from "../context/workflowsEditor";
+import { type GenerateWorkflowsParams } from "../context/workflowsEditor";
 import { containerResourcesSchema } from "../schemas/containerResourcesSchemas";
 import { extractDefaultInputValues, extractDefaultValues } from "../utils";
 import {
@@ -233,7 +233,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImportedJson = useCallback(
-    async (json: DominoWorkflowForage) => {
+    async (json: GenerateWorkflowsParams) => {
       try {
         if (json) {
           const differences = await validateJsonImported(json);

@@ -1,22 +1,22 @@
 import localForage from "services/config/localForage.config";
 import * as yup from "yup";
 
-import { type DominoWorkflowForage } from "../context/workflowsEditor";
+import { type GenerateWorkflowsParams } from "../context/workflowsEditor";
 
 export const importJsonWorkflow = (
   e: React.ChangeEvent<HTMLInputElement>,
-): Promise<DominoWorkflowForage> | null => {
+): Promise<GenerateWorkflowsParams> | null => {
   const file = e.target.files?.[0];
 
   if (file) {
-    return new Promise<DominoWorkflowForage>((resolve, reject) => {
+    return new Promise<GenerateWorkflowsParams>((resolve, reject) => {
       const reader = new FileReader();
 
       reader.onload = (e) => {
         try {
           const jsonData = JSON.parse(
             e.target?.result as string,
-          ) as DominoWorkflowForage;
+          ) as GenerateWorkflowsParams;
 
           resolve(jsonData); // Resolve the promise with the JSON data
         } catch (error) {
