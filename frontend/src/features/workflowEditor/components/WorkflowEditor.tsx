@@ -4,6 +4,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import SaveIcon from "@mui/icons-material/Save";
 import { Button, Grid, Paper, styled } from "@mui/material";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import { AxiosError } from "axios";
 import Loading from "components/Loading";
 import { Modal, type ModalRef } from "components/Modal";
@@ -12,12 +14,11 @@ import {
   WorkflowPanel,
   type DefaultNode,
 } from "components/WorkflowPanel";
-import { useWorkspaces } from "context/workspaces";
+import { useWorkspaces, usesPieces } from "context/workspaces";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type DragEvent, useCallback, useRef, useState } from "react";
+import React, { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { type Edge, type Node, type XYPosition } from "reactflow";
-import localForage from "services/config/localForage.config";
 import { yupResolver, useInterval, exportToJson } from "utils";
 import { v4 as uuidv4 } from "uuid";
 import * as yup from "yup";
@@ -26,6 +27,10 @@ import { type IWorkflowPieceData, storageAccessModes } from "../context/types";
 import { type DominoWorkflowForage } from "../context/workflowsEditor";
 import { containerResourcesSchema } from "../schemas/containerResourcesSchemas";
 import { extractDefaultInputValues, extractDefaultValues } from "../utils";
+import {
+  importJsonWorkflow,
+  validateJsonImported,
+} from "../utils/importWorkflow";
 
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
 import SidebarPieceForm from "./SidebarForm";
@@ -37,6 +42,7 @@ import {
   WorkflowSettingsFormSchema,
   type SidebarSettingsFormRef,
 } from "./SidebarSettingsForm";
+import { WorkflowExamplesGalleryModal } from "./WorkflowExamplesGalleryModal";
 
 /**
  * Create workflow tab
@@ -74,7 +80,11 @@ export const WorkflowsEditorComponent: React.FC = () => {
     "horizontal",
   );
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const importMenuOpen = Boolean(anchorEl);
+
   const incompatiblePiecesModalRef = useRef<ModalRef>(null);
+  const workflowsGalleryModalRef = useRef<ModalRef>(null);
   const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
 
   const { workspace } = useWorkspaces();
@@ -95,7 +105,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
     generateWorkflowsEditorBodyParams,
     fetchWorkflowForage,
     handleCreateWorkflow,
-    fetchForagePieceById,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
     setForageWorkflowPieces,
@@ -109,6 +118,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
     setWorkflowEdges,
     setWorkflowNodes,
   } = useWorkflowsEditor();
+
+  const { fetchForagePieceById } = usesPieces();
 
   const validateWorkflowSettings = useCallback(async (payload: any) => {
     const resolver = yupResolver(WorkflowSettingsFormSchema);
@@ -219,88 +230,39 @@ export const WorkflowsEditorComponent: React.FC = () => {
     exportToJson(payload, payload.workflowSettingsData?.config?.name);
   }, []);
 
-  const validateJsonImported = useCallback(
-    async (json: DominoWorkflowForage) => {
-      const getRepositories = function (
-        workflowPieces: DominoWorkflowForage["workflowPieces"],
-      ) {
-        return [
-          ...new Set(
-            Object.values(workflowPieces)
-              .reduce<Array<string | null>>((acc, next) => {
-                acc.push(next.source_image);
-                return acc;
-              }, [])
-              .filter((su) => !!su) as string[],
-          ),
-        ];
-      };
-
-      const currentRepositories = [
-        ...new Set(
-          Object.values((await localForage.getItem("pieces")) as any)?.map(
-            (p: any) => p?.source_image,
-          ),
-        ),
-      ];
-      const incomeRepositories = getRepositories(json.workflowPieces);
-
-      const differences = incomeRepositories.filter(
-        (x) => !currentRepositories.includes(x),
-      );
-
-      return differences.length ? differences : null;
-    },
-    [fetchWorkflowForage],
-  );
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImport = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
+  const handleImportedJson = useCallback(
+    async (json: DominoWorkflowForage) => {
+      try {
+        if (json) {
+          const differences = await validateJsonImported(json);
 
-      if (file) {
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-          try {
-            const jsonData = JSON.parse(
-              e.target?.result as string,
-            ) as DominoWorkflowForage;
-
-            validateJsonImported(jsonData)
-              .then((diferences) => {
-                if (diferences) {
-                  toast.error(
-                    "Some repositories are missing or incompatible version",
-                  );
-                  setIncompatiblesPieces(diferences);
-                  incompatiblePiecesModalRef.current?.open();
-                  return;
-                }
-
-                workflowPanelRef?.current?.setNodes(jsonData.workflowNodes);
-                workflowPanelRef?.current?.setEdges(jsonData.workflowEdges);
-                void importWorkflowToForage(jsonData);
-              })
-              .catch((e) => {
-                console.log(e);
-              });
-
-            if (fileInputRef.current) {
-              fileInputRef.current.value = "";
-            }
-          } catch (error) {
-            console.error("Error parsing JSON file:", error);
+          if (differences) {
+            toast.error(
+              "Some repositories are missing or incompatible version",
+            );
+            setIncompatiblesPieces(differences);
+            incompatiblePiecesModalRef.current?.open();
+          } else {
+            workflowPanelRef?.current?.setNodes(json.workflowNodes);
+            workflowPanelRef?.current?.setEdges(json.workflowEdges);
+            void importWorkflowToForage(json);
           }
-        };
-
-        reader.readAsText(file);
+        }
+      } catch (e: any) {
+        if (e instanceof yup.ValidationError) {
+          toast.error("This JSON file is incompatible or corrupted");
+        } else {
+          console.log(e);
+        }
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
     },
     [
-      validateJsonImported,
+      importJsonWorkflow,
       workflowPanelRef,
       importWorkflowToForage,
       setIncompatiblesPieces,
@@ -427,6 +389,25 @@ export const WorkflowsEditorComponent: React.FC = () => {
     setSidebarSettingsDrawer(open);
   };
 
+  const handleClickImportMenu = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorEl(event.currentTarget);
+    },
+    [],
+  );
+
+  const handleImportFromFile = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+    setAnchorEl(null);
+  }, [fileInputRef]);
+
+  const handleImportFromExamples = useCallback(() => {
+    setAnchorEl(null);
+    workflowsGalleryModalRef.current?.open();
+  }, [workflowsGalleryModalRef]);
+
   return (
     <>
       {loading && <Loading />}
@@ -479,16 +460,25 @@ export const WorkflowsEditorComponent: React.FC = () => {
             </Grid>
             <Grid item>
               <Button
-                component="label"
                 variant="contained"
                 startIcon={<DownloadIcon />}
+                id="import-button"
+                aria-controls={importMenuOpen ? "import-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={importMenuOpen ? "true" : undefined}
+                onClick={handleClickImportMenu}
               >
-                Import
                 <VisuallyHiddenInput
                   type="file"
-                  onChange={handleImport}
+                  onChange={async (e) => {
+                    const json = await importJsonWorkflow(e);
+                    if (json) {
+                      void handleImportedJson(json);
+                    }
+                  }}
                   ref={fileInputRef}
                 />
+                Import
                 <Modal
                   title="Missing or incompatibles Pieces Repositories"
                   content={
@@ -508,8 +498,39 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   ref={incompatiblePiecesModalRef}
                 />
               </Button>
+              <Menu
+                id="import-menu"
+                anchorEl={anchorEl}
+                open={importMenuOpen}
+                onClose={() => {
+                  setAnchorEl(null);
+                }}
+                MenuListProps={{
+                  "aria-labelledby": "import-button",
+                }}
+              >
+                <MenuItem onClick={handleImportFromFile}>
+                  Import from file
+                </MenuItem>
+                <MenuItem onClick={handleImportFromExamples}>
+                  Import from examples
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                  }}
+                  disabled
+                >
+                  Import from workflows
+                </MenuItem>
+              </Menu>
+              <WorkflowExamplesGalleryModal
+                ref={workflowsGalleryModalRef}
+                confirmFn={(json) => {
+                  void handleImportedJson(json);
+                }}
+              />
             </Grid>
-
             <Grid item>
               <Button
                 color="primary"

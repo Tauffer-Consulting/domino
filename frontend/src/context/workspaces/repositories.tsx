@@ -40,7 +40,7 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     data,
     error: repositoriesError,
     isValidating: repositoriesLoading,
-    // mutate: repositoriesRefresh
+    // mutate: repositoriesRefresh,
   } = useAuthenticatedGetPieceRepositories({});
 
   const repositories: PieceRepository[] = useMemo(
@@ -59,21 +59,25 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     const updateRepositoriesPieces = async () => {
       const repositoryPiecesAux: PiecesRepository = {};
       const foragePieces: PieceForageSchema = {};
-      for (const repo of repositories) {
-        fetchRepoById({ id: repo.id })
-          .then((pieces: any) => {
-            repositoryPiecesAux[repo.id] = [];
-            for (const op of pieces) {
-              repositoryPiecesAux[repo.id].push(op);
-              foragePieces[op.id] = op;
-            }
-            setRepositoryPieces(repositoryPiecesAux);
-            void localForage.setItem("pieces", foragePieces);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-        // Set piece item to storage -> {piece_id: Piece}
+      if (!repositories?.length) {
+        void localForage.setItem("pieces", foragePieces);
+      } else {
+        for (const repo of repositories) {
+          fetchRepoById({ id: repo.id })
+            .then((pieces: any) => {
+              repositoryPiecesAux[repo.id] = [];
+              for (const op of pieces) {
+                repositoryPiecesAux[repo.id].push(op);
+                foragePieces[op.id] = op;
+              }
+              setRepositoryPieces(repositoryPiecesAux);
+              void localForage.setItem("pieces", foragePieces);
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+          // Set piece item to storage -> {piece_id: Piece}
+        }
       }
     };
     void updateRepositoriesPieces();
