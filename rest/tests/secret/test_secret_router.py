@@ -49,7 +49,7 @@ class TestSecretRouter:
         ]
         response = get_secrets_by_piece_name
         content = response.json()
-        mock_response_content = json.loads(mock_response[0].json())
+        mock_response_content = json.loads(mock_response[0].model_dump_json())
 
         assert response.status_code == 200
         assert content[0] == mock_response_content

@@ -46,7 +46,7 @@ class PieceMetadata(BaseModel):
     name: str = Field(
         description="Piece name", 
         example="ExamplePiece", 
-        # regex=    # TODO - regex for *Piece  
+        # pattern=    # TODO - regex for *Piece  
     )
     description: str = Field(
         description="Description of this Piece", 

@@ -4,7 +4,7 @@ from typing import Optional, List
 class WorkspaceAuthorizerData(BaseModel):
     id: int
     name: str
-    github_access_token: Optional[str]
+    github_access_token: Optional[str] = None
     user_permission: str
 
 

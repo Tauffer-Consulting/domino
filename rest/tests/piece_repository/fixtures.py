@@ -34,7 +34,7 @@ def add_piece_repository(client: ApiTestClient, authorization_token: Dict, piece
         version=piece_repository.version,
         url=piece_repository.url
     )
-    body = json.loads(add_piece_repository_request.json())
+    body = json.loads(add_piece_repository_request.model_dump_json())
     response = client.post(
         "/pieces-repositories",
         headers={"Authorization": authorization_token["header"]},
@@ -79,7 +79,7 @@ def patch_piece_repository(client: ApiTestClient, authorization_token: Dict, pie
     patch_piece_repository_request = PatchRepositoryRequest(
         version=piece_repository.version
     )
-    body = json.loads(patch_piece_repository_request.json())
+    body = json.loads(patch_piece_repository_request.model_dump_json())
     response = client.patch(
         f"/pieces-repositories/{piece_repository.id}",
         headers={"Authorization": authorization_token["header"]},

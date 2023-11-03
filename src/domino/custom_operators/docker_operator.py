@@ -40,7 +40,7 @@ class DominoDockerOperator(DockerOperator):
                 "dag_id": dag_id,
             }),
             "DOMINO_RUN_PIECE_KWARGS": str(piece_input_kwargs),
-            "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.json() if self.workflow_shared_storage else "",
+            "DOMINO_WORKFLOW_SHARED_STORAGE": self.workflow_shared_storage.model_dump_json() if self.workflow_shared_storage else "",
             "AIRFLOW_CONTEXT_EXECUTION_DATETIME": "{{ dag_run.logical_date | ts_nodash }}",
             "AIRFLOW_CONTEXT_DAG_RUN_ID": "{{ run_id }}",
         }

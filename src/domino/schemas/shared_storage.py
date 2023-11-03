@@ -32,12 +32,12 @@ class WorkflowSharedStorage(BaseModel):
 
 
 class LocalSharedStorage(WorkflowSharedStorage):
-    source = StorageSource.local
+    source: StorageSource = StorageSource.local
     storage_piece_name: str = "LocalStoragePiece" # TODO to be implemented
 
 
 class AwsS3SharedStorage(WorkflowSharedStorage):
-    source = StorageSource.aws_s3
+    source: StorageSource = StorageSource.aws_s3
     bucket: str = Field(
         description="The name of the bucket to be used as the root of the storage source."
     )

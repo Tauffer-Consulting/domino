@@ -2,6 +2,7 @@ from typing import List
 from sqlalchemy import func
 from database.interface import session_scope
 from database.models.piece import Piece
+from database.models.piece_repository import PieceRepository as PieceRepositoryDatabaseModel
 
 class PieceRepository(object):
     def __init__(self):
@@ -16,6 +17,47 @@ class PieceRepository(object):
         with session_scope() as session:
             query = session.query(Piece).filter(Piece.id.in_(ids))
             result = query.all()
+            session.flush()
+            if result:
+                session.expunge_all()
+        return result
+    
+    def find_repositories_by_piece_name_and_workspace_id(self, pieces_names: list, sources_images: list, workspace_id):
+        # Find pieces repositories by pieces names and workspace_id
+        with session_scope() as session:
+            query = session.query(
+                PieceRepositoryDatabaseModel.id.label("piece_repository_id"), 
+                Piece.id.label('piece_id'),
+                Piece.name.label("piece_name")
+            )\
+                .filter(PieceRepositoryDatabaseModel.workspace_id == workspace_id)\
+                    .join(Piece, Piece.repository_id == PieceRepositoryDatabaseModel.id)\
+                        .filter(Piece.name.in_(pieces_names))\
+                            .filter(Piece.source_image.in_(sources_images))
+
+            result = query.all()
+            session.flush()
+            if result:
+                session.expunge_all()
+        return result
+
+
+    def find_repository_by_piece_name_and_workspace_id(self, piece_name: str, workspace_id: int):
+        # Find pieces repositories by pieces names and workspace_id
+        with session_scope() as session:
+            query = session.query(
+                PieceRepositoryDatabaseModel.id.label("piece_repository_id"),
+                PieceRepositoryDatabaseModel.url.label("piece_repository_url"),
+                PieceRepositoryDatabaseModel.version.label("piece_repository_version"),
+                Piece.source_image.label("source_image"),
+                Piece.id.label('piece_id'),
+                Piece.name.label("piece_name"),
+            )\
+                .filter(PieceRepositoryDatabaseModel.workspace_id == workspace_id)\
+                    .join(Piece, Piece.repository_id == PieceRepositoryDatabaseModel.id)\
+                        .filter(Piece.name == piece_name)
+
+            result = query.first()
             session.flush()
             if result:
                 session.expunge_all()

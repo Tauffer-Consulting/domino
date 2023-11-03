@@ -1,7 +1,7 @@
-from .base_model import BaseRequestModel
 from typing import Dict, List, Optional
 from enum import Enum
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
+from pydantic_core.core_schema import FieldValidationInfo
 from datetime import datetime
 from constants.default_pieces.storage import AWSS3StoragePiece
 
@@ -36,18 +36,18 @@ class WorkflowBaseSettings(BaseModel):
     name: str = Field(
         description="Workflow name", 
         example="workflow_name", 
-        regex=r"^[\w]*$",
+        pattern=r"^[\w]*$",
     )
     start_date: str = Field(alias="startDateTime")
     select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
-    end_date: Optional[str] = Field(alias='endDateTime')
+    end_date: Optional[str] = Field(alias='endDateTime', default=None)
     schedule: ScheduleIntervalType = Field(alias="scheduleInterval")
     catchup: Optional[bool] = False # TODO add catchup to UI?
     generate_report: Optional[bool] = Field(alias="generateReport", default=False) # TODO add generate report to UI?
-    description: Optional[str] # TODO add description to UI?
+    description: Optional[str] = None # TODO add description to UI?
     
 
-    @validator('start_date')
+    @field_validator('start_date')
     def start_date_validator(cls, v):
         try:
             if '.' in v:
@@ -63,16 +63,16 @@ class WorkflowBaseSettings(BaseModel):
         except ValueError:
             raise ValueError(f"Invalid start date: {v}")
 
-    @validator('end_date')
-    def end_date_validator(cls, v, values):
+    @field_validator('end_date')
+    def end_date_validator(cls, v, info: FieldValidationInfo):
         try:
-            if 'start_date' not in values:
+            if 'start_date' not in info.data:
                 raise ValueError("Start date must be provided")
-            converted_start_date =  datetime.fromisoformat(values['start_date'])
-            if 'select_end_date' not in values:
+            converted_start_date =  datetime.fromisoformat(info.data['start_date'])
+            if 'select_end_date' not in info.data:
                 raise ValueError("Select end date must be provided")
             
-            if values['select_end_date'] == SelectEndDate.never.value:
+            if info.data['select_end_date'] == SelectEndDate.never.value:
                 return None
 
             converted_end_date = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ").date()
@@ -82,8 +82,8 @@ class WorkflowBaseSettings(BaseModel):
         except ValueError:
             raise ValueError(f"Invalid end date: {v}")
     
-    class Config:
-        allow_population_by_field_name = True
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 storage_default_piece_model_map = {
@@ -103,16 +103,16 @@ class WorkflowSharedStorageModeEnum(str, Enum):
     
 
 class WorkflowSharedStorageDataModel(BaseModel):
-    source: Optional[WorkflowSharedStorageSourceEnum]
-    mode: Optional[WorkflowSharedStorageModeEnum]
-    provider_options: Optional[Dict]
+    source: Optional[WorkflowSharedStorageSourceEnum] = None
+    mode: Optional[WorkflowSharedStorageModeEnum] = None
+    provider_options: Optional[Dict] = None
 
-    class Config:
-        use_enum_values = True
+    
+    model_config = ConfigDict(use_enum_values=True)
 
 class TaskPieceDataModel(BaseModel):
-    id: int
     name: str
+    source_image: str
 
 class SystemRequirementsModel(BaseModel):
     cpu: float
@@ -130,7 +130,7 @@ class TasksDataModel(BaseModel):
     task_id: str
     piece: TaskPieceDataModel
     piece_input_kwargs: Dict
-    dependencies: Optional[List[str]]
+    dependencies: Optional[List[str]] = None
 
 """
 Request data models
@@ -143,7 +143,7 @@ class CreateWorkflowRequest(BaseModel):
     ]
     ui_schema: UiSchema
 
-    @validator('tasks')
+    @field_validator('tasks')
     def tasks_validator(cls, v):
         if not v:
             raise ValueError("Tasks must be provided")
@@ -152,12 +152,12 @@ class CreateWorkflowRequest(BaseModel):
 
 class ListWorkflowsFilters(BaseModel):
     # TODO add filters
-    created_at: Optional[str]
-    name__like: Optional[str] = Field(alias="name")
-    last_changed_at: Optional[str]
-    start_date: Optional[str]
-    start_date__gt: Optional[str]
-    end_date: Optional[str]
-    end_date__gt: Optional[str]
-    schedule: Optional[ScheduleIntervalType]
+    created_at: Optional[str] = None
+    name__like: Optional[str] = Field(alias="name", default=None)
+    last_changed_at: Optional[str] = None
+    start_date: Optional[str] = None
+    start_date__gt: Optional[str] = None
+    end_date: Optional[str] = None
+    end_date__gt: Optional[str] = None
+    schedule: Optional[ScheduleIntervalType] = None
 

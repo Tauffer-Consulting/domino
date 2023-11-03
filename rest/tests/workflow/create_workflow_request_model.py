@@ -11,8 +11,8 @@ workflow_request_model = {
         "SimpleLogP_0298c1669d404e08b631ebe1490e1c45": {
             "task_id": "SimpleLogP_0298c1669d404e08b631ebe1490e1c45",
             "piece": {
-                "id": 988,
-                "name": "SimpleLogPiece"
+                "name": "SimpleLogPiece",
+                "source_image": "ghcr.io/tauffer-consulting/default_domino_pieces_tests:0.0.2-group0"
             },
             "workflow_shared_storage": {
                 "source": "None",

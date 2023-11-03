@@ -180,7 +180,7 @@ export const RepositoriesCard: FC = () => {
           handleRefreshRepositories();
         })
         .catch((error) => {
-          toast.error(error.response.data.detail);
+          console.log(error);
         });
     },
     [handleDeleteRepository, handleRefreshRepositories],

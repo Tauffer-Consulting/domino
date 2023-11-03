@@ -3,7 +3,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
+  type DialogProps,
   DialogTitle,
   Grid,
 } from "@mui/material";
@@ -12,7 +12,8 @@ import React, { useCallback, useImperativeHandle, useState } from "react";
 interface Props {
   title: string;
   content?: string | React.ReactNode;
-
+  maxWidth?: DialogProps["maxWidth"];
+  fullWidth?: boolean;
   confirmFn?: () => void;
   cancelFn?: () => void;
 }
@@ -23,7 +24,7 @@ export interface ModalRef {
 }
 
 export const Modal = React.forwardRef<ModalRef, Props>(
-  ({ cancelFn, confirmFn, title, content }, ref) => {
+  ({ cancelFn, confirmFn, title, content, maxWidth, fullWidth }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const open = () => {
@@ -36,7 +37,7 @@ export const Modal = React.forwardRef<ModalRef, Props>(
       }
 
       setIsOpen(false);
-    }, []);
+    }, [cancelFn]);
 
     const handleConfirm = useCallback(() => {
       if (confirmFn) {
@@ -44,7 +45,7 @@ export const Modal = React.forwardRef<ModalRef, Props>(
       }
 
       setIsOpen(false);
-    }, []);
+    }, [confirmFn]);
 
     useImperativeHandle(ref, () => ({
       open,
@@ -52,11 +53,14 @@ export const Modal = React.forwardRef<ModalRef, Props>(
     }));
 
     return (
-      <Dialog open={isOpen} onClose={handleClose}>
+      <Dialog
+        open={isOpen}
+        onClose={handleClose}
+        maxWidth={maxWidth}
+        fullWidth={fullWidth}
+      >
         <DialogTitle>{title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{content}</DialogContentText>
-        </DialogContent>
+        <DialogContent>{content}</DialogContent>
         <DialogActions>
           <Grid container justifyContent="center" spacing={4}>
             {cancelFn && (

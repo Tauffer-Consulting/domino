@@ -11,12 +11,19 @@ export interface ArrayOption {
   items: Option[];
 }
 
+export type ComplexArrayOption = Record<string, ArrayOption>;
+
 export type UpstreamOptions = Record<string, Option[] | ArrayOption>;
 
 const getInputType = (schema: Record<string, any>) => {
   let type = schema.format ? schema.format : schema.type;
-  if ("allOf" in schema || "oneOf" in schema || "anyOf" in schema) {
+  if ("allOf" in schema || "oneOf" in schema) {
     type = "enum";
+  } else if ("anyOf" in schema) {
+    type = [];
+    for (const item of schema.anyOf) {
+      type.push(item.type);
+    }
   }
   return type === "number" ? "float" : (type as string);
 };
@@ -36,7 +43,11 @@ const getOptions = (
       for (const property in upSchema) {
         const upType = getInputType(upSchema[property]);
 
-        if (upType === type || (upType === "string" && type === "object")) {
+        if (
+          upType === type ||
+          (upType === "string" && type === "object") ||
+          (Array.isArray(type) && type.includes(upType))
+        ) {
           const value = `${upPiece?.name} (${getUuidSlice(upPiece.id)}) - ${
             upSchema[property].title
           }`;
@@ -88,16 +99,24 @@ export const getUpstreamOptions = (
         itemsSchema = schema.definitions?.[subItemSchemaName];
       }
 
-      const itemsType = getInputType(itemsSchema);
-
       const array = getOptions(upstreamPieces, currentType);
-      const items = getOptions(upstreamPieces, itemsType);
-
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      upstreamOptions[key] = { array, items } as ArrayOption;
+      if (itemsSchema.type === "object") {
+        const __data: any = {};
+        Object.keys(itemsSchema.properties).forEach((subKey) => {
+          const subSchema = itemsSchema.properties[subKey];
+          const subType = getInputType(subSchema);
+          const items = getOptions(upstreamPieces, subType);
+          __data[subKey] = { array, items };
+        });
+        upstreamOptions[key] = __data;
+      } else {
+        const itemsType = getInputType(itemsSchema);
+        const items = getOptions(upstreamPieces, itemsType);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        upstreamOptions[key] = { array, items } as ArrayOption;
+      }
     } else {
       const options = getOptions(upstreamPieces, currentType);
-
       upstreamOptions[key] = options;
     }
   });
