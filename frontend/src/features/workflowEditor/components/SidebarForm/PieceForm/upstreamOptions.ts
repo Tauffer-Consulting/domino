@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { generateTaskName, getUuidSlice } from "utils";
 
 export interface Option {
@@ -22,10 +23,25 @@ const getInputType = (schema: Record<string, any>) => {
   } else if ("anyOf" in schema) {
     type = [];
     for (const item of schema.anyOf) {
-      type.push(item.type);
+      let _type = item.type;
+      _type = _type === "number" ? "float" : (_type as string);
+      type.push(_type);
     }
   }
   return type === "number" ? "float" : (type as string);
+};
+
+const validateUpstreamType = (upType: string, type: string) => {
+  if (upType === type) {
+    return true;
+  }
+  if (Array.isArray(upType) && !Array.isArray(type)) {
+    return upType.includes(type);
+  }
+  if (Array.isArray(upType) && Array.isArray(type)) {
+    return upType.some((element) => type.includes(element));
+  }
+  return false;
 };
 
 const getOptions = (
@@ -43,11 +59,7 @@ const getOptions = (
       for (const property in upSchema) {
         const upType = getInputType(upSchema[property]);
 
-        if (
-          upType === type ||
-          (upType === "string" && type === "object") ||
-          (Array.isArray(type) && type.includes(upType))
-        ) {
+        if (validateUpstreamType(upType, type)) {
           const value = `${upPiece?.name} (${getUuidSlice(upPiece.id)}) - ${
             upSchema[property].title
           }`;
