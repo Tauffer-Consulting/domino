@@ -173,7 +173,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
           minWidth: "300px",
         },
       }}
-      BackdropProps={{ style: { backgroundColor: "transparent" } }}
+      slotProps={{ backdrop: { style: { backgroundColor: "transparent" } } }}
     >
       <div
         style={{
