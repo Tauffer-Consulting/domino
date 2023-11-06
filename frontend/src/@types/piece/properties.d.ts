@@ -1,5 +1,5 @@
 interface Reference {
-  $ref: `#/definitions/${string}`;
+  $ref: `#/$defs/${string}`;
 }
 type FromUpstream = "always" | "never" | "allowed";
 
