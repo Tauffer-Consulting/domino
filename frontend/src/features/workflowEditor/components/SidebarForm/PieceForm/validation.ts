@@ -189,7 +189,7 @@ export function createInputsSchemaValidation(schema: any) {
         let subItemSchema: any = subSchema?.items;
         if (subSchema?.items?.$ref) {
           const subItemSchemaName = subSchema.items.$ref.split("/").pop();
-          subItemSchema = schema.definitions?.[subItemSchemaName];
+          subItemSchema = schema.$defs?.[subItemSchemaName];
         }
         const required = true; // for arrays, we always require the value
         inputSchema = yup.object({
