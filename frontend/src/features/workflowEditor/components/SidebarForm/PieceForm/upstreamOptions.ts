@@ -96,7 +96,7 @@ export const getUpstreamOptions = (
       let itemsSchema = currentSchema?.items;
       if (currentSchema?.items?.$ref) {
         const subItemSchemaName = currentSchema.items.$ref.split("/").pop();
-        itemsSchema = schema.definitions?.[subItemSchemaName];
+        itemsSchema = schema.$defs?.[subItemSchemaName];
       }
 
       const array = getOptions(upstreamPieces, currentType);
