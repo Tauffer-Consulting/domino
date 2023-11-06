@@ -78,7 +78,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
           return (
             "items" in inputSchema &&
             "$ref" in inputSchema.items &&
-            inputSchema.items.$ref === "#/definitions/OutputModifierModel"
+            inputSchema.items.$ref === "#/$defs/OutputModifierModel"
           );
         },
       );
@@ -173,7 +173,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
           minWidth: "300px",
         },
       }}
-      BackdropProps={{ style: { backgroundColor: "transparent" } }}
+      slotProps={{ backdrop: { style: { backgroundColor: "transparent" } } }}
     >
       <div
         style={{
