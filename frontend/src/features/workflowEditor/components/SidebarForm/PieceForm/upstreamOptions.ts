@@ -46,7 +46,6 @@ const validateUpstreamType = (upType: string, type: string) => {
   if (Array.isArray(type) && !Array.isArray(upType)) {
     return type.includes(upType);
   }
-  console.log("returning false");
   return false;
 };
 

@@ -44,13 +44,13 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
 
   let anyOfType = "";
   if ("anyOf" in schema && schema.anyOf.length === 2) {
+    // todo check if is only null + 1 item
     for (const itemSchema of schema.anyOf) {
       if (itemSchema.type !== "null") {
         anyOfType = itemSchema.format ? itemSchema.format : itemSchema.type;
       }
     }
   }
-
   if (checkedFromUpstream) {
     let options: Option[] = [];
     if ("type" in schema && schema.type === "array") {
@@ -110,7 +110,10 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
         label={schema.title}
       />
     );
-  } else if ("type" in schema && schema.type === "array") {
+  } else if (
+    ("type" in schema && schema.type === "array") ||
+    anyOfType === "array"
+  ) {
     inputElement = (
       <ArrayInput
         formId={formId}
