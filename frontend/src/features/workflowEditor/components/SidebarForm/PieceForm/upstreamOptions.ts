@@ -25,7 +25,9 @@ const getInputType = (schema: Record<string, any>) => {
     for (const item of schema.anyOf) {
       let _type = item.format ? item.format : item.type;
       _type = _type === "number" ? "float" : (_type as string);
-      type.push(_type);
+      if (_type !== "null") {
+        type.push(_type);
+      }
     }
   }
   return type === "number" ? "float" : (type as string);
@@ -41,6 +43,10 @@ const validateUpstreamType = (upType: string, type: string) => {
   if (Array.isArray(upType) && Array.isArray(type)) {
     return upType.some((element) => type.includes(element));
   }
+  if (Array.isArray(type) && !Array.isArray(upType)) {
+    return type.includes(upType);
+  }
+  console.log("returning false");
   return false;
 };
 
