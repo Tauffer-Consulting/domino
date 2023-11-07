@@ -142,6 +142,7 @@ class CreateWorkflowRequest(BaseModel):
         TasksDataModel
     ]
     ui_schema: UiSchema
+    forageSchema: dict
 
     @field_validator('tasks')
     def tasks_validator(cls, v):

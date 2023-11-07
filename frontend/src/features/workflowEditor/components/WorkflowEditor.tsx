@@ -33,6 +33,7 @@ import {
 } from "../utils/importWorkflow";
 
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
+import { MyWorkflowExamplesGalleryModal } from "./MyWorkflowsGalleryModal";
 import SidebarPieceForm from "./SidebarForm";
 import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
 import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
@@ -85,6 +86,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
   const incompatiblePiecesModalRef = useRef<ModalRef>(null);
   const workflowsGalleryModalRef = useRef<ModalRef>(null);
+  const myWorkflowsGalleryModalRef = useRef<ModalRef>(null);
   const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
 
   const { workspace } = useWorkspaces();
@@ -521,15 +523,20 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    setAnchorEl(null);
+                    myWorkflowsGalleryModalRef.current?.open();
                   }}
-                  disabled
                 >
                   from my workflows
                 </MenuItem>
               </Menu>
               <WorkflowExamplesGalleryModal
                 ref={workflowsGalleryModalRef}
+                confirmFn={(json) => {
+                  void handleImportedJson(json);
+                }}
+              />
+              <MyWorkflowExamplesGalleryModal
+                ref={myWorkflowsGalleryModalRef}
                 confirmFn={(json) => {
                   void handleImportedJson(json);
                 }}

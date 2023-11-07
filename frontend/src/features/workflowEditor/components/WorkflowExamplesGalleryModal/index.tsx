@@ -1,4 +1,4 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // You can replace this with your own selected icon
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Grid,
   Typography,

@@ -272,6 +272,12 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
       }
 
       return {
+        forageSchema: {
+          workflowPieces,
+          workflowPiecesData,
+          workflowNodes,
+          workflowEdges,
+        },
         workflow,
         tasks,
         ui_schema,

@@ -159,7 +159,7 @@ export const WorkflowList: React.FC = () => {
         event.target.classList.contains(".action-button");
       if (!isActionButtonClick) {
         if (params.row.status !== "failed" && params.row.status !== "creating")
-          navigate(`/workflows/${params.id}`);
+          navigate(`/my-workflows/${params.id}`);
       }
     },
     [navigate],

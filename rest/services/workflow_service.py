@@ -78,7 +78,7 @@ class WorkflowService(object):
             name=body.workflow.name,
             uuid_name=workflow_id,
             created_at=datetime.utcnow(),
-            schema={},
+            schema=body.forageSchema,
             ui_schema=body.ui_schema.model_dump(),
             created_by=auth_context.user_id,
             last_changed_at=datetime.utcnow(),
@@ -123,7 +123,6 @@ class WorkflowService(object):
                     file_path=workflow_path_git,
                     content=workflow_code
                 )
-            workflow.schema = workflow_schema
 
             workflow = self.workflow_repository.update(workflow)
             response = CreateWorkflowResponse(
