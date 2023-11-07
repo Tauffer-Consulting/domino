@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-type Callback = (() => void) | (() => Promise<void>);
+type Callback = ((args?: any[]) => void) | (() => Promise<void>);
 
 /**
  * @param callback this function will be called when the interval arrive, make sure to save your data in a properly location
@@ -10,6 +10,7 @@ export const useInterval = (
   callback: Callback,
   interval: number,
   shouldIntervalRun: boolean = true,
+  args: any[] = [],
 ) => {
   const intervalIdRef = useRef<number | null>(null);
 
@@ -24,7 +25,7 @@ export const useInterval = (
 
     if (intervalIdRef.current === null) {
       intervalIdRef.current = setInterval(() => {
-        void callback();
+        void callback(args);
       }, interval) as unknown as number;
     }
 
