@@ -23,7 +23,7 @@ const getInputType = (schema: Record<string, any>) => {
   } else if ("anyOf" in schema) {
     type = [];
     for (const item of schema.anyOf) {
-      let _type = item.type;
+      let _type = item.format ? item.format : item.type;
       _type = _type === "number" ? "float" : (_type as string);
       type.push(_type);
     }
