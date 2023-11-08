@@ -1,6 +1,7 @@
 import { CircularProgress, Container, Typography } from "@mui/material";
 import { type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
+import "./styles.css";
 // import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 interface ITaskResultProps {
@@ -66,7 +67,10 @@ export const TaskResult = (props: ITaskResultProps) => {
             style={{ overflow: "auto", maxWidth: "100%" }}
             className="markdown-container"
           >
-            <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
+            <ReactMarkdown className="react-markdown-component">
+              {window.atob(base64_content)}
+            </ReactMarkdown>
+            ;
           </div>
         );
 
