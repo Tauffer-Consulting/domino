@@ -44,10 +44,12 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
 
   let anyOfType = "";
   if ("anyOf" in schema && schema.anyOf.length === 2) {
-    // todo check if is only null + 1 item
-    for (const itemSchema of schema.anyOf) {
-      if (itemSchema.type !== "null") {
-        anyOfType = itemSchema.format ? itemSchema.format : itemSchema.type;
+    const hasNullType = schema.anyOf.some((item) => item.type === "null");
+    if (hasNullType) {
+      for (const itemSchema of schema.anyOf) {
+        if (itemSchema.type !== "null") {
+          anyOfType = itemSchema.format ? itemSchema.format : itemSchema.type;
+        }
       }
     }
   }

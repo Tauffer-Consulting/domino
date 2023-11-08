@@ -61,8 +61,13 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
   const [enumOptions, setEnumOptions] = useState<string[]>([]);
 
   if ("anyOf" in schema && schema.anyOf.length === 2) {
-    const notNullAnyOf = schema.anyOf.find((item: any) => item.type !== "null");
-    schema.items = notNullAnyOf.items;
+    const hasNullType = schema.anyOf.some((item: any) => item.type === "null");
+    if (hasNullType) {
+      const notNullAnyOf = schema.anyOf.find(
+        (item: any) => item.type !== "null",
+      );
+      schema.items = notNullAnyOf.items;
+    }
   }
 
   const subItemSchema = useMemo(() => {
