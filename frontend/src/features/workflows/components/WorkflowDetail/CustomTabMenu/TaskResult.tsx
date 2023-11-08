@@ -62,7 +62,10 @@ export const TaskResult = (props: ITaskResultProps) => {
         );
       case "md":
         return (
-          <div style={{ overflow: "auto" }} className="markdown-container">
+          <div
+            style={{ overflow: "auto", maxWidth: "100%" }}
+            className="markdown-container"
+          >
             <ReactMarkdown>{window.atob(base64_content)}</ReactMarkdown>;
           </div>
         );
