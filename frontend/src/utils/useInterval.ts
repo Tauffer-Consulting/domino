@@ -10,7 +10,6 @@ export const useInterval = (
   callback: Callback,
   interval: number,
   shouldIntervalRun: boolean = true,
-  args: any[] = [],
 ) => {
   const intervalIdRef = useRef<number | null>(null);
 
@@ -25,7 +24,7 @@ export const useInterval = (
 
     if (intervalIdRef.current === null) {
       intervalIdRef.current = setInterval(() => {
-        void callback(args);
+        void callback();
       }, interval) as unknown as number;
     }
 

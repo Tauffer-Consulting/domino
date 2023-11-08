@@ -51,113 +51,108 @@ export const WorkflowDetail: React.FC = () => {
   const fetchWorkflowTasks = useAuthenticatedGetWorkflowRunTasks();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
-  const handleFetchWorkflowRunTasks = useCallback(
-    async (selectedRun: any) => {
-      if (selectedRun && workflow) {
-        try {
-          const pageSize = 100;
-          const result = await fetchWorkflowTasks({
-            workflowId: id as string,
-            runId: selectedRun.workflow_run_id,
-            page: 0,
-            pageSize,
-          });
-          const { metadata } = result;
-          const total = metadata?.total ? metadata.total : 0;
+  const handleFetchWorkflowRunTasks = useCallback(async () => {
+    if (selectedRun && workflow) {
+      try {
+        const pageSize = 100;
+        const result = await fetchWorkflowTasks({
+          workflowId: id as string,
+          runId: selectedRun.workflow_run_id,
+          page: 0,
+          pageSize,
+        });
+        const { metadata } = result;
+        const total = metadata?.total ? metadata.total : 0;
 
-          const allTasks = [result];
+        const allTasks = [result];
 
-          if (total > pageSize) {
-            const numberOfPages = Math.ceil(total / pageSize);
-            const pages = Array.from(Array(numberOfPages).keys()).slice(1);
-            const promises = pages.map(
-              async (page) =>
-                await fetchWorkflowTasks({
-                  workflowId: id as string,
-                  runId: selectedRun.workflow_run_id,
-                  page,
-                  pageSize,
-                }),
-            );
-            const responses = await Promise.all(promises);
-            allTasks.push(...responses);
-          }
-
-          const nodes: RunNode[] = [];
-          const tasks: IWorkflowRunTaskExtended[] = [];
-          for (const result of allTasks) {
-            const { data } = result;
-
-            if (Array.isArray(data)) {
-              const nodesData = data
-                .map((task) => {
-                  const defaultNode: DefaultNode | undefined = workflow
-                    .ui_schema.nodes[task.task_id] as DefaultNode | undefined;
-                  const runNode = { ...defaultNode } as unknown as RunNode;
-
-                  if (runNode?.data) {
-                    runNode.data.taskId = task.task_id;
-                    runNode.data.state = task.state;
-                  }
-                  return runNode as unknown as RunNode;
-                })
-                .filter((n) => !!n);
-              const tasksData = data
-                .map((task) => {
-                  const node: DefaultNode | undefined = workflow.ui_schema
-                    .nodes[task.task_id] as DefaultNode | undefined;
-
-                  const pieceName =
-                    node?.data?.style?.label ?? node?.data?.name;
-                  return {
-                    ...task,
-                    pieceName,
-                  } as unknown as IWorkflowRunTaskExtended;
-                })
-                .filter((n) => !!n);
-              tasks.push(...tasksData);
-              nodes.push(...nodesData);
-            }
-          }
-          const currentNodes = JSON.stringify(
-            workflowPanelRef.current?.nodes ?? {},
+        if (total > pageSize) {
+          const numberOfPages = Math.ceil(total / pageSize);
+          const pages = Array.from(Array(numberOfPages).keys()).slice(1);
+          const promises = pages.map(
+            async (page) =>
+              await fetchWorkflowTasks({
+                workflowId: id as string,
+                runId: selectedRun.workflow_run_id,
+                page,
+                pageSize,
+              }),
           );
-          const newNodes = JSON.stringify(nodes);
-          if (newNodes !== currentNodes) {
-            // need to create a different object to perform a re-render
-            workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
-            workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
-            setTasks(tasks);
-            if (
-              selectedRun &&
-              (selectedRun.state === "success" ||
-                selectedRun.state === "failed")
-            ) {
-              setAutoUpdate(false);
-            } else {
-              setAutoUpdate(true);
-            }
+          const responses = await Promise.all(promises);
+          allTasks.push(...responses);
+        }
+
+        const nodes: RunNode[] = [];
+        const tasks: IWorkflowRunTaskExtended[] = [];
+        for (const result of allTasks) {
+          const { data } = result;
+
+          if (Array.isArray(data)) {
+            const nodesData = data
+              .map((task) => {
+                const defaultNode: DefaultNode | undefined = workflow.ui_schema
+                  .nodes[task.task_id] as DefaultNode | undefined;
+                const runNode = { ...defaultNode } as unknown as RunNode;
+
+                if (runNode?.data) {
+                  runNode.data.taskId = task.task_id;
+                  runNode.data.state = task.state;
+                }
+                return runNode as unknown as RunNode;
+              })
+              .filter((n) => !!n);
+            const tasksData = data
+              .map((task) => {
+                const node: DefaultNode | undefined = workflow.ui_schema.nodes[
+                  task.task_id
+                ] as DefaultNode | undefined;
+
+                const pieceName = node?.data?.style?.label ?? node?.data?.name;
+                return {
+                  ...task,
+                  pieceName,
+                } as unknown as IWorkflowRunTaskExtended;
+              })
+              .filter((n) => !!n);
+            tasks.push(...tasksData);
+            nodes.push(...nodesData);
           }
-        } catch (e) {
-          if (e instanceof AxiosError) {
-            console.log(e);
+        }
+        const currentNodes = JSON.stringify(
+          workflowPanelRef.current?.nodes ?? {},
+        );
+        const newNodes = JSON.stringify(nodes);
+        if (newNodes !== currentNodes) {
+          // need to create a different object to perform a re-render
+          workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
+          workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
+          setTasks(tasks);
+          if (
+            selectedRun &&
+            (selectedRun.state === "success" || selectedRun.state === "failed")
+          ) {
+            setAutoUpdate(false);
+          } else {
+            setAutoUpdate(true);
           }
+        }
+      } catch (e) {
+        if (e instanceof AxiosError) {
           console.log(e);
         }
+        console.log(e);
       }
-    },
-    [workflow, fetchWorkflowTasks, autoUpdate],
-  );
+    }
+  }, [workflow, fetchWorkflowTasks, autoUpdate, selectedRun]);
 
   const handleSelectRun = useCallback(
     async (run: IWorkflowRuns | null) => {
+      // if (!(run?.state === "success") && !(run?.state === "failed")) {
+      //   setAutoUpdate(true);
+      // }
+      // TODO force run without first delay
       setSelectedRun(run);
-      if (run?.workflow_run_id !== selectedRun?.workflow_run_id) {
-        await handleFetchWorkflowRunTasks(run);
-      }
-      if (!(run?.state === "success") && !(run?.state === "failed")) {
-        setAutoUpdate(true);
-      }
+      setAutoUpdate(true);
     },
     [handleFetchWorkflowRunTasks],
   );
@@ -169,7 +164,7 @@ export const WorkflowDetail: React.FC = () => {
     [],
   );
 
-  useInterval(handleFetchWorkflowRunTasks, 1000, autoUpdate, [selectedRun]);
+  useInterval(handleFetchWorkflowRunTasks, 1000, autoUpdate);
 
   return (
     <Grid container spacing={3}>
