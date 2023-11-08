@@ -109,7 +109,10 @@ export const getUpstreamOptions = (
     const currentSchema = schema.properties[key];
     const currentType = getInputType(currentSchema);
 
-    if (currentType === "array") {
+    if (
+      currentType === "array" ||
+      (Array.isArray(currentType) && currentType.includes("array"))
+    ) {
       let itemsSchema = currentSchema?.items;
       if (currentSchema?.items?.$ref) {
         const subItemSchemaName = currentSchema.items.$ref.split("/").pop();
