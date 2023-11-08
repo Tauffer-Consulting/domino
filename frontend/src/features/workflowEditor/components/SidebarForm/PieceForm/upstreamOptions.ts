@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { generateTaskName, getUuidSlice } from "utils";
 
 export interface Option {
@@ -8,7 +7,7 @@ export interface Option {
 }
 
 export interface ArrayOption {
-  array: Option[];
+  $array: Option[];
   items: Option[];
 }
 
@@ -119,21 +118,21 @@ export const getUpstreamOptions = (
         itemsSchema = schema.$defs?.[subItemSchemaName];
       }
 
-      const array = getOptions(upstreamPieces, currentType);
+      const $array = getOptions(upstreamPieces, currentType);
       if (itemsSchema.type === "object") {
         const __data: any = {};
         Object.keys(itemsSchema.properties).forEach((subKey) => {
           const subSchema = itemsSchema.properties[subKey];
           const subType = getInputType(subSchema);
           const items = getOptions(upstreamPieces, subType);
-          __data[subKey] = { array, items };
+          __data[subKey] = { items };
         });
-        upstreamOptions[key] = __data;
+        upstreamOptions[key] = { ...__data, $array };
       } else {
         const itemsType = getInputType(itemsSchema);
         const items = getOptions(upstreamPieces, itemsType);
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        upstreamOptions[key] = { array, items } as ArrayOption;
+        upstreamOptions[key] = { $array, items } as ArrayOption;
       }
     } else {
       const options = getOptions(upstreamPieces, currentType);

@@ -55,8 +55,11 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
   }
   if (checkedFromUpstream) {
     let options: Option[] = [];
-    if ("type" in schema && schema.type === "array") {
-      options = (upstreamOptions as ArrayOption).array;
+    if (
+      ("type" in schema && schema.type === "array") ||
+      (anyOfType && anyOfType === "array")
+    ) {
+      options = (upstreamOptions as ArrayOption).$array;
     } else {
       options = upstreamOptions as Option[];
     }
