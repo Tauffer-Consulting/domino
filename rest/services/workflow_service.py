@@ -78,8 +78,9 @@ class WorkflowService(object):
             name=body.workflow.name,
             uuid_name=workflow_id,
             created_at=datetime.utcnow(),
-            schema=body.forageSchema,
+            schema={},
             ui_schema=body.ui_schema.model_dump(),
+            forage_schema=body.forageSchema,
             created_by=auth_context.user_id,
             last_changed_at=datetime.utcnow(),
             start_date=body.workflow.start_date,
@@ -124,6 +125,7 @@ class WorkflowService(object):
                     content=workflow_code
                 )
 
+            workflow.schema = workflow_schema
             workflow = self.workflow_repository.update(workflow)
             response = CreateWorkflowResponse(
                 id=workflow.id,
@@ -281,7 +283,7 @@ class WorkflowService(object):
         response = GetWorkflowResponse(
             id=workflow.id,
             name=workflow.name,
-            schema=workflow.schema,
+            schema=workflow.forage_schema,
             ui_schema=workflow.ui_schema,
             created_at=workflow.created_at,
             last_changed_at=workflow.last_changed_at,
