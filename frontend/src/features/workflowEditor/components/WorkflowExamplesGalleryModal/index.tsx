@@ -11,6 +11,7 @@ import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState } from "react";
 
 import LogWorkflow from "../../utils/workflows/simple_log_workflow.json";
+import YoutubeSummarizerWorkflow from "../../utils/workflows/youtube_summarizer.json";
 
 interface WorkflowGalleryModalRef extends ModalRef {}
 
@@ -26,12 +27,12 @@ const WorkflowExamplesGalleryModal = forwardRef(
     const [selected, setSelected] = useState<number | null>(null);
 
     const cardsContents = [
-      // {
-      //   title: "Youtube Summarizer",
-      //   description:
-      //     "This workflow allows you to download and summarize youtube audios, and send then to emails.",
-      //   jsonFile: YoutubeWorkflow,
-      // },
+      {
+        title: "Youtube Summarizer",
+        description:
+          "Sends the summary of the last BBCNews youtube channel video to an emails list. You must configure Secrets and Local storage to use it.",
+        jsonFile: YoutubeSummarizerWorkflow,
+      },
       {
         title: "Simple Log Workflow",
         description:
@@ -52,7 +53,7 @@ const WorkflowExamplesGalleryModal = forwardRef(
                 <Card
                   elevation={4}
                   sx={{
-                    height: "200px",
+                    height: "250px",
                     backgroundColor: theme.palette.grey[100],
                   }}
                 >
@@ -81,8 +82,11 @@ const WorkflowExamplesGalleryModal = forwardRef(
                           }}
                         />
                       )}
+
                       <Typography variant="h3">{card.title}</Typography>
-                      <Typography>{card.description}</Typography>
+                      <div style={{ marginTop: "40px" }}>
+                        <Typography>{card.description}</Typography>
+                      </div>
                     </CardContent>
                   </CardActionArea>
                 </Card>
