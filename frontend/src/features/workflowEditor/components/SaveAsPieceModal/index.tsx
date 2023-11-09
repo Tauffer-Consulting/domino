@@ -11,7 +11,6 @@ interface SaveAsPieceModalProps {
 const SaveAsPieceModal = forwardRef(
   (props: SaveAsPieceModalProps, ref: ForwardedRef<SaveAsPieceModalRef>) => {
     const methods = useForm();
-
     const onSubmit = (data: any) => {
       console.log("onsubmit", data);
       props.confirmFn(data);
@@ -25,7 +24,7 @@ const SaveAsPieceModal = forwardRef(
           title="Save As Piece"
           maxWidth={"md"}
           fullWidth={true}
-          content={<CustomTab />}
+          content={<CustomTab resetForm={methods.reset} />}
           cancelFn={() => {
             console.log("cancelFn");
           }}

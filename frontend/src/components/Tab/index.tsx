@@ -37,10 +37,11 @@ function a11yProps(index: number) {
     "aria-controls": `simple-tabpanel-${index}`,
   };
 }
-export default function CustomTab() {
+export default function CustomTab(resetForm: any) {
   const [value, setValue] = React.useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+    resetForm();
   };
   const tabStyle = {
     border: "1px solid #e0e0e0",
@@ -134,7 +135,7 @@ export default function CustomTab() {
             <SelectInput
               name="folderName"
               label="Existing Folder"
-              options={["Piece 1", "Piece 2", "Piece 3"]}
+              options={["folder1", "folder2"]}
               emptyValue
             />
           </Box>
