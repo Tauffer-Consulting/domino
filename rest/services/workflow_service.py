@@ -96,7 +96,7 @@ class WorkflowService(object):
         try:
             self._validate_workflow_tasks(tasks_dict=data_dict.get('tasks'), workspace_id=workspace_id)
 
-            workflow_schema, workflow_code, pieces_repositories_ids = self._create_dag_code_from_raw_json(data_dict, workspace_id=workspace_id)
+            _, workflow_code, pieces_repositories_ids = self._create_dag_code_from_raw_json(data_dict, workspace_id=workspace_id)
             
             workflow_piece_repository_associations = [
                 WorkflowPieceRepositoryAssociative(
@@ -124,7 +124,6 @@ class WorkflowService(object):
                     content=workflow_code
                 )
 
-            workflow.schema = workflow_schema
             workflow = self.workflow_repository.update(workflow)
             response = CreateWorkflowResponse(
                 id=workflow.id,
