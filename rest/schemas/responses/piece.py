@@ -14,3 +14,4 @@ class GetPiecesResponse(BaseModel):
     style: Optional[Dict] = None
     source_url: Optional[str] = None
     repository_id: int
+    is_composite: bool

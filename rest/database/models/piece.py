@@ -1,6 +1,6 @@
 from database.models.base import Base, BaseDatabaseModel
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Integer, JSON, ForeignKey, text
+from sqlalchemy import Column, String, Integer, JSON, ForeignKey, text, Boolean
 
 class Piece(Base, BaseDatabaseModel):
     __tablename__ = "piece"
@@ -17,3 +17,4 @@ class Piece(Base, BaseDatabaseModel):
     source_url = Column(String, nullable=True)
     repository_id = Column(Integer, ForeignKey('piece_repository.id', ondelete='cascade'), nullable=False)
     piece_repository = relationship('PieceRepository', back_populates='pieces', lazy="subquery")
+    is_composite = Column(Boolean, nullable=False, server_default=text("false"))
