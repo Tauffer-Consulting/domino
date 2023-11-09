@@ -30,6 +30,7 @@ import ReactFlow, {
   MarkerType,
   type EdgeTypes,
   type NodeTypes,
+  type OnConnect,
 } from "reactflow";
 
 import { CustomConnectionLine } from "./ConnectionLine";
@@ -73,6 +74,7 @@ type Props =
       onInit?: OnInit;
 
       onNodeDoubleClick?: NodeMouseHandler;
+      onConnect?: OnConnect;
     }
   | {
       editable: false;
@@ -178,9 +180,15 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
       [instance, setNodes, props],
     );
 
-    const onConnect = useCallback((connection: Connection) => {
-      setEdges((prevEdges: Edge[]) => addEdge(connection, prevEdges));
-    }, []);
+    const onConnect = useCallback(
+      (connection: Connection) => {
+        setEdges((prevEdges: Edge[]) => addEdge(connection, prevEdges));
+        if (props.editable && props.onConnect) {
+          props.onConnect(connection);
+        }
+      },
+      [props],
+    );
 
     const autoLayout = useCallback(async () => {
       const elkGraph = {

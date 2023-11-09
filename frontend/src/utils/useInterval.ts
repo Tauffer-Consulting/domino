@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-type Callback = (() => void) | (() => Promise<void>);
+type Callback = ((args?: any[]) => void) | (() => Promise<void>);
 
 /**
  * @param callback this function will be called when the interval arrive, make sure to save your data in a properly location

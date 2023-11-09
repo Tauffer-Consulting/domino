@@ -3,14 +3,14 @@
 </p>
 <p align="center"><i>Build amazing ideas, piece by piece.</i></p>
 <p align="center">
+  <a href="https://tauffer-consulting.github.io/domino-docs/docs/intro">
+    <img alt="Docs" src="https://img.shields.io/badge/Documentation-docs?logo=readthedocs&logoColor=white&labelColor=gray&color=%231e4c94">
+  </a>
   <a href="https://pypi.org/project/domino-py">
     <img src="https://img.shields.io/pypi/v/domino-py?color=%231BA331&label=PyPI&logo=python&logoColor=%23F7F991%20">
   </a>
   <a href="https://artifacthub.io/packages/helm/domino/domino">
     <img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/domino">
-  </a>
-  <a href="https://tauffer-consulting.github.io/domino-docs/docs/intro">
-    <img alt="Read the Docs" src="https://img.shields.io/readthedocs/domino-py?label=Docs&logo=Read%20the%20Docs&logoColor=white">
   </a>
   <a href="https://github.com/sponsors/Tauffer-Consulting">
     <img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86">
