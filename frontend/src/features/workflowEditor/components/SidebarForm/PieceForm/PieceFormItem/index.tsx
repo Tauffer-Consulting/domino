@@ -42,10 +42,24 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
 
   let inputElement: React.ReactNode = null;
 
+  let anyOfType = "";
+  if ("anyOf" in schema && schema.anyOf.length === 2) {
+    const hasNullType = schema.anyOf.some((item) => item.type === "null");
+    if (hasNullType) {
+      for (const itemSchema of schema.anyOf) {
+        if (itemSchema.type !== "null") {
+          anyOfType = itemSchema.format ? itemSchema.format : itemSchema.type;
+        }
+      }
+    }
+  }
   if (checkedFromUpstream) {
     let options: Option[] = [];
-    if ("type" in schema && schema.type === "array") {
-      options = (upstreamOptions as ArrayOption).array;
+    if (
+      ("type" in schema && schema.type === "array") ||
+      (anyOfType && anyOfType === "array")
+    ) {
+      options = (upstreamOptions as ArrayOption).$array;
     } else {
       options = upstreamOptions as Option[];
     }
@@ -101,7 +115,10 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
         label={schema.title}
       />
     );
-  } else if ("type" in schema && schema.type === "array") {
+  } else if (
+    ("type" in schema && schema.type === "array") ||
+    anyOfType === "array"
+  ) {
     inputElement = (
       <ArrayInput
         formId={formId}
@@ -113,10 +130,11 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    "format" in schema &&
-    schema.type === "string" &&
-    schema.format === "date"
+    ("type" in schema &&
+      "format" in schema &&
+      schema.type === "string" &&
+      schema.format === "date") ||
+    anyOfType === "date"
   ) {
     inputElement = (
       <DatetimeInput<IWorkflowPieceData>
@@ -126,10 +144,11 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    "format" in schema &&
-    schema.type === "string" &&
-    schema.format === "time"
+    ("type" in schema &&
+      "format" in schema &&
+      schema.type === "string" &&
+      schema.format === "time") ||
+    anyOfType === "time"
   ) {
     inputElement = (
       <DatetimeInput<IWorkflowPieceData>
@@ -139,10 +158,11 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    "format" in schema &&
-    schema.type === "string" &&
-    schema.format === "date-time"
+    ("type" in schema &&
+      "format" in schema &&
+      schema.type === "string" &&
+      schema.format === "date-time") ||
+    anyOfType === "date-time"
   ) {
     inputElement = (
       <DatetimeInput<IWorkflowPieceData>
@@ -152,10 +172,15 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    "widget" in schema &&
-    schema.type === "string" &&
-    (schema.widget === "codeeditor" || schema.widget === "codeeditor-python")
+    ("type" in schema &&
+      "widget" in schema &&
+      schema.type === "string" &&
+      (schema.widget === "codeeditor" ||
+        schema.widget === "codeeditor-python")) ||
+    ("widget" in schema &&
+      (schema.widget === "codeeditor" ||
+        schema.widget === "codeeditor-python") &&
+      anyOfType === "string")
   ) {
     inputElement = (
       <CodeEditorInput<IWorkflowPieceData>
@@ -165,10 +190,13 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    "widget" in schema &&
-    schema.type === "string" &&
-    schema.widget === "codeeditor-json"
+    ("type" in schema &&
+      "widget" in schema &&
+      schema.type === "string" &&
+      schema.widget === "codeeditor-json") ||
+    ("widget" in schema &&
+      (schema.widget === "codeeditor" || schema.widget === "codeeditor-json") &&
+      anyOfType === "string")
   ) {
     inputElement = (
       <CodeEditorInput<IWorkflowPieceData>
@@ -178,10 +206,13 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    "widget" in schema &&
-    schema.type === "string" &&
-    schema.widget === "codeeditor-sql"
+    ("type" in schema &&
+      "widget" in schema &&
+      schema.type === "string" &&
+      schema.widget === "codeeditor-sql") ||
+    ("widget" in schema &&
+      (schema.widget === "codeeditor" || schema.widget === "codeeditor-sql") &&
+      anyOfType === "string")
   ) {
     inputElement = (
       <CodeEditorInput<IWorkflowPieceData>
@@ -191,9 +222,8 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    !("format" in schema) &&
-    schema.type === "string"
+    ("type" in schema && !("format" in schema) && schema.type === "string") ||
+    anyOfType === "string"
   ) {
     inputElement = (
       <TextInput<IWorkflowPieceData>

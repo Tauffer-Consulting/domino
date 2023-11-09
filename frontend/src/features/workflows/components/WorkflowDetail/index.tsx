@@ -143,15 +143,16 @@ export const WorkflowDetail: React.FC = () => {
         console.log(e);
       }
     }
-  }, [selectedRun, workflow, fetchWorkflowTasks, autoUpdate]);
+  }, [workflow, fetchWorkflowTasks, autoUpdate, selectedRun]);
 
   const handleSelectRun = useCallback(
-    (run: IWorkflowRuns | null) => {
-      if (!(run?.state === "success") && !(run?.state === "failed")) {
-        setAutoUpdate(true);
-      }
-
+    async (run: IWorkflowRuns | null) => {
+      // if (!(run?.state === "success") && !(run?.state === "failed")) {
+      //   setAutoUpdate(true);
+      // }
+      // TODO force run without first delay
       setSelectedRun(run);
+      setAutoUpdate(true);
     },
     [handleFetchWorkflowRunTasks],
   );

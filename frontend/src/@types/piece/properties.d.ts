@@ -10,19 +10,19 @@ interface DefaultPropertyProps {
 }
 
 type BooleanProperty = DefaultPropertyProps & {
-  type: "boolean";
+  type: "boolean" | "null";
   default: boolean;
 };
 
 type NumberProperty = DefaultPropertyProps & {
-  type: "number" | "integer" | "float";
+  type: "number" | "integer" | "float" | "null";
   default: number;
   exclusiveMaximum?: number;
   exclusiveMinimum?: number;
 };
 
 type StringProperty = DefaultPropertyProps & {
-  type: "string";
+  type: "string" | "null";
   default: string;
 
   widget?: string;
@@ -73,9 +73,14 @@ export type SimpleInputSchemaProperty =
   | StringProperty
   | EnumProperty;
 
+type AnyOfObjectProperty = DefaultPropertyProps & {
+  anyOf: StringProperty[];
+};
+
 export type InputSchemaProperty =
   | SimpleInputSchemaProperty
   | ArrayStringProperty
   | ArrayNumberProperty
   | ArrayBooleanProperty
-  | ArrayObjectProperty;
+  | ArrayObjectProperty
+  | AnyOfObjectProperty;
