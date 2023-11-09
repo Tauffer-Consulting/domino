@@ -68,9 +68,9 @@ const ObjectInputComponent: React.FC<Prop> = ({
       }
     };
 
-    return Object.keys(schemaDefinition.properties).reduce<
-      Record<string, string>
-    >((acc, cur) => {
+    return Object.keys(
+      (schemaDefinition as ObjectDefinition).properties,
+    ).reduce<Record<string, string>>((acc, cur) => {
       acc[cur] = getElementType(cur, schemaDefinition);
       return acc;
     }, {});

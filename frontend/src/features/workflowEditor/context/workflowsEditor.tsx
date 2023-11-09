@@ -213,6 +213,9 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
           Record<string, any>
         >((acc, [key, value]) => {
           if (Array.isArray(value.value)) {
+            if (!value.value.length) {
+              return acc;
+            }
             acc[key] = {
               fromUpstream: value.fromUpstream,
               upstreamTaskId: value.fromUpstream ? value.upstreamId : null,
@@ -231,6 +234,10 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
               }),
             };
 
+            return acc;
+          }
+
+          if (!value.value) {
             return acc;
           }
 

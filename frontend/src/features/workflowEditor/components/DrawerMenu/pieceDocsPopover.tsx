@@ -12,7 +12,7 @@ function renderPieceProperties(
   const properties = schema?.properties ?? {};
   return Object.entries(properties).map(([key, value]) => {
     const argument = value;
-    let typeName: string = "allOf" in argument ? "enum" : argument.type;
+    let typeName: string = "type" in argument ? argument.type : "enum";
     let valuesOptions: string[] = [];
 
     if ("allOf" in argument && argument.allOf.length > 0) {
