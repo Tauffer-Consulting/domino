@@ -34,6 +34,7 @@ import {
 
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
 import { MyWorkflowExamplesGalleryModal } from "./MyWorkflowsGalleryModal";
+import SaveAsPieceModal from "./SaveAsPieceModal";
 import SidebarPieceForm from "./SidebarForm";
 import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
 import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
@@ -87,6 +88,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const incompatiblePiecesModalRef = useRef<ModalRef>(null);
   const workflowsGalleryModalRef = useRef<ModalRef>(null);
   const myWorkflowsGalleryModalRef = useRef<ModalRef>(null);
+  const saveAsPieceModalRef = useRef<ModalRef>(null);
   const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
 
   const { workspace } = useWorkspaces();
@@ -214,6 +216,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
     generateWorkflowsEditorBodyParams,
     workspace?.id,
   ]);
+
+  const handleSaveAsPiece = useCallback((json: any) => {
+    console.log("handleSaveAsPiece", json);
+  }, []);
 
   const handleClear = useCallback(async () => {
     await clearForageData();
@@ -455,6 +461,25 @@ export const WorkflowsEditorComponent: React.FC = () => {
               >
                 Create
               </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                startIcon={<SaveIcon />}
+                onClick={() => {
+                  console.log("save as piece");
+                  saveAsPieceModalRef.current?.open();
+                }}
+              >
+                Save as piece
+              </Button>
+              <SaveAsPieceModal
+                ref={saveAsPieceModalRef}
+                confirmFn={(json) => {
+                  handleSaveAsPiece(json);
+                }}
+              />
             </Grid>
             <Grid item>
               <Button
