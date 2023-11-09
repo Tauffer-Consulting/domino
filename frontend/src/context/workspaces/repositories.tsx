@@ -2,7 +2,7 @@ import {
   type IGetRepoPiecesResponseInterface,
   useAuthenticatedGetPieceRepositories,
   useFetchAuthenticatedGetRepoIdPieces,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import localForage from "services/config/localForage.config";

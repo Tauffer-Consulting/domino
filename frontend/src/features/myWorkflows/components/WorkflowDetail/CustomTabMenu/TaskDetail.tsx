@@ -9,8 +9,8 @@ import {
   Container,
 } from "@mui/material";
 import { intervalToDuration } from "date-fns";
-import { taskStatesColorMap } from "features/workflows/constants";
-import { type IWorkflowRunTasks } from "features/workflows/types/runs";
+import { taskStatesColorMap } from "features/myWorkflows/constants";
+import { type IWorkflowRunTasks } from "features/myWorkflows/types/runs";
 import { useMemo } from "react";
 
 interface IWorkflowRunTasksExtended extends IWorkflowRunTasks {

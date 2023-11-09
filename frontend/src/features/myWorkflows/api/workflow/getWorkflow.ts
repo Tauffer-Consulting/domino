@@ -1,6 +1,6 @@
 import { type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
-import { type IGetWorkflowResponseInterface } from "features/workflows/types/workflow";
+import { type IGetWorkflowResponseInterface } from "features/myWorkflows/types/workflow";
 import { dominoApiClient } from "services/clients/domino.client";
 import useSWR from "swr";
 

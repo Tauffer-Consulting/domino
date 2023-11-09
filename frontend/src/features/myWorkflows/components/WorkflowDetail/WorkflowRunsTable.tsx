@@ -1,8 +1,8 @@
 import { Card, Grid, Skeleton } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { NoDataOverlay } from "components/NoDataOverlay";
-import { useAuthenticatedGetWorkflowRuns } from "features/workflows/api";
-import { type IWorkflowRuns } from "features/workflows/types";
+import { useAuthenticatedGetWorkflowRuns } from "features/myWorkflows/api";
+import { type IWorkflowRuns } from "features/myWorkflows/types";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useInterval } from "utils";
 

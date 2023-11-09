@@ -8,6 +8,21 @@ export const Breadcrumbs: React.FC = () => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
+  const formatBreadcrumbLabel = (value: string) => {
+    // Remove dashes and other special characters and add spaces
+    const formattedValue = value
+      .replace(/[-_]+/g, " ")
+      .replace(/([a-z])([A-Z])/g, "$1 $2");
+
+    // Capitalize the first letter of each word
+    const words = formattedValue.split(" ");
+    const capitalizedWords = words.map((word) => {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    });
+
+    return capitalizedWords.join(" ");
+  };
+
   return (
     <BreadcrumbsMui
       aria-label="Breadcrumb"
@@ -17,7 +32,7 @@ export const Breadcrumbs: React.FC = () => {
       {pathnames.map((value, index) => {
         const last = index === pathnames.length - 1;
         const to = `/${pathnames.slice(0, index + 1).join("/")}`;
-        const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1);
+        const formattedValue = formatBreadcrumbLabel(value);
 
         return last ? (
           <Typography
@@ -28,7 +43,7 @@ export const Breadcrumbs: React.FC = () => {
               userSelect: "none",
             }}
           >
-            {capitalizedValue}
+            {formattedValue}
           </Typography>
         ) : (
           <RouterLink
@@ -47,7 +62,7 @@ export const Breadcrumbs: React.FC = () => {
             }}
           >
             <Typography variant="h1" color="textPrimary">
-              {capitalizedValue}
+              {formattedValue}
             </Typography>
           </RouterLink>
         );

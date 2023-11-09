@@ -3,7 +3,7 @@ import { NoDataOverlay } from "components/NoDataOverlay";
 import {
   useAuthenticatedGetWorkflowRunTaskLogs,
   useAuthenticatedGetWorkflowRunTaskResult,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import React, { useCallback, useMemo, useState } from "react";
 import { useInterval } from "utils";
 

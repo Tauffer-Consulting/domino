@@ -1,6 +1,6 @@
 import { type AxiosResponse } from "axios";
 import { type CreateWorkflowRequest } from "features/workflowEditor/context/types";
-import { type IPostWorkflowResponseInterface } from "features/workflows/types";
+import { type IPostWorkflowResponseInterface } from "features/myWorkflows/types";
 import { dominoApiClient } from "services/clients/domino.client";
 
 export interface IPostWorkflowParams extends CreateWorkflowRequest {

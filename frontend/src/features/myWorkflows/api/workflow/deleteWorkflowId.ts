@@ -1,6 +1,6 @@
 import { AxiosError, type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
-import { type IDeleteWorkflowIdResponseInterface } from "features/workflows/types/workflow";
+import { type IDeleteWorkflowIdResponseInterface } from "features/myWorkflows/types/workflow";
 import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 

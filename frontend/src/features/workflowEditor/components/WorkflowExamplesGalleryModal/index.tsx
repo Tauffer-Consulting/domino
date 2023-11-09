@@ -1,4 +1,4 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // You can replace this with your own selected icon
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Grid,
   Typography,
@@ -11,7 +11,6 @@ import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState } from "react";
 
 import LogWorkflow from "../../utils/workflows/simple_log_workflow.json";
-import YoutubeWorkflow from "../../utils/workflows/youtube_workflow.json";
 
 interface WorkflowGalleryModalRef extends ModalRef {}
 
@@ -27,16 +26,16 @@ const WorkflowExamplesGalleryModal = forwardRef(
     const [selected, setSelected] = useState<number | null>(null);
 
     const cardsContents = [
-      {
-        title: "Youtube Summarizer",
-        description:
-          "This workflow allows you to download and summarize youtube audios, and send then to emails.",
-        jsonFile: YoutubeWorkflow,
-      },
+      // {
+      //   title: "Youtube Summarizer",
+      //   description:
+      //     "This workflow allows you to download and summarize youtube audios, and send then to emails.",
+      //   jsonFile: YoutubeWorkflow,
+      // },
       {
         title: "Simple Log Workflow",
         description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut laoreet turpis.",
+          "A simple workflow that logs a message to the console. Useful as starting point for new users.",
         jsonFile: LogWorkflow,
       },
     ];

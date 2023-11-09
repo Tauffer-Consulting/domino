@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import { type IWorkflowRuns } from "features/workflows/types";
+import { type IWorkflowRuns } from "features/myWorkflows/types";
 import theme from "providers/theme.config";
 import React from "react";
 

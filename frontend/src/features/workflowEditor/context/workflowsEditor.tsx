@@ -2,11 +2,11 @@ import { useWorkspaces } from "context/workspaces";
 import {
   type IPostWorkflowParams,
   useAuthenticatedPostWorkflow,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import {
   type IWorkflowElement,
   type IPostWorkflowResponseInterface,
-} from "features/workflows/types";
+} from "features/myWorkflows/types";
 import React, { type FC, useCallback } from "react";
 import { type Edge } from "reactflow";
 import { createCustomContext, generateTaskName } from "utils";
@@ -272,6 +272,12 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
       }
 
       return {
+        forageSchema: {
+          workflowPieces,
+          workflowPiecesData,
+          workflowNodes,
+          workflowEdges,
+        },
         workflow,
         tasks,
         ui_schema,
