@@ -64,7 +64,7 @@ export const TaskResult = (props: ITaskResultProps) => {
       case "md":
         return (
           <div
-            style={{ overflow: "auto", maxWidth: "100%" }}
+            style={{ overflow: "auto", maxWidth: "100%", width: "100%" }}
             className="markdown-container"
           >
             <ReactMarkdown className="react-markdown-component">
