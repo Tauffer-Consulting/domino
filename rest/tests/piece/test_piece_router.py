@@ -17,7 +17,7 @@ class TestPieceRouter:
 
         assert response.status_code == 200
         
-        mock_response_content = json.loads(mock_response[0].json())
+        mock_response_content = json.loads(mock_response[0].model_dump_json())
         assert content[0].keys() == mock_response_content.keys()
 
         for count, piece in enumerate(content):
@@ -26,7 +26,7 @@ class TestPieceRouter:
             for key in piece:
                 if key == "id":
                     continue
-                mock_response_content = json.loads(mock_response[count].json())
+                mock_response_content = json.loads(mock_response[count].model_dump_json())
                 assert piece.get(key) == mock_response_content.get(key)
 
     @staticmethod
