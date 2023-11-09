@@ -78,9 +78,8 @@ class WorkflowService(object):
             name=body.workflow.name,
             uuid_name=workflow_id,
             created_at=datetime.utcnow(),
-            schema={},
+            schema=body.forageSchema,
             ui_schema=body.ui_schema.model_dump(),
-            forage_schema=body.forageSchema,
             created_by=auth_context.user_id,
             last_changed_at=datetime.utcnow(),
             start_date=body.workflow.start_date,
@@ -283,7 +282,7 @@ class WorkflowService(object):
         response = GetWorkflowResponse(
             id=workflow.id,
             name=workflow.name,
-            schema=workflow.forage_schema,
+            schema=workflow.schema,
             ui_schema=workflow.ui_schema,
             created_at=workflow.created_at,
             last_changed_at=workflow.last_changed_at,
@@ -696,7 +695,7 @@ class WorkflowService(object):
         return response
 
     @staticmethod
-    def parse_log(log_text: str, task_id: str, piece_name: str):
+    def parse_log(log_text: str):
         # Get the log lines between the start and stop patterns
         start_command_pattern = "Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
         stop_command_pattern = "End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
@@ -779,12 +778,8 @@ class WorkflowService(object):
         if response.status_code != 200:
             raise BaseException("Error while trying to get task logs")
 
-        # Get the piece name from the task_id using the workflow schema.
-        piece_name = workflow.schema['tasks'][task_id]['piece']['name']
         parsed_log = self.parse_log(
-            response.text, 
-            task_id, 
-            piece_name
+            response.text
         )
 
         return GetWorkflowRunTaskLogsResponse(

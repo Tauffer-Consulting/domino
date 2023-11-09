@@ -14,7 +14,6 @@ class Workflow(Base):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     schema = Column(JSON, nullable=True)
     ui_schema = Column(JSON, nullable=True)
-    forage_schema = Column(JSON, nullable=True)
     created_by = Column(Integer, ForeignKey("user.id"), nullable=False)
     last_changed_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     start_date = Column(DateTime, nullable=True)
