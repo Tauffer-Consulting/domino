@@ -54,7 +54,12 @@ jobs:
           DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: ${{ secrets.TESTS_GITHUB_PIECES_TOKEN }}
           DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS: ${{ secrets.TESTS_GITHUB_WORKFLOWS_TOKEN }}
           DOMINO_GITHUB_WORKFLOWS_REPOSITORY: ${{secrets.TESTS_WORKFLOWS_REPOSITORY}}
-        run: pytest rest/tests/ -v
+        run: pytest --cov=rest/tests --cov-report=xml --cov-report=term-missing rest/tests/ -v
+      
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Delete cluster
         run: kind delete cluster --name domino-cluster
