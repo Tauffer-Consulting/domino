@@ -158,19 +158,19 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Add arguments types to XCOM 
         # TODO - this is a temporary solution. We should find a better way to do this
-        output_schema = output_obj.model_json_schema()
-        for k, v in output_schema["properties"].items():
-            if "type" in v:
-                # Get file-path and directory-path types
-                if v["type"] == "string" and "format" in v:
-                    v_type = v["format"]
-                else:
-                    v_type = v["type"]
-            elif "anyOf" in v:
-                if "$ref" in v["anyOf"][0]:
-                    type_model = v["anyOf"][0]["$ref"].split("/")[-1]
-                    v_type = output_schema["definitions"][type_model]["type"]
-            xcom_obj[f"{k}_type"] = v_type
+        # output_schema = output_obj.model_json_schema()
+        # for k, v in output_schema["properties"].items():
+        #     if "type" in v:
+        #         # Get file-path and directory-path types
+        #         if v["type"] == "string" and "format" in v:
+        #             v_type = v["format"]
+        #         else:
+        #             v_type = v["type"]
+        #     elif "anyOf" in v:
+        #         if "$ref" in v["anyOf"][0]:
+        #             type_model = v["anyOf"][0]["$ref"].split("/")[-1]
+        #             v_type = output_schema["definitions"][type_model]["type"]
+        #     xcom_obj[f"{k}_type"] = v_type
 
         # Serialize self.display_result and add it to XCOM
         if isinstance(self.display_result, dict):
