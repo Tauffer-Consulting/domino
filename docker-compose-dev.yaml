@@ -367,6 +367,7 @@ services:
       - 3000:3000
     volumes:
       - ./frontend:/usr/src/app # Enable hot reload for frontend
+      - /usr/src/app/node_modules
     depends_on:
       domino_rest:
         condition: service_started
