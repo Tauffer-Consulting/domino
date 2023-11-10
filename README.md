@@ -12,6 +12,9 @@
   <a href="https://artifacthub.io/packages/helm/domino/domino">
     <img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/domino">
   </a>
+  <a href="https://codecov.io/gh/Tauffer-Consulting/domino" > 
+    <img src="https://codecov.io/gh/Tauffer-Consulting/domino/graph/badge.svg?token=WTJPH7FSNJ"/> 
+  </a>
   <a href="https://github.com/sponsors/Tauffer-Consulting">
     <img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86">
   </a>
