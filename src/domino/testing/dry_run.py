@@ -10,7 +10,7 @@ from domino.logger import get_configured_logger
 def piece_dry_run(
     piece_name: str,
     input_data: dict,
-    repository_folder_path: Optional[str] = None, 
+    repository_folder_path: Optional[str] = None,
     secrets_data: dict = None,
     results_path: str = None
 ) -> dict:
