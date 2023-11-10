@@ -26,10 +26,9 @@ class TestingHttpClient:
                 response.raise_for_status()
                 return response
             except (ConnectionError, Timeout) as e:
-                cls.logger.info(f"Health Check Failed.\nRetrying in {retry_delay_in_seconds} seconds...")
+                cls.logger.info(f"Health Check Failed with error: {e}.\nRetrying in {retry_delay_in_seconds} seconds...")
                 time.sleep(retry_delay_in_seconds)
         raise Exception("Max retries exceeded. Unable to make the request.")
-
 
     @classmethod
     def start_http_server(cls, image: str):

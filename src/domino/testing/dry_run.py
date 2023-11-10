@@ -6,23 +6,6 @@ import os
 from typing import Optional
 from domino.logger import get_configured_logger
 
-"""
-Example usage of dry run:
-
-from domino.testing.dry_run import piece_dry_run
-
-piece_dry_run(
-    repository_folder_path=".", 
-    piece_name="SingleLogPiece", 
-    input_data={
-        "message": "testing msg",
-        "input_str": 'testing',
-        "input_int": 1,
-        ...
-    }
-)
-"""
-
 
 def piece_dry_run(
     piece_name: str,
@@ -31,6 +14,22 @@ def piece_dry_run(
     secrets_data: dict = None,
     results_path: str = None
 ) -> dict:
+    """
+    Example usage of dry run:
+
+    from domino.testing.dry_run import piece_dry_run
+
+    piece_dry_run(
+        repository_folder_path=".",
+        piece_name="SingleLogPiece",
+        input_data={
+            "message": "testing msg",
+            "input_str": 'testing',
+            "input_int": 1,
+            ...
+        }
+    )
+    """
     logger = get_configured_logger("piece_dry_run")
 
     pieces_images_map = os.environ.get("PIECES_IMAGES_MAP", {})
@@ -38,7 +37,7 @@ def piece_dry_run(
     if pieces_images_map and piece_name in pieces_images_map:
         try:
             from domino.testing.http_client import TestingHttpClient
-            
+
             logger.info('Running pieces dry run with http client')
             http_client = TestingHttpClient()
             pieces_images_map = json.loads(pieces_images_map)
@@ -76,7 +75,7 @@ def piece_dry_run(
     metadata_path = Path(pieces_folder_path) / f"{piece_name}/metadata.json"
     with open(metadata_path, "r") as f:
         metadata = json.load(f)
-    
+
     # Set Operator class metadata
     piece_class.set_metadata(metadata=metadata)
 
