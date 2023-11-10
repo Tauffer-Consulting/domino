@@ -53,7 +53,7 @@ const PiecesSidebarNode: FC<{ piece: Piece }> = ({ piece }) => {
             maxWidth: "180px",
           }}
         >
-          {piece?.name ?? "-"}
+          {piece?.style?.label ?? "-"}
         </Typography>
 
         <IconButton sx={{ padding: 0 }} onClick={handlePopoverOpen}>
