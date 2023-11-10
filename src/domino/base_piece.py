@@ -158,7 +158,7 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Add arguments types to XCOM 
         # TODO - this is a temporary solution. We should find a better way to do this
-        output_schema = output_obj.schema()
+        output_schema = output_obj.model_json_schema()
         for k, v in output_schema["properties"].items():
             if "type" in v:
                 # Get file-path and directory-path types

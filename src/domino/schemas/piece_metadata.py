@@ -5,17 +5,23 @@ from typing import List, Dict
 class Dependency(BaseModel):
     docker_image: str = Field(
         description="Docker image to be used to run this Operator", 
-        example="python:3.9-slim", 
+        json_schema_extra={
+            "example": "python:3.9-slim"
+        },
         default=None
     )
     dockerfile: str = Field(
         description="Dockerfile to build the image for the container that will run this Operator", 
-        example="Dockerfile", 
+        json_schema_extra={
+            "example": "Dockerfile"
+        },
         default=None
     )
     requirements_file: str = Field(
         description="Requirements file with pip packages to be installed in the container that will run this Operator", 
-        example="requirements.txt",
+        json_schema_extra={
+            "example": "requirements.txt"
+        },
         default=None
     )
     # TODO - validation: one and only one of these options
@@ -45,12 +51,15 @@ class SecretsSchema(BaseModel):
 class PieceMetadata(BaseModel):
     name: str = Field(
         description="Piece name", 
-        example="ExamplePiece", 
-        # pattern=    # TODO - regex for *Piece  
+        json_schema_extra={
+            "example": "ExamplePiece"
+        } 
     )
     description: str = Field(
         description="Description of this Piece", 
-        example="This Piece executes ABCDEFG function.", 
+        json_schema_extra={
+            "example": "This Piece executes ABCDEFG function."
+        } 
     )
     dependency: Dependency = None
     container_resources: Dict = None # TODO - add model for the container_resources dictionary
