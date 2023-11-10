@@ -171,9 +171,9 @@ export const WorkflowDetail: React.FC = () => {
       <Grid item xs={12}>
         <Breadcrumbs />
       </Grid>
-      <Grid container spacing={3} sx={{ marginTop: "0.5vh" }}>
+      <Grid container spacing={3} sx={{ marginTop: "5px" }}>
         {/* Left Column */}
-        <Grid item xs={7}>
+        <Grid item lg={7} xs={12}>
           {/* WorkflowRunsTable */}
           <Grid item xs={12} sx={{ paddingLeft: "1rem" }}>
             <WorkflowRunsTable
@@ -202,7 +202,7 @@ export const WorkflowDetail: React.FC = () => {
         </Grid>
 
         {/* Right Column */}
-        <Grid item xs={5}>
+        <Grid item lg={5} xs={12}>
           <WorkflowRunDetail
             runId={selectedRun?.workflow_run_id ?? null}
             tasks={tasks}
