@@ -131,7 +131,7 @@ export const WorkflowRunsTable: React.FC<Props> = ({
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <Card sx={{ height: "35vh" }}>
+        <Card sx={{ height: "38vh" }}>
           {isLoading ? (
             <Skeleton
               animation="wave"
@@ -144,7 +144,7 @@ export const WorkflowRunsTable: React.FC<Props> = ({
               onRowSelectionModelChange={([id]) => {
                 setSelectedRun(
                   workflowRuns?.data?.find((wr) => wr.workflow_run_id === id) ??
-                    null,
+                  null,
                 );
               }}
               rowSelectionModel={

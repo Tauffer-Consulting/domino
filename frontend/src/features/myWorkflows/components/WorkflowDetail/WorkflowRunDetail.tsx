@@ -69,7 +69,7 @@ export const WorkflowRunDetail: React.FC<Props> = ({
   useInterval(mutate, 1000, autoUpdate);
 
   return (
-    <Paper sx={{ height: "46vh" }}>
+    <Paper sx={{ height: "86vh" }}>
       {runId ? (
         nodeId ? (
           <CustomTabMenu
