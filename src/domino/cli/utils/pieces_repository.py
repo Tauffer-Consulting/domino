@@ -193,7 +193,7 @@ def validate_pieces_folders() -> None:
             if (op_dir / "metadata.json").is_file():
                 with open(str(op_dir / "metadata.json"), "r") as f:
                     metadata = json.load(f)
-                jsonschema.validate(instance=metadata, schema=PieceMetadata.schema())
+                jsonschema.validate(instance=metadata, schema=PieceMetadata.model_json_schema())
 
                 # Validate Pieces name
                 if metadata.get("name", None) and not metadata["name"] == op_dir.name:
@@ -271,9 +271,9 @@ def create_compiled_pieces_metadata(source_url: str=None) -> None:
                 pieces_folder_path=str(pieces_path), 
                 piece_name=op_dir.name
             )
-            metadata["input_schema"] = input_model_class.schema()
-            metadata["output_schema"] = output_model_class.schema()
-            metadata["secrets_schema"] = secrets_model_class.schema() if secrets_model_class else None
+            metadata["input_schema"] = input_model_class.model_json_schema()
+            metadata["output_schema"] = output_model_class.model_json_schema()
+            metadata["secrets_schema"] = secrets_model_class.model_json_schema() if secrets_model_class else None
 
             # Add source code url
             metadata["source_url"] = None
