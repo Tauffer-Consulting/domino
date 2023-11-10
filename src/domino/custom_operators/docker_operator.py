@@ -56,6 +56,7 @@ class DominoDockerOperator(DockerOperator):
         mounts=[
             # TODO remove
             # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+            # Mount(source='/media/luiz/storage2/Github/default_domino_pieces', target='/home/domino/pieces_repository/', type='bind', read_only=True),
         ]
         if self.workflow_shared_storage and str(self.workflow_shared_storage.source.value).lower() == str(getattr(StorageSource, 'local').value).lower():
             mounts.append(
