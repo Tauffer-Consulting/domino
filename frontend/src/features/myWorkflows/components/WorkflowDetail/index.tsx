@@ -171,7 +171,7 @@ export const WorkflowDetail: React.FC = () => {
       <Grid item xs={12}>
         <Breadcrumbs />
       </Grid>
-      <Grid container spacing={3} sx={{ marginTop: "5px" }}>
+      <Grid container spacing={3}>
         {/* Left Column */}
         <Grid item lg={7} xs={12}>
           {/* WorkflowRunsTable */}
