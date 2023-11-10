@@ -35,8 +35,7 @@ class WorkflowBaseSettings(BaseModel):
     # TODO remove regex ?
     name: str = Field(
         description="Workflow name", 
-        example="workflow_name", 
-        pattern=r"^[\w]*$",
+        pattern=r"^[\w]*$"
     )
     start_date: str = Field(alias="startDateTime")
     select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
