@@ -171,37 +171,46 @@ export const WorkflowDetail: React.FC = () => {
       <Grid item xs={12}>
         <Breadcrumbs />
       </Grid>
-      <Grid item xs={12}>
-        <WorkflowRunsTable
-          triggerRun={() => {
-            if (workflow?.id) {
-              void handleRunWorkflow({ id: String(workflow.id) });
-            }
-          }}
-          selectedRun={selectedRun}
-          onSelectedRunChange={handleSelectRun}
-          workflowId={id as string}
-          autoUpdate={autoUpdate}
-          setAutoUpdate={setAutoUpdate}
-        />
-      </Grid>
-      <Grid item xs={7}>
-        <Paper sx={{ height: "46vh" }}>
-          <WorkflowPanel
-            ref={workflowPanelRef}
-            editable={false}
-            onNodeDoubleClick={onNodeDoubleClick}
+      <Grid container spacing={3}>
+        {/* Left Column */}
+        <Grid item xs={7}>
+          {/* WorkflowRunsTable */}
+          <Grid item xs={12}>
+            <WorkflowRunsTable
+              triggerRun={() => {
+                if (workflow?.id) {
+                  void handleRunWorkflow({ id: String(workflow.id) });
+                }
+              }}
+              selectedRun={selectedRun}
+              onSelectedRunChange={handleSelectRun}
+              workflowId={id as string}
+              autoUpdate={autoUpdate}
+              setAutoUpdate={setAutoUpdate}
+            />
+          </Grid>
+          {/* WorkflowPanel */}
+          <Grid item xs={12}>
+            <Paper sx={{ height: "46vh" }}>
+              <WorkflowPanel
+                ref={workflowPanelRef}
+                editable={false}
+                onNodeDoubleClick={onNodeDoubleClick}
+              />
+            </Paper>
+          </Grid>
+        </Grid>
+
+        {/* Right Column */}
+        <Grid item xs={5}>
+          <WorkflowRunDetail
+            runId={selectedRun?.workflow_run_id ?? null}
+            tasks={tasks}
+            nodeId={selectedNodeId}
+            workflowId={id as string}
+            autoUpdate={autoUpdate}
           />
-        </Paper>
-      </Grid>
-      <Grid item xs={5}>
-        <WorkflowRunDetail
-          runId={selectedRun?.workflow_run_id ?? null}
-          tasks={tasks}
-          nodeId={selectedNodeId}
-          workflowId={id as string}
-          autoUpdate={autoUpdate}
-        />
+        </Grid>
       </Grid>
     </Grid>
   );
