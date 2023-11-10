@@ -171,11 +171,11 @@ export const WorkflowDetail: React.FC = () => {
       <Grid item xs={12}>
         <Breadcrumbs />
       </Grid>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ marginTop: "0.5vh" }}>
         {/* Left Column */}
         <Grid item xs={7}>
           {/* WorkflowRunsTable */}
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ paddingLeft: "1rem" }}>
             <WorkflowRunsTable
               triggerRun={() => {
                 if (workflow?.id) {
@@ -190,7 +190,7 @@ export const WorkflowDetail: React.FC = () => {
             />
           </Grid>
           {/* WorkflowPanel */}
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ paddingLeft: "1rem", paddingTop: "2vh" }}>
             <Paper sx={{ height: "46vh" }}>
               <WorkflowPanel
                 ref={workflowPanelRef}
