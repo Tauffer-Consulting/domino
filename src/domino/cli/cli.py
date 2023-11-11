@@ -302,7 +302,12 @@ def cli_publish_images(registry_token: str):
 
 
 @click.command()
-def cli_create_release():
+@click.option(
+    '--tag-name',
+    default="",
+    help='Tag name'
+)
+def cli_create_release(tag_name: str):
     """
     Get release version for the Pieces repository in github stdout format.
     Used by github actions to set the release version.
@@ -310,7 +315,7 @@ def cli_create_release():
         - GITHUB_TOKEN
         - GITHUB_REPOSITORY
     """
-    pieces_repository.create_release()
+    pieces_repository.create_release(tag_name=tag_name)
 
 
 @click.command()
