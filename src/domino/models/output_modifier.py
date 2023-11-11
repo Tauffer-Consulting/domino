@@ -20,13 +20,12 @@ class OutputModifierModel(BaseModel):
             "from_upstream": "never"
         }
     )
-    type_: OutputModifierItemType = Field(
+    type: OutputModifierItemType = Field(
         default=OutputModifierItemType.string,
         description='Type of the output argument.',
         json_schema_extra={
             "from_upstream": "never"
         },
-        alias="type"
     )
     description: str = Field(
         default="",
