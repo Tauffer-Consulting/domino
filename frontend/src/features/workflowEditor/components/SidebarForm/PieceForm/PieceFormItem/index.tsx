@@ -5,6 +5,7 @@ import DatetimeInput from "components/DatetimeInput";
 import NumberInput from "components/NumberInput";
 import SelectInput from "components/SelectInput";
 import TextInput from "components/TextInput";
+import TextAreaInput from "components/TextAreaInput";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
 import React, { useMemo } from "react";
 import { type Control, useWatch } from "react-hook-form";
@@ -219,6 +220,18 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
         name={`inputs.${itemKey}.value`}
         language="sql"
         placeholder="Enter SQL code."
+      />
+    );
+  } else if (
+    ("type" in schema &&
+      "widget" in schema &&
+      schema.type === "string" &&
+      schema.widget === "textarea")) {
+    inputElement = (
+      <TextAreaInput<IWorkflowPieceData>
+        variant="outlined"
+        name={`inputs.${itemKey}.value`}
+        label={schema.title}
       />
     );
   } else if (
