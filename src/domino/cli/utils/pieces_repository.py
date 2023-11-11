@@ -487,9 +487,9 @@ def delete_release(tag_name: str):
 
     # Check if tag already exists
     tag = client.get_tag(repo_name=repository, tag_name=tag_name)
-    if not tag:
-        raise ValueError(f'Tag {tag_name} does not exist')
-
-    # Delete release by tag
-    client.delete_release_by_tag(repo_name=repository, tag_name=tag_name)
-    console.print(f"Release {tag_name} deleted successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+    if tag:
+        # Delete release by tag
+        client.delete_release_by_tag(repo_name=repository, tag_name=tag_name)
+        console.print(f"Release {tag_name} deleted successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+    else:
+        console.print(f"Release {tag_name} not found. Skipping deletion.", style=f"bold {COLOR_PALETTE.get('warning')}")
