@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 from enum import Enum
-from typing import List
 
 
 class OutputModifierItemType(str, Enum):
@@ -29,10 +28,11 @@ class OutputModifierModel(BaseModel):
             "from_upstream": "never"
         }
     )
-    type: OutputModifierItemType = Field(
+    type_: OutputModifierItemType = Field(
         default=OutputModifierItemType.string,
         description='Type of the output argument.',
         json_schema_extra={
             "from_upstream": "never"
-        }
+        },
+        alias="type"
     )
