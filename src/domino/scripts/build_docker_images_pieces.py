@@ -13,7 +13,6 @@ console = Console()
 
 def publish_image(source_image_name: str):
     client = docker.from_env()
-
     print(f"Publishing docker image: {source_image_name}")
     print(Style.RESET_ALL + Style.DIM, end='')
     try:
@@ -28,9 +27,10 @@ def publish_image(source_image_name: str):
     print(response, end='')
     print(Style.RESET_ALL + Fore.BLUE + f"Finished publishing: {source_image_name}")
 
+
 def build_image_from_tmp_dockerfile(
-    source_image_name: str, 
-    path: str = ".", 
+    source_image_name: str,
+    path: str = ".",
     dockerfile: str = "Dockerfile-tmp"
 ):
     client = docker.from_env()
@@ -56,7 +56,7 @@ def build_image_from_tmp_dockerfile(
         (Path(path) / dockerfile).unlink()
 
 
-def build_images_from_pieces_repository():
+def build_images_from_pieces_repository(tag_overwrite: str | None = None):
     """
     Each dependencies group will need to have its own Docker image built and published to be used by Domino.
     This is because the Pieces source code goes baked in the images.
@@ -67,14 +67,15 @@ def build_images_from_pieces_repository():
 
     # Get information from config.toml file
     with open(config_path, "rb") as f:
-        config_dict = tomli.load(f)
-    docker_image_repository = config_dict.get("repository").get("REPOSITORY_NAME")
-    docker_image_version = config_dict.get("repository").get("VERSION")
+        repo_config = tomli.load(f).get("repository", {})
 
-    #if publish:
-    github_container_registry_name = f'ghcr.io/{config_dict.get("repository").get("REGISTRY_NAME")}'.lower()
-    # else:
-    #     github_container_registry_name = f'local'
+    # Tag overwrite
+    if tag_overwrite:
+        repo_config["VERSION"] = tag_overwrite
+
+    docker_image_repository = repo_config.get("REPOSITORY_NAME")
+    docker_image_version = repo_config.get("VERSION")
+    github_container_registry_name = f'ghcr.io/{repo_config.get("REGISTRY_NAME")}'.lower()
 
     # Load dependencies_map.json file
     with open(domino_path / "dependencies_map.json", "r") as f:
@@ -90,7 +91,7 @@ def build_images_from_pieces_repository():
         # If no extra dependency, use base Pod image and just copy the Pieces source code
         if not any([dependency_dockerfile, dependency_requirements]):
             pieces_dependencies_map[group]["source_image"] = source_image_name
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-base-piece:latest
+            dockerfile_str = """FROM ghcr.io/tauffer-consulting/domino-base-piece:latest
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino

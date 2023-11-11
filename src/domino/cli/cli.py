@@ -276,9 +276,14 @@ def cli_create_piece_repository(name, container_registry):
     default="",
     help='The base url for this Pieces repository.'
 )
-def cli_organize_pieces_repository(build_images, source_url):
+@click.option(
+    '--tag-overwrite',
+    default="",
+    help='Overwrite tag for release.'
+)
+def cli_organize_pieces_repository(build_images: bool, source_url: str, tag_overwrite: str):
     """Organize Pieces repository."""
-    pieces_repository.organize_pieces_repository(build_images, source_url)
+    pieces_repository.organize_pieces_repository(build_images, source_url, tag_overwrite)
 
 
 @click.command()

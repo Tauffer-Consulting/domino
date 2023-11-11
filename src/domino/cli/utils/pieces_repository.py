@@ -243,11 +243,11 @@ def create_pieces_repository(repository_name: str, container_registry: str) -> N
     console.print("")
 
 
-def create_compiled_pieces_metadata(source_url: str = None) -> None:
+def create_compiled_pieces_metadata(source_url: str | None = None) -> None:
     """
     Create compiled metadata from Pieces metadata.json files and include input_schema generated from models.py
     """
-    from domino.scripts.load_piece import load_piece_models_from_path, load_piece_class_from_path
+    from domino.scripts.load_piece import load_piece_models_from_path
     from domino.utils.metadata_default import metadata_default
 
     pieces_path = Path(".") / "pieces"
@@ -345,14 +345,14 @@ def create_dependencies_map(save_map_as_file: bool = True) -> None:
             json.dump(pieces_images_map, outfile, indent=4, cls=SetEncoder)
 
 
-def build_docker_images() -> None:
+def build_docker_images(tag_overwrite: str | None = None) -> None:
     """
     Convenience function to build Docker images from the repository dependencies and publish them to Docker Hub
     """
     from domino.scripts.build_docker_images_pieces import build_images_from_pieces_repository
 
     console.print("Building Docker images and generating map file...")
-    updated_dependencies_map = build_images_from_pieces_repository()
+    updated_dependencies_map = build_images_from_pieces_repository(tag_overwrite=tag_overwrite)
     return updated_dependencies_map
 
 
@@ -384,7 +384,11 @@ def validate_repo_name(repo_name: str) -> None:
         raise ValueError("Repository name should not contain special characters")
 
 
-def organize_pieces_repository(build_images: bool, source_url: str) -> None:
+def organize_pieces_repository(
+    build_images: bool,
+    source_url: str,
+    tag_overwrite: str | None = None
+) -> None:
     """
     Organize Piece's repository for Domino. This will:
     - validate the folder structure, and create the pieces compiled_metadata.json and dependencies_map.json files
@@ -400,8 +404,14 @@ def organize_pieces_repository(build_images: bool, source_url: str) -> None:
     # Load config
     with open("config.toml", "rb") as f:
         repo_config = tomli.load(f)
+
+    # Validate repository name
     repo_name = repo_config["repository"]["REPOSITORY_NAME"]
     validate_repo_name(repo_name)
+
+    # Tag overwrite
+    if tag_overwrite:
+        repo_config["repository"]["VERSION"] = tag_overwrite
 
     # Create compiled metadata from Pieces metadata.json files and add data input schema
     create_compiled_pieces_metadata(source_url=source_url)
@@ -412,7 +422,7 @@ def organize_pieces_repository(build_images: bool, source_url: str) -> None:
 
     # Build and publish the images
     if build_images:
-        updated_dependencies_map = build_docker_images()
+        updated_dependencies_map = build_docker_images(tag_overwrite=tag_overwrite)
         map_file_path = Path(".") / ".domino/dependencies_map.json"
         with open(map_file_path, "w") as outfile:
             json.dump(updated_dependencies_map, outfile, indent=4)
