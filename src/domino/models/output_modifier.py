@@ -15,15 +15,7 @@ class OutputModifierItemType(str, Enum):
 
 class OutputModifierModel(BaseModel):
     name: str = Field(
-        default=None,
         description='Name of the output argument.',
-        json_schema_extra={
-            "from_upstream": "never"
-        }
-    )
-    description: str = Field(
-        default=None,
-        description='Description of the output argument.',
         json_schema_extra={
             "from_upstream": "never"
         }
@@ -35,4 +27,11 @@ class OutputModifierModel(BaseModel):
             "from_upstream": "never"
         },
         alias="type"
+    )
+    description: str = Field(
+        default="",
+        description='Description of the output argument.',
+        json_schema_extra={
+            "from_upstream": "never"
+        }
     )

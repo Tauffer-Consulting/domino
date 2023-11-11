@@ -86,11 +86,11 @@ def validate_env_vars() -> None:
     The accepted variables are:
         - GITHUB_ACCESS_TOKEN: Token to access GitHub API.
     """
-    # Set AIRFLOW_UID from host user id 
+    # Set AIRFLOW_UID from host user id
     # https://airflow.apache.org/docs/apache-airflow/stable/start/docker.html#setting-the-right-airflow-user
     # https://airflow.apache.org/docs/apache-airflow/stable/start/docker.html#environment-variables-supported-by-docker-compose
     uid = subprocess.run(["id", "-u"], capture_output=True, text=True)
-    set_config_as_env("AIRFLOW_UID", int(uid.stdout)) 
+    set_config_as_env("AIRFLOW_UID", int(uid.stdout))
 
     for var, validator in REQUIRED_ENV_VARS_VALIDATORS.items():
         if 'depends' in validator:
@@ -119,9 +119,9 @@ def validate_config(config_dict: dict) -> None:
             if key in required_fields:
                 required_fields.remove(key)
                 # Set config vars as env vars, it will be used by docker build
-                set_config_as_env(key, value) 
+                set_config_as_env(key, value)
     if len(required_fields) > 0:
-        console.print("Missing required fields: {}".format(required_fields), style=f"bold {COLOR_PALETTE.get('error')}") 
+        console.print("Missing required fields: {}".format(required_fields), style=f"bold {COLOR_PALETTE.get('error')}")
 
 
 def validate_repository_structure() -> None:
@@ -136,7 +136,7 @@ def validate_repository_structure() -> None:
     organized_domino_path = Path(".") / ".domino/"
     if not organized_domino_path.is_dir():
         organized_domino_path.mkdir(parents=True, exist_ok=True)
-    
+
     # Validating config
     config_path = Path(".") / 'config.toml'
     if not config_path.is_file():
@@ -157,7 +157,7 @@ def validate_repository_structure() -> None:
     if not (pieces_repository / 'pieces').is_dir():
         console.print("Pieces directory does not exist", style=f"bold {COLOR_PALETTE.get('error')}")
         raise Exception("Pieces directory does not exist")
-    
+
     if not (pieces_repository / 'dependencies').is_dir():
         console.print("Dependencies directory does not exist", style=f"bold {COLOR_PALETTE.get('error')}")
         raise Exception("Dependencies directory does not exist")
@@ -184,7 +184,7 @@ def validate_pieces_folders() -> None:
             files_names = [f.name for f in op_dir.glob("*")]
             if 'models.py' not in files_names:
                 missing_file_errors.append(f"missing 'models.py' for {op_dir.name}")
-            if 'piece.py' not in files_names: 
+            if 'piece.py' not in files_names:
                 missing_file_errors.append(f"missing 'piece.py' for {op_dir.name}")
             if len(missing_file_errors) > 0:
                 raise Exception('\n'.join(missing_file_errors))
@@ -198,13 +198,13 @@ def validate_pieces_folders() -> None:
                 # Validate Pieces name
                 if metadata.get("name", None) and not metadata["name"] == op_dir.name:
                     name_errors.append(op_dir.name)
-                
+
                 # Validate dependencies exist
                 if metadata.get("dependency", None):
                     req_file = metadata["dependency"].get("requirements_file", None)
                     if req_file and req_file != "default" and req_file not in dependencies_files:
                         missing_dependencies_errors.append(f'missing dependency file {req_file} defined for {op_dir.name}')
-                    
+
                     dock_file = metadata["dependency"].get("dockerfile", None)
                     if dock_file and dock_file != "default" and dock_file not in dependencies_files:
                         missing_dependencies_errors.append(f'missing dependency file {dock_file} defined for {op_dir.name}')
@@ -213,8 +213,8 @@ def validate_pieces_folders() -> None:
         raise Exception(f"The following Pieces have inconsistent names: {', '.join(name_errors)}")
     if len(missing_dependencies_errors) > 0:
         raise Exception("\n" + "\n".join(missing_dependencies_errors))
-    
-    
+
+
 def create_pieces_repository(repository_name: str, container_registry: str) -> None:
     """
     Create a new Pieces repository from template, with folder structure and placeholder files.
@@ -243,7 +243,7 @@ def create_pieces_repository(repository_name: str, container_registry: str) -> N
     console.print("")
 
 
-def create_compiled_pieces_metadata(source_url: str=None) -> None:  
+def create_compiled_pieces_metadata(source_url: str=None) -> None:
     """
     Create compiled metadata from Pieces metadata.json files and include input_schema generated from models.py
     """
@@ -268,7 +268,7 @@ def create_compiled_pieces_metadata(source_url: str=None) -> None:
 
             # Add input and output schemas
             input_model_class, output_model_class, secrets_model_class = load_piece_models_from_path(
-                pieces_folder_path=str(pieces_path), 
+                pieces_folder_path=str(pieces_path),
                 piece_name=op_dir.name
             )
             metadata["input_schema"] = input_model_class.model_json_schema()
@@ -282,7 +282,7 @@ def create_compiled_pieces_metadata(source_url: str=None) -> None:
 
             # Add to compiled metadata
             compiled_metadata[piece_name] = metadata
-    
+
     # Save compiled_metadata.json file
     organized_domino_path = Path(".") / ".domino/"
     with open(str(organized_domino_path / "compiled_metadata.json"), "w") as f:
@@ -305,7 +305,7 @@ def create_dependencies_map(save_map_as_file: bool = True) -> None:
 
     pieces_images_map = {}
     for op_i, (piece_name, piece_metadata) in enumerate(compiled_metadata.items()):
-        
+
         if piece_metadata.get("secrets_schema"):
             piece_secrets = set(piece_metadata.get("secrets_schema")["properties"].keys())
         else:
@@ -366,13 +366,13 @@ def publish_docker_images() -> None:
     pieces_images_map = json.loads(os.environ.get('PIECES_IMAGES_MAP', '{}'))
     if not pieces_images_map:
         raise ValueError("No images found to publish.")
-    
+
     console.print("Publishing Docker images...")
     all_images = set([e for e in pieces_images_map.values()])
     for image in all_images:
         console.print(f"Publishing image {image}...")
         publish_image(source_image_name=image)
-    
+
 
 
 
@@ -388,11 +388,11 @@ def validate_repo_name(repo_name: str) -> None:
 
 def organize_pieces_repository(build_images: bool, source_url: str) -> None:
     """
-    Organize Piece's repository for Domino. This will: 
+    Organize Piece's repository for Domino. This will:
     - validate the folder structure, and create the pieces compiled_metadata.json and dependencies_map.json files
     - build Docker images for the Pieces
     - publish images at github container registry
-    """        
+    """
     # Validate repository
     console.print("Validating repository structure and files...")
     validate_repository_structure()
@@ -404,10 +404,10 @@ def organize_pieces_repository(build_images: bool, source_url: str) -> None:
         repo_config = tomli.load(f)
     repo_name = repo_config["repository"]["REPOSITORY_NAME"]
     validate_repo_name(repo_name)
-    
+
     # Create compiled metadata from Pieces metadata.json files and add data input schema
     create_compiled_pieces_metadata(source_url=source_url)
-    
+
     # Generate dependencies_map.json file
     create_dependencies_map(save_map_as_file=True)
     console.print("Metadata and dependencies organized successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
@@ -420,31 +420,34 @@ def organize_pieces_repository(build_images: bool, source_url: str) -> None:
             json.dump(updated_dependencies_map, outfile, indent=4)
 
 
-
 def create_release():
     """
     Create a new release and tag in the repository for the latest commit.
     """
-    token = os.environ.get('GITHUB_TOKEN')
+    token = os.environ.get('GITHUB_TOKEN', None)
+    if not token:
+        raise ValueError("GITHUB_TOKEN not found in ENV vars.")
     client = GithubRestClient(token=token)
 
     # Get version from config.toml
     with open("config.toml", "rb") as f:
         repo_config = tomli.load(f)
 
-    version = repo_config.get("repository").get("VERSION")
+    version = repo_config.get("repository", {}).get("VERSION", None)
     if not version:
         raise ValueError("VERSION not found in config.toml")
 
     # https://docs.github.com/en/actions/learn-github-actions/contexts#example-printing-context-information-to-the-log
-    # Passing from context to env - ${{ github.repository }} - get repository from context 
-    repository = os.environ.get('GITHUB_REPOSITORY')
+    # Passing from context to env - ${{ github.repository }} - get repository from context
+    repository = os.environ.get('GITHUB_REPOSITORY', None)
+    if not repository:
+        raise ValueError("GITHUB_REPOSITORY not found in ENV vars.")
 
     # Check if tag already exists
     tag = client.get_tag(repo_name=repository, tag_name=version)
     if tag:
         raise ValueError(f'Tag {version} already exists')
-    
+
     # Get latest commit
     latest_commit = client.get_commits(repo_name=repository, number_of_commits=1)[0]
     # Create tag
@@ -459,3 +462,26 @@ def create_release():
     return release
 
 
+def delete_release(tag_name: str):
+    """
+    Delete a release with given tag from the repository.
+    """
+    token = os.environ.get('GITHUB_TOKEN', None)
+    if not token:
+        raise ValueError("GITHUB_TOKEN not found in ENV vars.")
+    client = GithubRestClient(token=token)
+
+    # https://docs.github.com/en/actions/learn-github-actions/contexts#example-printing-context-information-to-the-log
+    # Passing from context to env - ${{ github.repository }} - get repository from context
+    repository = os.environ.get('GITHUB_REPOSITORY', None)
+    if not repository:
+        raise ValueError("GITHUB_REPOSITORY not found in ENV vars.")
+
+    # Check if tag already exists
+    tag = client.get_tag(repo_name=repository, tag_name=tag_name)
+    if not tag:
+        raise ValueError(f'Tag {tag_name} does not exist')
+
+    # Delete release by tag
+    client.delete_release_by_tag(repo_name=repository, tag_name=tag_name)
+    console.print(f"Release {tag_name} deleted successfully!", style=f"bold {COLOR_PALETTE.get('success')}")

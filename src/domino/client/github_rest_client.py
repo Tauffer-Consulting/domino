@@ -19,7 +19,6 @@ class GithubRestClient(Github):
         """
         repo = super().get_repo(repo_name)
         tags = repo.get_tags()
-
         for tag in tags:
             if str(tag.name) == tag_name:
                 return tag
@@ -39,7 +38,7 @@ class GithubRestClient(Github):
         repo = super().get_repo(repo_name)
         contents = repo.get_contents(file_path)
         return contents
-    
+
     def create_file(self, repo_name: str, file_path: str, content: str):
         """
         Create a file in a repository.
@@ -47,8 +46,8 @@ class GithubRestClient(Github):
         repo = super().get_repo(repo_name)
         commit_msg = 'Create file'
         repo.create_file(
-            path=file_path, 
-            message=commit_msg, 
+            path=file_path,
+            message=commit_msg,
             content=content
         )
 
@@ -66,9 +65,9 @@ class GithubRestClient(Github):
         return commit
 
     def compare_commits(
-        self, 
+        self,
         repo_name: str,
-        base_sha: str, 
+        base_sha: str,
         head_sha: str
     ):
         """
@@ -77,7 +76,7 @@ class GithubRestClient(Github):
         repo = super().get_repo(repo_name)
         diff = repo.compare(base_sha, head_sha)
         return diff
-    
+
     def create_release(
         self,
         repo_name: str,
@@ -101,4 +100,21 @@ class GithubRestClient(Github):
         )
         return release
 
+    def delete_release_by_tag(self, repo_name: str, tag_name: str):
+        """
+        Delete a release with a specific tag in a repository.
+        """
+        repo = super().get_repo(repo_name)
+        try:
+            # Find the release by tag name
+            release_to_delete = None
+            for release in repo.get_releases():
+                if release.tag_name == tag_name:
+                    release_to_delete = release
+                    break
 
+            if release_to_delete:
+                # Delete the release
+                release_to_delete.delete_release()
+        except Exception as e:
+            raise Exception(f"An error occurred: {e}")

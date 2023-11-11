@@ -14,11 +14,11 @@ class DominoDockerOperator(DockerOperator):
         dag_id: str,
         task_id: str,
         piece_name: str,
-        deploy_mode: str, # TODO enum
+        deploy_mode: str,  # TODO enum
         repository_url: str,
         repository_version: str,
         workspace_id: int,
-        piece_input_kwargs: Optional[Dict] = None, 
+        piece_input_kwargs: Optional[Dict] = None,
         workflow_shared_storage: WorkflowSharedStorage = None,
         **docker_operator_kwargs
     ) -> None:
@@ -51,31 +51,31 @@ class DominoDockerOperator(DockerOperator):
         shared_storage_host_path = os.environ.get('LOCAL_DOMINO_SHARED_DATA_PATH', '')
         shared_storage_container_path = '/home/shared_storage'
         mounts = []
-        
+
         # TODO remove - used in DEV only
-        mounts=[
+        mounts = [
             # TODO remove
             # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
-            # Mount(source='/media/luiz/storage2/Github/default_domino_pieces', target='/home/domino/pieces_repository/', type='bind', read_only=True),
+            # Mount(source='/mnt/shared_storage/Github/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+            # Mount(source='/mnt/shared_storage/Github/default_domino_pieces', target='/home/domino/pieces_repository/', type='bind', read_only=True),
         ]
         if self.workflow_shared_storage and str(self.workflow_shared_storage.source.value).lower() == str(getattr(StorageSource, 'local').value).lower():
             mounts.append(
                 Mount(
-                    source=shared_storage_host_path, 
-                    target=shared_storage_container_path, 
-                    type='bind', 
+                    source=shared_storage_host_path,
+                    target=shared_storage_container_path,
+                    type='bind',
                     read_only=False
                 ),
             )
 
         super().__init__(
-            **docker_operator_kwargs, 
+            **docker_operator_kwargs,
             task_id=task_id,
             docker_url='tcp://docker-proxy:2375',
             mounts=mounts,
             environment=self.environment,
         )
-    
 
     def _get_piece_secrets(self) -> Dict[str, Any]:
         """Get piece secrets values from Domino API"""
@@ -97,11 +97,10 @@ class DominoDockerOperator(DockerOperator):
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
         piece_secrets = {
-            e.get('name'): e.get('value') 
+            e.get('name'): e.get('value')
             for e in secrets_response.json()
         }
         return piece_secrets
-    
 
     @staticmethod
     def _get_upstream_xcom_data_from_task_ids(task_ids: list, context: Context):
@@ -110,9 +109,8 @@ class DominoDockerOperator(DockerOperator):
             upstream_xcoms_data[tid] = context['ti'].xcom_pull(task_ids=tid)
         return upstream_xcoms_data
 
-
     def _get_piece_kwargs_value_from_upstream_xcom(
-        self, 
+        self,
         value: Any
     ):
         if isinstance(value, dict) and value.get("type") == "fromUpstream":
@@ -125,16 +123,15 @@ class DominoDockerOperator(DockerOperator):
             return [self._get_piece_kwargs_value_from_upstream_xcom(item) for item in value]
         elif isinstance(value, dict):
             return {
-                k: self._get_piece_kwargs_value_from_upstream_xcom(v) 
+                k: self._get_piece_kwargs_value_from_upstream_xcom(v)
                 for k, v in value.items()
             }
         return value
 
-
     def _update_piece_kwargs_with_upstream_xcom(self):
         if not self.piece_input_kwargs:
             self.piece_input_kwargs = dict()
-        
+
         updated_piece_kwargs = {
             k: self._get_piece_kwargs_value_from_upstream_xcom(
                 value=v
@@ -144,9 +141,8 @@ class DominoDockerOperator(DockerOperator):
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS_SHARED_STORAGE'] = str(self.shared_storage_upstream_ids_list)
         self.environment['DOMINO_RUN_PIECE_KWARGS'] = str(self.piece_input_kwargs)
 
-
     def _prepare_execute_environment(self, context: Context):
-        """ 
+        """
         Prepare execution with the following configurations:
         - pass extra arguments and configuration as environment variables to the pod
         - add shared storage sidecar container to the pod - if shared storage is FUSE based
@@ -156,7 +152,7 @@ class DominoDockerOperator(DockerOperator):
         upstream_task_ids = [t.task_id for t in self.get_direct_relatives(upstream=True)]
         self.environment['AIRFLOW_UPSTREAM_TASKS_IDS'] = str(upstream_task_ids)
         self.environment['DOMINO_WORKFLOW_SHARED_STORAGE_SOURCE_NAME'] = str(self.workflow_shared_storage.source.name) if self.workflow_shared_storage else None
-    
+
         # Save updated piece input kwargs with upstream data to environment variable
         self.upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
         self._update_piece_kwargs_with_upstream_xcom()
@@ -169,7 +165,6 @@ class DominoDockerOperator(DockerOperator):
         dag_run_id_path = dag_run_id.replace("-", "_").replace(".", "_").replace(" ", "_").replace(":", "_").replace("+", "_")
         self.workflow_run_subpath = f"{dag_id}/{dag_run_id_path}"
         self.environment['DOMINO_WORKFLOW_RUN_SUBPATH'] = self.workflow_run_subpath
-
 
     def execute(self, context: Context) -> Optional[str]:
         """
