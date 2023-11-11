@@ -72,7 +72,7 @@ def set_config_as_env(key: str, value: Union[str, int, float]) -> None:
     os.environ[key] = str(value)
 
 
-def validate_repository_name(name: str) -> None:
+def validate_repository_name(name: str) -> bool:
     regex = r'^[A-Za-z0-9_]*$'
     pattern = re.compile(regex)
     if pattern.match(name):
@@ -94,8 +94,8 @@ def validate_env_vars() -> None:
 
     for var, validator in REQUIRED_ENV_VARS_VALIDATORS.items():
         if 'depends' in validator:
-            should_exists = validator.get('depends')(CONFIG_REQUIRED_FIELDS)
-        if not should_exists:
+            should_exist = validator.get('depends')(CONFIG_REQUIRED_FIELDS)
+        if not should_exist:
             continue
         env_var = os.environ.get(var, None)
         if env_var:
@@ -243,7 +243,7 @@ def create_pieces_repository(repository_name: str, container_registry: str) -> N
     console.print("")
 
 
-def create_compiled_pieces_metadata(source_url: str=None) -> None:
+def create_compiled_pieces_metadata(source_url: str = None) -> None:
     """
     Create compiled metadata from Pieces metadata.json files and include input_schema generated from models.py
     """
@@ -372,8 +372,6 @@ def publish_docker_images() -> None:
     for image in all_images:
         console.print(f"Publishing image {image}...")
         publish_image(source_image_name=image)
-
-
 
 
 def validate_repo_name(repo_name: str) -> None:
