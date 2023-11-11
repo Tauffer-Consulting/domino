@@ -234,7 +234,7 @@ def create_pieces_repository(repository_name: str, container_registry: str) -> N
         repo_config = tomli.load(f)
 
     repo_config["repository"]["REPOSITORY_NAME"] = repository_name
-    repo_config["repository"]["REGISTRY_NAME"] =  container_registry if container_registry else "enter-your-github-registry-name-here"
+    repo_config["repository"]["REGISTRY_NAME"] = container_registry if container_registry else "enter-your-github-registry-name-here"
 
     with open(f"{repository_name}/config.toml", "wb") as f:
         tomli_w.dump(repo_config, f)
@@ -428,7 +428,7 @@ def organize_pieces_repository(
             json.dump(updated_dependencies_map, outfile, indent=4)
 
 
-def create_release():
+def create_release(tag_name: str | None = None):
     """
     Create a new release and tag in the repository for the latest commit.
     """
@@ -444,6 +444,10 @@ def create_release():
     version = repo_config.get("repository", {}).get("VERSION", None)
     if not version:
         raise ValueError("VERSION not found in config.toml")
+
+    # Overwrite version if tag_name is passed
+    if tag_name:
+        version = tag_name
 
     # https://docs.github.com/en/actions/learn-github-actions/contexts#example-printing-context-information-to-the-log
     # Passing from context to env - ${{ github.repository }} - get repository from context
