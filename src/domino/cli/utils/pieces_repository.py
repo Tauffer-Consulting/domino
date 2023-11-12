@@ -8,6 +8,7 @@ import uuid
 import os
 import re
 import shutil
+import time
 from pathlib import Path
 from rich.console import Console
 from typing import Union
@@ -499,6 +500,14 @@ def delete_release(tag_name: str):
     if tag:
         # Delete release by tag
         client.delete_release_by_tag(repo_name=repository, tag_name=tag_name)
-        console.print(f"Release {tag_name} deleted successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+        console.print(f"Attempting to delete release {tag_name}...", style="bold")
+        timeout = 30  # 30 seconds timeout
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if not client.get_tag(repo_name=repository, tag_name=tag_name):
+                console.print(f"Release {tag_name} deleted successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                return
+            time.sleep(5)  # Wait for 5 seconds before checking again
+        console.print(f"Deletion error: Release {tag_name} still exists after {timeout} seconds.", style=f"bold {COLOR_PALETTE.get('warning')}")
     else:
         console.print(f"Release {tag_name} not found. Skipping deletion.", style=f"bold {COLOR_PALETTE.get('warning')}")
