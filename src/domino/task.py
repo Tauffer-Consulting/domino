@@ -15,7 +15,7 @@ from domino.schemas import shared_storage_map, StorageSource
 
 class Task(object):
     """
-    The Task object represents a task in a workflow. 
+    The Task object represents a task in a workflow.
     It is only instantiated by processes parsing dag files in Airflow.
     """
     def __init__(
@@ -52,9 +52,9 @@ class Task(object):
         provider_options = workflow_shared_storage.pop("provider_options", {})
         if shared_storage_map[shared_storage_source_name]:
             self.workflow_shared_storage = shared_storage_map[shared_storage_source_name](
-                **workflow_shared_storage, 
+                **workflow_shared_storage,
                 **provider_options
-            ) 
+            )
         else:
             self.workflow_shared_storage = shared_storage_map[shared_storage_source_name]
 
@@ -62,7 +62,7 @@ class Task(object):
         self.container_resources = container_resources
 
         # Get deploy mode
-        self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')            
+        self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')
 
         # Set up task operator
         self._task_operator = self._set_operator()
@@ -97,7 +97,7 @@ class Task(object):
                 )
             )
 
-        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:            
+        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:
             # References:
             # - https://airflow.apache.org/docs/apache-airflow/1.10.14/_api/airflow/contrib/operators/kubernetes_pod_operator/index.html
             # - https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html

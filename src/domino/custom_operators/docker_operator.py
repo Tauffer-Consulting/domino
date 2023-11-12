@@ -52,13 +52,19 @@ class DominoDockerOperator(DockerOperator):
         shared_storage_container_path = '/home/shared_storage'
         mounts = []
 
-        # TODO remove - used in DEV only
-        mounts = [
-            # TODO remove
-            # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
-            # Mount(source='/mnt/shared_storage/Github/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
-            # Mount(source='/mnt/shared_storage/Github/default_domino_pieces', target='/home/domino/pieces_repository/', type='bind', read_only=True),
-        ]
+        # TODO remove - used in DEV only #######################
+        dev_pieces = False
+        if dev_pieces:
+            piece_repo_name = repository_url.split("/")[-1]
+            local_repos_path = f"/mnt/shared_storage/Github/{piece_repo_name}"
+            mounts = [
+                # TODO remove
+                # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+                Mount(source='/mnt/shared_storage/Github/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+                Mount(source=local_repos_path, target='/home/domino/pieces_repository/', type='bind', read_only=True),
+            ]
+        ########################################################
+
         if self.workflow_shared_storage and str(self.workflow_shared_storage.source.value).lower() == str(getattr(StorageSource, 'local').value).lower():
             mounts.append(
                 Mount(
