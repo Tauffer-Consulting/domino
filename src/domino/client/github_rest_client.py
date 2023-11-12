@@ -83,7 +83,7 @@ class GithubRestClient(Github):
         version: str,
         tag_message: str,
         release_message: str,
-        target_commitish: str,
+        target_commit_sha: str,
         release_type: str = "commit"
     ):
         """
@@ -95,7 +95,7 @@ class GithubRestClient(Github):
             tag_message=tag_message,
             release_name=version,
             release_message=release_message,
-            object=target_commitish,
+            object=target_commit_sha,
             type=release_type
         )
         return release

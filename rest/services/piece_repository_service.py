@@ -38,7 +38,7 @@ class PieceRepositoryService(object):
         self.piece_repository_repository = PieceRepositoryRepository()
         self.workflow_repository = WorkflowRepository()
         self.secret_repository = SecretRepository()
-        
+
         # TODO change token from app level to workspace level
 
     def get_piece_repository(self, piece_repository_id: int) -> GetRepositoryResponse:
@@ -127,7 +127,7 @@ class PieceRepositoryService(object):
         self.logger.info(f"Updating piece repository {repository.id} for workspace {repository.workspace_id}")
 
         repository_files_metadata = self._read_repository_data(
-            source=repository.source, 
+            source=repository.source,
             path=repository.path,
             version=piece_repository_data.version
         )
@@ -154,7 +154,7 @@ class PieceRepositoryService(object):
         for value in repository_files_metadata['dependencies_map'].values():
             for secret in value.get('secrets'):
                 all_current_secrets.add(secret)
-        
+
         for secret in all_current_secrets:
             db_secret = self.secret_repository.find_by_name_and_piece_repository_id(
                 name=secret,
@@ -206,7 +206,7 @@ class PieceRepositoryService(object):
 
     def create_piece_repository(
         self,
-        piece_repository_data: CreateRepositoryRequest, 
+        piece_repository_data: CreateRepositoryRequest,
         auth_context: AuthorizationContextData
     ) -> CreateRepositoryReponse:
 
@@ -223,7 +223,7 @@ class PieceRepositoryService(object):
             token = None
         repository_files_metadata = self._read_repository_data(
             source=piece_repository_data.source,
-            path=piece_repository_data.path, 
+            path=piece_repository_data.path,
             version=piece_repository_data.version,
             github_access_token=token
         )

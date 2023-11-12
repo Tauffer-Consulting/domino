@@ -428,7 +428,7 @@ def organize_pieces_repository(
             json.dump(updated_dependencies_map, outfile, indent=4)
 
 
-def create_release(tag_name: str | None = None):
+def create_release(tag_name: str | None = None, commit_sha: str | None = None):
     """
     Create a new release and tag in the repository for the latest commit.
     """
@@ -461,14 +461,19 @@ def create_release(tag_name: str | None = None):
         raise ValueError(f'Tag {version} already exists')
 
     # Get latest commit
-    latest_commit = client.get_commits(repo_name=repository, number_of_commits=1)[0]
+    if not commit_sha:
+        latest_commit = client.get_commits(repo_name=repository, number_of_commits=1)[0]
+        commit_sha = latest_commit.sha
+    if not commit_sha:
+        raise ValueError("Commit SHA not found")
+
     # Create tag
     release = client.create_release(
         repo_name=repository,
         version=version,
         tag_message=f'Release {version}',
         release_message=f'Release {version}',
-        target_commitish=latest_commit.sha,
+        target_commit_sha=commit_sha,
     )
     console.print(f"Release {version} created successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
     return release

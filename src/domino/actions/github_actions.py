@@ -21,7 +21,7 @@ class Actions(object):
         if matched:
             return cls.new_tag
         raise Exception(f"Invalid tag format: {cls.new_tag}")
-    
+
     @classmethod
     def _check_github_releases_versions(cls):
         """
@@ -55,7 +55,7 @@ class Actions(object):
             version=cls.new_tag,
             tag_message=f"Release {cls.new_tag} Python package",
             release_message=f"Release {cls.new_tag} Python package",
-            target_commitish=last_commit_sha
+            target_commit_sha=last_commit_sha
         )
         return release
 

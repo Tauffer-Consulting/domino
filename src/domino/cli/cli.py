@@ -307,7 +307,12 @@ def cli_publish_images(registry_token: str):
     default="",
     help='Tag name'
 )
-def cli_create_release(tag_name: str):
+@click.option(
+    '--commit-sha',
+    default="",
+    help='Commit SHA'
+)
+def cli_create_release(tag_name: str, commit_sha: str):
     """
     Get release version for the Pieces repository in github stdout format.
     Used by github actions to set the release version.
@@ -315,7 +320,7 @@ def cli_create_release(tag_name: str):
         - GITHUB_TOKEN
         - GITHUB_REPOSITORY
     """
-    pieces_repository.create_release(tag_name=tag_name)
+    pieces_repository.create_release(tag_name=tag_name, commit_sha=commit_sha)
 
 
 @click.command()
