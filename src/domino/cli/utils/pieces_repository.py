@@ -500,6 +500,7 @@ def delete_release(tag_name: str):
     if tag:
         # Delete release by tag
         client.delete_release_by_tag(repo_name=repository, tag_name=tag_name)
+        client.delete_tag(repo_name=repository, tag_name=tag_name)
         console.print(f"Attempting to delete release {tag_name}...", style="bold")
         timeout = 30  # 30 seconds timeout
         start_time = time.time()

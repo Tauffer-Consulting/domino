@@ -118,3 +118,16 @@ class GithubRestClient(Github):
                 release_to_delete.delete_release()
         except Exception as e:
             raise Exception(f"An error occurred: {e}")
+
+    def delete_tag(self, repo_name: str, tag_name: str):
+        """
+        Delete a tag from a GitHub repository.
+        """
+        repo = super().get_repo(repo_name)
+        try:
+            # Delete tag by reference
+            ref = 'tags/' + tag_name
+            repo.get_git_ref(ref).delete()
+            print(f"Tag '{tag_name}' deleted successfully.")
+        except Exception as e:
+            raise Exception(f"Error deleting tag: {e}")
