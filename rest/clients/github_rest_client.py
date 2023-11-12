@@ -4,8 +4,10 @@ from schemas.exceptions.base import ResourceNotFoundException, ForbiddenExceptio
 
 
 class GithubRestClient(Github):
-    def __init__(self, token):
-        super().__init__(token)
+    def __init__(self, token: str | None = None):
+        if token == "":
+            token = None
+        super().__init__(login_or_token=token)
         self.logger = get_configured_logger(self.__class__.__name__)
 
     def _handle_exceptions(self, _exception):
