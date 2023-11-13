@@ -172,10 +172,6 @@ export const WorkflowDetail: React.FC = () => {
 
   const handleSelectRun = useCallback(
     (run: IWorkflowRuns | null) => {
-      // if (!(run?.state === "success") && !(run?.state === "failed")) {
-      //   setAutoUpdate(true);
-      // }
-      // TODO force run without first delay
       setSelectedRun(run);
       setAutoUpdate(true);
     },
@@ -195,7 +191,7 @@ export const WorkflowDetail: React.FC = () => {
     }
   }, [selectedRun, refresh]);
 
-  useInterval(refreshTasks, 1000, autoUpdate);
+  useInterval(refresh, 1000, autoUpdate);
 
   return (
     <Grid container spacing={3}>
@@ -211,6 +207,7 @@ export const WorkflowDetail: React.FC = () => {
               triggerRun={() => {
                 if (workflow?.id) {
                   void handleRunWorkflow({ id: String(workflow.id) });
+                  setAutoUpdate(true);
                 }
               }}
               selectedRun={selectedRun}
