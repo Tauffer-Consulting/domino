@@ -24,8 +24,8 @@ from core.settings import settings
 from typing import List
 from math import ceil
 
-class WorkspaceService(object):
 
+class WorkspaceService(object):
     def __init__(self) -> None:
         self.workspace_repository = WorkspaceRepository()
         self.user_repository = UserRepository()
@@ -85,8 +85,8 @@ class WorkspaceService(object):
                 auth_context=auth_context
             )
             return CreateWorkspaceResponse(
-                id=workspace.id, 
-                name=workspace.name, 
+                id=workspace.id,
+                name=workspace.name,
                 user_permission=associative.permission,
             )
         except (BaseException, ForbiddenException, UnauthorizedException, ResourceNotFoundException) as e:
@@ -117,7 +117,7 @@ class WorkspaceService(object):
         workspace.github_access_token = decoded_encrypted_secret
         self.workspace_repository.update(workspace)
         return PatchWorkspaceResponse(
-            id=workspace.id, 
+            id=workspace.id,
             workspace_name=workspace.name,
             github_access_token_filled=workspace.github_access_token is not None,
             status=_workspace.status,
@@ -194,7 +194,7 @@ class WorkspaceService(object):
                 status=UserWorkspaceStatus.pending.value
             )
         )
-    
+
     async def delete_workspace(self, workspace_id: int):
         workspace = self.workspace_repository.find_by_id(id=workspace_id)
         if not workspace:
@@ -216,17 +216,17 @@ class WorkspaceService(object):
         )
         if not _workspace:
             raise ResourceNotFoundException('Workspace invite not found.')
- 
+
         workspace = _workspace.Workspace
         associative = _workspace.UserWorkspaceAssociative
-    
+
         if action == UserWorkspaceStatus.accepted.value:
             associative.status = UserWorkspaceStatus.accepted.value
         elif action == UserWorkspaceStatus.rejected.value:
             associative.status = UserWorkspaceStatus.rejected.value
         else:
             raise BaseException('Invalid action.')
-    
+
         updated_associative = self.workspace_repository.update_user_workspace_associative_by_ids(associative)
         if not updated_associative:
             raise ResourceNotFoundException('Workspace invite not found.')
@@ -244,7 +244,7 @@ class WorkspaceService(object):
         # Can't remove other users if not owner
         if auth_context.user_id != user_id and auth_context.workspace.user_permission != Permission.owner.value:
             raise ForbiddenException()
-        
+
         workspace_infos = self.workspace_repository.find_user_workspaces_members_owners_count(
             user_id=user_id,
             workspaces_ids=[workspace_id]
@@ -257,8 +257,8 @@ class WorkspaceService(object):
         if workspace_info.members_count == 1:
             await self.delete_workspace(workspace_id=workspace_id)
             return
-        
-        # If the user is owner and the workspace has only one owner (the user) but has more than one member, delete the workspace. 
+
+        # If the user is owner and the workspace has only one owner (the user) but has more than one member, delete the workspace.
         if workspace_info.owners_count == 1 and auth_context.user_id == user_id and auth_context.workspace.user_permission == Permission.owner.value:
             await self.delete_workspace(workspace_id=workspace_id)
 
@@ -278,13 +278,13 @@ class WorkspaceService(object):
         workspace = self.workspace_repository.find_by_id(id=workspace_id)
         if not workspace:
             raise ResourceNotFoundException("Workspace not found.")
-        
+
         workspace_users_data = self.workspace_repository.find_workspace_users(
             workspace_id=workspace_id,
             page=page,
             page_size=page_size
         )
-        
+
         count = workspace_users_data[0].count if workspace_users_data else 0
         response_metadata = PaginationSet(
             page=page,
@@ -303,10 +303,9 @@ class WorkspaceService(object):
                     status=workspace_user_data.UserWorkspaceAssociative.status.value
                 )
             )
-            
+
         return ListWorkspaceUsersResponse(
             data=response_data,
             metadata=response_metadata
-        )    
-        
-        
+        )
+

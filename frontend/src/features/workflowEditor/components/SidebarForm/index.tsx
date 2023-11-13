@@ -151,6 +151,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     if (open) {
       void loadData();
     } else {
+      setFormLoaded(false);
       reset();
     }
   }, [open, reset, loadData]);
@@ -159,6 +160,10 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   useEffect(() => {
     void saveData();
   }, [saveData]);
+
+  if (!formLoaded) {
+    return null;
+  }
 
   return (
     <Drawer

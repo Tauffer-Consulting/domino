@@ -35,8 +35,7 @@ class WorkflowBaseSettings(BaseModel):
     # TODO remove regex ?
     name: str = Field(
         description="Workflow name", 
-        example="workflow_name", 
-        pattern=r"^[\w]*$",
+        pattern=r"^[\w]*$"
     )
     start_date: str = Field(alias="startDateTime")
     select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
@@ -142,6 +141,7 @@ class CreateWorkflowRequest(BaseModel):
         TasksDataModel
     ]
     ui_schema: UiSchema
+    forageSchema: dict
 
     @field_validator('tasks')
     def tasks_validator(cls, v):

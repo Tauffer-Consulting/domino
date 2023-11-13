@@ -194,9 +194,17 @@ export function createInputsSchemaValidation(schema: any) {
         const required = true; // for arrays, we always require the value
         inputSchema = yup.object({
           ...defaultValidation,
-          value: yup
-            .array()
-            .of(getValidationValueBySchemaType(subItemSchema, required) as any),
+          value: yup.array().when("fromUpstream", (fromUpstream) => {
+            if (fromUpstream) {
+              return yup.mixed().notRequired();
+            }
+
+            return yup
+              .array()
+              .of(
+                getValidationValueBySchemaType(subItemSchema, required) as any,
+              );
+          }),
         });
       } else {
         const required = requiredFields.includes(key);

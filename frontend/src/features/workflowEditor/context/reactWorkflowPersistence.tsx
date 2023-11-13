@@ -1,4 +1,4 @@
-import { type IWorkflowElement } from "features/workflows/types";
+import { type IWorkflowElement } from "features/myWorkflows/types";
 import React, { useCallback } from "react";
 import { type Node, type Edge } from "reactflow";
 import localForage from "services/config/localForage.config";

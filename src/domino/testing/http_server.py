@@ -2,6 +2,7 @@ from bottle import run, Bottle, request
 from domino.testing.dry_run import piece_dry_run
 import json
 
+
 app = Bottle()
 
 
@@ -15,6 +16,7 @@ def run_test():
 @app.route("/health-check")
 def health_check():
     return {"status": "ok"}
+
 
 def run_server():
     run(app=app, host='0.0.0.0', port=8080)
