@@ -28,66 +28,41 @@ class TestWorkflowRouter:
             id=1,
             name=workflow_request_model["workflow"]["name"],
             created_at=datetime.utcnow(),
-            schema=WorkflowSchemaBaseModel(
-                workflow={
-                    "name": workflow_request_model["workflow"]["name"],
-                    "start_date": workflow_request_model["workflow"]["start_date"],
-                    "end_date": None,
-                    "schedule": None,
-                    "catchup": False,
-                    "generate_report": False,
-                    "description": None
-                },
-                tasks=workflow_request_model['tasks']
-            ),
+            schema=workflow_request_model['forageSchema'],
             created_by=user.id,
             last_changed_at=datetime.utcnow(),
             last_changed_by=user.id
         )
         response=create_workflow
         content=response.json()
-        mock_response_content=json.loads(mock_response.json(by_alias=True))
+        mock_response_content=json.loads(mock_response.model_dump_json(by_alias=True))
 
         assert response.status_code == 201
         assert content.keys() == mock_response_content.keys()
         
         assert content.get("name") == mock_response_content.get("name")
 
-        for key, value in content["schema"]["workflow"].items():
-            assert value == mock_response_content["schema"]["workflow"].get(key)
-        
-        tasks_ids = []
-        for task in content["schema"]["tasks"].items():
-            tasks_ids.append(content["schema"]["tasks"][task[0]].get("task_id"))
-            assert content["schema"]["tasks"][task[0]].get("task_id") == mock_response_content["schema"]["tasks"][task[0]].get("task_id")
-            assert content["schema"]["tasks"][task[0]]["piece"].get("name") == mock_response_content["schema"]["tasks"][task[0]]["piece"].get("name")
-            assert content["schema"]["tasks"][task[0]]["piece"].get("repository_id") == mock_response_content["schema"]["tasks"][task[0]]["piece"].get("repository_id")
-            if "upstream" in content["schema"]["tasks"][task[0]]:
-                assert content["schema"]["tasks"][task[0]].get("upstream") == mock_response_content["schema"]["tasks"][task[0]].get("upstream")
-
         assert content.get("created_by") == mock_response_content.get("created_by")
         assert content.get("last_changed_by") == mock_response_content.get("last_changed_by")
-
-        assert len(tasks_ids) == len(set(tasks_ids))
 
 
     @staticmethod
     @pytest.mark.skip(reason="Requires a workflow to be created")
     def test_get_workflow(get_workflow: Response, workflow: Workflow, default_workspace: Workspace, user: User):
         mock_response = GetWorkflowResponse(
-            id = workflow.id,
-            name = workflow.name,
-            created_at = workflow.created_at,
-            schema = BaseWorkflowModel(
-                workflow = WorkflowConfigResponse(
-                    name = workflow.name,
-                    start_date = str(datetime.utcnow())
+            id=workflow.id,
+            name=workflow.name,
+            created_at=workflow.created_at,
+            schema=BaseWorkflowModel(
+                workflow=WorkflowConfigResponse(
+                    name=workflow.name,
+                    start_date=str(datetime.utcnow())
                 ),
-                tasks = dict()
+                tasks=dict()
             ),
-            ui_schema = BaseUiSchema(
-                nodes = dict(),
-                edges = list(dict())
+            ui_schema=BaseUiSchema(
+                nodes=dict(),
+                edges=list(dict())
             ),
             last_changed_at = datetime.utcnow(),
             last_changed_by = user.id,

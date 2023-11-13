@@ -78,7 +78,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
           return (
             "items" in inputSchema &&
             "$ref" in inputSchema.items &&
-            inputSchema.items.$ref === "#/definitions/OutputModifierModel"
+            inputSchema.items.$ref === "#/$defs/OutputModifierModel"
           );
         },
       );
@@ -151,6 +151,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     if (open) {
       void loadData();
     } else {
+      setFormLoaded(false);
       reset();
     }
   }, [open, reset, loadData]);
@@ -159,6 +160,10 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
   useEffect(() => {
     void saveData();
   }, [saveData]);
+
+  if (!formLoaded) {
+    return null;
+  }
 
   return (
     <Drawer
@@ -173,7 +178,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
           minWidth: "300px",
         },
       }}
-      BackdropProps={{ style: { backgroundColor: "transparent" } }}
+      slotProps={{ backdrop: { style: { backgroundColor: "transparent" } } }}
     >
       <div
         style={{

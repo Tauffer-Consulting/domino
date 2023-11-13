@@ -2,16 +2,15 @@ import { useWorkspaces } from "context/workspaces";
 import {
   type IPostWorkflowParams,
   useAuthenticatedPostWorkflow,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import {
   type IWorkflowElement,
   type IPostWorkflowResponseInterface,
-} from "features/workflows/types";
+} from "features/myWorkflows/types";
 import React, { type FC, useCallback } from "react";
 import { type Edge } from "reactflow";
-import { createCustomContext, generateTaskName, getIdSlice } from "utils";
+import { createCustomContext, generateTaskName } from "utils";
 
-import { usesPieces, type IPiecesContext } from "./pieces";
 import {
   useReactWorkflowPersistence,
   type IReactWorkflowPersistenceContext,
@@ -33,26 +32,22 @@ import {
 } from "./workflowSettingsData";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type GenerateWorkflowsParams = {
+export type GenerateWorkflowsParams = {
+  workflowPieces: Record<string, Piece>;
   workflowPiecesData: ForagePiecesData;
   workflowSettingsData: IWorkflowSettings;
   workflowNodes: IWorkflowElement[];
   workflowEdges: Edge[];
 };
 
-export type DominoWorkflowForage = GenerateWorkflowsParams & {
-  workflowPieces: Record<string, Piece>;
-};
-
 interface IWorkflowsEditorContext
-  extends IPiecesContext,
-    IReactWorkflowPersistenceContext,
+  extends IReactWorkflowPersistenceContext,
     IWorkflowSettingsContext,
     IWorkflowPieceContext,
     IWorkflowPiecesDataContext {
-  fetchWorkflowForage: () => Promise<DominoWorkflowForage>;
+  fetchWorkflowForage: () => Promise<GenerateWorkflowsParams>;
   importWorkflowToForage: (
-    importedWorkflow: DominoWorkflowForage,
+    importedWorkflow: GenerateWorkflowsParams,
   ) => Promise<void>;
   generateWorkflowsEditorBodyParams: (
     p: GenerateWorkflowsParams,
@@ -71,17 +66,6 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 }) => {
   const { workspace } = useWorkspaces();
   const postWorkflow = useAuthenticatedPostWorkflow();
-
-  const {
-    repositories,
-    repositoriesError,
-    repositoriesLoading,
-    repositoryPieces,
-    fetchForagePieceById,
-    fetchRepoById,
-    search,
-    handleSearch,
-  } = usesPieces();
 
   const {
     setWorkflowEdges,
@@ -132,7 +116,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     const workflowSettingsData = await fetchWorkflowSettingsData();
     const workflowNodes = await fetchForageWorkflowNodes();
     const workflowEdges = await fetchForageWorkflowEdges();
-    const result: DominoWorkflowForage = {
+    const result: GenerateWorkflowsParams = {
       workflowPieces,
       workflowPiecesData,
       workflowSettingsData,
@@ -147,7 +131,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
   ]);
 
   const importWorkflowToForage = useCallback(
-    async (dominoWorkflow: DominoWorkflowForage) => {
+    async (dominoWorkflow: GenerateWorkflowsParams) => {
       await setForageWorkflowPieces(dominoWorkflow.workflowPieces);
       await setForageWorkflowPiecesData(dominoWorkflow.workflowPiecesData);
       await setWorkflowSettingsData(dominoWorkflow.workflowSettingsData);
@@ -165,6 +149,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 
   const generateWorkflowsEditorBodyParams = useCallback(
     async ({
+      workflowPieces,
       workflowPiecesData,
       workflowSettingsData,
       workflowNodes,
@@ -187,8 +172,8 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 
       for (const element of workflowNodes) {
         const elementData = workflowPiecesData[element.id];
+        const pieceData = workflowPieces[element.id];
 
-        const numberId = getIdSlice(element.id);
         const taskName = generateTaskName(element.data.name, element.id);
 
         ui_schema.nodes[taskName] = element;
@@ -228,6 +213,9 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
           Record<string, any>
         >((acc, [key, value]) => {
           if (Array.isArray(value.value)) {
+            if (!value.fromUpstream && !value.value.length) {
+              return acc;
+            }
             acc[key] = {
               fromUpstream: value.fromUpstream,
               upstreamTaskId: value.fromUpstream ? value.upstreamId : null,
@@ -249,6 +237,10 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
             return acc;
           }
 
+          if (!value.fromUpstream && !value.value) {
+            return acc;
+          }
+
           acc[key] = {
             fromUpstream: value.fromUpstream,
             upstreamTaskId: value.fromUpstream ? value.upstreamId : null,
@@ -264,8 +256,8 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
         const taskDataModel: TasksDataModel = {
           task_id: taskName,
           piece: {
-            id: numberId,
             name: element.data.name,
+            source_image: pieceData.source_image,
           },
           dependencies,
           piece_input_kwargs: pieceInputKwargs,
@@ -287,6 +279,12 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
       }
 
       return {
+        forageSchema: {
+          workflowPieces,
+          workflowPiecesData,
+          workflowNodes,
+          workflowEdges,
+        },
         workflow,
         tasks,
         ui_schema,
@@ -315,15 +313,6 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
   ]);
 
   const value: IWorkflowsEditorContext = {
-    repositories,
-    repositoryPieces,
-    repositoriesError,
-    repositoriesLoading,
-    fetchRepoById,
-    fetchForagePieceById,
-    search,
-    handleSearch,
-
     importWorkflowToForage,
 
     setWorkflowEdges,

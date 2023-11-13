@@ -18,7 +18,7 @@ import {
 import {
   useAuthenticatedGetRepositorySecrets,
   useAuthenticatedPatchRepositorySecret,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";

@@ -23,13 +23,13 @@ class TestSecretRouter:
 
         mock_response_secrets_names = []
         for secret in mock_response:
-            secret_content = json.loads(secret.json())
+            secret_content = json.loads(secret.model_dump_json())
             mock_response_secrets_names.append(secret_content.get("name"))
         mock_response_secrets_names.sort()
         
         assert response.status_code == 200
 
-        mock_response_content = json.loads(mock_response[0].json())
+        mock_response_content = json.loads(mock_response[0].model_dump_json())
         assert content[0].keys() == mock_response_content.keys()
         assert response_secrets_names == mock_response_secrets_names
     
@@ -49,7 +49,7 @@ class TestSecretRouter:
         ]
         response = get_secrets_by_piece_name
         content = response.json()
-        mock_response_content = json.loads(mock_response[0].json())
+        mock_response_content = json.loads(mock_response[0].model_dump_json())
 
         assert response.status_code == 200
         assert content[0] == mock_response_content

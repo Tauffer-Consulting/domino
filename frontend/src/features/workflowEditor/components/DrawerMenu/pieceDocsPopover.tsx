@@ -12,25 +12,30 @@ function renderPieceProperties(
   const properties = schema?.properties ?? {};
   return Object.entries(properties).map(([key, value]) => {
     const argument = value;
-    let typeName: string = "allOf" in argument ? "enum" : argument.type;
+    let typeName: string = "type" in argument ? argument.type : "enum";
     let valuesOptions: string[] = [];
 
     if ("allOf" in argument && argument.allOf.length > 0) {
       typeName = "enum";
       const typeClass = argument.allOf[0].$ref.split("/").pop() as string;
-      valuesOptions = (schema?.definitions?.[typeClass] as EnumDefinition).enum;
+      valuesOptions = (schema?.$defs?.[typeClass] as EnumDefinition).enum;
     }
 
     return (
-      <Typography key={key} sx={{ padding: "0.5rem 1rem 0rem 1.5rem" }}>
-        <strong>{key}</strong> [<em>{typeName}</em>] - {argument.description}
-        {valuesOptions && valuesOptions.length > 0 && (
-          <>
-            {" Options: "}
-            {valuesOptions.join(", ")}
-          </>
-        )}
-      </Typography>
+      <>
+        <Typography key={key} sx={{ padding: "0.5rem 1rem 0rem 1.5rem" }}>
+          <strong>{key}</strong> - <em>{typeName}</em>
+        </Typography>
+        <Typography sx={{ padding: "0rem 1rem 0rem 2.5rem" }}>
+          {argument.description}
+          {valuesOptions && valuesOptions.length > 0 && (
+            <>
+              {" Options: "}
+              {valuesOptions.join(", ")}
+            </>
+          )}
+        </Typography>
+      </>
     );
   });
 }

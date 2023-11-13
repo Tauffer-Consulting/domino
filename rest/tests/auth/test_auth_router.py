@@ -20,7 +20,7 @@ class TestAuthRouter:
         )
         response = register
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 201
         assert content["email"] == mock_response_content["email"]
@@ -36,7 +36,7 @@ class TestAuthRouter:
         )
         response = login
         content = response.json()
-        mock_response_content = json.loads(mock_response.json())
+        mock_response_content = json.loads(mock_response.model_dump_json())
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()

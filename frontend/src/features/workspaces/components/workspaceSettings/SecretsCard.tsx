@@ -17,7 +17,7 @@ import {
 import {
   useAuthenticatedGetRepositorySecrets,
   useAuthenticatedPatchRepositorySecret,
-} from "features/workflows/api";
+} from "features/myWorkflows/api";
 import {
   useState,
   useImperativeHandle,

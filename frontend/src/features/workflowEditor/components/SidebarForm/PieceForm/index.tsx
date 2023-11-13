@@ -58,7 +58,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
             schema={schema.properties[key]}
             itemKey={key}
             control={control}
-            definitions={schema?.definitions}
+            definitions={schema?.$defs}
             upstreamOptions={upstreamOptions[key] ?? []}
           />
         </div>

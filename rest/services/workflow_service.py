@@ -78,8 +78,8 @@ class WorkflowService(object):
             name=body.workflow.name,
             uuid_name=workflow_id,
             created_at=datetime.utcnow(),
-            schema={},
-            ui_schema=body.ui_schema.dict(),
+            schema=body.forageSchema,
+            ui_schema=body.ui_schema.model_dump(),
             created_by=auth_context.user_id,
             last_changed_at=datetime.utcnow(),
             start_date=body.workflow.start_date,
@@ -90,13 +90,13 @@ class WorkflowService(object):
         )
         workflow = self.workflow_repository.create(new_workflow)
         
-        data_dict = body.dict()
+        data_dict = body.model_dump()
         data_dict['workflow']['id'] = workflow_id
         
         try:
             self._validate_workflow_tasks(tasks_dict=data_dict.get('tasks'), workspace_id=workspace_id)
 
-            workflow_schema, workflow_code, pieces_repositories_ids = self._create_dag_code_from_raw_json(data_dict, workspace_id=workspace_id)
+            _, workflow_code, pieces_repositories_ids = self._create_dag_code_from_raw_json(data_dict, workspace_id=workspace_id)
             
             workflow_piece_repository_associations = [
                 WorkflowPieceRepositoryAssociative(
@@ -123,7 +123,6 @@ class WorkflowService(object):
                     file_path=workflow_path_git,
                     content=workflow_code
                 )
-            workflow.schema = workflow_schema
 
             workflow = self.workflow_repository.update(workflow)
             response = CreateWorkflowResponse(
@@ -303,11 +302,12 @@ class WorkflowService(object):
         # get all repositories ids necessary for tasks
         # get all workspaces ids necessary for repositories referenced by tasks
         # check if user has access to all necessary workspaces
-        #repositories_ids = list()
-        pieces_ids = list()
+        pieces_names = set()
+        pieces_source_images = set()
         shared_storage_sources = []
         for v in tasks_dict.values():
-            pieces_ids.append(v['piece']["id"])
+            pieces_names.add(v['piece']['name'])
+            pieces_source_images.add(v['piece']['source_image'])
             shared_storage_sources.append(v['workflow_shared_storage']['source'])
         
         shared_storage_source = list(set(shared_storage_sources))
@@ -333,27 +333,26 @@ class WorkflowService(object):
             for secret in shared_storage_secrets:
                 if not secret.value:
                     raise BadRequestException("Missing secrets for shared storage.")
-            
+        
+        # Find necessary repositories from pieces names and workspace_id
+        necessary_repositories_and_pieces = self.piece_repository.find_repositories_by_piece_name_and_workspace_id(
+            pieces_names=pieces_names,
+            sources_images=pieces_source_images,
+            workspace_id=workspace_id
+        )
 
-        pieces_ids = list(set(pieces_ids))
-        necessary_pieces = self.piece_repository.find_by_ids(ids=pieces_ids)
-        if len(pieces_ids) != len(necessary_pieces):
+        if len(necessary_repositories_and_pieces) != len(pieces_names):
             raise ResourceNotFoundException("Some pieces were not found for this workspace.")
-        pieces_repositories_ids = [e.repository_id for e in necessary_pieces]
-        necessary_repositories = self.piece_repository_repository.find_by_ids(ids=pieces_repositories_ids)
-        for repo in necessary_repositories:
-            if repo.workspace_id != workspace_id:
-                raise ForbiddenException("Piece repository not accessible through this workspace.")
 
-        for piece in necessary_pieces:
-            piece_name = piece.name
+        for repo_piece in necessary_repositories_and_pieces:
+            piece_name = repo_piece.piece_name
             piece_secrets = self.secret_service.get_piece_secrets(
-                piece_repository_id=piece.repository_id,
+                piece_repository_id=repo_piece.piece_repository_id,
                 piece_name=piece_name,
             )
             for secret in piece_secrets:
                 if not secret.value:
-                    raise ResourceNotFoundException(f"Secret {secret.name} missing for {piece.name}.")
+                    raise ResourceNotFoundException(f"Secret {secret.name} missing for {piece_name}.")
         return True
 
     def _get_storage_repository_from_tasks(self, tasks: list, workspace_id: int):
@@ -472,23 +471,21 @@ class WorkflowService(object):
                 else:
                     input_kwargs[input_key] = input_value['value']
             
-            # workspace_storage_repository = self._get_storage_repository_from_tasks(tasks=tasks, workspace_id=workspace_id)
-            # if workflow_shared_storage:
-            #     ...
-                #workflow_shared_storage['storage_repository_url'] = workspace_storage_repository.url if workspace_storage_repository else None
-                #workflow_shared_storage['storage_repository_version'] = workspace_storage_repository.version if workspace_storage_repository else None
 
-            piece_db = self.piece_repository.find_by_id(piece_request.get('id'))
-            piece_repository_db = self.piece_repository_repository.find_by_id(piece_db.repository_id)
-            pieces_repositories_ids.add(piece_db.repository_id)
+            # piece_request = {"id": 1, "name": "SimpleLogPiece"}
+            piece_db = self.piece_repository.find_repository_by_piece_name_and_workspace_id(
+                workspace_id=workspace_id,
+                piece_name=piece_request['name']
+            )
+            pieces_repositories_ids.add(piece_db.piece_repository_id)
             stream_tasks_dict[task_key] = {
                 'task_id': task_key,
                 'workspace_id': workspace_id,
                 'piece': {
-                    'name': piece_db.name,
+                    'name': piece_db.piece_name,
                     'source_image': piece_db.source_image,
-                    'repository_url': piece_repository_db.url,
-                    'repository_version': piece_repository_db.version,
+                    'repository_url': piece_db.piece_repository_url,
+                    'repository_version': piece_db.piece_repository_version,
                 },
                 'input_kwargs': input_kwargs,
                 'workflow_shared_storage': workflow_shared_storage,
@@ -697,7 +694,7 @@ class WorkflowService(object):
         return response
 
     @staticmethod
-    def parse_log(log_text: str, task_id: str, piece_name: str):
+    def parse_log(log_text: str):
         # Get the log lines between the start and stop patterns
         start_command_pattern = "Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
         stop_command_pattern = "End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
@@ -780,12 +777,8 @@ class WorkflowService(object):
         if response.status_code != 200:
             raise BaseException("Error while trying to get task logs")
 
-        # Get the piece name from the task_id using the workflow schema.
-        piece_name = workflow.schema['tasks'][task_id]['piece']['name']
         parsed_log = self.parse_log(
-            response.text, 
-            task_id, 
-            piece_name
+            response.text
         )
 
         return GetWorkflowRunTaskLogsResponse(

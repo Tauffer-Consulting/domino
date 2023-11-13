@@ -9,7 +9,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { useWorkflowsEditor } from "features/workflowEditor/context";
+import { usesPieces } from "context/workspaces";
 import { type FC, useState } from "react";
 
 import PiecesSidebarNode from "./sidebarNode";
@@ -28,8 +28,7 @@ interface Props {
 }
 
 const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
-  const { repositories, repositoriesLoading, repositoryPieces } =
-    useWorkflowsEditor();
+  const { repositories, repositoriesLoading, repositoryPieces } = usesPieces();
 
   const [piecesMap, setPiecesMap] = useState<Record<string, Piece[]>>({});
   const [expandedRepos, setExpandedRepos] = useState<string[]>([]);

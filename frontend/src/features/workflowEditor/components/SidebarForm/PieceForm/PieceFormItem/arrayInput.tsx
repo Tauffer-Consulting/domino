@@ -20,7 +20,11 @@ import {
   useWatch,
 } from "react-hook-form";
 
-import { type ArrayOption } from "../upstreamOptions";
+import {
+  type ComplexArrayOption,
+  type ArrayOption,
+  type Option,
+} from "../upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import ObjectInputComponent from "./objectInput";
@@ -32,7 +36,7 @@ interface ArrayInputItemProps {
   schema: any;
   control: Control<IWorkflowPieceData, any>;
   definitions?: any;
-  upstreamOptions: ArrayOption;
+  upstreamOptions: ArrayOption | ComplexArrayOption;
 }
 
 const ArrayInput: React.FC<ArrayInputItemProps> = ({
@@ -55,6 +59,16 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
   const formsData = useWatch({ name });
 
   const [enumOptions, setEnumOptions] = useState<string[]>([]);
+
+  if ("anyOf" in schema && schema.anyOf.length === 2) {
+    const hasNullType = schema.anyOf.some((item: any) => item.type === "null");
+    if (hasNullType) {
+      const notNullAnyOf = schema.anyOf.find(
+        (item: any) => item.type !== "null",
+      );
+      schema.items = notNullAnyOf.items;
+    }
+  }
 
   const subItemSchema = useMemo(() => {
     let subItemSchema: any = schema?.items;
@@ -135,8 +149,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
       });
       return object;
     }
-
-    const defaultValue = schema.default[0];
+    const defaultValue = schema.default === null ? "" : schema.default[0];
     const isObject = typeof defaultValue === "object";
     let defaultObj = {
       fromUpstream: getFromUpstream(schema),
@@ -206,7 +219,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
                   <SelectUpstreamInput
                     name={`${name}.${index}`}
                     label={schema?.title}
-                    options={upstreamOptions.items}
+                    options={upstreamOptions.items as Option[]}
                   />
                 </Grid>
               )}
@@ -313,7 +326,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
                     name={`${name}.${index}`}
                     schema={schema}
                     definitions={definitions}
-                    upstreamOptions={upstreamOptions.items}
+                    upstreamOptions={upstreamOptions as ComplexArrayOption}
                   />
                 </Grid>
               )}

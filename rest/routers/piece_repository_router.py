@@ -14,12 +14,13 @@ from schemas.responses.piece_repository import (
 from database.models.enums import RepositorySource
 from schemas.exceptions.base import BaseException, ConflictException, ForbiddenException, ResourceNotFoundException, UnauthorizedException
 from schemas.errors.base import ConflictError, ForbiddenError, ResourceNotFoundError, SomethingWrongError, UnauthorizedError
-from typing import List
+from typing import List, Optional
 
 router = APIRouter(prefix="/pieces-repositories")
 auth_service = AuthService()
 
 piece_repository_service = PieceRepositoryService()
+
 
 @router.post(
     path="",
@@ -38,7 +39,7 @@ def create_piece_repository(
     auth_context: AuthorizationContextData = Depends(auth_service.workspace_owner_access_authorizer_body)
 ) -> CreateRepositoryReponse:
     """
-    Create piece repository for workspace. 
+    Create piece repository for workspace.
     Only one piece repository version is allowed for each workspace.
     """
     try:
@@ -124,8 +125,8 @@ def get_piece_repository_release_data(
 )
 def get_pieces_repositories(
     workspace_id: int,
-    page: int = 0,
-    page_size: int = 100,
+    page: Optional[int] = 0,
+    page_size: Optional[int] = 100,
     filters: ListRepositoryFilters = Depends(),
 ) -> GetWorkspaceRepositoriesResponse:
     """Get pieces repositories for workspace"""

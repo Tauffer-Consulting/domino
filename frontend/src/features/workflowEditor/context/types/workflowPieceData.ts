@@ -1,4 +1,4 @@
-import { type IWorkflowElement } from "features/workflows/types";
+import { type IWorkflowElement } from "features/myWorkflows/types";
 import { type Edge } from "reactflow";
 
 import { type IContainerResourceFormData } from "./containerResources";
@@ -61,8 +61,8 @@ export interface TasksDataModel {
   container_resources: ContainerResourcesDataModel;
   task_id: string;
   piece: {
-    id: number;
     name: string;
+    source_image: string;
   };
   piece_input_kwargs: Record<string, any>;
   dependencies?: string[];

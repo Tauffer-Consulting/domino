@@ -34,7 +34,7 @@ export interface PieceSchema {
   type: "object";
 
   properties: SchemaProperties;
-  definitions: Definitions;
+  $defs: Definitions;
 }
 
 export interface Piece {

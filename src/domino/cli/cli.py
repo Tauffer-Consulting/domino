@@ -13,12 +13,12 @@ console = Console()
 # Font: standard
 msg = """
 ==============================================
-  ____                  _             
- |  _ \  ___  _ __ ___ (_)_ __   ___  
- | | | |/ _ \| '_ ` _ \| | '_ \ / _ \ 
+  ____                  _
+ |  _ \  ___  _ __ ___ (_)_ __   ___
+ | | | |/ _ \| '_ ` _ \| | '_ \ / _ \
  | |_| | (_) | | | | | | | | | | (_) |
- |____/ \___/|_| |_| |_|_|_| |_|\___/       
-  
+ |____/ \___/|_| |_| |_|_|_| |_|\___/
+
 =============================================="""
 
 
@@ -48,22 +48,27 @@ def get_cluster_name_from_env():
 def get_github_workflows_ssh_private_key_from_env():
     return os.environ.get("DOMINO_GITHUB_WORKFLOWS_SSH_PRIVATE_KEY", "")
 
+
 def get_github_token_pieces_from_env():
     return os.environ.get("DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN", None)
+
 
 def get_github_token_workflows_from_env():
     return os.environ.get("DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS", None)
 
+
 def get_workflows_repository_from_env():
     return os.environ.get("DOMINO_GITHUB_WORKFLOWS_REPOSITORY", None)
+
 
 def get_registry_token_from_env():
     return os.environ.get('GHCR_PASSWORD', "")
 
+
 @click.command()
 @click.option(
-    '--cluster-name', 
-    prompt='Local cluster name', 
+    '--cluster-name',
+    prompt='Local cluster name',
     default=get_cluster_name_from_env,
     help='Define the name for the local k8s cluster.'
 )
@@ -74,7 +79,7 @@ def get_registry_token_from_env():
     help='Github repository where the Domino workflows will be stored.'
 )
 @click.option(
-    '--github-workflows-ssh-private-key', 
+    '--github-workflows-ssh-private-key',
     prompt='Github ssh private for Workflows repository. If none, it will create a ssh key pair to be used.',
     default=get_github_workflows_ssh_private_key_from_env,
     help='Github ssh key for GitSync read/write operations on Workflows repository. The private key will be used in the Domino cluster and the public key should be added to the Github repository deploy keys.'
@@ -86,7 +91,7 @@ def get_registry_token_from_env():
     help='Github token for read operations on Pieces repositories.'
 )
 @click.option(
-    '--github-workflows-token', 
+    '--github-workflows-token',
     prompt='Github token for Workflows Repository',
     default=get_github_token_workflows_from_env,
     help='Github token for read/write operations on Workflows Repository.'
@@ -143,9 +148,9 @@ def cli_prepare_platform(
 ):
     """Prepare local folder for running a Domino platform."""
     platform.prepare_platform(
-        cluster_name=cluster_name, 
+        cluster_name=cluster_name,
         workflows_repository=workflows_repository,
-        github_workflows_ssh_private_key=github_workflows_ssh_private_key, 
+        github_workflows_ssh_private_key=github_workflows_ssh_private_key,
         github_default_pieces_repository_token=github_default_pieces_repository_token,
         github_workflows_token=github_workflows_token,
         deploy_mode=deploy_mode,
@@ -159,7 +164,7 @@ def cli_prepare_platform(
 
 @click.command()
 @click.option(
-    "--install-airflow", 
+    "--install-airflow",
     default=True,
     help="Install Airflow services."
 )
@@ -221,7 +226,7 @@ def cli_platform(ctx):
     if ctx.invoked_subcommand == "prepare":
         console.print("Let's get you started configuring a local Domino platform:")
     elif ctx.invoked_subcommand == "create":
-        console.print("Your local Domino platform is being created. This might take a while...")    
+        console.print("Your local Domino platform is being created. This might take a while...")
 
 
 cli_platform.add_command(cli_prepare_platform, name="prepare")
@@ -231,7 +236,7 @@ cli_platform.add_command(cli_run_platform_compose, name="run-compose")
 
 
 ###############################################################################
-# PIECES REPOSITORY 
+# PIECES REPOSITORY
 ###############################################################################
 
 def generate_random_repo_name():
@@ -240,13 +245,13 @@ def generate_random_repo_name():
 
 @click.command()
 @click.option(
-    '--name', 
+    '--name',
     prompt="Repository's name",
     default=generate_random_repo_name,
     help="Repository's name"
 )
 @click.option(
-    '--container-registry', 
+    '--container-registry',
     prompt="Github Container Registry name",
     default="",
     help="Github container registry name"
@@ -258,7 +263,7 @@ def cli_create_piece_repository(name, container_registry):
 
 @click.command()
 @click.option(
-    '--build-images', 
+    '--build-images',
     is_flag=True,
     prompt='Build Docker images?',
     expose_value=True,
@@ -271,9 +276,15 @@ def cli_create_piece_repository(name, container_registry):
     default="",
     help='The base url for this Pieces repository.'
 )
-def cli_organize_pieces_repository(build_images, source_url):
+@click.option(
+    '--tag-overwrite',
+    default="",
+    help='Overwrite tag for release.'
+)
+def cli_organize_pieces_repository(build_images: bool, source_url: str, tag_overwrite: str):
     """Organize Pieces repository."""
-    pieces_repository.organize_pieces_repository(build_images, source_url)
+    pieces_repository.organize_pieces_repository(build_images, source_url, tag_overwrite)
+
 
 @click.command()
 @click.option(
@@ -282,15 +293,26 @@ def cli_organize_pieces_repository(build_images, source_url):
     default=get_registry_token_from_env,
     help='Your Github Container Registry token with access to where the image will be published.'
 )
-def cli_publish_images(registry_token):
+def cli_publish_images(registry_token: str):
     """Publish images to github container registry from mapping."""
     if registry_token:
         os.environ['GHCR_PASSWORD'] = registry_token
-    console.print(f"Using registry token to publish images")
+    console.print("Using registry token to publish images")
     pieces_repository.publish_docker_images()
-    
+
+
 @click.command()
-def cli_create_release():
+@click.option(
+    '--tag-name',
+    default="",
+    help='Tag name'
+)
+@click.option(
+    '--commit-sha',
+    default="",
+    help='Commit SHA'
+)
+def cli_create_release(tag_name: str, commit_sha: str):
     """
     Get release version for the Pieces repository in github stdout format.
     Used by github actions to set the release version.
@@ -298,8 +320,23 @@ def cli_create_release():
         - GITHUB_TOKEN
         - GITHUB_REPOSITORY
     """
-    pieces_repository.create_release()
-    
+    pieces_repository.create_release(tag_name=tag_name, commit_sha=commit_sha)
+
+
+@click.command()
+@click.option(
+    '--tag-name',
+    help='Tag name'
+)
+def cli_delete_release(tag_name: str):
+    """
+    Used by github actions to delete a release with given tag name.
+    Needs the following env vars:
+        - GITHUB_TOKEN
+        - GITHUB_REPOSITORY
+    """
+    pieces_repository.delete_release(tag_name=tag_name)
+
 
 @click.group()
 @click.pass_context
@@ -314,6 +351,7 @@ def cli_piece(ctx):
 cli_piece.add_command(cli_organize_pieces_repository, name="organize")
 cli_piece.add_command(cli_create_piece_repository, name="create")
 cli_piece.add_command(cli_create_release, name="release")
+cli_piece.add_command(cli_delete_release, name="delete-release")
 cli_piece.add_command(cli_publish_images, name="publish-images")
 
 
@@ -324,7 +362,7 @@ cli_piece.add_command(cli_publish_images, name="publish-images")
 @click.command()
 def cli_run_piece_k8s():
     """Run Piece on Kubernetes Pod"""
-    from domino.scripts.run_piece_docker import run_piece as run_piece_in_docker    
+    from domino.scripts.run_piece_docker import run_piece as run_piece_in_docker
     console.print("Running Piece inside K8s pod...")
     run_piece_in_docker()
 

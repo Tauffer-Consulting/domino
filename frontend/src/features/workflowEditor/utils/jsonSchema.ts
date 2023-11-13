@@ -6,7 +6,7 @@ import { getFromUpstream } from "./getFromUpstream";
 
 export const extractDefaultInputValues = (pieceSchema: Piece) => {
   const schema = pieceSchema.input_schema.properties;
-  const definitions = pieceSchema.input_schema.definitions;
+  const definitions = pieceSchema.input_schema.$defs;
   const defaultData = extractDefaultValues(pieceSchema.input_schema);
 
   const defaultInputs: IWorkflowPieceData["inputs"] = {};

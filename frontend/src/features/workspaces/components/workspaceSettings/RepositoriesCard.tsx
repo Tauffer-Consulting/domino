@@ -29,7 +29,7 @@ import {
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { repositorySource } from "context/workspaces/types";
-import { type IPieceRepositoryMetadata } from "features/workflows/api";
+import { type IPieceRepositoryMetadata } from "features/myWorkflows/api";
 import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -180,7 +180,7 @@ export const RepositoriesCard: FC = () => {
           handleRefreshRepositories();
         })
         .catch((error) => {
-          toast.error(error.response.data.detail);
+          console.log(error);
         });
     },
     [handleDeleteRepository, handleRefreshRepositories],

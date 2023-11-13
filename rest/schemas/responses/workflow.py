@@ -1,5 +1,5 @@
 from schemas.responses.base import PaginationSet
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime, timezone
 from typing import Dict, Optional, List, Union
 from enum import Enum
@@ -47,14 +47,14 @@ class WorkflowConfigResponse(BaseModel):
     # TODO remove regex ?
     name: str
     start_date: str
-    end_date: Optional[str]
-    schedule: Optional[ScheduleIntervalTypeResponse]
+    end_date: Optional[str] = None
+    schedule: Optional[ScheduleIntervalTypeResponse] = None
     catchup: bool = False
     generate_report: bool = False
-    description: Optional[str]
+    description: Optional[str] = None
 
 
-    @validator('schedule')
+    @field_validator('schedule')
     def set_schedule(cls, schedule):
         return schedule or ScheduleIntervalTypeResponse.none
     
@@ -76,27 +76,27 @@ class GetWorkflowsResponseData(BaseModel):
     is_paused: bool
     is_active: bool
     status: WorkflowStatus
-    schedule: Optional[ScheduleIntervalTypeResponse]
-    next_dagrun: Optional[datetime]
+    schedule: Optional[ScheduleIntervalTypeResponse] = None
+    next_dagrun: Optional[datetime] = None
 
-    @validator('schedule')
+    @field_validator('schedule')
     def set_schedule(cls, schedule):
         return schedule or ScheduleIntervalTypeResponse.none
     
 
-    @validator('created_at', pre=True, always=True)
+    @field_validator('created_at', mode='before')
     def add_utc_timezone_created_at(cls, v):
         if isinstance(v, datetime) and v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
         return v
     
-    @validator('last_changed_at', pre=True, always=True)
+    @field_validator('last_changed_at', mode='before')
     def add_utc_timezone_last_changed_at(cls, v):
         if isinstance(v, datetime) and v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
         return v
     
-    @validator('next_dagrun', pre=True, always=True)
+    @field_validator('next_dagrun', mode='before')
     def add_utc_timezone_next_dagrun(cls, v):
         if isinstance(v, datetime) and v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
@@ -114,29 +114,29 @@ class GetWorkflowResponse(BaseModel):
     id: int
     name: str
     created_at: datetime
-    schema_: Optional[BaseWorkflowModel] = Field(alias="schema")
-    ui_schema: Optional[BaseUiSchema]
+    schema_: dict = Field(alias="schema", default=None) # TODO add data model
+    ui_schema: Optional[BaseUiSchema] = None
     last_changed_at: datetime
     last_changed_by: int
     created_by: int
     workspace_id: int
 
     # Airflow database infos # TODO check if add more fields, or if we should use /details fields to get more infos
-    is_paused: Optional[Union[bool, WorkflowStatus]] # Whether the DAG is paused.
-    is_active: Optional[Union[bool, WorkflowStatus]] # Whether the DAG is currently seen by the scheduler(s).
-    is_subdag: Optional[Union[bool, WorkflowStatus]] # Whether the DAG is SubDAG.
-    last_pickled: Optional[Union[datetime, WorkflowStatus]] # The last time the DAG was pickled.
-    last_expired: Optional[Union[datetime, WorkflowStatus]] # Time when the DAG last received a refresh signal (e.g. the DAG's "refresh" button was clicked in the web UI)
-    schedule: Optional[Union[ScheduleIntervalTypeResponse, WorkflowStatus]] # The schedule interval for the DAG.
-    max_active_tasks: Optional[Union[int, WorkflowStatus]]  # Maximum number of active tasks that can be run on the DAG
-    max_active_runs: Optional[Union[int, WorkflowStatus]] # Maximum number of active DAG runs for the DAG
-    has_task_concurrency_limits: Optional[Union[bool, WorkflowStatus]] # Whether the DAG has task concurrency limits
-    has_import_errors: Optional[Union[bool, WorkflowStatus]] # Whether the DAG has import errors
-    next_dagrun: Optional[Union[datetime, WorkflowStatus]] # The logical date of the next dag run.
-    next_dagrun_data_interval_start: Optional[Union[datetime, WorkflowStatus]] # The start date of the next dag run.
-    next_dagrun_data_interval_end: Optional[Union[datetime, WorkflowStatus]] # The end date of the next dag run.
+    is_paused: Optional[Union[bool, WorkflowStatus]] = None # Whether the DAG is paused.
+    is_active: Optional[Union[bool, WorkflowStatus]] = None # Whether the DAG is currently seen by the scheduler(s).
+    is_subdag: Optional[Union[bool, WorkflowStatus]] = None # Whether the DAG is SubDAG.
+    last_pickled: Optional[Union[datetime, WorkflowStatus]] = None # The last time the DAG was pickled.
+    last_expired: Optional[Union[datetime, WorkflowStatus]] = None # Time when the DAG last received a refresh signal (e.g. the DAG's "refresh" button was clicked in the web UI)
+    schedule: Optional[Union[ScheduleIntervalTypeResponse, WorkflowStatus]] = None # The schedule interval for the DAG.
+    max_active_tasks: Optional[Union[int, WorkflowStatus]] = None  # Maximum number of active tasks that can be run on the DAG
+    max_active_runs: Optional[Union[int, WorkflowStatus]] = None # Maximum number of active DAG runs for the DAG
+    has_task_concurrency_limits: Optional[Union[bool, WorkflowStatus]] = None # Whether the DAG has task concurrency limits
+    has_import_errors: Optional[Union[bool, WorkflowStatus]] = None # Whether the DAG has import errors
+    next_dagrun: Optional[Union[datetime, WorkflowStatus]] = None # The logical date of the next dag run.
+    next_dagrun_data_interval_start: Optional[Union[datetime, WorkflowStatus]] = None # The start date of the next dag run.
+    next_dagrun_data_interval_end: Optional[Union[datetime, WorkflowStatus]] = None # The end date of the next dag run.
 
-    @validator('schedule')
+    @field_validator('schedule')
     def set_schedule(cls, schedule):
         return schedule or ScheduleIntervalTypeResponse.none
 
@@ -144,18 +144,17 @@ class GetWorkflowResponse(BaseModel):
 class GetWorkflowRunsResponseData(BaseModel):
     dag_id: str = Field(alias='workflow_uuid')
     dag_run_id: str = Field(alias='workflow_run_id')
-    start_date: Optional[datetime]
-    end_date: Optional[datetime]
-    execution_date: Optional[datetime]
-    state: Optional[WorkflowRunState]
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    execution_date: Optional[datetime] = None
+    state: Optional[WorkflowRunState] = None
 
-    @validator('state')
+    @field_validator('state')
     def set_state(cls, state):
         return state or WorkflowRunState.none
     
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GetWorkflowRunsResponse(BaseModel):
@@ -166,21 +165,21 @@ class GetWorkflowRunsResponse(BaseModel):
 class GetWorkflowRunTasksResponseData(BaseModel):
     dag_id: str = Field(alias='workflow_uuid')
     dag_run_id: str = Field(alias='workflow_run_id')
-    duration: Optional[float]
-    start_date: Optional[datetime]
-    end_date: Optional[datetime]
-    execution_date: Optional[datetime]
-    docker_image: Optional[str]
+    duration: Optional[float] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    execution_date: Optional[datetime] = None
+    docker_image: Optional[str] = None
     task_id: str
     try_number: int
-    state: Optional[WorkflowRunTaskState]
+    state: Optional[WorkflowRunTaskState] = None
 
-    @validator('state')
+    @field_validator('state')
     def set_state(cls, state):
         return state or WorkflowRunTaskState.none
 
-    class Config:
-        allow_population_by_field_name = True
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GetWorkflowRunTasksResponse(BaseModel):
@@ -194,8 +193,8 @@ class WorkflowSchemaBaseModel(BaseModel):
 
 
 class GetWorkflowRunTaskResultResponse(BaseModel):
-    base64_content: Optional[str]
-    file_type: Optional[str]
+    base64_content: Optional[str] = None
+    file_type: Optional[str] = None
 
 
 class GetWorkflowRunTaskLogsResponse(BaseModel):
@@ -206,7 +205,7 @@ class CreateWorkflowResponse(BaseModel):
     id: int
     name: str
     created_at: datetime
-    schema_: WorkflowSchemaBaseModel = Field(..., alias='schema')
+    schema_: dict = Field(..., alias='schema') # TODO add data modal
     created_by: int
     last_changed_at: datetime
     last_changed_by: int

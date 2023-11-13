@@ -33,7 +33,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         # Full metadata
         cls._metadata_ = metadata
 
-
     def __init__(
         self,
         deploy_mode: DeployModeType,
@@ -62,7 +61,6 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         self.display_result = None
 
-
     def start_logger(self):
         """
         Start logger.
@@ -70,14 +68,12 @@ class BasePiece(metaclass=abc.ABCMeta):
         self.logger.info(f"Started {self.task_id} of type {self.__class__.__name__} at {str(datetime.now().isoformat())}")
         self.logger.info("Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
 
-
     def _wait_for_sidecar_paths(self):
         # Wait for sidecar create directories
         while True:
             if Path(self.report_path).is_dir():
                 break
             time.sleep(2)
-
 
     def generate_paths(self):
         """
@@ -98,7 +94,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         # # Path to store report data
         if not Path(self.report_path).is_dir():
             Path(self.report_path).mkdir(parents=True, exist_ok=True)
-
 
     def get_upstream_tasks_data(self):
         """
@@ -125,7 +120,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         else:
             raise NotImplementedError(f"Get upstream XCOM not implemented for deploy_mode=={self.deploy_mode}")
 
-    
     def validate_and_get_env_secrets(self, piece_secrets_model: pydantic.BaseModel = None):
         """
         Get secret variables for this Piece from ENV. The necessary secret variables to run the Piece should be defined in the Piece's SecretsModel.
@@ -139,7 +133,6 @@ class BasePiece(metaclass=abc.ABCMeta):
             return piece_secrets_model(**secrets_values)
         return None
 
-
     def format_xcom(self, output_obj: pydantic.BaseModel) -> dict:
         """
         Formats and adds extra metadata to XCOM dictionary content.
@@ -150,27 +143,27 @@ class BasePiece(metaclass=abc.ABCMeta):
         Returns:
             dict: XCOM dictionary
         """
-        # xcom_obj = output_obj.dict()
-        xcom_obj = json.loads(output_obj.json())
+        # xcom_obj = output_obj.model_dump()
+        xcom_obj = json.loads(output_obj.model_dump_json())
         if not isinstance(xcom_obj, dict):
             self.logger.info(f"Piece {self.__class__.__name__} is not returning a valid XCOM object. Auto-generating a base XCOM for it...")
             xcom_obj = dict()
 
         # Add arguments types to XCOM 
         # TODO - this is a temporary solution. We should find a better way to do this
-        output_schema = output_obj.schema()
-        for k, v in output_schema["properties"].items():
-            if "type" in v:
-                # Get file-path and directory-path types
-                if v["type"] == "string" and "format" in v:
-                    v_type = v["format"]
-                else:
-                    v_type = v["type"]
-            elif "anyOf" in v:
-                if "$ref" in v["anyOf"][0]:
-                    type_model = v["anyOf"][0]["$ref"].split("/")[-1]
-                    v_type = output_schema["definitions"][type_model]["type"]
-            xcom_obj[f"{k}_type"] = v_type
+        # output_schema = output_obj.model_json_schema()
+        # for k, v in output_schema["properties"].items():
+        #     if "type" in v:
+        #         # Get file-path and directory-path types
+        #         if v["type"] == "string" and "format" in v:
+        #             v_type = v["format"]
+        #         else:
+        #             v_type = v["type"]
+        #     elif "anyOf" in v:
+        #         if "$ref" in v["anyOf"][0]:
+        #             type_model = v["anyOf"][0]["$ref"].split("/")[-1]
+        #             v_type = output_schema["definitions"][type_model]["type"]
+        #     xcom_obj[f"{k}_type"] = v_type
 
         # Serialize self.display_result and add it to XCOM
         if isinstance(self.display_result, dict):
@@ -200,7 +193,6 @@ class BasePiece(metaclass=abc.ABCMeta):
             piece_metadata=self._metadata_
         )
         return xcom_obj
-
 
     def push_xcom(self, xcom_obj: dict):
         """
@@ -240,14 +232,12 @@ class BasePiece(metaclass=abc.ABCMeta):
             file_path = self.xcom_path + "/return.json"
             with open(file_path, 'w') as fp:
                 json.dump(xcom_obj, fp)
-            #time.sleep(120)
 
         else:
             raise NotImplementedError("deploy mode not accepted for xcom push")
-    
 
     def run_piece_function(
-        self, 
+        self,
         piece_input_data: dict,
         piece_input_model: pydantic.BaseModel,
         piece_output_model: pydantic.BaseModel, 
@@ -283,11 +273,11 @@ class BasePiece(metaclass=abc.ABCMeta):
             }
 
         # Check if Piece's necessary secrets are present in ENV
-        secrets_model_obj =self.validate_and_get_env_secrets(piece_secrets_model=piece_secrets_model)
+        secrets_model_obj = self.validate_and_get_env_secrets(piece_secrets_model=piece_secrets_model)
 
         # Generate paths
         workflow_run_subpath = os.environ.get('DOMINO_WORKFLOW_RUN_SUBPATH', '')
-        self.workflow_shared_storage = Path("/home/shared_storage") 
+        self.workflow_shared_storage = Path("/home/shared_storage")
         if self.deploy_mode == 'local-compose':
             self.workflow_shared_storage = str(self.workflow_shared_storage / workflow_run_subpath)
         self.results_path = f"{self.workflow_shared_storage}/{self.task_id}/results"
@@ -298,7 +288,7 @@ class BasePiece(metaclass=abc.ABCMeta):
             self.generate_paths()
         else:
             self._wait_for_sidecar_paths()
-            
+
         # Using pydantic to validate input data
         input_model_obj = piece_input_model(**piece_input_data)
 
@@ -317,14 +307,12 @@ class BasePiece(metaclass=abc.ABCMeta):
         # Push XCom
         xcom_obj = self.format_xcom(output_obj=output_obj)
         self.push_xcom(xcom_obj=xcom_obj)
-
         self.logger.info("End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
-
 
     @classmethod
     def dry_run(
         cls,
-        input_data: dict, 
+        input_data: dict,
         piece_input_model: pydantic.BaseModel,
         piece_output_model: pydantic.BaseModel,
         piece_secrets_model: pydantic.BaseModel = None,
@@ -344,21 +332,20 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Run piece function
         call_piece_func_dict = {
-            "self": dry_instance, 
+            "self": dry_instance,
             "input_data": input_model_obj
         }
         if piece_secrets_model:
             call_piece_func_dict['secrets_data'] = secrets_model_obj
         output_obj = cls.piece_function(**call_piece_func_dict)
-        
+
         # Validate output data
         if isinstance(output_obj, dict):
             output_obj = piece_output_model(**output_obj)
         if not isinstance(output_obj, piece_output_model):
             raise InvalidPieceOutputError(piece_name=cls.__name__)
-        
-        return output_obj
 
+        return output_obj
 
     @staticmethod
     def get_container_cpu_limit() -> float:
@@ -374,7 +361,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         container_cpus = float(cfs_quota_us / cfs_period_us)
         return container_cpus
 
-
     @staticmethod
     def get_nvidia_smi_output() -> str:
         """
@@ -386,7 +372,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         except Exception as e:
             raise Exception(f"Error while running nvidia-smi: {e}")
 
-
     @staticmethod
     def get_container_memory_limit() -> int:
         """
@@ -395,7 +380,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         with open("/sys/fs/cgroup/memory/memory.limit_in_bytes") as fp:
             container_memory_limit = int(fp.read())
         return container_memory_limit
-
 
     @staticmethod
     def get_container_memory_usage() -> int:
@@ -406,7 +390,6 @@ class BasePiece(metaclass=abc.ABCMeta):
             container_memory_usage = int(fp.read())
         return container_memory_usage
 
-
     @abc.abstractmethod
     def piece_function(self):
         """
@@ -415,7 +398,6 @@ class BasePiece(metaclass=abc.ABCMeta):
         All arguments should be type annotated and docstring should carry description for each argument.
         """
         raise NotImplementedError("This method must be implemented in the child class!")        
-
 
     def serialize_display_result_file(self, file_path: Union[str, Path], file_type: DisplayResultFileType) -> dict:
         """
@@ -439,7 +421,6 @@ class BasePiece(metaclass=abc.ABCMeta):
             content_bytes = f.read()
         encoded_content = base64.b64encode(content_bytes).decode('utf-8')
         return encoded_content
-
 
     # @abc.abstractmethod
     # def generate_report(self):
