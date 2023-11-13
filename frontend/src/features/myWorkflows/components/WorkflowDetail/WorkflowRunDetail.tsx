@@ -21,10 +21,10 @@ import { TaskResult } from "./CustomTabMenu/TaskResult";
 import { type IWorkflowRunTaskExtended } from ".";
 
 interface Props {
-  runId: string | null;
-  nodeId: string | null;
-  tasks: IWorkflowRunTaskExtended[] | null;
-  workflowId: string;
+  runId?: string;
+  nodeId?: string;
+  tasks?: IWorkflowRunTaskExtended[];
+  workflowId?: string;
 }
 
 export interface WorkflowRunDetailRef {
@@ -55,14 +55,14 @@ export const WorkflowRunDetail = forwardRef<WorkflowRunDetailRef, Props>(
 
         return task;
       }
-    }, [nodeId, tasks]);
+    }, [runId, nodeId, tasks]);
 
     const { data: taskLogs, mutate: refreshTaskLogs } =
       useAuthenticatedGetWorkflowRunTaskLogs({
         runId: runId ?? "",
         taskId: taskData?.task_id ?? "",
         taskTryNumber: String(taskData?.try_number) ?? "",
-        workflowId,
+        workflowId: workflowId ?? "",
       });
 
     const {
@@ -70,9 +70,9 @@ export const WorkflowRunDetail = forwardRef<WorkflowRunDetailRef, Props>(
       isLoading,
       mutate: refreshTaskResults,
     } = useAuthenticatedGetWorkflowRunTaskResult({
-      runId: runId ?? "",
-      taskId: taskData?.task_id ?? "",
-      taskTryNumber: String(taskData?.try_number) ?? "",
+      runId,
+      taskId: taskData?.state === "success" ? taskData?.task_id : undefined,
+      taskTryNumber: String(taskData?.try_number),
       workflowId,
     });
 

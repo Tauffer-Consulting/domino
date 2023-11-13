@@ -44,9 +44,9 @@ export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [autoUpdate, setAutoUpdate] = useState(true);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
   const [selectedRun, setSelectedRun] = useState<IWorkflowRuns | null>(null);
-  const [tasks, setTasks] = useState<IWorkflowRunTaskExtended[]>([]);
+  const [statusTasks, setTasks] = useState<IWorkflowRunTaskExtended[]>([]);
 
   const workflowPanelRef = useRef<WorkflowPanelRef>(null);
   const workflowRunsTableRef = useRef<WorkflowRunsTableRef>(null);
@@ -135,6 +135,13 @@ export const WorkflowDetail: React.FC = () => {
             nodes.push(...nodesData);
           }
         }
+        const currentTaks = JSON.stringify(statusTasks);
+        const newTasks = JSON.stringify(tasks);
+
+        if (currentTaks !== newTasks) {
+          setTasks(tasks);
+        }
+
         const currentNodes = JSON.stringify(
           workflowPanelRef.current?.nodes ?? {},
         );
@@ -143,7 +150,6 @@ export const WorkflowDetail: React.FC = () => {
           // need to create a different object to perform a re-render
           workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
           workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
-          setTasks(tasks);
         }
       } catch (e) {
         console.log(e);
@@ -230,8 +236,8 @@ export const WorkflowDetail: React.FC = () => {
         <Grid item lg={5} xs={12}>
           <WorkflowRunDetail
             ref={workflowRunDetailRef}
-            runId={selectedRun?.workflow_run_id ?? null}
-            tasks={tasks}
+            runId={selectedRun?.workflow_run_id}
+            tasks={statusTasks}
             nodeId={selectedNodeId}
             workflowId={id as string}
           />
