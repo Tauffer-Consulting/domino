@@ -33,6 +33,7 @@ import {
 } from "../utils/importWorkflow";
 
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
+import { MyWorkflowExamplesGalleryModal } from "./MyWorkflowsGalleryModal";
 import SidebarPieceForm from "./SidebarForm";
 import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
 import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
@@ -85,6 +86,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
   const incompatiblePiecesModalRef = useRef<ModalRef>(null);
   const workflowsGalleryModalRef = useRef<ModalRef>(null);
+  const myWorkflowsGalleryModalRef = useRef<ModalRef>(null);
   const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
 
   const { workspace } = useWorkspaces();
@@ -227,7 +229,13 @@ export const WorkflowsEditorComponent: React.FC = () => {
       toast.error("Workflow must have at least one piece to be exported.");
       return;
     }
-    exportToJson(payload, payload.workflowSettingsData?.config?.name);
+    const name = payload.workflowSettingsData?.config?.name;
+
+    const exportedJson: any = { ...payload };
+
+    delete exportedJson.workflowSettingsData;
+
+    exportToJson(exportedJson, name);
   }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -368,6 +376,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
     ],
   );
 
+  const onConnect = useCallback(() => {
+    void saveDataToLocalForage();
+  }, [saveDataToLocalForage]);
+
   // Left drawers controls
   const toggleSidebarPieceDrawer = (open: boolean) => (event: any) => {
     if (
@@ -445,7 +457,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 startIcon={<SaveIcon />}
                 onClick={handleSaveWorkflow}
               >
-                Save
+                Create
               </Button>
             </Grid>
             <Grid item>
@@ -509,23 +521,26 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   "aria-labelledby": "import-button",
                 }}
               >
-                <MenuItem onClick={handleImportFromFile}>
-                  Import from file
-                </MenuItem>
+                <MenuItem onClick={handleImportFromFile}>from file</MenuItem>
                 <MenuItem onClick={handleImportFromExamples}>
-                  Import from examples
+                  from examples gallery
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    setAnchorEl(null);
+                    myWorkflowsGalleryModalRef.current?.open();
                   }}
-                  disabled
                 >
-                  Import from workflows
+                  from my workflows
                 </MenuItem>
               </Menu>
               <WorkflowExamplesGalleryModal
                 ref={workflowsGalleryModalRef}
+                confirmFn={(json) => {
+                  void handleImportedJson(json);
+                }}
+              />
+              <MyWorkflowExamplesGalleryModal
+                ref={myWorkflowsGalleryModalRef}
                 confirmFn={(json) => {
                   void handleImportedJson(json);
                 }}
@@ -551,6 +566,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
               onEdgesDelete={onEdgesDelete}
               onInit={onLoad}
               onDrop={onDrop}
+              onConnect={onConnect}
             />
           </Paper>
         </Grid>

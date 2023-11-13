@@ -142,7 +142,7 @@ def patch_workspace(client: ApiTestClient, authorization_token: Dict, workspace:
     patch_workspace_request = PatchWorkspaceRequest(
         github_access_token = 'ghp_1234567890'
     )
-    body = json.loads(patch_workspace_request.json())
+    body = json.loads(patch_workspace_request.model_dump_json())
     response = client.patch(
         f"/workspaces/{workspace.id}",
         headers={"Authorization": authorization_token["header"]},

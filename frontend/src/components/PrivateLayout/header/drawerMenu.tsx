@@ -107,12 +107,12 @@ export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
         <Divider />
         <List>
           <DrawerMenuItem
-            selected={pathname === "/workflows"}
+            selected={pathname === "/my-workflows"}
             onClick={() => {
-              if (workspace?.id) navigate("/workflows");
+              if (workspace?.id) navigate("/my-workflows");
             }}
             icon={<Toc />}
-            label={"Workflows"}
+            label={"My Workflows"}
             isMenuOpen={isOpen}
             disabled={!workspace?.id}
           />

@@ -79,7 +79,9 @@ function DatetimeInput<T extends FieldValues>({
                   sx={{ width: "100%" }}
                   value={dayjs(value as string, "HH:mm")}
                   onChange={(e) => {
-                    onChange(dayjs(e).format("HH:mm") as any);
+                    e?.isValid()
+                      ? onChange(dayjs(e).format("HH:mm") as any)
+                      : onChange(null);
                   }}
                   {...rest}
                 />
@@ -109,7 +111,9 @@ function DatetimeInput<T extends FieldValues>({
                   sx={{ width: "100%" }}
                   value={dayjs(value as string)}
                   onChange={(e) => {
-                    onChange(dayjs(e).format("YYYY-MM-DD") as any);
+                    e?.isValid()
+                      ? onChange(dayjs(e).format("YYYY-MM-DD") as any)
+                      : onChange(null);
                   }}
                   {...rest}
                 />

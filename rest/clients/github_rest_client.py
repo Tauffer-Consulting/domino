@@ -2,9 +2,12 @@ from github import Github, GithubException
 from core.logger import get_configured_logger
 from schemas.exceptions.base import ResourceNotFoundException, ForbiddenException, BaseException, UnauthorizedException
 
+
 class GithubRestClient(Github):
-    def __init__(self, token):
-        super().__init__(token)
+    def __init__(self, token: str | None = None):
+        if token == "":
+            token = None
+        super().__init__(login_or_token=token)
         self.logger = get_configured_logger(self.__class__.__name__)
 
     def _handle_exceptions(self, _exception):
@@ -23,8 +26,7 @@ class GithubRestClient(Github):
             self.logger.exception(_exception)
             raise BaseException('Error connecting to github service.')
 
-
-    def get_contents(self, repo_name: str, file_path: str, commit_sha: str = None):
+    def get_contents(self, repo_name: str, file_path: str, commit_sha: str | None = None):
         """
         Get the contents of a file from a repository for a specific commit hash.
         If the hash is not defined, the latest commit is used.
@@ -39,7 +41,6 @@ class GithubRestClient(Github):
         except GithubException as e:
             self._handle_exceptions(e)
 
-    
     def create_file(self, repo_name: str, file_path: str, content: str):
         """
         Create a file in a repository.
@@ -51,7 +52,7 @@ class GithubRestClient(Github):
         except GithubException as e:
             self.logger.info('Could not create file in github: %s', e)
             self._handle_exceptions(e)
-    
+
     def delete_file(self, repo_name: str, file_path: str):
         try:
             repo = super().get_repo(repo_name)
@@ -114,9 +115,9 @@ class GithubRestClient(Github):
             self._handle_exceptions(e)
 
     def compare_commits(
-        self, 
+        self,
         repo_name: str,
-        base_sha: str, 
+        base_sha: str,
         head_sha: str
     ):
         """

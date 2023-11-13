@@ -4,7 +4,7 @@ import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import { IconButton } from "@mui/material";
 import { type CommonProps } from "@mui/material/OverridableComponent";
 import { Modal, type ModalRef } from "components/Modal";
-import { type IWorkflow } from "features/workflows/types";
+import { type IWorkflow } from "features/myWorkflows/types";
 import theme from "providers/theme.config";
 import React, { useRef, useState } from "react";
 

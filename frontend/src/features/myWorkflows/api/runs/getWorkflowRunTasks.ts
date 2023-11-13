@@ -1,6 +1,6 @@
 import { type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
-import { type IGetWorkflowRunTasksResponseInterface } from "features/workflows/types/runs";
+import { type IGetWorkflowRunTasksResponseInterface } from "features/myWorkflows/types/runs";
 import { dominoApiClient } from "services/clients/domino.client";
 
 export interface IGetWorkflowRunTasksParams {

@@ -55,7 +55,7 @@ def piece_repository():
         id=1,
         source="github",
         path="Tauffer-Consulting/default_domino_pieces_tests",
-        version="0.0.2",
+        version="0.0.3",
         workspace_id=1,
         url='https://github.com/Tauffer-Consulting/default_domino_pieces'
     )

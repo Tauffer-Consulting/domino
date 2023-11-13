@@ -1,4 +1,5 @@
 import localForage from "services/config/localForage.config";
+import { isEmpty } from "utils";
 import * as yup from "yup";
 
 import { type GenerateWorkflowsParams } from "../context/workflowsEditor";
@@ -32,13 +33,68 @@ export const importJsonWorkflow = (
 };
 
 export const validateJsonImported = async (json: any) => {
-  const schema = yup.object().shape({
-    workflowPiecesData: yup.mixed(),
-    workflowSettingsData: yup.mixed(),
-    workflowNodes: yup.mixed(),
-    workflowEdges: yup.array().of(yup.object().shape({})),
-    workflowPieces: yup.object().shape({}),
-  });
+  const schema = yup
+    .object()
+    .shape({
+      workflowEdges: yup
+        .array()
+        .of(
+          yup.object().shape({
+            id: yup.string().required(),
+            source: yup.string().required(),
+            target: yup.string().required(),
+          }),
+        )
+        .required(),
+      workflowNodes: yup
+        .array()
+        .of(
+          yup
+            .object()
+            .shape({
+              data: yup
+                .object()
+                .shape({
+                  name: yup.string().required(),
+                  orientation: yup.string().required(),
+                })
+                .required(),
+              position: yup
+                .object()
+                .shape({
+                  x: yup.number().required(),
+                  y: yup.number().required(),
+                })
+                .required(),
+            })
+            .required(),
+        )
+        .required(),
+      workflowPieces: yup.lazy((value) => {
+        if (!isEmpty(value)) {
+          const validationObject = {
+            id: yup.number().required(),
+            source_image: yup.string().required(),
+            source_url: yup.string().required(),
+            input_schema: yup.object().shape({}).required(),
+            output_schema: yup.object().shape({}).required(),
+          };
+          const newEntries = Object.keys(value).reduce(
+            (acc, val) => ({
+              ...acc,
+              [val]: yup.object(validationObject),
+            }),
+            {},
+          );
+
+          return yup.object().shape(newEntries).required();
+        }
+        return yup.mixed().notRequired();
+      }),
+      workflowPiecesData: yup.mixed(),
+    })
+    .strict()
+    .noUnknown();
 
   await schema.validate(json);
 

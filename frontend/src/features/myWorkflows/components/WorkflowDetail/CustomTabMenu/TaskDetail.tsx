@@ -9,8 +9,8 @@ import {
   Container,
 } from "@mui/material";
 import { intervalToDuration } from "date-fns";
-import { taskStatesColorMap } from "features/workflows/constants";
-import { type IWorkflowRunTasks } from "features/workflows/types/runs";
+import { taskStatesColorMap } from "features/myWorkflows/constants";
+import { type IWorkflowRunTasks } from "features/myWorkflows/types/runs";
 import { useMemo } from "react";
 
 interface IWorkflowRunTasksExtended extends IWorkflowRunTasks {
@@ -29,13 +29,10 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
         end: props.taskData.duration * 1000,
       });
 
-      return `${duration.hours} ${
-        (duration?.hours ?? 0) > 1 ? "hours" : "hour"
-      } : ${duration.minutes} ${
-        (duration?.minutes ?? 0) > 1 ? "minutes" : "minute"
-      } : ${duration.seconds} ${
-        (duration?.seconds ?? 0) > 1 ? "seconds" : "second"
-      }`;
+      return `${duration.hours} ${(duration?.hours ?? 0) > 1 ? "hours" : "hour"
+        } : ${duration.minutes} ${(duration?.minutes ?? 0) > 1 ? "minutes" : "minute"
+        } : ${duration.seconds} ${(duration?.seconds ?? 0) > 1 ? "seconds" : "second"
+        }`;
     } else {
       return "Not done yet";
     }
@@ -47,7 +44,7 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
         height: "100%",
         width: "100%",
         display: "flex",
-        alignItems: "center",
+        alignItems: "top",
         justifyContent: "center",
       }}
     >

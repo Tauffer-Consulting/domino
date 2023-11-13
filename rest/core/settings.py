@@ -18,7 +18,7 @@ class Settings(BaseSettings):
         port=os.environ.get("DOMINO_DB_PORT", "5432"),
         name=os.environ.get("DOMINO_DB_NAME", "postgres"),
     )
-    
+
     # Auth config
     AUTH_SECRET_KEY: str = os.environ.get('AUTH_SECRET_KEY', "SECRET")
     AUTH_ALGORITHM: str = os.environ.get('AUTH_ALGORITHM', "HS256")
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     GITHUB_TOKEN_SECRET_KEY: str = os.environ.get('GITHUB_TOKEN_SECRET_KEY', b'j1DsRJ-ehxU_3PbXW0c_-U4nTOx3knRB4zzWguMVaio=')
 
     # Used by github rest client
-    DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS: str = os.environ.get('DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS', '')
+    DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS: str | None = os.environ.get('DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS', None)
 
     # Workflows storage
     DOMINO_GITHUB_WORKFLOWS_REPOSITORY: str = os.environ.get('DOMINO_GITHUB_WORKFLOWS_REPOSITORY', "Tauffer-Consulting/domino_workflows_dev")
@@ -37,12 +37,11 @@ class Settings(BaseSettings):
 
     # Default domino pieces repository
     DOMINO_DEFAULT_PIECES_REPOSITORY: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY', "Tauffer-Consulting/default_domino_pieces")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.5.0")
+    DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.6.0")
     DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE', "github")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: Union[str, None] = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', '')
-
+    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: str | None = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', None)
     DOMINO_DEFAULT_PIECES_REPOSITORY_URL: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_URL', 'https://github.com/Tauffer-Consulting/default_domino_pieces')
-    
+
     # Default DB mock data
     RUN_CREATE_MOCK_DATA: bool = False
     ADMIN_CREDENTIALS: dict = {
@@ -67,6 +66,7 @@ class Settings(BaseSettings):
     DEPLOY_MODE: str = os.environ.get('DOMINO_DEPLOY_MODE', 'local-k8s')
 
     CONDITIONAL_ENDPOINTS_ENABLED: bool = False if DEPLOY_MODE == 'local-compose' else True
+
 
 class LocalK8sSettings(Settings):
     SERVER_HOST: str = "0.0.0.0"
