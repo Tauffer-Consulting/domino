@@ -1,5 +1,4 @@
 import { Grid, Paper } from "@mui/material";
-import { AxiosError } from "axios";
 import { Breadcrumbs } from "components/Breadcrumbs";
 import {
   WorkflowPanel,
@@ -145,30 +144,27 @@ export const WorkflowDetail: React.FC = () => {
           workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
           workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
           setTasks(tasks);
-          if (
-            selectedRun &&
-            (selectedRun.state === "success" || selectedRun.state === "failed")
-          ) {
-            setAutoUpdate(false);
-          } else {
-            setAutoUpdate(true);
-          }
         }
       } catch (e) {
-        if (e instanceof AxiosError) {
-          console.log(e);
-        }
         console.log(e);
       }
     }
   }, [workflow, fetchWorkflowTasks, selectedRun]);
 
-  const refresh = useCallback(() => {
-    console.log("refresh");
+  const refresh = useCallback(async () => {
     refreshDetails();
     refreshTable();
-    void refreshTasks();
-  }, [refreshDetails, refreshTable, refreshTasks]);
+    await refreshTasks();
+
+    if (
+      selectedRun &&
+      (selectedRun.state === "success" || selectedRun.state === "failed")
+    ) {
+      setAutoUpdate(false);
+    } else {
+      setAutoUpdate(true);
+    }
+  }, [refreshDetails, refreshTable, refreshTasks, selectedRun, setAutoUpdate]);
 
   const handleSelectRun = useCallback(
     (run: IWorkflowRuns | null) => {
@@ -187,7 +183,9 @@ export const WorkflowDetail: React.FC = () => {
 
   useEffect(() => {
     if (selectedRun) {
-      refresh();
+      refresh().catch((e) => {
+        console.log(e);
+      });
     }
   }, [selectedRun, refresh]);
 
