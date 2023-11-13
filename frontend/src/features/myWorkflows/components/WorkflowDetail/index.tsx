@@ -16,13 +16,19 @@ import {
   type IWorkflowRuns,
   type IWorkflowRunTasks,
 } from "features/myWorkflows/types";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { type NodeMouseHandler } from "reactflow";
 import { useInterval } from "utils";
 
-import { WorkflowRunDetail } from "./WorkflowRunDetail";
-import { WorkflowRunsTable } from "./WorkflowRunsTable";
+import {
+  WorkflowRunDetail,
+  type WorkflowRunDetailRef,
+} from "./WorkflowRunDetail";
+import {
+  WorkflowRunsTable,
+  type WorkflowRunsTableRef,
+} from "./WorkflowRunsTable";
 
 /**
  * @todo Cancel run. []
@@ -38,11 +44,14 @@ export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {
 
 export const WorkflowDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const workflowPanelRef = useRef<WorkflowPanelRef>(null);
   const [autoUpdate, setAutoUpdate] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedRun, setSelectedRun] = useState<IWorkflowRuns | null>(null);
   const [tasks, setTasks] = useState<IWorkflowRunTaskExtended[]>([]);
+
+  const workflowPanelRef = useRef<WorkflowPanelRef>(null);
+  const workflowRunsTableRef = useRef<WorkflowRunsTableRef>(null);
+  const workflowRunDetailRef = useRef<WorkflowRunDetailRef>(null);
 
   const { data: workflow } = useAuthenticatedGetWorkflowId({
     id: id as string,
@@ -51,7 +60,16 @@ export const WorkflowDetail: React.FC = () => {
   const fetchWorkflowTasks = useAuthenticatedGetWorkflowRunTasks();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
-  const handleFetchWorkflowRunTasks = useCallback(async () => {
+  const refreshDetails = useCallback(() => {
+    void workflowRunDetailRef.current?.refreshTaskLogs();
+    void workflowRunDetailRef.current?.refreshTaskResults();
+  }, [workflowRunDetailRef]);
+
+  const refreshTable = useCallback(() => {
+    void workflowRunsTableRef.current?.refetchWorkflowsRun();
+  }, [workflowRunsTableRef]);
+
+  const refreshTasks = useCallback(async () => {
     if (selectedRun && workflow) {
       try {
         const pageSize = 100;
@@ -143,10 +161,17 @@ export const WorkflowDetail: React.FC = () => {
         console.log(e);
       }
     }
-  }, [workflow, fetchWorkflowTasks, autoUpdate, selectedRun]);
+  }, [workflow, fetchWorkflowTasks, selectedRun]);
+
+  const refresh = useCallback(() => {
+    console.log("refresh");
+    refreshDetails();
+    refreshTable();
+    void refreshTasks();
+  }, [refreshDetails, refreshTable, refreshTasks]);
 
   const handleSelectRun = useCallback(
-    async (run: IWorkflowRuns | null) => {
+    (run: IWorkflowRuns | null) => {
       // if (!(run?.state === "success") && !(run?.state === "failed")) {
       //   setAutoUpdate(true);
       // }
@@ -154,7 +179,7 @@ export const WorkflowDetail: React.FC = () => {
       setSelectedRun(run);
       setAutoUpdate(true);
     },
-    [handleFetchWorkflowRunTasks],
+    [refreshDetails, refreshTable, refreshTasks],
   );
 
   const onNodeDoubleClick = useCallback<NodeMouseHandler>(
@@ -164,7 +189,13 @@ export const WorkflowDetail: React.FC = () => {
     [],
   );
 
-  useInterval(handleFetchWorkflowRunTasks, 1000, autoUpdate);
+  useEffect(() => {
+    if (selectedRun) {
+      refresh();
+    }
+  }, [selectedRun, refresh]);
+
+  useInterval(refreshTasks, 1000, autoUpdate);
 
   return (
     <Grid container spacing={3}>
@@ -183,10 +214,9 @@ export const WorkflowDetail: React.FC = () => {
                 }
               }}
               selectedRun={selectedRun}
+              ref={workflowRunsTableRef}
               onSelectedRunChange={handleSelectRun}
               workflowId={id as string}
-              autoUpdate={autoUpdate}
-              setAutoUpdate={setAutoUpdate}
             />
           </Grid>
           {/* WorkflowPanel */}
@@ -204,11 +234,11 @@ export const WorkflowDetail: React.FC = () => {
         {/* Right Column */}
         <Grid item lg={5} xs={12}>
           <WorkflowRunDetail
+            ref={workflowRunDetailRef}
             runId={selectedRun?.workflow_run_id ?? null}
             tasks={tasks}
             nodeId={selectedNodeId}
             workflowId={id as string}
-            autoUpdate={autoUpdate}
           />
         </Grid>
       </Grid>
