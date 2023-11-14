@@ -382,6 +382,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
     ],
   );
 
+  const onConnect = useCallback(() => {
+    void saveDataToLocalForage();
+  }, [saveDataToLocalForage]);
+
   // Left drawers controls
   const toggleSidebarPieceDrawer = (open: boolean) => (event: any) => {
     if (
@@ -587,6 +591,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
               onEdgesDelete={onEdgesDelete}
               onInit={onLoad}
               onDrop={onDrop}
+              onConnect={onConnect}
             />
           </Paper>
         </Grid>

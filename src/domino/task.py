@@ -15,13 +15,12 @@ from domino.schemas import shared_storage_map, StorageSource
 
 class Task(object):
     """
-    The Task object represents a task in a workflow. 
+    The Task object represents a task in a workflow.
     It is only instantiated by processes parsing dag files in Airflow.
     """
-    
     def __init__(
-        self, 
-        dag: DAG, 
+        self,
+        dag: DAG,
         task_id: str,
         workspace_id: int,
         piece: dict,
@@ -53,21 +52,20 @@ class Task(object):
         provider_options = workflow_shared_storage.pop("provider_options", {})
         if shared_storage_map[shared_storage_source_name]:
             self.workflow_shared_storage = shared_storage_map[shared_storage_source_name](
-                **workflow_shared_storage, 
+                **workflow_shared_storage,
                 **provider_options
-            ) 
-        else: 
+            )
+        else:
             self.workflow_shared_storage = shared_storage_map[shared_storage_source_name]
 
         # Container resources
         self.container_resources = container_resources
-        
+
         # Get deploy mode
-        self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')            
+        self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')
 
         # Set up task operator
         self._task_operator = self._set_operator()
-
 
     def _set_operator(self) -> BaseOperator:
         """
@@ -99,8 +97,8 @@ class Task(object):
                 )
             )
 
-        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:            
-            # References: 
+        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:
+            # References:
             # - https://airflow.apache.org/docs/apache-airflow/1.10.14/_api/airflow/contrib/operators/kubernetes_pod_operator/index.html
             # - https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html
             # - https://www.astronomer.io/guides/templating/
@@ -123,14 +121,14 @@ class Task(object):
                 image_pull_policy='IfNotPresent',
                 name=f"airflow-worker-pod-{self.task_id}",
                 startup_timeout_seconds=600,
-                #cmds=["/bin/bash"],
-                #arguments=["-c", "sleep 120;"],
+                # cmds=["/bin/bash"],
+                # arguments=["-c", "sleep 120;"],
                 cmds=["domino"],
                 arguments=["run-piece-k8s"],
                 do_xcom_push=True,
                 in_cluster=True,
             )
-        
+
         elif self.deploy_mode == 'local-compose':
             return DominoDockerOperator(
                 dag_id=self.dag_id,
@@ -152,7 +150,6 @@ class Task(object):
                 retrieve_output_path='/airflow/xcom/return.out',
                 entrypoint=["domino", "run-piece-docker"],
             )
-
 
     def __call__(self) -> Callable:
         return self._task_operator

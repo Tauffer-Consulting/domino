@@ -21,9 +21,9 @@ class PieceRepository(Base, BaseDatabaseModel):
     workspace_id = Column(Integer, ForeignKey("workspace.id", ondelete='cascade'), nullable=False)
 
     workspace = relationship(
-        "Workspace", 
-        back_populates="piece_repositories", 
-        lazy='subquery', 
+        "Workspace",
+        back_populates="piece_repositories",
+        lazy='subquery',
         uselist=True,
         cascade="all, delete"
     )
@@ -43,5 +43,3 @@ class PieceRepository(Base, BaseDatabaseModel):
         uselist=True,
         cascade="all, delete"
     )
-
-

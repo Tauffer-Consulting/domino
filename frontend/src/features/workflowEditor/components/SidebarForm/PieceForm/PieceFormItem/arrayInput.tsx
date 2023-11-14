@@ -60,6 +60,16 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
 
   const [enumOptions, setEnumOptions] = useState<string[]>([]);
 
+  if ("anyOf" in schema && schema.anyOf.length === 2) {
+    const hasNullType = schema.anyOf.some((item: any) => item.type === "null");
+    if (hasNullType) {
+      const notNullAnyOf = schema.anyOf.find(
+        (item: any) => item.type !== "null",
+      );
+      schema.items = notNullAnyOf.items;
+    }
+  }
+
   const subItemSchema = useMemo(() => {
     let subItemSchema: any = schema?.items;
     if (schema?.items?.$ref) {
@@ -139,8 +149,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
       });
       return object;
     }
-
-    const defaultValue = schema.default[0];
+    const defaultValue = schema.default === null ? "" : schema.default[0];
     const isObject = typeof defaultValue === "object";
     let defaultObj = {
       fromUpstream: getFromUpstream(schema),

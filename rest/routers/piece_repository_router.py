@@ -21,6 +21,7 @@ auth_service = AuthService()
 
 piece_repository_service = PieceRepositoryService()
 
+
 @router.post(
     path="",
     status_code=status.HTTP_200_OK,
@@ -38,7 +39,7 @@ def create_piece_repository(
     auth_context: AuthorizationContextData = Depends(auth_service.workspace_owner_access_authorizer_body)
 ) -> CreateRepositoryReponse:
     """
-    Create piece repository for workspace. 
+    Create piece repository for workspace.
     Only one piece repository version is allowed for each workspace.
     """
     try:

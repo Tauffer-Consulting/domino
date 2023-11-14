@@ -12,8 +12,8 @@ from services.workspace_service import WorkspaceService
 from services.piece_repository_service import PieceRepositoryService
 from database.models.enums import Permission
 
-class UserService(object):
 
+class UserService(object):
     def __init__(self) -> None:
         self.user_repository = UserRepository()
         self.auth_service = AuthService()
@@ -21,7 +21,6 @@ class UserService(object):
         self.piece_repository_service = PieceRepositoryService()
         self.workspace_service = WorkspaceService()
         self.logger = get_configured_logger(self.__class__.__name__)
-
 
     async def create_user(self, email: str, password: str):
         if self.user_repository.get_user_by_email(email=email):
@@ -57,11 +56,9 @@ class UserService(object):
             await self.delete_user(user_id=user.id, auth_context=auth_context)
             raise e
 
-
     def get_user_info(self, user_id: str):
         # TODO
         return self.user_repository.get_user_by_id(id=user_id)
-
 
     def login_user(self, email: str, password: str) -> LoginResponse:
         user = self.user_repository.get_user_by_email(email=email)
@@ -79,13 +76,13 @@ class UserService(object):
         user = self.user_repository.find_by_id(user_id)
         if not user:
             raise ResourceNotFoundException()
-        
+
         if user.id != auth_context.user_id:
             raise ForbiddenException()
 
         workspaces_ids = [workspace.workspace.id for workspace in user.workspaces]
         user_workspaces_members_count = self.workspace_repository.find_user_workspaces_members_count(
-            user_id=user_id, 
+            user_id=user_id,
             workspaces_ids=workspaces_ids
         )
 

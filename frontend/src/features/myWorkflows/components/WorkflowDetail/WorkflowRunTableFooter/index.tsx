@@ -27,31 +27,31 @@ export const WorkflowRunTableFooter = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <Grid container>
-        <Grid item xs={9}>
+        <Grid item xs={6}>
           <Grid
             container
             alignContent="center"
-            justifyContent="end"
+            justifyContent="start"
             sx={{ height: "100%" }}
           >
-            <Grid item xs={1}>
+            <Grid item sx={{ paddingLeft: "1rem" }}>
               <Button variant="contained" onClick={triggerRun}>
                 Run
               </Button>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sx={{ paddingLeft: "1rem" }}>
               <Button disabled variant="contained">
                 Cancel
               </Button>
             </Grid>
-            <Grid item xs={1}>
+            <Grid item sx={{ paddingLeft: "1rem" }}>
               <Button disabled variant="contained">
                 Pause
               </Button>
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={6}>
           {paginationElement}
         </Grid>
       </Grid>

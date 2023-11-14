@@ -96,7 +96,7 @@ class WorkflowService(object):
         try:
             self._validate_workflow_tasks(tasks_dict=data_dict.get('tasks'), workspace_id=workspace_id)
 
-            workflow_schema, workflow_code, pieces_repositories_ids = self._create_dag_code_from_raw_json(data_dict, workspace_id=workspace_id)
+            _, workflow_code, pieces_repositories_ids = self._create_dag_code_from_raw_json(data_dict, workspace_id=workspace_id)
             
             workflow_piece_repository_associations = [
                 WorkflowPieceRepositoryAssociative(
@@ -694,7 +694,7 @@ class WorkflowService(object):
         return response
 
     @staticmethod
-    def parse_log(log_text: str, task_id: str, piece_name: str):
+    def parse_log(log_text: str):
         # Get the log lines between the start and stop patterns
         start_command_pattern = "Start cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
         stop_command_pattern = "End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b"
@@ -777,12 +777,8 @@ class WorkflowService(object):
         if response.status_code != 200:
             raise BaseException("Error while trying to get task logs")
 
-        # Get the piece name from the task_id using the workflow schema.
-        piece_name = workflow.schema['tasks'][task_id]['piece']['name']
         parsed_log = self.parse_log(
-            response.text, 
-            task_id, 
-            piece_name
+            response.text
         )
 
         return GetWorkflowRunTaskLogsResponse(

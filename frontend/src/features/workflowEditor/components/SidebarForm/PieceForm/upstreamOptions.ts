@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { generateTaskName, getUuidSlice } from "utils";
 
 export interface Option {
@@ -8,7 +7,7 @@ export interface Option {
 }
 
 export interface ArrayOption {
-  array: Option[];
+  $array: Option[];
   items: Option[];
 }
 
@@ -23,9 +22,11 @@ const getInputType = (schema: Record<string, any>) => {
   } else if ("anyOf" in schema) {
     type = [];
     for (const item of schema.anyOf) {
-      let _type = item.type;
+      let _type = item.format ? item.format : item.type;
       _type = _type === "number" ? "float" : (_type as string);
-      type.push(_type);
+      if (_type !== "null") {
+        type.push(_type);
+      }
     }
   }
   return type === "number" ? "float" : (type as string);
@@ -40,6 +41,9 @@ const validateUpstreamType = (upType: string, type: string) => {
   }
   if (Array.isArray(upType) && Array.isArray(type)) {
     return upType.some((element) => type.includes(element));
+  }
+  if (Array.isArray(type) && !Array.isArray(upType)) {
+    return type.includes(upType);
   }
   return false;
 };
@@ -104,28 +108,31 @@ export const getUpstreamOptions = (
     const currentSchema = schema.properties[key];
     const currentType = getInputType(currentSchema);
 
-    if (currentType === "array") {
+    if (
+      currentType === "array" ||
+      (Array.isArray(currentType) && currentType.includes("array"))
+    ) {
       let itemsSchema = currentSchema?.items;
       if (currentSchema?.items?.$ref) {
         const subItemSchemaName = currentSchema.items.$ref.split("/").pop();
         itemsSchema = schema.$defs?.[subItemSchemaName];
       }
 
-      const array = getOptions(upstreamPieces, currentType);
+      const $array = getOptions(upstreamPieces, currentType);
       if (itemsSchema.type === "object") {
         const __data: any = {};
         Object.keys(itemsSchema.properties).forEach((subKey) => {
           const subSchema = itemsSchema.properties[subKey];
           const subType = getInputType(subSchema);
           const items = getOptions(upstreamPieces, subType);
-          __data[subKey] = { array, items };
+          __data[subKey] = { items };
         });
-        upstreamOptions[key] = __data;
+        upstreamOptions[key] = { ...__data, $array };
       } else {
         const itemsType = getInputType(itemsSchema);
         const items = getOptions(upstreamPieces, itemsType);
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        upstreamOptions[key] = { array, items } as ArrayOption;
+        upstreamOptions[key] = { $array, items } as ArrayOption;
       }
     } else {
       const options = getOptions(upstreamPieces, currentType);
