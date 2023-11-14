@@ -19,15 +19,18 @@ import shutil
 
 
 class AsLiteral(str):
-  pass
+    pass
+
 
 def represent_literal(dumper, data):
-  return dumper.represent_scalar(BaseResolver.DEFAULT_SCALAR_TAG, data, style="|")
+    return dumper.represent_scalar(BaseResolver.DEFAULT_SCALAR_TAG, data, style="|")
+
 
 yaml.add_representer(AsLiteral, represent_literal)
 
 
 console = Console()
+
 
 def create_ssh_pair_key() -> None:
     # Create SSH key pair for GitHub Workflows
@@ -48,12 +51,12 @@ def create_ssh_pair_key() -> None:
         crypto_serialization.PublicFormat.OpenSSH
     )
     return private_key, public_key
-    
+
 
 def prepare_platform(
-    cluster_name: str, 
-    workflows_repository: str, 
-    github_workflows_ssh_private_key: str, 
+    cluster_name: str,
+    workflows_repository: str,
+    github_workflows_ssh_private_key: str,
     github_default_pieces_repository_token: str,
     github_workflows_token: str,
     deploy_mode: str,
@@ -67,7 +70,7 @@ def prepare_platform(
     config_file_path = Path(__file__).resolve().parent / "config-domino-local.toml"
     with open(str(config_file_path), "rb") as f:
         config_dict = tomli.load(f)
-    
+
     running_path = str(Path().cwd().resolve())
     config_dict["path"]["DOMINO_LOCAL_RUNNING_PATH"] = running_path
     config_dict["kind"]["DOMINO_KIND_CLUSTER_NAME"] = cluster_name
@@ -83,8 +86,8 @@ def prepare_platform(
             repo_config_file_path = Path(local_pieces_repository).resolve() / "config.toml"
             with open(str(repo_config_file_path), "rb") as f:
                 repo_toml = tomli.load(f)
-            
-            repo_name = repo_toml['repository']['REPOSITORY_NAME'] 
+
+            repo_name = repo_toml['repository']['REPOSITORY_NAME']
             config_dict['dev'][repo_name] = local_pieces_repository
 
     config_dict['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'] = workflows_repository.split("github.com/")[-1].strip('/')
@@ -98,7 +101,7 @@ def prepare_platform(
 
     config_dict['github']['DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS'] = github_workflows_token
     config_dict['github']['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = github_default_pieces_repository_token
-    
+
     with open("config-domino-local.toml", "wb") as f:
         tomli_w.dump(config_dict, f)
 
@@ -124,7 +127,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         )
     )
     extra_mounts_local_repositories = []
-    
+
     domino_dev_private_variables_list = [
         "DOMINO_LOCAL_DOMINO_PACKAGE",
         "DOMINO_REST_IMAGE",
@@ -196,7 +199,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         yaml.dump(kind_config, f)
 
     cluster_name = platform_config["kind"]["DOMINO_KIND_CLUSTER_NAME"]
-    
+
     # Delete previous Kind cluster
     console.print("")
     console.print(f"Removing previous Kind cluster - {cluster_name}...")
@@ -232,7 +235,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     local_domino_rest_image = platform_config.get('dev', {}).get('DOMINO_REST_IMAGE', None)
 
     domino_airflow_image_tag = 'latest'
-    domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base" 
+    domino_airflow_image = "ghcr.io/tauffer-consulting/domino-airflow-base"
     if local_domino_airflow_image:
         console.print(f"Loading local Domino Airflow image {local_domino_airflow_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", local_domino_airflow_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
@@ -248,19 +251,19 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         domino_frontend_image = "ghcr.io/tauffer-consulting/domino-frontend:k8s-dev"
     else:
         domino_frontend_image = "ghcr.io/tauffer-consulting/domino-frontend:k8s"
-    
+
     if local_domino_rest_image:
         console.print(f"Loading local REST image {local_domino_rest_image} to Kind cluster...")
         subprocess.run(["kind", "load", "docker-image", local_domino_rest_image , "--name", cluster_name, "--nodes", f"{cluster_name}-worker"])
         domino_rest_image = f'docker.io/library/{local_domino_rest_image}'
     elif platform_config['kind']["DOMINO_DEPLOY_MODE"] == 'local-k8s-dev':
-        domino_rest_image = "ghcr.io/tauffer-consulting/domino-rest:latest-dev" 
+        domino_rest_image = "ghcr.io/tauffer-consulting/domino-rest:latest-dev"
     else:
-        domino_rest_image = "ghcr.io/tauffer-consulting/domino-rest:latest" 
+        domino_rest_image = "ghcr.io/tauffer-consulting/domino-rest:latest"
 
     # In order to use nvidia gpu in our cluster we need nvidia plugins to be installed.
     # We can use nvidia operator to install nvidia plugins.
-    # References: 
+    # References:
     #     https://catalog.ngc.nvidia.com/orgs/nvidia/containers/gpu-operator
     #     https://jacobtomlinson.dev/posts/2022/quick-hack-adding-gpu-support-to-kind/
     if use_gpu:
@@ -275,8 +278,8 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         # We don't need driver as we are using kind and our host machine already has nvidia driver that is why we are disabling it.
         nvidia_plugis_install_command = "helm install --wait --generate-name -n gpu-operator --create-namespace nvidia/gpu-operator --set driver.enabled=false"
         subprocess.run(nvidia_plugis_install_command, shell=True)
-    
-    
+
+
     # Override values for Domino Helm chart
     db_enabled = platform_config['domino_db'].get("DOMINO_CREATE_DATABASE", True)
     token_pieces = platform_config["github"]["DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"]
@@ -565,7 +568,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
                     )
                 )
                 k8s_client.create_persistent_volume(body=pv)
-        
+
         if platform_config['dev'].get('DOMINO_LOCAL_DOMINO_PACKAGE'):
             console.print("Creating PV's and PVC's for Local Domino Package...")
             # Create pv and pvc for local dev domino
@@ -656,7 +659,6 @@ def run_platform_compose(detached: bool = False, use_config_file: bool = False, 
         if platform_config['domino_db'].get('DOMINO_DB_HOST') in ['localhost', '0.0.0.0', '127.0.0.1']:
             os.environ['NETWORK_MODE'] = 'host'
 
-    
     # Create local directories
     local_path = Path(".").resolve()
     domino_dir = local_path / "domino_data"
@@ -680,8 +682,8 @@ def run_platform_compose(detached: bool = False, use_config_file: bool = False, 
     shutil.copy(str(docker_compose_path), "./docker-compose.yaml")
     # Run docker-compose up
     cmd = [
-        "docker", 
-        "compose", 
+        "docker",
+        "compose",
         "up"
     ]
     if detached:
@@ -697,8 +699,8 @@ def stop_platform_compose() -> None:
     docker_compose_path = Path.cwd().resolve() / "docker-compose.yaml"
     if docker_compose_path.exists():
         cmd = [
-            "docker", 
-            "compose", 
+            "docker",
+            "compose",
             "down"
         ]
         completed_process = subprocess.run(cmd)
@@ -722,7 +724,7 @@ def stop_platform_compose() -> None:
                 print(f"Command failed with error: {stderr.decode()}")
             else:
                 print(stdout.decode())
-        
+
         try:
             container_names = [
                 "domino-frontend",

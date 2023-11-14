@@ -219,6 +219,12 @@ def cli_run_platform_compose(d, use_config_file, dev, stop):
         platform.run_platform_compose(detached=d, use_config_file=use_config_file, dev=dev)
 
 
+@click.command()
+def cli_stop_platform_compose():
+    """Stop Domino platform locally with docker compose. Do NOT use this in production."""
+    platform.stop_platform_compose()
+
+
 @click.group()
 @click.pass_context
 def cli_platform(ctx):
@@ -233,6 +239,7 @@ cli_platform.add_command(cli_prepare_platform, name="prepare")
 cli_platform.add_command(cli_create_platform, name="create")
 cli_platform.add_command(cli_destroy_platform, name="destroy")
 cli_platform.add_command(cli_run_platform_compose, name="run-compose")
+cli_platform.add_command(cli_stop_platform_compose, name="stop-compose")
 
 
 ###############################################################################
