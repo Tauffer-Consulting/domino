@@ -12,6 +12,7 @@ import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState } from "react";
 
 import ImageFilterWorkflow from "../../utils/workflows/image_filter_workflow.json";
+import NasaImageWorkflow from "../../utils/workflows/nasa_workflow.json";
 import YoutubeSummarizerWorkflow from "../../utils/workflows/youtube_summarizer.json";
 
 interface WorkflowGalleryModalRef extends ModalRef {}
@@ -39,6 +40,12 @@ const WorkflowExamplesGalleryModal = forwardRef(
         title: "Image Filter Workflow",
         description: "A simple workflow that applies a filter to an image.",
         jsonFile: ImageFilterWorkflow,
+        levelTag: "Beginner",
+      },
+      {
+        title: "NASA Image Workflow",
+        description: "A simple workflow that gets an image from NASA API.",
+        jsonFile: NasaImageWorkflow,
         levelTag: "Beginner",
       },
     ];
