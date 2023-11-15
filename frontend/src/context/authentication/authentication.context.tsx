@@ -1,3 +1,4 @@
+import Loading from "components/Loading";
 import React, {
   type ReactNode,
   useCallback,
@@ -13,6 +14,7 @@ import { createCustomContext } from "utils";
 
 import { postAuthLogin, postAuthRegister } from "./api";
 import {
+  authStatus,
   type IAuthenticationContext,
   type IAuthenticationStore,
 } from "./authentication.interface";
@@ -29,6 +31,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const navigate = useNavigate();
+  const [status, setStatus] = useState(authStatus.Loading);
   const [authLoading, setAuthLoading] = useState(false);
   const [store, setStore] = useState<IAuthenticationStore>({
     token: localStorage.getItem("auth_token"),
@@ -56,6 +59,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
         "tokenExpiresAtTimestamp",
         tokenExpirationDate.getTime().toString(),
       );
+      setStatus(authStatus.SignedIn);
       navigate(redirect);
     },
     [navigate],
@@ -69,12 +73,10 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       ...store,
       token: null,
     }));
+    setStatus(authStatus.SignedOut);
     navigate("/sign-in");
   }, [navigate]);
 
-  /**
-   * @todo improve error handling
-   */
   const authenticate = useCallback(
     async (email: string, password: string) => {
       setAuthLoading(true);
@@ -120,16 +122,15 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
     [authenticate],
   );
 
-  const value = useMemo((): IAuthenticationContext => {
-    return {
-      store,
-      isLogged: isLogged.current,
-      authLoading,
-      logout,
-      authenticate,
-      register,
-    };
-  }, [store, logout, authenticate, register, authLoading]);
+  const tokenExpired = useCallback(() => {
+    const tokenTimestamp = localStorage.getItem("tokenExpiresAtTimestamp");
+    if (tokenTimestamp) {
+      const date1 = Number(tokenTimestamp);
+      const date2 = new Date().getTime();
+      return date1 <= date2;
+    }
+    return true;
+  }, []);
 
   /**
    * Listen to "logout" event and handles it (ie. unauthorized request)
@@ -144,6 +145,31 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       });
     };
   }, [logout]);
+
+  useEffect(() => {
+    const expired = tokenExpired();
+
+    if (expired) {
+      logout();
+    } else {
+      setStatus(authStatus.SignedIn);
+    }
+  }, [tokenExpired]);
+
+  const value = useMemo((): IAuthenticationContext => {
+    return {
+      store,
+      isLogged: isLogged.current,
+      authLoading,
+      logout,
+      authenticate,
+      register,
+    };
+  }, [store, logout, authenticate, register, authLoading]);
+
+  if (status === authStatus.Loading) {
+    return <Loading />;
+  }
 
   return (
     <AuthenticationContext.Provider value={value}>
