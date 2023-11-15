@@ -32,12 +32,14 @@ const WorkflowExamplesGalleryModal = forwardRef(
         description:
           "Sends the summary of the last BBCNews youtube channel video to an emails list. You must configure Secrets and Local storage to use it.",
         jsonFile: YoutubeSummarizerWorkflow,
+        levelTag: "Advanced",
       },
       {
         title: "Simple Log Workflow",
         description:
           "A simple workflow that logs a message to the console. Useful as starting point for new users.",
         jsonFile: LogWorkflow,
+        levelTag: "Beginner",
       },
     ];
 
@@ -83,8 +85,24 @@ const WorkflowExamplesGalleryModal = forwardRef(
                         />
                       )}
 
-                      <Typography variant="h3">{card.title}</Typography>
-                      <div style={{ marginTop: "40px" }}>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          position: "absolute",
+                          top: "20px",
+                          left: "20px",
+                          zIndex: 1,
+                        }}
+                      >
+                        {card.title}
+                      </Typography>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "80px",
+                          overflow: "hidden",
+                        }}
+                      >
                         <Typography>{card.description}</Typography>
                       </div>
                     </CardContent>
