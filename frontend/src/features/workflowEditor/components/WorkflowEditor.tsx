@@ -250,7 +250,14 @@ export const WorkflowsEditorComponent: React.FC = () => {
             toast.error(
               "Some repositories are missing or incompatible version",
             );
-            setIncompatiblesPieces(differences);
+            const uniquePieces = new Set<string>();
+            incompatiblesPieces.forEach((item) => {
+              const pieceWithVersion = `${
+                item.split("ghcr.io/")[1].split(":")[0]
+              }:${item.split("ghcr.io/")[1].split(":")[1].split("-")[0]}`;
+              uniquePieces.add(pieceWithVersion);
+            });
+            setIncompatiblesPieces(Array.from(uniquePieces));
             incompatiblePiecesModalRef.current?.open();
           } else {
             workflowPanelRef?.current?.setNodes(json.workflowNodes);
@@ -494,18 +501,19 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 <Modal
                   title="Missing or incompatibles Pieces Repositories"
                   content={
-                    <ul>
-                      {incompatiblesPieces.map((item) => (
-                        <li key={item}>
-                          {`${item.split("ghcr.io/")[1].split(":")[0]}:  ${
-                            item
-                              .split("ghcr.io/")[1]
-                              .split(":")[1]
-                              .split("-")[0]
-                          }`}
-                        </li>
-                      ))}
-                    </ul>
+                    <div>
+                      <p style={{ textAlign: "justify" }}>
+                        Some of the pieces necessary to run this workflow are
+                        not present in this workspace. In order to install the
+                        correct versions go to the workspace configuration page
+                        and install the following repositories versions:
+                      </p>
+                      <ul>
+                        {incompatiblesPieces.map((item) => (
+                          <li key={item}>{`${item}`}</li>
+                        ))}
+                      </ul>
+                    </div>
                   }
                   ref={incompatiblePiecesModalRef}
                 />
