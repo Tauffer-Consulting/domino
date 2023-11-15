@@ -51,7 +51,7 @@ const MyWorkflowExamplesGalleryModal = forwardRef(
         fullWidth={true}
         content={
           <Container>
-            <Grid container justifyContent="center">
+            <Grid container justifyContent="center" spacing={2}>
               {cardsContents.map((card, index) => (
                 <Grid item key={index} xs={12} sm={4} md={4}>
                   <Card
