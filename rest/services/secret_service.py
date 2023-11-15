@@ -111,7 +111,9 @@ class SecretService(object):
         piece_item = self.piece_repository.find_by_name_and_repository_id(name=piece_name, repository_id=piece_repository_id)
         if not piece_item:
             raise ResourceNotFoundException()
-
+        
+        
+        piece_item_required_secrets = piece_item.secrets_schema.get('required', [])
         secrets_names = self.piece_repository.get_piece_secrets_names_by_repository_id(name=piece_name, repository_id=piece_repository_id)
         secrets_names = [e[0] for e in secrets_names]
 
@@ -128,7 +130,8 @@ class SecretService(object):
             response.append(
                 GetSecretsByPieceResponse(
                     name=secret,
-                    value=decoded_value
+                    value=decoded_value,
+                    required=secret in piece_item_required_secrets
                 )
             )
 

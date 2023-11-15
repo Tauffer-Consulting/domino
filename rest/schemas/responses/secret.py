@@ -20,3 +20,4 @@ class ListRepositorySecretsResponse(BaseModel):
 class GetSecretsByPieceResponse(BaseModel):
     name: str
     value: Optional[str] = None
+    required: bool
