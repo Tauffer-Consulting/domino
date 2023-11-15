@@ -46,7 +46,7 @@ const MyWorkflowExamplesGalleryModal = forwardRef(
 
     return (
       <Modal
-        title="Example Workflows Gallery"
+        title="My Workflows Gallery"
         maxWidth={"md"}
         fullWidth={true}
         content={

@@ -118,6 +118,7 @@ const WorkflowExamplesGalleryModal = forwardRef(
                           top: "20px",
                           left: "20px",
                           zIndex: 1,
+                          fontWeight: "bold",
                         }}
                       >
                         {card.title}
@@ -127,6 +128,8 @@ const WorkflowExamplesGalleryModal = forwardRef(
                           position: "absolute",
                           top: "80px",
                           overflow: "hidden",
+                          paddingRight: "10px",
+                          textAlign: "justify",
                         }}
                       >
                         <Typography>{card.description}</Typography>
