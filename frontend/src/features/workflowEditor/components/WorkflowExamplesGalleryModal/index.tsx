@@ -56,6 +56,19 @@ const WorkflowExamplesGalleryModal = forwardRef(
       },
     };
 
+    cardsContents.sort((a, b) => {
+      const orderMap: any = {
+        Beginner: 1,
+        Intermediate: 2,
+        Advanced: 3,
+      };
+
+      const levelA = orderMap[a.levelTag];
+      const levelB = orderMap[b.levelTag];
+
+      return levelA - levelB;
+    });
+
     return (
       <Modal
         title="Example Workflows Gallery"
