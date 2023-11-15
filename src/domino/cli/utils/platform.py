@@ -3,6 +3,10 @@ import tomli
 import tomli_w
 import yaml
 import subprocess
+import re
+import shutil
+import requests
+import time
 from concurrent.futures import ThreadPoolExecutor
 import base64
 from pathlib import Path
@@ -15,7 +19,6 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from kubernetes import client, config
 
 from domino.cli.utils.constants import COLOR_PALETTE, DOMINO_HELM_PATH, DOMINO_HELM_VERSION, DOMINO_HELM_REPOSITORY
-import shutil
 
 
 class AsLiteral(str):
@@ -637,7 +640,9 @@ def destroy_platform() -> None:
     console.print("")
 
 
-def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False) -> None:
+def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False, debug: bool = False) -> None:
+    console.print("Starting Domino Platform using Docker Compose.")
+    console.print("Please wait, this might take a few minutes...")
     # Database default settings
     create_database = True
     if use_config_file:
@@ -680,69 +685,186 @@ def run_platform_compose(detached: bool = False, use_config_file: bool = False, 
     else:
         docker_compose_path = Path(__file__).resolve().parent / "docker-compose-without-database.yaml"
     shutil.copy(str(docker_compose_path), "./docker-compose.yaml")
-    # Run docker-compose up
+
+    # Environment variables
+    environment = os.environ.copy()
+    environment['DOMINO_COMPOSE_DEV'] = ''
+    if dev:
+        environment['DOMINO_COMPOSE_DEV'] = '-dev'
+
+    # Run docker compose pull
+    console.print("\nPulling Docker images...")
+    pull_cmd = [
+        "docker",
+        "compose",
+        "pull"
+    ]
+    pull_process = subprocess.Popen(pull_cmd, env=environment)
+    pull_process.wait()
+    if pull_process.returncode == 0:
+        console.print(" \u2713 Docker images pulled successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+    else:
+        console.print("Docker images pull failed.", style=f"bold {COLOR_PALETTE.get('error')}")
+
+    # Run docker compose up
+    console.print("\nStarting services...")
     cmd = [
         "docker",
         "compose",
         "up"
     ]
-    if detached:
+    if detached and not debug:
         cmd.append("-d")
-    environment = os.environ.copy()
-    if dev:
-        environment['DOMINO_COMPOSE_DEV'] = '-dev'
-    subprocess.Popen(cmd, env=environment)
+
+    if debug:
+        subprocess.Popen(cmd, env=environment)
+    else:
+        airflow_redis_ready = False
+        airflow_database_ready = False
+        airflow_init_ready = False
+        airflow_triggerer_ready = False
+        airflow_worker_ready = False
+        airflow_webserver_ready = False
+        airflow_scheduler_ready = False
+        domino_database_ready = False
+
+        process = subprocess.Popen(cmd, env=environment, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        # Read and filter the output
+        def customize_message(
+            line: str,
+            airflow_redis_ready: bool = False,
+            airflow_database_ready: bool = False,
+            airflow_init_ready: bool = False,
+            airflow_triggerer_ready: bool = False,
+            airflow_worker_ready: bool = False,
+            airflow_webserver_ready: bool = False,
+            airflow_scheduler_ready: bool = False,
+            domino_database_ready: bool = False,
+        ):
+            line = line.lower()
+            line = re.sub(r'\s+', ' ', line)
+            if not airflow_redis_ready and "airflow-redis" in line and "ready to accept connections tcp" in line:
+                console.print(" \u2713 Airflow Redis service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                airflow_redis_ready = True
+            if not airflow_database_ready and "airflow-postgres" in line and ("ready" in line or "skipping" in line):
+                console.print(" \u2713 Airflow database service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                airflow_database_ready = True
+            if not airflow_init_ready and "airflow-init" in line and "exited with code 0" in line:
+                console.print(" \u2713 Airflow pre-initialization service completed successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                airflow_init_ready = True
+            if not airflow_triggerer_ready and "airflow-triggerer" in line and "starting" in line:
+                console.print(" \u2713 Airflow triggerer service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                airflow_triggerer_ready = True
+            if not airflow_worker_ready and "airflow-domino-worker" in line and "execute_command" in line:
+                console.print(" \u2713 Airflow worker service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                airflow_worker_ready = True
+            if not airflow_webserver_ready and "airflow-webserver" in line and "health" in line and "200" in line:
+                console.print(" \u2713 Airflow webserver service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                airflow_webserver_ready = True
+            if not airflow_scheduler_ready and "airflow-domino-scheduler" in line and "launched" in line:
+                console.print(" \u2713 Airflow scheduler service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                airflow_scheduler_ready = True
+            if not domino_database_ready and "domino-postgres" in line and ("ready" in line or "skipping" in line):
+                console.print(" \u2713 Domino database service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                domino_database_ready = True
+            return airflow_redis_ready, airflow_database_ready, airflow_init_ready, airflow_triggerer_ready, airflow_worker_ready, airflow_webserver_ready, airflow_scheduler_ready, domino_database_ready
+
+        def check_domino_processes():
+            while True:
+                frontend_response = requests.get("http://localhost:3000").status_code
+                rest_response = requests.get("http://localhost:8000/health-check").status_code
+                if frontend_response == 200 and rest_response == 200:
+                    console.print(" \u2713 Domino REST service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                    console.print(" \u2713 Domino frontend service started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                    break
+                time.sleep(5)
+
+        for line in process.stdout:
+            airflow_redis_ready, airflow_database_ready, airflow_init_ready, airflow_triggerer_ready, airflow_worker_ready, airflow_webserver_ready, airflow_scheduler_ready, domino_database_ready = customize_message(
+                line, airflow_redis_ready, airflow_database_ready, airflow_init_ready, airflow_triggerer_ready,
+                airflow_worker_ready, airflow_webserver_ready, airflow_scheduler_ready, domino_database_ready)
+            if all([
+                airflow_redis_ready,
+                airflow_database_ready,
+                airflow_init_ready,
+                airflow_triggerer_ready,
+                airflow_worker_ready,
+                airflow_webserver_ready,
+                airflow_scheduler_ready,
+                domino_database_ready,
+            ]):
+                check_domino_processes()
+                console.print("\n \u2713 All services for Domino Platform started successfully!", style=f"bold {COLOR_PALETTE.get('success')}")
+                console.print("")
+                console.print("You can now access them at")
+                console.print("Domino UI: http://localhost:3000")
+                console.print("Domino REST API: http://localhost:8000")
+                console.print("Domino REST API Docs: http://localhost:8000/docs")
+                console.print("Airflow webserver: http://localhost:8080")
+                console.print("")
+                console.print("To stop the platform, run:")
+                console.print("    $ domino platform stop-compose")
+                console.print("")
+                break
 
 
 def stop_platform_compose() -> None:
     # If "docker-compose.yaml" file is present in current working path, try run "docker compose down"
     docker_compose_path = Path.cwd().resolve() / "docker-compose.yaml"
     if docker_compose_path.exists():
+        # Setting this environment variable to empty string just to print cleaner messages to terminal
+        environment = os.environ.copy()
+        environment['DOMINO_COMPOSE_DEV'] = ''
+        environment['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = ''
+        environment['AIRFLOW_UID'] = ''
         cmd = [
             "docker",
             "compose",
             "down"
         ]
-        completed_process = subprocess.run(cmd)
-        if completed_process.returncode == 0:
-            print("Domino Platform stopped successfully. All containers were removed.")
-    # If not, try to stop and remove containers by name
-    else:
-        def stop_and_remove_container(container_name):
-            print(f"Stopping {container_name}...")
-            process = subprocess.Popen(f"docker stop {container_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode != 0:
-                print(f"Command failed with error: {stderr.decode()}")
-            else:
-                print(stdout.decode())
+        completed_process = subprocess.run(cmd, env=environment)
+        # if completed_process.returncode == 0:
+        #     print("Domino Platform stopped successfully. All containers were removed.")
 
-            print(f"Removing {container_name}...")
-            process = subprocess.Popen(f"docker rm {container_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode != 0:
-                print(f"Command failed with error: {stderr.decode()}")
-            else:
-                print(stdout.decode())
+    # Stop and remove containers by name
+    def stop_and_remove_container(container_name):
+        print(f"Stopping {container_name}...")
+        process = subprocess.Popen(f"docker stop {container_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            # print(f"Command failed with error: {stderr.decode()}")
+            pass
+        else:
+            print(stdout.decode())
 
-        try:
-            container_names = [
-                "domino-frontend",
-                "domino-rest",
-                "domino-postgres",
-                "domino-docker-proxy",
-                "airflow-domino-scheduler",
-                "airflow-domino-worker",
-                "airflow-webserver",
-                "airflow-triggerer",
-                "airflow-redis",
-                "airflow-postgres",
-                "airflow-flower",
-                "airflow-cli",
-                "airflow-init",
-            ]
-            with ThreadPoolExecutor() as executor:
-                executor.map(stop_and_remove_container, container_names)
-            print("Domino Platform stopped successfully. All containers were removed.")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        print(f"Removing {container_name}...")
+        process = subprocess.Popen(f"docker rm {container_name}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            # print(f"Command failed with error: {stderr.decode()}")
+            pass
+        else:
+            print(stdout.decode())
+
+    try:
+        container_names = [
+            "domino-frontend",
+            "domino-rest",
+            "domino-postgres",
+            "domino-docker-proxy",
+            "airflow-domino-scheduler",
+            "airflow-domino-worker",
+            "airflow-webserver",
+            "airflow-triggerer",
+            "airflow-redis",
+            "airflow-postgres",
+            "airflow-flower",
+            "airflow-cli",
+            "airflow-init",
+        ]
+        with ThreadPoolExecutor() as executor:
+            executor.map(stop_and_remove_container, container_names)
+        console.print("\n \u2713 Domino Platform stopped successfully. All containers were removed.\n", style=f"bold {COLOR_PALETTE.get('success')}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
