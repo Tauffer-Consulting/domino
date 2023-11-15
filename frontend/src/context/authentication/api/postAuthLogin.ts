@@ -10,6 +10,7 @@ interface IPostAuthLoginResponseInterface {
   user_id: string;
   group_ids: number[];
   access_token: string;
+  token_expires_in: number;
 }
 
 /**

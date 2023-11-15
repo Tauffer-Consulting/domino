@@ -13,6 +13,7 @@ from database.models.enums import Permission, UserWorkspaceStatus
 import functools
 from typing import Optional, Dict
 from cryptography.fernet import Fernet
+from math import floor
 
 
 class AuthService():
@@ -36,16 +37,25 @@ class AuthService():
 
     @classmethod
     def encode_token(cls, user_id):
+        exp = datetime.utcnow() + timedelta(days=0, minutes=cls.expire)
+        current_date = datetime.utcnow()
+        expires_in = floor((exp - current_date).total_seconds())
+        if expires_in >= 120:
+            expires_in = expires_in - 120
+
         payload = {
             'exp': datetime.utcnow() + timedelta(days=0, minutes=cls.expire),
             'iat': datetime.utcnow(),
             'sub': user_id
         }
-        return jwt.encode(
-            payload,
-            settings.AUTH_SECRET_KEY,
-            algorithm=cls.algorithm
-        )
+        return {
+            "token": jwt.encode(
+                payload,
+                settings.AUTH_SECRET_KEY,
+                algorithm=cls.algorithm
+            ),
+            "expires_in": expires_in
+        }
 
     @classmethod
     def decode_token(cls, token):
