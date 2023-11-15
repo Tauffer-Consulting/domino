@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardActionArea,
+  Chip,
 } from "@mui/material";
 import { Modal, type ModalRef } from "components/Modal";
 import theme from "providers/theme.config";
@@ -42,6 +43,18 @@ const WorkflowExamplesGalleryModal = forwardRef(
         levelTag: "Beginner",
       },
     ];
+
+    const levelTagMap: any = {
+      Beginner: {
+        color: "success",
+      },
+      Advanced: {
+        color: "error",
+      },
+      Intermediate: {
+        color: "warning",
+      },
+    };
 
     return (
       <Modal
@@ -105,6 +118,11 @@ const WorkflowExamplesGalleryModal = forwardRef(
                       >
                         <Typography>{card.description}</Typography>
                       </div>
+                      <Chip
+                        style={{ position: "absolute", bottom: "10px" }}
+                        label={card.levelTag}
+                        color={levelTagMap[card.levelTag].color}
+                      />
                     </CardContent>
                   </CardActionArea>
                 </Card>
