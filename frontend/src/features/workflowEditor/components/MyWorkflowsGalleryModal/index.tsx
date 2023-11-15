@@ -53,11 +53,11 @@ const MyWorkflowExamplesGalleryModal = forwardRef(
           <Container>
             <Grid container justifyContent="center" spacing={2}>
               {cardsContents.map((card, index) => (
-                <Grid item key={index} xs={12} sm={4} md={4}>
+                <Grid item key={index} xs={12} sm={12} md={12}>
                   <Card
                     elevation={4}
                     sx={{
-                      height: "200px",
+                      height: "60px",
                       backgroundColor: theme.palette.grey[100],
                     }}
                   >
