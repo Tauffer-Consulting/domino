@@ -11,7 +11,7 @@ import { Modal, type ModalRef } from "components/Modal";
 import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState } from "react";
 
-import LogWorkflow from "../../utils/workflows/simple_log_workflow.json";
+import ImageFilterWorkflow from "../../utils/workflows/image_filter_workflow.json";
 import YoutubeSummarizerWorkflow from "../../utils/workflows/youtube_summarizer.json";
 
 interface WorkflowGalleryModalRef extends ModalRef {}
@@ -36,10 +36,9 @@ const WorkflowExamplesGalleryModal = forwardRef(
         levelTag: "Advanced",
       },
       {
-        title: "Simple Log Workflow",
-        description:
-          "A simple workflow that logs a message to the console. Useful as starting point for new users.",
-        jsonFile: LogWorkflow,
+        title: "Image Filter Workflow",
+        description: "A simple workflow that applies a filter to an image.",
+        jsonFile: ImageFilterWorkflow,
         levelTag: "Beginner",
       },
     ];
