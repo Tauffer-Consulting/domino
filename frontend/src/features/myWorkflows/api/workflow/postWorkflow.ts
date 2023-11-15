@@ -1,9 +1,17 @@
 import { type AxiosResponse } from "axios";
-import { type CreateWorkflowRequest } from "features/workflowEditor/context/types";
 import { type IPostWorkflowResponseInterface } from "features/myWorkflows/types";
+import {
+  type CreateWorkflowRequest,
+  type CreateWorkflowPieceData,
+} from "features/workflowEditor/context/types";
 import { dominoApiClient } from "services/clients/domino.client";
 
 export interface IPostWorkflowParams extends CreateWorkflowRequest {
+  workspace_id: string;
+}
+
+export interface IPostCreateWorkflowPieceParams
+  extends CreateWorkflowPieceData {
   workspace_id: string;
 }
 
@@ -30,6 +38,23 @@ const postWorkflow: (
 export const useAuthenticatedPostWorkflow = () => {
   const fetcher = async (params: IPostWorkflowParams) =>
     await postWorkflow(params).then((data) => data.data);
+
+  return fetcher;
+};
+
+const postCreateWorkflowPiece: (
+  payload: IPostCreateWorkflowPieceParams,
+) => Promise<AxiosResponse<any>> = async (payload) => {
+  console.log("payload", payload);
+  return await dominoApiClient.post(
+    `/pieces-repositories/${payload.workspace_id}/pieces`,
+    payload,
+  );
+};
+
+export const useAuthenticatedPostCreateWorkflowPiece = () => {
+  const fetcher = async (params: IPostCreateWorkflowPieceParams) =>
+    await postCreateWorkflowPiece(params).then((data) => data.data);
 
   return fetcher;
 };

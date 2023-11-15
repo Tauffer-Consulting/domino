@@ -2,6 +2,8 @@ import { useWorkspaces } from "context/workspaces";
 import {
   type IPostWorkflowParams,
   useAuthenticatedPostWorkflow,
+  type IPostCreateWorkflowPieceParams,
+  useAuthenticatedPostCreateWorkflowPiece,
 } from "features/myWorkflows/api";
 import {
   type IWorkflowElement,
@@ -55,6 +57,9 @@ interface IWorkflowsEditorContext
   handleCreateWorkflow: (
     params: IPostWorkflowParams,
   ) => Promise<IPostWorkflowResponseInterface>;
+  handleCreateWorkflowPiece: (
+    payload: IPostCreateWorkflowPieceParams,
+  ) => Promise<any>;
   clearForageData: () => Promise<void>;
 }
 
@@ -66,6 +71,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
 }) => {
   const { workspace } = useWorkspaces();
   const postWorkflow = useAuthenticatedPostWorkflow();
+  const postCreateWorkflowPiece = useAuthenticatedPostCreateWorkflowPiece();
 
   const {
     setWorkflowEdges,
@@ -108,6 +114,16 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
       });
     },
     [postWorkflow, workspace],
+  );
+
+  const handleCreateWorkflowPiece = useCallback(
+    async (payload: IPostCreateWorkflowPieceParams) => {
+      return await postCreateWorkflowPiece({
+        ...payload,
+        workspace_id: workspace?.id ?? "",
+      });
+    },
+    [postCreateWorkflowPiece, workspace],
   );
 
   const fetchWorkflowForage = useCallback(async () => {
@@ -341,6 +357,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     clearWorkflowSettingsData,
 
     handleCreateWorkflow,
+    handleCreateWorkflowPiece,
     fetchWorkflowForage,
     generateWorkflowsEditorBodyParams,
     clearForageData,

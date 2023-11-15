@@ -9,13 +9,14 @@ from core.settings import settings
 from repository.user_repository import UserRepository
 from repository.workspace_repository import WorkspaceRepository
 from repository.piece_repository_repository import PieceRepositoryRepository
-from database.models import Piece, PieceRepository
+from database.models import Piece, PieceRepository as PieceRepositoryModel
 from database.models.enums import RepositorySource
 from clients.local_files_client import LocalFilesClient
 from repository.piece_repository import PieceRepository
 from schemas.responses.piece import GetPiecesResponse
 from utils.base_node_style import get_frontend_node_style
 from constants.default_pieces.storage import DEFAULT_STORAGE_PIECES
+from datetime import datetime
 
 
 class PieceService(object):
@@ -26,6 +27,44 @@ class PieceService(object):
         self.workspace_repository = WorkspaceRepository()
         self.user_repository = UserRepository()
         self.file_system_client = LocalFilesClient()
+
+    def create_piece(
+        self,
+        workspace_id: int,
+        body: dict
+    ) -> GetPiecesResponse:
+        """Create a piece in a piece repository in a workspace"""
+        # print("body", body)
+        piece = body.piece
+        piece_repository = self.piece_repository_repository.find_by_name(name=piece.repository_name)
+        print("piece_repository", piece_repository)
+        if not piece_repository:
+            #create piece repository
+            print("creating piece repository",PieceRepository)
+            piece_repository = PieceRepositoryModel(
+                name=piece.repository_name,
+                created_at=datetime.utcnow(),
+                workspace_id=workspace_id,
+            )
+            piece_repository = self.piece_repository_repository.create(piece_repository)
+
+        piece_repository_id = self.piece_repository_repository.find_by_name(name=piece.repository_name).id
+
+        piece = Piece(
+            name=piece.name,
+            description=piece.description,
+            dependency=piece.dependency,
+            source_image=piece.source_image,
+            input_schema=piece.input_schema,
+            output_schema=piece.output_schema,
+            secrets_schema=piece.secrets_schema,
+            style=piece.style,
+            source_url=piece.source_url,
+            repository_id=piece_repository_id
+        )
+        piece = self.piece_repository.create(piece)
+        print("piece", piece)
+        return GetPiecesResponse(**piece.to_dict())
 
     def list_pieces(
         self,

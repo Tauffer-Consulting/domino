@@ -19,6 +19,15 @@ class PieceRepositoryRepository(object):
             if result:
                 session.expunge(result)
         return result
+    
+    def find_by_name(self, name: str):
+        with session_scope() as session:
+            query = session.query(PieceRepository).filter(PieceRepository.name == name)
+            result = query.first()
+            session.flush()
+            if result:
+                session.expunge(result)
+        return result
 
     def find_by_ids(self, ids: list):
         with session_scope() as session:

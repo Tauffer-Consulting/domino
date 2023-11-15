@@ -70,6 +70,28 @@ export interface TasksDataModel {
 
 type TasksDict = Record<string, TasksDataModel>;
 
+export interface CreateWorkflowPieces {
+  repository_name: string;
+  name: string;
+  description: string;
+  dependency: Record<string, unknown>;
+  source_image: string;
+  input_schema: Record<string, unknown>;
+  output_schema: Record<string, unknown>;
+  secrets_schema: Record<string, unknown>;
+  style: Record<string, unknown>;
+  source_url: string;
+  repository_id: number;
+  is_composite: boolean;
+}
+
+export interface CreateWorkflowPieceData {
+  piece: CreateWorkflowPieces;
+  workflow: WorkflowBaseSettings;
+  tasks: TasksDict;
+  ui_schema: UiSchema;
+}
+
 export interface CreateWorkflowRequest {
   workflow: WorkflowBaseSettings;
   tasks: TasksDict;

@@ -109,6 +109,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     generateWorkflowsEditorBodyParams,
     fetchWorkflowForage,
     handleCreateWorkflow,
+    handleCreateWorkflowPiece,
     fetchForageWorkflowNodes,
     fetchForageWorkflowEdges,
     setForageWorkflowPieces,
@@ -217,9 +218,77 @@ export const WorkflowsEditorComponent: React.FC = () => {
     workspace?.id,
   ]);
 
-  const handleSaveAsPiece = useCallback((json: any) => {
-    console.log("handleSaveAsPiece", json);
-  }, []);
+  const handleSaveAsPiece = useCallback(
+    async (json: any) => {
+      console.log("handleSaveAsPiece", json);
+      await saveDataToLocalForage();
+      setBackdropIsOpen(true);
+      if (!workspace?.id) {
+        throw new Error("No selected Workspace");
+      }
+      const payload = await fetchWorkflowForage();
+
+      await validateWorkflowPiecesData(payload);
+      await validateWorkflowSettings(payload);
+
+      const data = await generateWorkflowsEditorBodyParams(payload);
+      console.log("data", data);
+
+      if (Object.keys(payload.workflowPieces).length === 0) {
+        toast.error("Workflow must have at least one piece to be exported.");
+        return;
+      }
+      const piece = await extractPieceFromWorkflow(json, payload);
+      console.log("Savepiece", piece);
+
+      await handleCreateWorkflowPiece({
+        workspace_id: workspace?.id,
+        piece,
+        ...data,
+      });
+
+      toast.success("save Piece successfully.");
+      setBackdropIsOpen(false);
+    },
+    [
+      fetchWorkflowForage,
+      handleCreateWorkflowPiece,
+      validateWorkflowPiecesData,
+      validateWorkflowSettings,
+      generateWorkflowsEditorBodyParams,
+      workspace?.id,
+    ],
+  );
+
+  const extractPieceFromWorkflow = useCallback(
+    async (json: any, payload: any) => {
+      const name = json?.PieceName;
+      const repository_name = json?.folderName;
+
+      const pieceIds = Object.keys(payload.workflowPieces);
+
+      const firstPieceId = pieceIds[0];
+      const input_schema = payload.workflowPieces[firstPieceId].input_schema;
+
+      const lastPieceId = pieceIds[pieceIds.length - 1];
+      const output_schema = payload.workflowPieces[lastPieceId].output_schema;
+      return {
+        repository_name,
+        name,
+        description: "",
+        dependency: {},
+        source_image: "",
+        input_schema,
+        output_schema,
+        secrets_schema: {},
+        style: {},
+        source_url: "local",
+        repository_id: 0,
+        is_composite: true,
+      };
+    },
+    [],
+  );
 
   const handleClear = useCallback(async () => {
     await clearForageData();
@@ -481,7 +550,13 @@ export const WorkflowsEditorComponent: React.FC = () => {
               <SaveAsPieceModal
                 ref={saveAsPieceModalRef}
                 confirmFn={(json) => {
-                  handleSaveAsPiece(json);
+                  handleSaveAsPiece(json)
+                    .then(() => {
+                      console.log("Success in handleSaveAsPiece");
+                    })
+                    .catch((error) => {
+                      console.error("Error in handleSaveAsPiece:", error);
+                    });
                 }}
               />
             </Grid>

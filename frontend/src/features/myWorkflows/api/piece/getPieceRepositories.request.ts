@@ -11,7 +11,7 @@ interface IGetPieceRepositoryFilters {
   name__like?: string;
   path__like?: string;
   version?: string;
-  source?: "github" | "default";
+  source?: "github" | "default" | "local";
 }
 
 const getPiecesRepositoriesUrl = (
