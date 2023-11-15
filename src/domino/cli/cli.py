@@ -206,17 +206,29 @@ def cli_destroy_platform():
     default=False
 )
 @click.option(
+    '--debug',
+    is_flag=True,
+    help="Debug mode prints docker compose messages on terminal.",
+    default=False
+)
+@click.option(
     '--stop',
     is_flag=True,
     help="Stop and remove containers.",
     default=False
 )
-def cli_run_platform_compose(d, use_config_file, dev, stop):
+def cli_run_platform_compose(d, use_config_file, dev, debug, stop):
     """Run Domino platform locally with docker compose. Do NOT use this in production."""
     if stop:
         platform.stop_platform_compose()
     else:
-        platform.run_platform_compose(detached=d, use_config_file=use_config_file, dev=dev)
+        platform.run_platform_compose(detached=d, use_config_file=use_config_file, dev=dev, debug=debug)
+
+
+@click.command()
+def cli_stop_platform_compose():
+    """Stop Domino platform locally with docker compose. Do NOT use this in production."""
+    platform.stop_platform_compose()
 
 
 @click.group()
@@ -233,6 +245,7 @@ cli_platform.add_command(cli_prepare_platform, name="prepare")
 cli_platform.add_command(cli_create_platform, name="create")
 cli_platform.add_command(cli_destroy_platform, name="destroy")
 cli_platform.add_command(cli_run_platform_compose, name="run-compose")
+cli_platform.add_command(cli_stop_platform_compose, name="stop-compose")
 
 
 ###############################################################################
@@ -382,7 +395,8 @@ def cli_run_piece_docker():
 @click.group()
 @click.pass_context
 def cli(ctx):
-    console.print(msg, style="rgb(109,125,176)", highlight=False)
+    # console.print(msg, style="rgb(109,125,176)", highlight=False)
+    console.print("")
     console.print("Welcome to Domino! :red_heart-emoji:")
     console.print("")
 

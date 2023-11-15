@@ -1,3 +1,9 @@
+# v0.7.1
+
+### Features
+* Improved terminal messages for `domino platform run-compose` and `domino platform stop-compose` CLI.
+
+
 # v0.7.0
 
 ### Features
