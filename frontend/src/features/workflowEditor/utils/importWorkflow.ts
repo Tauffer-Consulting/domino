@@ -32,7 +32,15 @@ export const importJsonWorkflow = (
   return null; // Return null if no file is selected
 };
 
-export const validateJsonImported = async (json: any) => {
+interface Differences {
+  source: string;
+  version: string;
+  installed: boolean;
+}
+
+export const validateJsonImported = async (
+  json: any,
+): Promise<Differences[]> => {
   const schema = yup
     .object()
     .shape({
@@ -98,10 +106,11 @@ export const validateJsonImported = async (json: any) => {
 
   await schema.validate(json);
 
-  const currentRepositories = [
+  const currentRepositories: string[] = [
     ...new Set(
       Object.values((await localForage.getItem("pieces")) as any)?.map(
-        (p: any) => p?.source_image,
+        (p: any) =>
+          p?.source_image.replace("ghcr.io/", "").replace(/-group\d+$/g, ""),
       ),
     ),
   ];
@@ -109,7 +118,11 @@ export const validateJsonImported = async (json: any) => {
     ...new Set(
       Object.values(json.workflowPieces)
         .reduce<Array<string | null>>((acc, next: any) => {
-          acc.push(next.source_image);
+          acc.push(
+            next.source_image
+              .replace("ghcr.io/", "")
+              .replace(/-group\d+$/g, ""),
+          );
           return acc;
         }, [])
         .filter((su) => !!su) as string[],
@@ -120,5 +133,24 @@ export const validateJsonImported = async (json: any) => {
     (x) => !currentRepositories.includes(x),
   );
 
-  return differences.length ? differences : null;
+  const currentRepositoriesWithoutVersion = currentRepositories.map(
+    (cr) => cr.split(":")[0],
+  );
+
+  const differencesWithoutVersion = differences.map((d) => d.split(":")[0]);
+
+  const uninstalled = differencesWithoutVersion.filter(
+    (x) => !currentRepositoriesWithoutVersion.includes(x),
+  );
+
+  return differences.map((d) => {
+    const source = d.split(":")[0];
+    const version = d.split(":")[1];
+    const installed = !uninstalled.includes(source);
+    return {
+      source,
+      version,
+      installed,
+    };
+  });
 };

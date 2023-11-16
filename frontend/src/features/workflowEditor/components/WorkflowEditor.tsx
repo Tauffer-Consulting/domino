@@ -246,18 +246,16 @@ export const WorkflowsEditorComponent: React.FC = () => {
         if (json) {
           const differences = await validateJsonImported(json);
 
-          if (differences) {
+          if (differences.length) {
             toast.error(
               "Some repositories are missing or incompatible version",
             );
-            const uniquePieces = new Set<string>();
-            incompatiblesPieces.forEach((item) => {
-              const pieceWithVersion = `${
-                item.split("ghcr.io/")[1].split(":")[0]
-              }:${item.split("ghcr.io/")[1].split(":")[1].split("-")[0]}`;
-              uniquePieces.add(pieceWithVersion);
-            });
-            setIncompatiblesPieces(Array.from(uniquePieces));
+
+            setIncompatiblesPieces(
+              differences.map(
+                (d) => `${d.source}:${d.version} - installed: ${d.installed}`,
+              ),
+            );
             incompatiblePiecesModalRef.current?.open();
           } else {
             workflowPanelRef?.current?.setNodes(json.workflowNodes);
