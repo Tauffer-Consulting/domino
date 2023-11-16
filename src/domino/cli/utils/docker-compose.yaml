@@ -302,7 +302,7 @@ services:
       - DOMINO_DEPLOY_MODE=local-compose
       - AIRFLOW_ADMIN_USERNAME=airflow
       - AIRFLOW_ADMIN_PASSWORD=airflow
-      - CREATE_DEFAULT_USER=true
+      - CREATE_DEFAULT_USER=${DOMINO_CREATE_DEFAULT_USER}
     networks:
       - domino-postgres-network
       - default
