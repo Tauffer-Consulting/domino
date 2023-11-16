@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: int = 600
     ADMIN_USER_EMAIL: str = os.environ.get('ADMIN_USER_EMAIL', "admin@email.com")
     ADMIN_USER_PASSWORD: str = os.environ.get('ADMIN_USER_PASSWORD', "admin")
+    CREATE_DEFAULT_USER: bool = os.environ.get('CREATE_DEFAULT_USER', True)
 
     # Secrets config
     SECRETS_SECRET_KEY: str = os.environ.get('SECRETS_SECRET_KEY', b'j1DsRJ-ehxU_3PbXW0c_-U4nTOx3knRB4zzWguMVaio=')

@@ -302,6 +302,7 @@ services:
       - DOMINO_DEPLOY_MODE=local-compose
       - AIRFLOW_ADMIN_USERNAME=airflow
       - AIRFLOW_ADMIN_PASSWORD=airflow
+      - CREATE_DEFAULT_USER=true
     network_mode: ${NETWORK_MODE}
     volumes:
       - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
