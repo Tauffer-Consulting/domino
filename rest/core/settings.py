@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     AUTH_SECRET_KEY: str = os.environ.get('AUTH_SECRET_KEY', "SECRET")
     AUTH_ALGORITHM: str = os.environ.get('AUTH_ALGORITHM', "HS256")
     AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: int = 600
+    ADMIN_USER_EMAIL: str = os.environ.get('ADMIN_USER_EMAIL', "admin@email.com")
+    ADMIN_USER_PASSWORD: str = os.environ.get('ADMIN_USER_PASSWORD', "admin")
 
     # Secrets config
     SECRETS_SECRET_KEY: str = os.environ.get('SECRETS_SECRET_KEY', b'j1DsRJ-ehxU_3PbXW0c_-U4nTOx3knRB4zzWguMVaio=')
@@ -43,11 +45,6 @@ class Settings(BaseSettings):
     DOMINO_DEFAULT_PIECES_REPOSITORY_URL: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_URL', 'https://github.com/Tauffer-Consulting/default_domino_pieces')
 
     # Default DB mock data
-    RUN_CREATE_MOCK_DATA: bool = False
-    ADMIN_CREDENTIALS: dict = {
-        "email": "admin@email.com",
-        "password": "admin"
-    }
     AIRFLOW_ADMIN_CREDENTIALS: dict = {
         "username": os.environ.get('AIRFLOW_ADMIN_USERNAME', "admin"),
         "password": os.environ.get('AIRFLOW_ADMIN_PASSWORD', "admin")
