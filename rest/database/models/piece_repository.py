@@ -1,6 +1,6 @@
 from database.models.base import Base, BaseDatabaseModel
 from sqlalchemy import Column, String, Integer, DateTime, Enum, JSON, ForeignKey
-from database.models.enums import RepositorySource
+from database.models.enums import RepositorySource, PieceExecutionMode
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -16,6 +16,7 @@ class PieceRepository(Base, BaseDatabaseModel):
     path = Column(String(250), nullable=True)
     url = Column(String(250), nullable=True)
     version = Column(String(10), nullable=True)
+    piece_execution_mode = Column(Enum(PieceExecutionMode), nullable=False, default=PieceExecutionMode.docker.value)
     dependencies_map = Column(JSON, nullable=True)
     compiled_metadata = Column(JSON, nullable=True)
     workspace_id = Column(Integer, ForeignKey("workspace.id", ondelete='cascade'), nullable=False)
