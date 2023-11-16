@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 import os
 import uuid
-
+import tomli
 from domino.cli.utils import pieces_repository, platform
 import ast
 
@@ -64,6 +64,14 @@ def get_workflows_repository_from_env():
 def get_registry_token_from_env():
     return os.environ.get('GHCR_PASSWORD', "")
 
+
+def get_github_token_pieces_from_config_or_env():
+    if Path('config-domino-local.toml').is_file():
+        with open("config-domino-local.toml", "rb") as f:
+            config = tomli.load(f)
+        return config.get('github').get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', None)
+
+    return os.environ.get("DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN", None)
 
 @click.command()
 @click.option(
@@ -217,12 +225,17 @@ def cli_destroy_platform():
     help="Stop and remove containers.",
     default=False
 )
-def cli_run_platform_compose(d, use_config_file, dev, debug, stop):
+@click.option(
+    '--github-token',
+    prompt='Github token for access default pieces repositories',
+    default=get_github_token_pieces_from_config_or_env,
+)
+def cli_run_platform_compose(d, use_config_file, dev, debug, stop, github_token):
     """Run Domino platform locally with docker compose. Do NOT use this in production."""
     if stop:
         platform.stop_platform_compose()
     else:
-        platform.run_platform_compose(detached=d, use_config_file=use_config_file, dev=dev, debug=debug)
+        platform.run_platform_compose(github_token=github_token, detached=d, use_config_file=use_config_file, dev=dev, debug=debug)
 
 
 @click.command()
