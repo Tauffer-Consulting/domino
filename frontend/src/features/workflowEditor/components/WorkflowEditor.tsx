@@ -248,7 +248,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
       });
 
       toast.success("save Piece successfully.");
-      setBackdropIsOpen(false);
     },
     [
       fetchWorkflowForage,
@@ -553,9 +552,11 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   handleSaveAsPiece(json)
                     .then(() => {
                       console.log("Success in handleSaveAsPiece");
+                      setBackdropIsOpen(false);
                     })
                     .catch((error) => {
                       console.error("Error in handleSaveAsPiece:", error);
+                      setBackdropIsOpen(false);
                     });
                 }}
               />

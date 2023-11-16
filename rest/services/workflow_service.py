@@ -35,7 +35,6 @@ from clients.local_files_client import LocalFilesClient
 from clients.github_rest_client import GithubRestClient
 from database.models import Workflow, WorkflowPieceRepositoryAssociative
 from repository.piece_repository_repository import PieceRepositoryRepository
-from repository.workflow_repository import WorkflowRepository
 from repository.secret_repository import SecretRepository
 from services.secret_service import SecretService
 

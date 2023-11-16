@@ -5,6 +5,7 @@ import React, { type FC, useState } from "react";
 import PieceDocsPopover from "./pieceDocsPopover";
 
 const PiecesSidebarNode: FC<{ piece: Piece }> = ({ piece }) => {
+  console.log("piece", piece);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   // Drag and drop from sidebar to Workflow area
@@ -53,7 +54,8 @@ const PiecesSidebarNode: FC<{ piece: Piece }> = ({ piece }) => {
             maxWidth: "180px",
           }}
         >
-          {piece?.style?.label ?? "-"}
+          {/* {piece?.style?.label ?? "-"} */}
+          {piece?.name ?? "-"}
         </Typography>
 
         <IconButton sx={{ padding: 0 }} onClick={handlePopoverOpen}>
