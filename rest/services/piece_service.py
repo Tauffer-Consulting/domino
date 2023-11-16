@@ -62,39 +62,20 @@ class PieceService(object):
         ]
 
 
-    def check_pieces_to_update_github(self, repo_name: str, repository_id: int, version: str, github_access_token: str) -> None:
-        """Check if there are new pieces in the github repository and update them if necessary
-
-        Args:
-            repo_name (str): Github repository name
-            repository_id (int): User group id being updated
-        """
-        github_rest_client = GithubRestClient(token=github_access_token)
-        tag = github_rest_client.get_tag(repo_name=repo_name, tag_name=version)
-        if not tag:
-            raise ResourceNotFoundException(message=f"Version {version} not found in repository {repo_name}")
-        tag_commit_sha = str(tag.commit.sha)
-        github_pieces_names_list = [e.name for e in github_rest_client.get_contents(repo_name=repo_name, file_path='pieces', commit_sha=tag_commit_sha) if e.type == 'dir']
-
-        compiled_metadata = github_rest_client.get_contents(
-            repo_name=repo_name,
-            file_path=f".domino/compiled_metadata.json",
-            commit_sha=tag_commit_sha
-        )
-        compiled_metadata_dict = json.loads(compiled_metadata.decoded_content.decode('utf-8'))
-        dependencies_map = github_rest_client.get_contents(
-            repo_name=repo_name,
-            file_path=f".domino/dependencies_map.json",
-            commit_sha=tag_commit_sha
-        )
-        dependencies_map_dict = json.loads(dependencies_map.decoded_content.decode('utf-8'))
+    def check_pieces_to_update_github(
+        self, 
+        repository_id: int, 
+        compiled_metadata: dict,
+        dependencies_map: dict,
+    ) -> None:
+        github_pieces_names_list = list(compiled_metadata.keys())
         updated_pieces_list = list()
         for piece_name in github_pieces_names_list:
             # Create piece if it does not exist, update if it exists (ignoring version control)
-            piece_metadata = compiled_metadata_dict[piece_name]
+            piece_metadata = compiled_metadata[piece_name]
             self._update_pieces_from_metadata(
                 piece_metadata=piece_metadata,
-                dependencies_map=dependencies_map_dict,
+                dependencies_map=dependencies_map,
                 repository_id=repository_id
             )
         response_msg = ", ".join(updated_pieces_list) if len(updated_pieces_list) > 0 else "None"
