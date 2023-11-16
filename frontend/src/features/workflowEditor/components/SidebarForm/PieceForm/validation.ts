@@ -161,7 +161,7 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return required ? yup.string().required() : yup.string();
+        return required ? yup.string().required() : yup.string().nullable();
       }),
     });
   } else if (schema.type === "object") {

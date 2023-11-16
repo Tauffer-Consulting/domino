@@ -53,14 +53,15 @@ class DominoDockerOperator(DockerOperator):
         mounts = []
 
         # TODO remove - used in DEV only #######################
-        dev_pieces = False
+        dev_pieces = True
         if dev_pieces:
             piece_repo_name = repository_url.split("/")[-1]
-            local_repos_path = f"/mnt/shared_storage/Github/{piece_repo_name}"
+            #local_repos_path = f"/mnt/shared_storage/Github/{piece_repo_name}"
+            local_repos_path = f"/home/vinicius/Documents/work/tauffer/{piece_repo_name}"
             mounts = [
                 # TODO remove
-                # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
-                Mount(source='/mnt/shared_storage/Github/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+                Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+                #Mount(source='/mnt/shared_storage/Github/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
                 Mount(source=local_repos_path, target='/home/domino/pieces_repository/', type='bind', read_only=True),
             ]
         ########################################################
@@ -102,10 +103,12 @@ class DominoDockerOperator(DockerOperator):
         )
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
-        piece_secrets = {
-            e.get('name'): e.get('value')
-            for e in secrets_response.json()
-        }
+        piece_secrets = {}
+        for e in secrets_response.json():
+            if not e.get('value') and not e.get('required'):
+                continue
+            piece_secrets[e.get('name')] = e.get('value')
+
         return piece_secrets
 
     @staticmethod

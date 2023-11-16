@@ -331,7 +331,7 @@ class WorkflowService(object):
                 piece_name=shared_storage_piece_name,
             )
             for secret in shared_storage_secrets:
-                if not secret.value:
+                if not secret.value and not secret.required:
                     raise BadRequestException("Missing secrets for shared storage.")
         
         # Find necessary repositories from pieces names and workspace_id
@@ -351,7 +351,7 @@ class WorkflowService(object):
                 piece_name=piece_name,
             )
             for secret in piece_secrets:
-                if not secret.value:
+                if not secret.value and secret.required:
                     raise ResourceNotFoundException(f"Secret {secret.name} missing for {piece_name}.")
         return True
 

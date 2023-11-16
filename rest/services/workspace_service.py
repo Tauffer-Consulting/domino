@@ -73,7 +73,6 @@ class WorkspaceService(object):
                 github_access_token=None,
                 user_permission=Permission.owner.value
             )
-
             self.piece_repository_service.create_piece_repository(
                 piece_repository_data=CreateRepositoryRequest(
                     workspace_id=workspace.id,

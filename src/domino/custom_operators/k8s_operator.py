@@ -365,10 +365,12 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         )
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
-        piece_secrets = {
-            e.get('name'): e.get('value') 
-            for e in secrets_response.json()
-        }
+
+        piece_secrets = {}
+        for e in secrets_response.json():
+            if not e.get('value') and not e.get('required'):
+                continue
+            piece_secrets[e.get('name')] = e.get('value')
         return piece_secrets
 
 
