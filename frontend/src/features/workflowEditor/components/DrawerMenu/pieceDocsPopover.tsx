@@ -22,8 +22,8 @@ function renderPieceProperties(
     }
 
     return (
-      <>
-        <Typography key={key} sx={{ padding: "0.5rem 1rem 0rem 1.5rem" }}>
+      <React.Fragment key={key}>
+        <Typography sx={{ padding: "0.5rem 1rem 0rem 1.5rem" }}>
           <strong>{key}</strong> - <em>{typeName}</em>
         </Typography>
         <Typography sx={{ padding: "0rem 1rem 0rem 2.5rem" }}>
@@ -35,7 +35,7 @@ function renderPieceProperties(
             </>
           )}
         </Typography>
-      </>
+      </React.Fragment>
     );
   });
 }

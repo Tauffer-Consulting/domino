@@ -15,6 +15,11 @@ import {
   type DefaultNode,
 } from "components/WorkflowPanel";
 import { useWorkspaces, usesPieces } from "context/workspaces";
+import {
+  useAuthenticatedGetWorkspace,
+  useAuthenticatedPostPiecesRepository,
+} from "context/workspaces/api";
+import { type IPostWorkspaceRepositoryPayload } from "context/workspaces/types";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import React, { type DragEvent, useCallback, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -320,18 +325,16 @@ export const WorkflowsEditorComponent: React.FC = () => {
         if (json) {
           const differences = await validateJsonImported(json);
 
-          if (differences) {
+          if (differences.length) {
             toast.error(
               "Some repositories are missing or incompatible version",
             );
-            const uniquePieces = new Set<string>();
-            incompatiblesPieces.forEach((item) => {
-              const pieceWithVersion = `${
-                item.split("ghcr.io/")[1].split(":")[0]
-              }:${item.split("ghcr.io/")[1].split(":")[1].split("-")[0]}`;
-              uniquePieces.add(pieceWithVersion);
-            });
-            setIncompatiblesPieces(Array.from(uniquePieces));
+
+            setIncompatiblesPieces(
+              differences.map(
+                (d) => `${d.source}:${d.version} - installed: ${d.installed}`,
+              ),
+            );
             incompatiblePiecesModalRef.current?.open();
           } else {
             workflowPanelRef?.current?.setNodes(json.workflowNodes);
@@ -500,6 +503,25 @@ export const WorkflowsEditorComponent: React.FC = () => {
     setAnchorEl(null);
     workflowsGalleryModalRef.current?.open();
   }, [workflowsGalleryModalRef]);
+
+  const postRepository = useAuthenticatedPostPiecesRepository({
+    workspace: workspace?.id ?? "",
+  });
+  const { mutate: refreshWorkspaceData } = useAuthenticatedGetWorkspace({
+    id: workspace?.id ?? "",
+  });
+
+  const _handleAddRepository = useCallback(
+    async (params: Omit<IPostWorkspaceRepositoryPayload, "workspace_id">) => {
+      try {
+        await postRepository({ ...params, workspace_id: workspace?.id ?? "" });
+        await refreshWorkspaceData();
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    [postRepository, refreshWorkspaceData],
+  );
 
   return (
     <>
