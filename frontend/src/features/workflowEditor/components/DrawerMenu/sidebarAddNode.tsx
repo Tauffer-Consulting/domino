@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { usesPieces } from "context/workspaces";
-import { type FC, useState, useMemo } from "react";
+import { type FC, useState, useMemo, useEffect } from "react";
 
 import PiecesSidebarNode from "./sidebarNode";
 
@@ -54,7 +54,21 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
     return filterPieces(repositoryPieces, filter);
   }, [filter, repositoryPieces, setExpanded]);
 
-  console.log(expanded);
+  useEffect(() => {
+    if (!filter) {
+      setExpanded((e) => {
+        const newExpanded = Object.keys(e).reduce<Record<string, boolean>>(
+          (acc, next) => {
+            acc[next] = false;
+            return acc;
+          },
+          {},
+        );
+
+        return newExpanded;
+      });
+    }
+  }, [filter]);
 
   return (
     <Box sx={{ padding: 2 }}>
