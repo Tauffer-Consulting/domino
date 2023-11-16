@@ -13,9 +13,10 @@ class TestAuthRouter:
     @staticmethod
     def test_register(user: User, register: Response, authorization_token: Dict):
         mock_response = RegisterResponse(
-            id=1,
+            user_id=1,
             email=user.email, 
             workspaces_ids=[1], 
+            token_expires_in=35999,
             access_token="access_token"
         )
         response = register
@@ -31,7 +32,8 @@ class TestAuthRouter:
         mock_response = LoginResponse(
             user_id=user.id,
             email=user.email, 
-            workspaces_ids=[1], 
+            workspaces_ids=[1],
+            token_expires_in=35999,
             access_token=authorization_token["header"].split(' ')[1]
         )
         response = login
@@ -41,5 +43,5 @@ class TestAuthRouter:
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
         for key in content:
-            if key != "workspaces_ids":
+            if key != "workspaces_ids" and key != "token_expires_in":
                 assert content.get(key) == mock_response_content.get(key)

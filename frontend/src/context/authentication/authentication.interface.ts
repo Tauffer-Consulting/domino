@@ -3,6 +3,12 @@ export interface IAuthenticationStore {
   userId: string | null;
 }
 
+export enum authStatus {
+  Loading,
+  SignedIn,
+  SignedOut,
+}
+
 export interface IAuthenticationContext {
   store: IAuthenticationStore;
   isLogged: boolean;
