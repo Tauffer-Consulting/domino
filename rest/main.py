@@ -11,6 +11,7 @@ from routers.piece_repository_router import router as piece_repository_router
 from routers.secret_router import router as secret_router
 from routers.health_check_router import router as health_check_router
 from core.settings import settings
+from utils.populate_first_user import populate_first_user
 
 
 description = """
@@ -26,6 +27,10 @@ def configure_app():
         description=description,
         version=settings.VERSION,
     )
+
+    if settings.CREATE_DEFAULT_USER:
+        populate_first_user()
+
 
     app.add_middleware(
         CORSMiddleware,

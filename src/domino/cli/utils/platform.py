@@ -300,6 +300,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             "enabled": True,
             "image": domino_rest_image,
             "workflowsRepository": platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'],
+            "create_default_user": platform_config['domino_db']['DOMINO_CREATE_DEFAULT_USER']
         },
         "database": {
             "enabled": db_enabled,
@@ -307,7 +308,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             "name": "postgres",
             "user": "postgres",
             "password": "postgres",
-            "port": "5432"
+            "port": "5432",
         }
     }
 
@@ -640,18 +641,25 @@ def destroy_platform() -> None:
     console.print("")
 
 
-def run_platform_compose(detached: bool = False, use_config_file: bool = False, dev: bool = False, debug: bool = False) -> None:
+def run_platform_compose(
+    github_token: str, 
+    detached: bool = False, 
+    use_config_file: bool = False,
+    dev: bool = False, 
+    debug: bool = False
+) -> None:
     console.print("Starting Domino Platform using Docker Compose.")
     console.print("Please wait, this might take a few minutes...")
     # Database default settings
     create_database = True
+    os.environ['DOMINO_CREATE_DEFAULT_USER'] = 'true'
     if use_config_file:
         console.print("Using config file...")
         with open("config-domino-local.toml", "rb") as f:
             platform_config = tomli.load(f)
-        token_pieces = platform_config["github"].get("DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN")
-        os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = token_pieces
+        os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = github_token
         create_database = platform_config['domino_db'].get('DOMINO_CREATE_DATABASE', True)
+        os.environ['DOMINO_CREATE_DEFAULT_USER'] = str(platform_config['domino_db'].get('DOMINO_CREATE_DEFAULT_USER', 'true')).lower()
         if not create_database:
             os.environ['DOMINO_DB_HOST'] = platform_config['domino_db'].get("DOMINO_DB_HOST", 'postgres')
             os.environ['DOMINO_DB_PORT'] = platform_config['domino_db'].get("DOMINO_DB_PORT", 5432)

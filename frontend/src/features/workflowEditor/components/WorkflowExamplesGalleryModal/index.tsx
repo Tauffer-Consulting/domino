@@ -5,12 +5,14 @@ import {
   Card,
   CardContent,
   CardActionArea,
+  Chip,
 } from "@mui/material";
 import { Modal, type ModalRef } from "components/Modal";
 import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState } from "react";
 
-import LogWorkflow from "../../utils/workflows/simple_log_workflow.json";
+import ImageFilterWorkflow from "../../utils/workflows/image_filter_workflow.json";
+import NasaImageWorkflow from "../../utils/workflows/nasa_workflow.json";
 import YoutubeSummarizerWorkflow from "../../utils/workflows/youtube_summarizer.json";
 
 interface WorkflowGalleryModalRef extends ModalRef {}
@@ -32,14 +34,46 @@ const WorkflowExamplesGalleryModal = forwardRef(
         description:
           "Sends the summary of the last BBCNews youtube channel video to an emails list. You must configure Secrets and Local storage to use it.",
         jsonFile: YoutubeSummarizerWorkflow,
+        levelTag: "Advanced",
       },
       {
-        title: "Simple Log Workflow",
-        description:
-          "A simple workflow that logs a message to the console. Useful as starting point for new users.",
-        jsonFile: LogWorkflow,
+        title: "Image Filter Workflow",
+        description: "A simple workflow that applies a filter to an image.",
+        jsonFile: ImageFilterWorkflow,
+        levelTag: "Beginner",
+      },
+      {
+        title: "NASA Image Workflow",
+        description: "A simple workflow that gets an image from NASA API.",
+        jsonFile: NasaImageWorkflow,
+        levelTag: "Beginner",
       },
     ];
+
+    const levelTagMap: any = {
+      Beginner: {
+        color: "success",
+      },
+      Advanced: {
+        color: "error",
+      },
+      Intermediate: {
+        color: "warning",
+      },
+    };
+
+    cardsContents.sort((a, b) => {
+      const orderMap: any = {
+        Beginner: 1,
+        Intermediate: 2,
+        Advanced: 3,
+      };
+
+      const levelA = orderMap[a.levelTag];
+      const levelB = orderMap[b.levelTag];
+
+      return levelA - levelB;
+    });
 
     return (
       <Modal
@@ -83,10 +117,34 @@ const WorkflowExamplesGalleryModal = forwardRef(
                         />
                       )}
 
-                      <Typography variant="h3">{card.title}</Typography>
-                      <div style={{ marginTop: "40px" }}>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          position: "absolute",
+                          top: "20px",
+                          left: "20px",
+                          zIndex: 1,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {card.title}
+                      </Typography>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "80px",
+                          overflow: "hidden",
+                          paddingRight: "15px",
+                          textAlign: "justify",
+                        }}
+                      >
                         <Typography>{card.description}</Typography>
                       </div>
+                      <Chip
+                        style={{ position: "absolute", bottom: "10px" }}
+                        label={card.levelTag}
+                        color={levelTagMap[card.levelTag].color}
+                      />
                     </CardContent>
                   </CardActionArea>
                 </Card>

@@ -300,7 +300,7 @@ services:
       context: ./rest
       dockerfile: Dockerfile
     container_name: domino-rest
-    command: bash -c "alembic upgrade heads && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
+    command: bash -c "alembic upgrade heads && python -m utils.populate_first_user && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
     ports:
       - 8000:8000
     environment:
@@ -313,6 +313,7 @@ services:
       - DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN=${DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN}
       - DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS=${DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS}
       - DOMINO_GITHUB_WORKFLOWS_REPOSITORY=${DOMINO_GITHUB_WORKFLOWS_REPOSITORY}
+      - CREATE_DEFAULT_USER=true
       - DOMINO_DEPLOY_MODE=local-compose
       - AIRFLOW_ADMIN_USERNAME=airflow
       - AIRFLOW_ADMIN_PASSWORD=airflow

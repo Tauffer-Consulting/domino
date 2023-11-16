@@ -7,7 +7,6 @@ import {
   Box,
   Divider,
   IconButton,
-  ListItem,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -61,14 +60,12 @@ export const PermanentDrawerRightWorkflows: FC<
           {openDrawer && (
             <>
               <Divider />
-              <ListItem>
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <SidebarAddNode
-                    orientation={orientation}
-                    setOrientation={setOrientation}
-                  />
-                </Box>
-              </ListItem>
+              <Box>
+                <SidebarAddNode
+                  orientation={orientation}
+                  setOrientation={setOrientation}
+                />
+              </Box>
             </>
           )}
         </Drawer>
