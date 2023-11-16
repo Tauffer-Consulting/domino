@@ -20,6 +20,7 @@ DOMINO_DB_PORT = "postgres"
 DOMINO_DB_USER = "postgres"
 DOMINO_DB_PASSWORD = "postgres"
 DOMINO_DB_NAME = "postgres"
+DOMINO_CREATE_DEFAULT_USER = true
 
 [dev]
 DOMINO_LOCAL_DOMINO_PACKAGE=""
