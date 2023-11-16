@@ -60,6 +60,13 @@ class Settings(BaseSettings):
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/social_media_domino_pieces'
+        ),
+        dict(
+            path="Tauffer-Consulting/data_apis_domino_pieces",
+            version='0.2.0',
+            source='github',
+            require_token=True,
+            url='https://github.com/Tauffer-Consulting/data_apis_domino_pieces'
         )
     ]
 

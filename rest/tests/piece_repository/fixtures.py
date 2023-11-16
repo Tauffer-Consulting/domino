@@ -54,7 +54,7 @@ def add_piece_repository(client: ApiTestClient, authorization_token: Dict, piece
 def get_pieces_repositories(client: ApiTestClient, authorization_token: Dict, piece_repository: PieceRepository):
     return client.get(
         "/pieces-repositories",
-        params={"workspace_id": piece_repository.workspace_id},
+        params={"workspace_id": piece_repository.workspace_id, "name__like": piece_repository.name},
         headers={"Authorization": authorization_token["header"]}
     )
 
