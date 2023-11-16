@@ -44,6 +44,8 @@ spec:
               value: {{ .Values.database.password }}
             - name: DOMINO_DB_PORT
               value: "{{ .Values.database.port }}"
+            - name: CREATE_DEFAULT_USER
+              value: {{ .Values.rest.create_default_user }}
             - name: "DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN"
               valueFrom:
                 secretKeyRef:
