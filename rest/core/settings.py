@@ -38,11 +38,30 @@ class Settings(BaseSettings):
     DOMINO_LOCAL_WORKFLOWS_REPOSITORY: str = '/opt/airflow/dags'
 
     # Default domino pieces repository
-    DOMINO_DEFAULT_PIECES_REPOSITORY: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY', "Tauffer-Consulting/default_domino_pieces")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION', "0.6.0")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE', "github")
-    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: str | None = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', None)
-    DOMINO_DEFAULT_PIECES_REPOSITORY_URL: str = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_URL', 'https://github.com/Tauffer-Consulting/default_domino_pieces')
+    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: str | None = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', None)    
+    DEFAULT_REPOSITORIES_LIST: list[dict] = [
+        dict(
+            path="Tauffer-Consulting/default_domino_pieces",
+            version='0.7.0',
+            source='github',
+            require_token=False,
+            url='https://github.com/Tauffer-Consulting/default_domino_pieces'
+        ),
+        dict(
+            path="Tauffer-Consulting/openai_domino_pieces",
+            version='0.6.1',
+            source='github',
+            require_token=True,
+            url='https://github.com/Tauffer-Consulting/openai_domino_pieces'
+        ),
+        dict(
+            path="Tauffer-Consulting/social_media_domino_pieces",
+            version='0.5.0',
+            source='github',
+            require_token=True,
+            url='https://github.com/Tauffer-Consulting/social_media_domino_pieces'
+        )
+    ]
 
     # Default DB mock data
     AIRFLOW_ADMIN_CREDENTIALS: dict = {
