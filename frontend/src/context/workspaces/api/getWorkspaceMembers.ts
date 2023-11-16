@@ -38,7 +38,7 @@ const getWorkspaceUsers: (
   page,
   pageSize,
 ) => {
-  if (auth && workspaceId && page && pageSize) {
+  if (auth && workspaceId && !isNaN(page) && !isNaN(pageSize)) {
     const url = getWorkspaceUsersUrl(auth, workspaceId, page, pageSize);
 
     if (url) return await dominoApiClient.get(url);
@@ -68,7 +68,7 @@ export const useAuthenticatedGetWorkspaceUsers = (
       params.page,
       params.pageSize,
     ).then((data) => data?.data);
-  }, [params, auth]);
+  }, [params]);
 
   return useSWR(
     getWorkspaceUsersUrl(
