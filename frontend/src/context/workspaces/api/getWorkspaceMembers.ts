@@ -18,7 +18,9 @@ const getWorkspaceUsersUrl = (
   page: number,
   pageSize: number,
 ) => {
-  return auth && workspaceId
+  // TODO: get workspaceId from context - this is a temporary solution
+  const workspace = localStorage.getItem("workspace");
+  return auth && workspaceId && workspace
     ? `/workspaces/${workspaceId}/users?page=${page}&page_size=${pageSize}`
     : null;
 };
