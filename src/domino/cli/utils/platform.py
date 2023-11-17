@@ -300,7 +300,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
             "enabled": True,
             "image": domino_rest_image,
             "workflowsRepository": platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY'],
-            "create_default_user": platform_config['domino_db']['DOMINO_CREATE_DEFAULT_USER']
+            "createDefaultUser": platform_config['domino_db'].get('DOMINO_CREATE_DEFAULT_USER', True)
         },
         "database": {
             "enabled": db_enabled,
@@ -660,6 +660,7 @@ def run_platform_compose(
         os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = github_token
         create_database = platform_config['domino_db'].get('DOMINO_CREATE_DATABASE', True)
         os.environ['DOMINO_CREATE_DEFAULT_USER'] = str(platform_config['domino_db'].get('DOMINO_CREATE_DEFAULT_USER', 'true')).lower()
+
         if not create_database:
             os.environ['DOMINO_DB_HOST'] = platform_config['domino_db'].get("DOMINO_DB_HOST", 'postgres')
             os.environ['DOMINO_DB_PORT'] = platform_config['domino_db'].get("DOMINO_DB_PORT", 5432)

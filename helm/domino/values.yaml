@@ -17,7 +17,7 @@ rest:
   deployMode: local-k8s # TODO change to prod
   # Github workflows repository name - Same one used in airflow gitSync ssh
   workflowsRepository: ~
-  create_default_user: true
+  createDefaultUser: true
 
 # Change this if using external Database
 database:

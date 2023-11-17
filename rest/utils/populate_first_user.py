@@ -8,6 +8,7 @@ import asyncio
 
 async def populate_first_user():
     logger = get_configured_logger('populate-first-user')
+    logger.info('Populating first user')
     user_service = UserService()
 
     request = AuthRegisterRequest(
