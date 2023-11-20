@@ -227,7 +227,8 @@ def cli_destroy_platform():
 )
 @click.option(
     '--github-token',
-    prompt='Github token for access default pieces repositories',
+    prompt='Github token for access default pieces repositories.',
+    help='Github token for access default pieces repositories.',
     default=get_github_token_pieces_from_config_or_env,
 )
 def cli_run_platform_compose(d, use_config_file, dev, debug, stop, github_token):
