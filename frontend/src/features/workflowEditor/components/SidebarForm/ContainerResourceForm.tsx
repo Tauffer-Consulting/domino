@@ -73,7 +73,7 @@ const ContainerResourceForm: React.FC = () => {
       </Grid>
       <Grid item xs={6}>
         <NumberInput
-          label="CPU Min"
+          label="CPU Min (m)"
           name="containerResources.cpu.min"
           required
           type="int"
@@ -85,7 +85,7 @@ const ContainerResourceForm: React.FC = () => {
       </Grid>
       <Grid item xs={6}>
         <NumberInput
-          label="CPU Max"
+          label="CPU Max (m)"
           name="containerResources.cpu.max"
           type="int"
           required

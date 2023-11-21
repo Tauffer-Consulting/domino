@@ -8,7 +8,6 @@ from domino.custom_operators.k8s_operator import DominoKubernetesPodOperator
 from domino.custom_operators.docker_operator import DominoDockerOperator
 from domino.custom_operators.python_operator import PythonOperator
 from domino.custom_operators.worker_operator import DominoWorkerOperator
-from domino.utils import dict_deep_update
 from domino.logger import get_configured_logger
 from domino.schemas import shared_storage_map, StorageSource
 
@@ -140,15 +139,17 @@ class Task(object):
                 workspace_id=self.workspace_id,
                 piece_input_kwargs=self.piece_input_kwargs,
                 workflow_shared_storage=self.workflow_shared_storage,
+                container_resources=self.container_resources,
                 # ----------------- Docker -----------------
+                # TODO uncoment
                 image=self.piece["source_image"],
+                entrypoint=["domino", "run-piece-docker"],
                 do_xcom_push=True,
                 mount_tmp_dir=False,
                 tty=True,
                 xcom_all=False,
                 retrieve_output=True,
                 retrieve_output_path='/airflow/xcom/return.out',
-                entrypoint=["domino", "run-piece-docker"],
             )
 
     def __call__(self) -> Callable:

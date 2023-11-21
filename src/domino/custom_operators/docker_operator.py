@@ -5,8 +5,8 @@ import os
 
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas import WorkflowSharedStorage, StorageSource
-
-
+from docker.types import Mount
+import docker
 class DominoDockerOperator(DockerOperator):
 
     def __init__(
@@ -20,6 +20,7 @@ class DominoDockerOperator(DockerOperator):
         workspace_id: int,
         piece_input_kwargs: Optional[Dict] = None,
         workflow_shared_storage: WorkflowSharedStorage = None,
+        container_resources: Optional[Dict] = None,
         **docker_operator_kwargs
     ) -> None:
         self.task_id = task_id
@@ -30,6 +31,7 @@ class DominoDockerOperator(DockerOperator):
         self.workspace_id = workspace_id
         self.piece_input_kwargs = piece_input_kwargs
         self.workflow_shared_storage = workflow_shared_storage
+        self.container_resources = container_resources or {}
 
         # Environment variables
         self.environment = {
@@ -76,11 +78,17 @@ class DominoDockerOperator(DockerOperator):
                 ),
             )
 
+        self.device_requests = []
+        if self.container_resources.get('use_gpu', False):
+            self.device_requests=[
+                docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])
+            ]
         super().__init__(
             **docker_operator_kwargs,
             task_id=task_id,
             docker_url='tcp://docker-proxy:2375',
             mounts=mounts,
+            device_requests=self.device_requests,
             environment=self.environment,
         )
 
