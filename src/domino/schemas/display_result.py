@@ -13,3 +13,4 @@ class DisplayResultFileType(str, Enum):
     md = "md"
     pdf = "pdf"
     html = "html"
+    plotly_json = "plotly_json"
