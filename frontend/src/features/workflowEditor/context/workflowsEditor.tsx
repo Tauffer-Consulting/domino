@@ -216,6 +216,14 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
             if (!value.fromUpstream && !value.value.length) {
               return acc;
             }
+            if (
+              value.fromUpstream &&
+              !value.upstreamId &&
+              !value.upstreamArgument
+            ) {
+              return acc;
+            }
+
             acc[key] = {
               fromUpstream: value.fromUpstream,
               upstreamTaskId: value.fromUpstream ? value.upstreamId : null,
@@ -238,6 +246,13 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
           }
 
           if (!value.fromUpstream && !value.value) {
+            return acc;
+          }
+          if (
+            value.fromUpstream &&
+            !value.upstreamId &&
+            !value.upstreamArgument
+          ) {
             return acc;
           }
 
