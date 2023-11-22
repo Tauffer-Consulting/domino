@@ -119,7 +119,7 @@ export const getUpstreamOptions = (
       }
 
       const $array = getOptions(upstreamPieces, currentType);
-      if (itemsSchema.type === "object") {
+      if (itemsSchema.type === "object" && itemsSchema.properties) {
         const __data: any = {};
         Object.keys(itemsSchema.properties).forEach((subKey) => {
           const subSchema = itemsSchema.properties[subKey];
