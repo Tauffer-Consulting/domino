@@ -32,15 +32,7 @@ export const importJsonWorkflow = (
   return null; // Return null if no file is selected
 };
 
-interface Differences {
-  source: string;
-  version: string;
-  installed: boolean;
-}
-
-export const validateJsonImported = async (
-  json: any,
-): Promise<Differences[]> => {
+export const validateJsonImported = async (json: any): Promise<void> => {
   const schema = yup
     .object()
     .shape({
@@ -105,52 +97,52 @@ export const validateJsonImported = async (
     .noUnknown();
 
   await schema.validate(json);
+};
 
-  const currentRepositories: string[] = [
-    ...new Set(
-      Object.values((await localForage.getItem("pieces")) as any)?.map(
-        (p: any) =>
-          p?.source_image.replace("ghcr.io/", "").replace(/-group\d+$/g, ""),
-      ),
-    ),
-  ];
-  const incomeRepositories = [
-    ...new Set(
-      Object.values(json.workflowPieces)
-        .reduce<Array<string | null>>((acc, next: any) => {
-          acc.push(
-            next.source_image
-              .replace("ghcr.io/", "")
-              .replace(/-group\d+$/g, ""),
-          );
-          return acc;
-        }, [])
-        .filter((su) => !!su) as string[],
-    ),
-  ];
-
-  const differences = incomeRepositories.filter(
-    (x) => !currentRepositories.includes(x),
+export interface Differences {
+  source: string;
+  installedVersion: string | null;
+  requiredVersion: string;
+}
+export const findDifferencesInJsonImported = async (
+  json: any,
+): Promise<Differences[]> => {
+  const currentRepositories = new Set<string>(
+    Object.values((await localForage.getItem("pieces")) as any)?.map(
+      (p: any) =>
+        p?.source_image.replace("ghcr.io/", "").replace(/-group\d+$/g, "") ||
+        "",
+    ) || [],
   );
 
-  const currentRepositoriesWithoutVersion = currentRepositories.map(
-    (cr) => cr.split(":")[0],
+  const incomeRepositories = new Set<string>(
+    Object.values(json.workflowPieces)
+      .flatMap(
+        (next: any) =>
+          next.source_image
+            .replace("ghcr.io/", "")
+            .replace(/-group\d+$/g, "") || null,
+      )
+      .filter(Boolean) as string[],
   );
 
-  const differencesWithoutVersion = differences.map((d) => d.split(":")[0]);
-
-  const uninstalled = differencesWithoutVersion.filter(
-    (x) => !currentRepositoriesWithoutVersion.includes(x),
+  const differences = [...incomeRepositories].filter(
+    (x) => !currentRepositories.has(x),
   );
 
   return differences.map((d) => {
     const source = d.split(":")[0];
-    const version = d.split(":")[1];
-    const installed = !uninstalled.includes(source);
+    const requiredVersion = d.split(":")[1];
+    const installedVersion = [...currentRepositories].find((cr) =>
+      cr.startsWith(source + ":"),
+    );
+
     return {
       source,
-      version,
-      installed,
+      installedVersion: installedVersion
+        ? installedVersion.split(":")[1]
+        : null,
+      requiredVersion,
     };
   });
 };

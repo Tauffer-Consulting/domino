@@ -27,6 +27,7 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
 
   const [filter, setFilter] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
   const filteredRepositoryPieces = useMemo(() => {
     function filterPieces(
       repository: PiecesRepository,
@@ -51,6 +52,7 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
       return filteredRepository;
     }
 
+    console.log("repositoryPieces", repositoryPieces);
     return filterPieces(repositoryPieces, filter);
   }, [filter, repositoryPieces, setExpanded]);
 
@@ -104,7 +106,7 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
       />
       {!repositoriesLoading &&
         repositories.map((repo) => {
-          if (!filteredRepositoryPieces[repo.id].length) {
+          if (!filteredRepositoryPieces[repo.id]?.length) {
             return null;
           }
 

@@ -36,10 +36,7 @@ const postWorkflowRunId: (
 export const useAuthenticatedPostWorkflowRunId = () => {
   const { workspace } = useWorkspaces();
 
-  if (!workspace)
-    throw new Error(
-      "Impossible to run workflows without specifying a workspace",
-    );
+  if (!workspace) return async (_params: IPostWorkflowRunIdParams) => {};
 
   const fetcher = async (params: IPostWorkflowRunIdParams) =>
     await postWorkflowRunId(workspace.id, params)

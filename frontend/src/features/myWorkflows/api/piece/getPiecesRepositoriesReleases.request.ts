@@ -36,10 +36,8 @@ const getPiecesRepositoriesReleases: (
 export const useAuthenticatedGetPieceRepositoriesReleases = () => {
   const { workspace } = useWorkspaces();
 
-  if (!workspace)
-    throw new Error(
-      "Impossible to fetch pieces repositories without specifying a workspace",
-    );
+  if (!workspace?.id)
+    return (_params: IGetPiecesRepositoriesReleasesParams) => {};
 
   return async (params: IGetPiecesRepositoriesReleasesParams) =>
     await getPiecesRepositoriesReleases({

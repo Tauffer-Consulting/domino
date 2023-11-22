@@ -43,7 +43,7 @@ export const WorkspaceListItem: FC<{
         sx={{
           display: "flex",
           flexDirection: "column",
-          borderColor: isSelected ? "darkgray" : "primary",
+          borderColor: isSelected ? "darkgray" : "primary.main",
         }}
       >
         <CardActionArea
@@ -59,7 +59,7 @@ export const WorkspaceListItem: FC<{
           <CardHeader
             title={workspace.workspace_name}
             titleTypographyProps={{ variant: "body1" }}
-            color={isSelected ? "success" : "primary"}
+            color={isSelected ? "success" : "primary.main"}
           />
           <CardContent sx={{ width: "100%" }}>
             <Grid container>

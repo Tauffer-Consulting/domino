@@ -2,20 +2,46 @@ import {
   type IGetRepoPiecesResponseInterface,
   useAuthenticatedGetPieceRepositories,
   useFetchAuthenticatedGetRepoIdPieces,
+  type IGetPiecesRepositoriesResponseInterface,
+  type IGetPiecesRepositoriesReleasesParams,
+  type IGetPiecesRepositoriesReleasesResponseInterface,
+  useAuthenticatedGetPieceRepositoriesReleases,
+  useAuthenticatedDeleteRepository,
 } from "features/myWorkflows/api";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import localForage from "services/config/localForage.config";
+import { type KeyedMutator } from "swr";
 import { createCustomContext } from "utils";
+
+import { useAuthenticatedPostPiecesRepository } from "./api";
+import {
+  type IPostWorkspaceRepositoryPayload,
+  type IPostWorkspaceRepositoryResponseInterface,
+} from "./types";
+import { useWorkspaces } from "./workspaces";
 
 export interface IPiecesContext {
   repositories: PieceRepository[];
-  repositoriesError: boolean;
-  repositoriesLoading: boolean;
+  defaultRepositories: PieceRepository[];
   repositoryPieces: PiecesRepository;
+  repositoriesLoading: boolean;
 
-  search: string;
-  handleSearch: (word: string) => void;
+  selectedRepositoryId: null | number;
+  setSelectedRepositoryId: React.Dispatch<React.SetStateAction<number | null>>;
+
+  handleRefreshRepositories: KeyedMutator<
+    IGetPiecesRepositoriesResponseInterface | undefined
+  >;
+  handleAddRepository: (
+    params: Omit<IPostWorkspaceRepositoryPayload, "workspace_id">,
+  ) => Promise<IPostWorkspaceRepositoryResponseInterface | unknown>;
+
+  handleFetchRepoReleases: (
+    params: IGetPiecesRepositoriesReleasesParams,
+  ) => Promise<IGetPiecesRepositoriesReleasesResponseInterface>;
+
+  handleDeleteRepository: (id: string) => Promise<any>;
 
   fetchRepoById: (params: {
     id: string;
@@ -29,24 +55,53 @@ export const [PiecesContext, usesPieces] =
 const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [search, handleSearch] = useState("");
-  const [repositoryPieces, setRepositoryPieces] = useState<PiecesRepository>(
-    {},
-  );
+  const [selectedRepositoryId, setSelectedRepositoryId] = useState<
+    number | null
+  >(null);
+
+  const { workspace, handleRefreshWorkspaces } = useWorkspaces();
 
   const fetchRepoById = useFetchAuthenticatedGetRepoIdPieces();
 
   const {
-    data,
+    data: repositories,
     error: repositoriesError,
     isValidating: repositoriesLoading,
-    // mutate: repositoriesRefresh,
+    mutate: handleRefreshRepositories,
   } = useAuthenticatedGetPieceRepositories({});
 
-  const repositories: PieceRepository[] = useMemo(
-    () => data?.data.filter((repo) => repo.name.includes(search)) ?? [],
-    [data, search],
-  );
+  const repositoryPieces = useMemo(() => {
+    const repositoryPiecesAux: PiecesRepository = {};
+    const foragePieces: PieceForageSchema = {};
+
+    console.log("repositories", repositories);
+
+    if (!repositories?.data?.length) {
+      void localForage.setItem("pieces", foragePieces);
+      return {};
+    } else {
+      for (const repo of repositories.data) {
+        fetchRepoById({ id: repo.id })
+          .then((pieces: any) => {
+            repositoryPiecesAux[repo.id] = [];
+            for (const op of pieces) {
+              repositoryPiecesAux[repo.id].push(op);
+              foragePieces[op.id] = op;
+            }
+            void localForage.setItem("pieces", foragePieces);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+        // Set piece item to storage -> {piece_id: Piece}
+      }
+      return repositoryPiecesAux;
+    }
+  }, [repositories, fetchRepoById]);
+
+  const { data: defaultRepositories } = useAuthenticatedGetPieceRepositories({
+    source: "default",
+  });
 
   const fetchForagePieceById = useCallback(async (id: number) => {
     const pieces = await localForage.getItem<PieceForageSchema>("pieces");
@@ -55,33 +110,34 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  useEffect(() => {
-    const updateRepositoriesPieces = async () => {
-      const repositoryPiecesAux: PiecesRepository = {};
-      const foragePieces: PieceForageSchema = {};
-      if (!repositories?.length) {
-        void localForage.setItem("pieces", foragePieces);
-      } else {
-        for (const repo of repositories) {
-          fetchRepoById({ id: repo.id })
-            .then((pieces: any) => {
-              repositoryPiecesAux[repo.id] = [];
-              for (const op of pieces) {
-                repositoryPiecesAux[repo.id].push(op);
-                foragePieces[op.id] = op;
-              }
-              setRepositoryPieces(repositoryPiecesAux);
-              void localForage.setItem("pieces", foragePieces);
-            })
-            .catch((e) => {
-              console.log(e);
-            });
-          // Set piece item to storage -> {piece_id: Piece}
-        }
-      }
-    };
-    void updateRepositoriesPieces();
-  }, [repositories, fetchRepoById]);
+  const postRepository = useAuthenticatedPostPiecesRepository({
+    workspace: workspace?.id ?? "",
+  });
+
+  const handleAddRepository = useCallback(
+    async (payload: Omit<IPostWorkspaceRepositoryPayload, "workspace_id">) =>
+      await postRepository({ ...payload, workspace_id: workspace?.id ?? "" })
+        .then((data) => {
+          toast.success(`Repository added successfully!`);
+          handleRefreshWorkspaces();
+          return data;
+        })
+        .catch((e) => {
+          if (e.response?.status === 403) {
+            toast.error(
+              `You don't have permission to add repositories to this workspace.`,
+            );
+            return;
+          }
+          toast.error(`Error adding repository, try again later.`);
+        }),
+    [postRepository, handleRefreshWorkspaces, workspace?.id],
+  );
+
+  const handleFetchRepoReleases =
+    useAuthenticatedGetPieceRepositoriesReleases();
+
+  const handleDeleteRepository = useAuthenticatedDeleteRepository();
 
   useEffect(() => {
     if (repositoriesError) {
@@ -90,14 +146,21 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [repositoriesError]);
 
   const value: IPiecesContext = {
+    repositories: repositories?.data ?? [],
+    defaultRepositories: defaultRepositories?.data ?? [],
+    repositoryPieces,
+    repositoriesLoading,
+
+    selectedRepositoryId,
+    setSelectedRepositoryId,
+
+    handleRefreshRepositories,
+    handleAddRepository,
+    handleFetchRepoReleases,
+    handleDeleteRepository,
+
     fetchForagePieceById,
     fetchRepoById,
-    handleSearch,
-    repositories,
-    repositoriesError,
-    repositoriesLoading,
-    repositoryPieces,
-    search,
   };
 
   return (

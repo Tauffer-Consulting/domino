@@ -28,7 +28,7 @@ export const useAuthenticatedPostPiecesRepository = (params: {
   workspace: string;
 }) => {
   if (!params?.workspace)
-    throw new Error("Impossible to add repositories without a workspace!");
+    return async (_params: IPostWorkspaceRepositoryPayload) => {};
 
   const fetcher = async (payload: IPostWorkspaceRepositoryPayload) =>
     await postPiecesRepository({
