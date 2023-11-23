@@ -15,14 +15,15 @@ import {
 const getPiecesRepositoriesReleases: (
   params: IGetPiecesRepositoriesReleasesParams,
 ) => Promise<
-  AxiosResponse<IGetPiecesRepositoriesReleasesResponseInterface>
+  AxiosResponse<IGetPiecesRepositoriesReleasesResponseInterface> | undefined
 > = async ({ source, path, workspaceId }) => {
+  if (!workspaceId) {
+    return;
+  }
   const search = new URLSearchParams();
   search.set("source", source);
   search.set("path", path);
-  if (workspaceId) {
-    search.set("workspace_id", workspaceId);
-  }
+  search.set("workspace_id", workspaceId);
 
   return await dominoApiClient.get(
     `/pieces-repositories/releases?${search.toString()}`,
@@ -36,14 +37,11 @@ const getPiecesRepositoriesReleases: (
 export const useAuthenticatedGetPieceRepositoriesReleases = () => {
   const { workspace } = useWorkspaces();
 
-  if (!workspace?.id)
-    return (_params: IGetPiecesRepositoriesReleasesParams) => {};
-
   return async (params: IGetPiecesRepositoriesReleasesParams) =>
     await getPiecesRepositoriesReleases({
       ...params,
-      workspaceId: workspace.id,
+      workspaceId: workspace?.id,
     }).then((data) => {
-      return data.data;
+      return data?.data;
     });
 };

@@ -11,10 +11,6 @@ import {
 } from "@mui/material";
 import { Modal, type ModalRef } from "components/Modal";
 import { useWorkspaces, usesPieces } from "context/workspaces";
-import {
-  useAuthenticatedGetWorkspace,
-  useAuthenticatedPostPiecesRepository,
-} from "context/workspaces/api";
 import { type Differences } from "features/workflowEditor/utils/importWorkflow";
 import React, { forwardRef, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -26,14 +22,7 @@ interface Props {
 export const DifferencesModal = forwardRef<ModalRef, Props>(
   ({ incompatiblesPieces }, ref) => {
     const { workspace } = useWorkspaces();
-    const { handleRefreshRepositories } = usesPieces();
-    const handleAddRepository = useAuthenticatedPostPiecesRepository({
-      workspace: workspace?.id ?? "",
-    });
-
-    const { mutate: refreshWorkspaceData } = useAuthenticatedGetWorkspace({
-      id: workspace?.id ?? "",
-    });
+    const { handleAddRepository } = usesPieces();
 
     const { installedPieces, uninstalledPieces } = useMemo(() => {
       return {
@@ -55,14 +44,6 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
         };
 
         handleAddRepository(addRepository)
-          .then(async () => {
-            await refreshWorkspaceData().catch((e) => {
-              console.log(e);
-            });
-            await handleRefreshRepositories().catch((e) => {
-              console.log(e);
-            });
-          })
           .catch((e) => {
             console.log(e);
           })
@@ -84,23 +65,46 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
               <Typography style={{ textAlign: "justify" }}>
                 Some of the pieces necessary to run this workflow are not
                 present in this workspace or mismatch the correct version.
-              </Typography>
-              {!!installedPieces.length && (
-                <>
-                  <Typography style={{ textAlign: "justify" }}>
+                {!!installedPieces.length && (
+                  <>
                     Incorrect version pieces need to be manually update on
-                  </Typography>
-                  <Link to="/workspace-settings">workspace settings</Link>
-                </>
-              )}
+                    <Link to="/workspace-settings"> workspace settings</Link>,
+                  </>
+                )}
+              </Typography>
             </Grid>
             <Grid item xs={12}>
               <List>
-                {uninstalledPieces.map((item) => (
+                {installedPieces.map((item) => (
                   <ListItem
+                    disablePadding
                     key={`${item.source}-${item.requiredVersion}`}
                     secondaryAction={
-                      <ListItemIcon>
+                      <ListItemIcon style={{ right: 0 }}>
+                        <Tooltip
+                          placement="top"
+                          title="Repositories updates need to be done manually on workspace settings"
+                        >
+                          <ErrorOutlineIcon />
+                        </Tooltip>
+                        <Typography sx={{ marginLeft: 1 }}>
+                          Change to {item.requiredVersion}
+                        </Typography>
+                      </ListItemIcon>
+                    }
+                  >
+                    <ListItemText
+                      primary={item.source}
+                      secondary={item.installedVersion ?? "Not installed"}
+                    />
+                  </ListItem>
+                ))}
+                {uninstalledPieces.map((item) => (
+                  <ListItem
+                    disablePadding
+                    key={`${item.source}-${item.requiredVersion}`}
+                    secondaryAction={
+                      <ListItemIcon style={{ right: 0 }}>
                         <Tooltip
                           placement="top"
                           title="Please install this repository to use this workflow"
@@ -119,35 +123,15 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                     />
                   </ListItem>
                 ))}
-                {installedPieces.map((item) => (
-                  <ListItem
-                    key={`${item.source}-${item.requiredVersion}`}
-                    secondaryAction={
-                      <ListItemIcon>
-                        <Tooltip
-                          placement="top"
-                          title="Repositories updates need to be done manually on workspace settings"
-                        >
-                          <ErrorOutlineIcon />
-                        </Tooltip>
-                        <Typography sx={{ marginLeft: 1 }}>
-                          Update to {item.requiredVersion}
-                        </Typography>
-                      </ListItemIcon>
-                    }
-                  >
-                    <ListItemText
-                      primary={item.source}
-                      secondary={item.installedVersion ?? "Not installed"}
-                    />
-                  </ListItem>
-                ))}
               </List>
             </Grid>
             {!!uninstalledPieces.length && (
               <Grid container item xs={12} justifyContent="center">
                 <Grid item xs="auto">
-                  <Button onClick={handleInstallMissingRepositories}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleInstallMissingRepositories}
+                  >
                     Install missing repositories
                   </Button>
                 </Grid>

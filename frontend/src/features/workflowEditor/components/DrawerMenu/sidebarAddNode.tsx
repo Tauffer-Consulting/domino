@@ -52,7 +52,6 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
       return filteredRepository;
     }
 
-    console.log("repositoryPieces", repositoryPieces);
     return filterPieces(repositoryPieces, filter);
   }, [filter, repositoryPieces, setExpanded]);
 
