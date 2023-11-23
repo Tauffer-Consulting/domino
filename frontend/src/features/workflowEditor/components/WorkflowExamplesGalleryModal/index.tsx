@@ -11,6 +11,7 @@ import { Modal, type ModalRef } from "components/Modal";
 import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState } from "react";
 
+import DimensionalityReductionWorkflow from "../../utils/workflows/dimensionality_reduction.json";
 import ImageFilterWorkflow from "../../utils/workflows/image_filter_workflow.json";
 import NasaImageWorkflow from "../../utils/workflows/nasa_workflow.json";
 import YoutubeSummarizerWorkflow from "../../utils/workflows/youtube_summarizer.json";
@@ -47,6 +48,13 @@ const WorkflowExamplesGalleryModal = forwardRef(
         description: "A simple workflow that gets an image from NASA API.",
         jsonFile: NasaImageWorkflow,
         levelTag: "Beginner",
+      },
+      {
+        title: "Dimensionality Reduction",
+        description:
+          "A workflow that applies dimensionality reduction to a dataset. To use it, you must use Shared Storage",
+        jsonFile: DimensionalityReductionWorkflow,
+        levelTag: "Intermediate",
       },
     ];
 
