@@ -1,6 +1,7 @@
 import { CircularProgress, Container, Typography } from "@mui/material";
 import { type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
+import Plot from "react-plotly.js";
 import "./styles.css";
 // import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
@@ -95,6 +96,17 @@ export const TaskResult = (props: ITaskResultProps) => {
           //     style={{ width: '100%', height: '100%' }}
           // />
         );
+      case "plotly_json": {
+        const utf8String = atob(base64_content);
+        const decodedJSON = JSON.parse(utf8String);
+        return (
+          <Plot
+            data={decodedJSON.data}
+            layout={decodedJSON.layout}
+            style={{ width: "100%", height: "100%" }}
+          />
+        );
+      }
       default:
         return <div>Unsupported file type</div>;
     }
