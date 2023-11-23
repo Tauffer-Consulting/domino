@@ -50,6 +50,7 @@ export interface Piece {
 
   source_image: string;
   source_url: string | null;
+  repository_url: string;
   dependency: {
     docker_image: string | null;
     dockerfile: string | null;

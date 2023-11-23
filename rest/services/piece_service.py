@@ -55,10 +55,10 @@ class PieceService(object):
             repository_id=piece_repository_id,
             page=page,
             page_size=page_size,
-            filters=filters.dict(exclude_none=True),
+            filters=filters.model_dump(exclude_none=True),
         )
         return [
-            GetPiecesResponse(**piece.to_dict()) for piece in pieces
+            GetPiecesResponse(**piece.to_dict(),repository_url=piece_repository.url) for piece in pieces
         ]
 
 

@@ -109,20 +109,33 @@ export const findDifferencesInJsonImported = async (
 ): Promise<Differences[]> => {
   const currentRepositories = new Set<string>(
     Object.values((await localForage.getItem("pieces")) as any)?.map(
-      (p: any) =>
-        p?.source_image.replace("ghcr.io/", "").replace(/-group\d+$/g, "") ||
-        "",
+      (p: any) => {
+        // console.log(p?.source_image.split(":"));
+
+        const result =
+          p?.repository_url.replace("https://github.com/", "") +
+            ":" +
+            p?.source_image.split(":")[1]?.replace(/-group\d+$/g, "") || "";
+
+        console.log(result);
+
+        return result;
+      },
     ) || [],
   );
 
   const incomeRepositories = new Set<string>(
     Object.values(json.workflowPieces)
-      .flatMap(
-        (next: any) =>
-          next.source_image
-            .replace("ghcr.io/", "")
-            .replace(/-group\d+$/g, "") || null,
-      )
+      .flatMap((next: any) => {
+        console.log(next);
+
+        const result =
+          next.repository_url.replace("https://github.com/", "") +
+            ":" +
+            next.source_image.split(":")[1].replace(/-group\d+$/g, "") || null;
+
+        return result;
+      })
       .filter(Boolean) as string[],
   );
 

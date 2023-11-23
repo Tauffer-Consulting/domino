@@ -40,7 +40,7 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
           source: "github",
           path: e.source,
           version: e.requiredVersion,
-          url: `http://github.com/${e.source}`,
+          url: `https://github.com/${e.source}`,
         };
 
         handleAddRepository(addRepository)
