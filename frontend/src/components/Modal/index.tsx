@@ -18,6 +18,7 @@ interface Props {
   fullWidth?: boolean;
   confirmFn?: () => void;
   cancelFn?: () => void;
+  onClose?: () => void;
   confirmText?: string;
   cancelText?: string;
 }
@@ -30,6 +31,7 @@ export interface ModalRef {
 export const Modal = React.forwardRef<ModalRef, Props>(
   (
     {
+      onClose,
       cancelFn,
       confirmFn,
       title,
@@ -51,9 +53,12 @@ export const Modal = React.forwardRef<ModalRef, Props>(
       if (cancelFn) {
         cancelFn();
       }
+      if (onClose) {
+        onClose();
+      }
 
       setIsOpen(false);
-    }, [cancelFn]);
+    }, [cancelFn, onClose]);
 
     const handleConfirm = useCallback(() => {
       if (confirmFn) {

@@ -182,6 +182,9 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
             )}
           </Grid>
         }
+        onClose={() => {
+          setInstallState(0);
+        }}
         ref={ref}
       />
     );
