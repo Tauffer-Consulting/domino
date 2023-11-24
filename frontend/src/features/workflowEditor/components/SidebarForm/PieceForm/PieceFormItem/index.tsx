@@ -54,6 +54,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       }
     }
   }
+
   if (checkedFromUpstream) {
     let options: Option[] = [];
     if (
@@ -89,8 +90,9 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    (schema.type === "number" || schema.type === "float")
+    ("type" in schema &&
+      (schema.type === "number" || schema.type === "float")) ||
+    anyOfType === "float"
   ) {
     inputElement = (
       <NumberInput<IWorkflowPieceData>
@@ -100,7 +102,10 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
         defaultValue={schema?.default ?? 10.5}
       />
     );
-  } else if ("type" in schema && schema.type === "integer") {
+  } else if (
+    ("type" in schema && schema.type === "integer") ||
+    anyOfType === "integer"
+  ) {
     inputElement = (
       <NumberInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
