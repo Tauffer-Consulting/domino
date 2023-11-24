@@ -1,6 +1,7 @@
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import {
   Button,
+  CircularProgress,
   Grid,
   List,
   ListItem,
@@ -12,7 +13,7 @@ import {
 import { Modal, type ModalRef } from "components/Modal";
 import { useWorkspaces, usesPieces } from "context/workspaces";
 import { type Differences } from "features/workflowEditor/utils/importWorkflow";
-import React, { forwardRef, useCallback, useMemo } from "react";
+import React, { forwardRef, useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -23,6 +24,7 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
   ({ incompatiblesPieces }, ref) => {
     const { workspace } = useWorkspaces();
     const { handleAddRepository } = usesPieces();
+    const [buttonState, setButtonState] = useState<0 | 1 | 2>(0);
 
     const { installedPieces, uninstalledPieces } = useMemo(() => {
       return {
@@ -40,7 +42,7 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
           source: "github",
           path: e.source,
           version: e.requiredVersion,
-          url: `http://github.com/${e.source}`,
+          url: `https://github.com/${e.source}`,
         };
 
         handleAddRepository(addRepository)
@@ -53,7 +55,13 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
     );
 
     const handleInstallMissingRepositories = useCallback(async () => {
-      await Promise.allSettled(uninstalledPieces.map(installRepositories));
+      await Promise.allSettled(uninstalledPieces.map(installRepositories))
+        .then(() => {
+          setButtonState(2);
+        })
+        .catch(() => {
+          setButtonState(0);
+        });
     }, [installRepositories, uninstalledPieces]);
 
     return (
@@ -131,8 +139,11 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                   <Button
                     variant="outlined"
                     onClick={handleInstallMissingRepositories}
+                    disabled={buttonState === 2 || buttonState === 1}
                   >
-                    Install missing repositories
+                    {buttonState === 1 && <CircularProgress />}
+                    {buttonState === 0 && "Install missing repositories"}
+                    {buttonState === 2 && "Success"}
                   </Button>
                 </Grid>
               </Grid>
