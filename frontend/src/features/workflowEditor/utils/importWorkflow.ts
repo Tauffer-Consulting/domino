@@ -76,6 +76,7 @@ export const validateJsonImported = async (json: any): Promise<void> => {
             id: yup.number().required(),
             source_image: yup.string().required(),
             source_url: yup.string().required(),
+            repository_url: yup.string().required(),
             input_schema: yup.object().shape({}).required(),
             output_schema: yup.object().shape({}).required(),
           };
@@ -109,33 +110,21 @@ export const findDifferencesInJsonImported = async (
 ): Promise<Differences[]> => {
   const currentRepositories = new Set<string>(
     Object.values((await localForage.getItem("pieces")) as any)?.map(
-      (p: any) => {
-        // console.log(p?.source_image.split(":"));
-
-        const result =
-          p?.repository_url.replace("https://github.com/", "") +
-            ":" +
-            p?.source_image.split(":")[1]?.replace(/-group\d+$/g, "") || "";
-
-        console.log(result);
-
-        return result;
-      },
+      (p: any) =>
+        p?.repository_url.replace("https://github.com/", "") +
+          ":" +
+          p?.source_image.split(":")[1]?.replace(/-group\d+$/g, "") || "",
     ) || [],
   );
 
   const incomeRepositories = new Set<string>(
     Object.values(json.workflowPieces)
-      .flatMap((next: any) => {
-        console.log(next);
-
-        const result =
+      .flatMap(
+        (next: any) =>
           next.repository_url.replace("https://github.com/", "") +
             ":" +
-            next.source_image.split(":")[1].replace(/-group\d+$/g, "") || null;
-
-        return result;
-      })
+            next.source_image.split(":")[1].replace(/-group\d+$/g, "") || null,
+      )
       .filter(Boolean) as string[],
   );
 
