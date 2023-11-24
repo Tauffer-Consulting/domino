@@ -14,6 +14,7 @@ import { forwardRef, type ForwardedRef, useState } from "react";
 import DimensionalityReductionWorkflow from "../../utils/workflows/dimensionality_reduction.json";
 import ImageFilterWorkflow from "../../utils/workflows/image_filter_workflow.json";
 import NasaImageWorkflow from "../../utils/workflows/nasa_workflow.json";
+import RandomForestClassifierWorkflow from "../../utils/workflows/random_forest_pipeline.json";
 import YoutubeSummarizerWorkflow from "../../utils/workflows/youtube_summarizer.json";
 
 interface WorkflowGalleryModalRef extends ModalRef {}
@@ -52,8 +53,15 @@ const WorkflowExamplesGalleryModal = forwardRef(
       {
         title: "Dimensionality Reduction",
         description:
-          "A workflow that applies dimensionality reduction to a dataset. To use it, you must use Shared Storage",
+          "A workflow that applies dimensionality reduction to a dataset. To use it, you must use Shared Storage.",
         jsonFile: DimensionalityReductionWorkflow,
+        levelTag: "Intermediate",
+      },
+      {
+        title: "Random Forest Classifier",
+        description:
+          "A machine learning workflow to train a random forest and use it to predict a new data. To use it, you must use Shared Storage",
+        jsonFile: RandomForestClassifierWorkflow,
         levelTag: "Intermediate",
       },
     ];
