@@ -1,3 +1,4 @@
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import {
   Button,
@@ -15,16 +16,23 @@ import { useWorkspaces, usesPieces } from "context/workspaces";
 import { type Differences } from "features/workflowEditor/utils/importWorkflow";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface Props {
   incompatiblesPieces: Differences[];
+}
+
+enum installStateEnum {
+  notInstalled = 0,
+  installing = 1,
+  installed = 2,
 }
 
 export const DifferencesModal = forwardRef<ModalRef, Props>(
   ({ incompatiblesPieces }, ref) => {
     const { workspace } = useWorkspaces();
     const { handleAddRepository } = usesPieces();
-    const [buttonState, setButtonState] = useState<0 | 1 | 2>(0);
+    const [installState, setInstallState] = useState<installStateEnum>(0);
 
     const { installedPieces, uninstalledPieces } = useMemo(() => {
       return {
@@ -36,7 +44,7 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
     }, [incompatiblesPieces]);
 
     const installRepositories = useCallback(
-      (e: Omit<Differences, "installedVersion">) => {
+      async (e: Omit<Differences, "installedVersion">) => {
         const addRepository = {
           workspace_id: workspace?.id ?? "",
           source: "github",
@@ -45,23 +53,22 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
           url: `https://github.com/${e.source}`,
         };
 
-        handleAddRepository(addRepository)
-          .catch((e) => {
-            console.log(e);
-          })
-          .finally(() => {});
+        return await handleAddRepository(addRepository).catch((e) => {
+          console.log(e);
+        });
       },
       [handleAddRepository],
     );
 
     const handleInstallMissingRepositories = useCallback(async () => {
-      await Promise.allSettled(uninstalledPieces.map(installRepositories))
-        .then(() => {
-          setButtonState(2);
-        })
-        .catch(() => {
-          setButtonState(0);
-        });
+      try {
+        setInstallState(1);
+        await Promise.all(uninstalledPieces.map(installRepositories));
+        setInstallState(2);
+      } catch (e) {
+        toast.error(e as string);
+        setInstallState(0);
+      }
     }, [installRepositories, uninstalledPieces]);
 
     return (
@@ -113,21 +120,36 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                     key={`${item.source}-${item.requiredVersion}`}
                     secondaryAction={
                       <ListItemIcon style={{ right: 0 }}>
-                        <Tooltip
-                          placement="top"
-                          title="Please install this repository to use this workflow"
-                        >
-                          <ErrorOutlineIcon />
-                        </Tooltip>
-                        <Typography sx={{ marginLeft: 1 }}>
-                          Install {item.requiredVersion}
-                        </Typography>
+                        {installState === 2 ? (
+                          <>
+                            <CheckCircleOutlineIcon />
+                            <Typography sx={{ marginLeft: 1 }}>
+                              Installed {item.requiredVersion}
+                            </Typography>
+                          </>
+                        ) : (
+                          <>
+                            <Tooltip
+                              placement="top"
+                              title="Please install this repository to use this workflow"
+                            >
+                              <ErrorOutlineIcon />
+                            </Tooltip>
+                            <Typography sx={{ marginLeft: 1 }}>
+                              Install {item.requiredVersion}
+                            </Typography>
+                          </>
+                        )}
                       </ListItemIcon>
                     }
                   >
                     <ListItemText
                       primary={item.source}
-                      secondary={item.installedVersion ?? "Not installed"}
+                      secondary={
+                        installState === 2
+                          ? item.requiredVersion
+                          : item.installedVersion ?? "Not installed"
+                      }
                     />
                   </ListItem>
                 ))}
@@ -139,11 +161,21 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                   <Button
                     variant="outlined"
                     onClick={handleInstallMissingRepositories}
-                    disabled={buttonState === 2 || buttonState === 1}
+                    disabled={installState !== 0}
                   >
-                    {buttonState === 1 && <CircularProgress />}
-                    {buttonState === 0 && "Install missing repositories"}
-                    {buttonState === 2 && "Success"}
+                    {installState === 1 && (
+                      <>
+                        <CircularProgress size={16} sx={{ marginRight: 1 }} />
+                        Installing
+                      </>
+                    )}
+                    {installState === 0 && "Install missing repositories"}
+                    {installState === 2 && (
+                      <>
+                        <CheckCircleOutlineIcon sx={{ marginRight: 1 }} />
+                        Success
+                      </>
+                    )}
                   </Button>
                 </Grid>
               </Grid>
