@@ -75,6 +75,10 @@ export type SimpleInputSchemaProperty =
 
 type AnyOfObjectProperty = DefaultPropertyProps & {
   anyOf: StringProperty[];
+  default:
+    | ArrayObjectProperty.default
+    | NumberProperty.default
+    | StringProperty.default;
 };
 
 export type InputSchemaProperty =
