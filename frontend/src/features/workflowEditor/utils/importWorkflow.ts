@@ -76,6 +76,7 @@ export const validateJsonImported = async (json: any): Promise<void> => {
             id: yup.number().required(),
             source_image: yup.string().required(),
             source_url: yup.string().required(),
+            repository_url: yup.string().required(),
             input_schema: yup.object().shape({}).required(),
             output_schema: yup.object().shape({}).required(),
           };
@@ -110,8 +111,9 @@ export const findDifferencesInJsonImported = async (
   const currentRepositories = new Set<string>(
     Object.values((await localForage.getItem("pieces")) as any)?.map(
       (p: any) =>
-        p?.source_image.replace("ghcr.io/", "").replace(/-group\d+$/g, "") ||
-        "",
+        p?.repository_url.replace("https://github.com/", "") +
+          ":" +
+          p?.source_image.split(":")[1]?.replace(/-group\d+$/g, "") || "",
     ) || [],
   );
 
@@ -119,9 +121,9 @@ export const findDifferencesInJsonImported = async (
     Object.values(json.workflowPieces)
       .flatMap(
         (next: any) =>
-          next.source_image
-            .replace("ghcr.io/", "")
-            .replace(/-group\d+$/g, "") || null,
+          next.repository_url.replace("https://github.com/", "") +
+            ":" +
+            next.source_image.split(":")[1].replace(/-group\d+$/g, "") || null,
       )
       .filter(Boolean) as string[],
   );

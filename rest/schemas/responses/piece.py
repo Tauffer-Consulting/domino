@@ -13,4 +13,5 @@ class GetPiecesResponse(BaseModel):
     secrets_schema: Optional[Dict] = None
     style: Optional[Dict] = None
     source_url: Optional[str] = None
+    repository_url: str
     repository_id: int
