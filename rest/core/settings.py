@@ -43,21 +43,21 @@ class Settings(BaseSettings):
     DEFAULT_REPOSITORIES_LIST: list[dict] = [
         dict(
             path="Tauffer-Consulting/default_domino_pieces",
-            version='0.7.0',
+            version='0.8.0',
             source='github',
             require_token=False,
             url='https://github.com/Tauffer-Consulting/default_domino_pieces'
         ),
         dict(
             path="Tauffer-Consulting/openai_domino_pieces",
-            version='0.6.1',
+            version='0.7.0',
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/openai_domino_pieces'
         ),
         dict(
             path="Tauffer-Consulting/social_media_domino_pieces",
-            version='0.5.0',
+            version='0.5.1',
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/social_media_domino_pieces'
