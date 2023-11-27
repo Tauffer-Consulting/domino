@@ -7,11 +7,11 @@ import os
 
 def pytest_collection_modifyitems(items):
     CLASS_ORDER = [
-        "TestAuthRouter", 
-        "TestWorkspaceRouter", 
-        "TestPieceRepositoryRouter", 
-        "TestPieceRouter", 
-        "TestSecretRouter", 
+        "TestAuthRouter",
+        "TestWorkspaceRouter",
+        "TestPieceRepositoryRouter",
+        "TestPieceRouter",
+        "TestSecretRouter",
         "TestWorkflowRouter",
         "TestUserRouter"
     ]
@@ -26,7 +26,7 @@ def pytest_collection_modifyitems(items):
 @pytest.fixture(scope="session")
 def client():
     base_url = os.environ.get('TESTS_API_URL', 'http://localhost/api')
-    with ApiTestClient(base_url=base_url) as c: 
+    with ApiTestClient(base_url=base_url) as c:
         yield c
 
 @pytest.fixture(scope="session")
@@ -57,7 +57,7 @@ def piece_repository():
         path="Tauffer-Consulting/default_domino_pieces_tests",
         version="0.0.3",
         workspace_id=1,
-        url='https://github.com/Tauffer-Consulting/default_domino_pieces'
+        url='https://github.com/Tauffer-Consulting/default_domino_pieces_tests'
     )
 
 @pytest.fixture(scope="class")
