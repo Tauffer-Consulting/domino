@@ -188,13 +188,13 @@ export const RepositoriesCard: FC = () => {
   return (
     <Card variant="outlined">
       <CardHeader
-        title="Repositories"
+        title="Pieces Repositories"
         titleTypographyProps={{ variant: "h6" }}
       />
       <CardContent>
         <Box>
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Add repository by URL. To discover available Pieces repositories, visit the <a href="https://domino-workflows.io/gallery" target="_blank" rel="noopener noreferrer">Pieces gallery</a>.
+            Add Pieces repository by URL. To discover available Pieces repositories, visit the <a href="https://domino-workflows.io/gallery" target="_blank" rel="noopener noreferrer">Pieces gallery</a>.
           </Typography>
           <TextField
             value={url}
