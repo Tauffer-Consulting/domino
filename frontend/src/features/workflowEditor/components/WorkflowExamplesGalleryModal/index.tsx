@@ -11,6 +11,7 @@ import { Modal, type ModalRef } from "components/Modal";
 import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState } from "react";
 
+import CloudSegmentationWorkflow from "../../utils/workflows/cloud_segmentation_workflow.json";
 import DimensionalityReductionWorkflow from "../../utils/workflows/dimensionality_reduction.json";
 import ImageFilterWorkflow from "../../utils/workflows/image_filter_workflow.json";
 import NasaImageWorkflow from "../../utils/workflows/nasa_workflow.json";
@@ -62,6 +63,13 @@ const WorkflowExamplesGalleryModal = forwardRef(
         description:
           "A machine learning workflow to train a random forest and use it to predict a new data. To use it, you must use Shared Storage",
         jsonFile: RandomForestClassifierWorkflow,
+        levelTag: "Intermediate",
+      },
+      {
+        title: "Cloud Segmentation Workflow",
+        description:
+          "A workflow that uses OpenCV to create a cloud segmentation over a NASA earth image. To use it, you must use Shared Storage",
+        jsonFile: CloudSegmentationWorkflow,
         levelTag: "Intermediate",
       },
     ];
