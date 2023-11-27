@@ -28,12 +28,11 @@ import {
   Tooltip,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import { usesPieces } from "context/workspaces";
 import { repositorySource } from "context/workspaces/types";
 import { type IPieceRepositoryMetadata } from "features/myWorkflows/api";
 import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-
-import { useWorkspaceSettings } from "../../context/workspaceSettings";
 
 /**
  * @todo this file is growing too much, maybe it's time to split into smaller components
@@ -59,7 +58,7 @@ export const RepositoriesCard: FC = () => {
     setSelectedRepositoryId,
     selectedRepositoryId,
     handleDeleteRepository,
-  } = useWorkspaceSettings();
+  } = usesPieces();
 
   /**
    * 1- fetch metadata for given url
@@ -99,7 +98,7 @@ export const RepositoriesCard: FC = () => {
     }).finally(() => {
       setStep("FETCH_METADATA");
       setAvailableVersions([]);
-      handleRefreshRepositories();
+      void handleRefreshRepositories();
       setUrl("");
       setIsStepLoading(false);
     });
@@ -177,7 +176,7 @@ export const RepositoriesCard: FC = () => {
       const repositoryId = e.currentTarget.value;
       handleDeleteRepository(repositoryId)
         .then(() => {
-          handleRefreshRepositories();
+          void handleRefreshRepositories();
         })
         .catch((error) => {
           console.log(error);
@@ -189,13 +188,13 @@ export const RepositoriesCard: FC = () => {
   return (
     <Card variant="outlined">
       <CardHeader
-        title="Repositories"
+        title="Pieces Repositories"
         titleTypographyProps={{ variant: "h6" }}
       />
       <CardContent>
         <Box>
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Add repository
+            Add Pieces repository by URL. To discover available Pieces repositories, visit the <a href="https://domino-workflows.io/gallery" target="_blank" rel="noopener noreferrer">Pieces gallery</a>.
           </Typography>
           <TextField
             value={url}

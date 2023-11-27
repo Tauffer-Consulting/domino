@@ -34,6 +34,8 @@ spec:
               value: http://airflow-webserver:8080
             - name: DOMINO_DEPLOY_MODE
               value: {{ .Values.rest.deployMode }}
+            - name: CREATE_DEFAULT_USER
+              value: "{{ toString .Values.rest.createDefaultUser }}"
             - name: DOMINO_DB_HOST
               value: {{ if .Values.database.enabled }}"{{ .Release.Name }}-postgres-service"{{ else }}{{ .Values.database.host }}{{ end }}
             - name: DOMINO_DB_NAME

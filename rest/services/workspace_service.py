@@ -23,7 +23,7 @@ from cryptography.fernet import Fernet
 from core.settings import settings
 from typing import List
 from math import ceil
-
+import threading
 
 class WorkspaceService(object):
     def __init__(self) -> None:
@@ -33,6 +33,7 @@ class WorkspaceService(object):
         self.logger = get_configured_logger(self.__class__.__name__)
         self.workflow_service = WorkflowService()
         self.github_token_fernet = Fernet(settings.GITHUB_TOKEN_SECRET_KEY)
+        
 
     def create_workspace(
         self,
@@ -73,17 +74,30 @@ class WorkspaceService(object):
                 github_access_token=None,
                 user_permission=Permission.owner.value
             )
+            threads = []
+            for repo in settings.DEFAULT_REPOSITORIES_LIST:
+                if not settings.DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN and repo.get('require_token'):
+                    self.logger.info(f'Not installing default repository {repo.get("path")} because it requires a token and no token was provided.')
+                    continue
 
-            self.piece_repository_service.create_piece_repository(
-                piece_repository_data=CreateRepositoryRequest(
-                    workspace_id=workspace.id,
-                    source=settings.DOMINO_DEFAULT_PIECES_REPOSITORY_SOURCE,
-                    path=settings.DOMINO_DEFAULT_PIECES_REPOSITORY,
-                    version=settings.DOMINO_DEFAULT_PIECES_REPOSITORY_VERSION,
-                    url=settings.DOMINO_DEFAULT_PIECES_REPOSITORY_URL
-                ),
-                auth_context=auth_context
-            )
+                thread = threading.Thread(
+                    target=self.piece_repository_service.create_piece_repository, kwargs=dict(
+                        piece_repository_data=CreateRepositoryRequest(
+                            workspace_id=workspace.id,
+                            source=repo.get('source'),
+                            path=repo.get('path'),
+                            version=repo.get('version'),
+                            url=repo.get('url')
+                        ),
+                        auth_context=auth_context
+                    )
+                )
+                thread.start()
+                threads.append(thread)
+            
+            for thread in threads:
+                thread.join()
+
             return CreateWorkspaceResponse(
                 id=workspace.id,
                 name=workspace.name,

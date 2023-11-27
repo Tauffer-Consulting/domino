@@ -42,7 +42,7 @@ class SecretService(object):
             )
 
     def create_workspace_repository_secret(
-        self, 
+        self,
         workspace_id: int,
         repository_id: int,
         secret_name: str,
@@ -52,7 +52,7 @@ class SecretService(object):
         new_secret = Secret(
             name=secret_name,
             value=None,
-            piece_repository_id=repository_id 
+            piece_repository_id=repository_id
         )
         secret = self.secret_repository.create(secret=new_secret)
         return secret
@@ -67,7 +67,7 @@ class SecretService(object):
         secret = self.secret_repository.find_by_id(id=secret_id)
         if not secret:
             raise ResourceNotFoundException()
-        
+
         if not body.value:
             secret.value = None
         else:
@@ -95,7 +95,7 @@ class SecretService(object):
         return response
 
     def get_piece_secrets(
-        self, 
+        self,
         piece_repository_id: int,
         piece_name: str
     ) -> List[GetSecretsByPieceResponse]:
@@ -112,12 +112,17 @@ class SecretService(object):
         if not piece_item:
             raise ResourceNotFoundException()
 
+        secrets_schema = piece_item.secrets_schema
+        piece_item_required_secrets = []
+        if isinstance(secrets_schema, dict):
+            piece_item_required_secrets = secrets_schema.get('required', [])
         secrets_names = self.piece_repository.get_piece_secrets_names_by_repository_id(name=piece_name, repository_id=piece_repository_id)
         secrets_names = [e[0] for e in secrets_names]
 
         if not secrets_names:
             secrets_names = []
         self.logger.info(f"Fetching the folowing secrets for {piece_name} from repository {piece_repository_id}: " + ", ".join(secrets_names))
+
         response = list()
         for secret in secrets_names:
             secret_item = self.secret_repository.find_by_name_and_piece_repository_id(name=secret, piece_repository_id=piece_repository_id)
@@ -128,7 +133,8 @@ class SecretService(object):
             response.append(
                 GetSecretsByPieceResponse(
                     name=secret,
-                    value=decoded_value
+                    value=decoded_value,
+                    required=secret in piece_item_required_secrets
                 )
             )
 

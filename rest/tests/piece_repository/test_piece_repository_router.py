@@ -65,8 +65,8 @@ class TestPieceRepositoryRouter:
             ],
             metadata = PaginationSet(
                 page=0,
-                records=2,
-                total=2,
+                records=1,
+                total=1,
                 last_page=0
             )
         )
@@ -76,8 +76,8 @@ class TestPieceRepositoryRouter:
 
         assert response.status_code == 200
         assert content.keys() == mock_response_content.keys()
-        for key in content["data"][1].keys():
-            assert content["data"][1].get(key) == mock_response_content["data"][0].get(key)
+        for key in content["data"][0].keys():
+            assert content["data"][0].get(key) == mock_response_content["data"][0].get(key)
         for key in content["metadata"].keys():
             assert content["metadata"].get(key) == mock_response_content["metadata"].get(key)
             

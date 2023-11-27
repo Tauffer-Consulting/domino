@@ -102,7 +102,7 @@ class PieceRepositoryService(object):
         self.logger.info(f'Getting release data for repository {path}')
 
         token = auth_context.workspace.github_access_token if auth_context.workspace.github_access_token else settings.DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN
-        if not token.strip():
+        if token is not None and not token.strip():
             token = None
         tag_data = self._read_repository_data(path=path, source=source, version=version, github_access_token=token)
         name = tag_data.get('config_toml').get('repository').get("REPOSITORY_NAME")
@@ -219,7 +219,7 @@ class PieceRepositoryService(object):
             raise ConflictException(message=f"Repository {piece_repository_data.path} already exists for this workspace")
 
         token = auth_context.workspace.github_access_token if auth_context.workspace.github_access_token else settings.DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN
-        if not token.strip():
+        if token is not None and not token.strip():
             token = None
         repository_files_metadata = self._read_repository_data(
             source=piece_repository_data.source,
@@ -243,13 +243,11 @@ class PieceRepositoryService(object):
         try:
             # Create pieces for this repository in database
             self._update_repository_pieces(
-                source=piece_repository_data.source,
-                path=piece_repository_data.path,
                 repository_id=repository.id,
-                version=piece_repository_data.version,
-                github_access_token=token
+                source=piece_repository_data.source,
+                compiled_metadata=repository_files_metadata['compiled_metadata'],
+                dependencies_map=repository_files_metadata['dependencies_map'],
             )
-
             # Create secrets for the repository with null values
             secrets_to_update = list()
             for value in repository_files_metadata['dependencies_map'].values():
@@ -320,11 +318,21 @@ class PieceRepositoryService(object):
         }
         return data
 
-    def _update_repository_pieces(self, source: str, path: str, repository_id: int, version: str, github_access_token: str):
+    def _update_repository_pieces(
+        self,
+        source: str,
+        compiled_metadata: dict,
+        dependencies_map: dict,
+        repository_id: int,
+    ):
         read_pieces_from_github = {
             "github": self.piece_service.check_pieces_to_update_github
         }
-        read_pieces_from_github[source](repo_name=path, repository_id=repository_id, version=version, github_access_token=github_access_token)
+        read_pieces_from_github[source](
+            repository_id=repository_id,
+            compiled_metadata=compiled_metadata,
+            dependencies_map=dependencies_map,
+        )
 
     def _read_repository_data(self, source: str, path: str, version: str, github_access_token: str):
         read_metadata_from_source_map = {

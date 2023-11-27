@@ -15,6 +15,7 @@ import {
   IconButton,
   Alert,
 } from "@mui/material";
+import { usesPieces } from "context/workspaces";
 import {
   useAuthenticatedGetRepositorySecrets,
   useAuthenticatedPatchRepositorySecret,
@@ -22,8 +23,6 @@ import {
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-
-import { useWorkspaceSettings } from "../../context/workspaceSettings";
 
 /* eslint-disable react/prop-types */
 const StorageSecretsCard = () => {
@@ -34,7 +33,7 @@ const StorageSecretsCard = () => {
   >(null);
   const [repositoryId, setRepositoryId] = useState<number | null>(null);
 
-  const { defaultRepositories } = useWorkspaceSettings();
+  const { defaultRepositories } = usesPieces();
 
   const storageRepository = useMemo(() => {
     return defaultRepositories.find((repository) => {

@@ -45,6 +45,7 @@ def get_pieces_mock_response(piece_repository: PieceRepository):
                 "dockerfile": "",
                 "requirements_file": "requirements_0.txt"
             },
+            repository_url='https://github.com/Tauffer-Consulting/default_domino_pieces_tests',
             source_url='https://github.com/Tauffer-Consulting/default_domino_pieces_tests/tree/main/pieces/SimpleLogPiece',
             source_image = "ghcr.io/tauffer-consulting/default_domino_pieces_tests:0.0.3-group0",
             input_schema = {

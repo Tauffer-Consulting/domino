@@ -17,8 +17,6 @@ import { useWorkspaces } from "context/workspaces";
 import { type FC, useCallback, useState } from "react";
 import { toast } from "react-toastify";
 
-import { useWorkspaceSettings } from "../../context/workspaceSettings";
-
 /**
  * @todo integrate with backend
  * @returns Users card component
@@ -26,7 +24,7 @@ import { useWorkspaceSettings } from "../../context/workspaceSettings";
 export const UsersCard: FC = () => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [permission, setPermission] = useState<string>("");
-  const { workspaceData } = useWorkspaceSettings();
+  const { workspace: workspaceData } = useWorkspaces();
   const { handleInviteUserWorkspace } = useWorkspaces();
 
   const inviteUser = useCallback(() => {

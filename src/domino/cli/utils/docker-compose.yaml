@@ -289,7 +289,7 @@ services:
   domino_rest:
     image: ghcr.io/tauffer-consulting/domino-rest:latest${DOMINO_COMPOSE_DEV}
     container_name: domino-rest
-    command: bash -c "alembic upgrade heads && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
+    command: bash -c "alembic upgrade heads && python -m utils.populate_first_user && uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
     ports:
       - 8000:8000
     environment:
@@ -302,6 +302,7 @@ services:
       - DOMINO_DEPLOY_MODE=local-compose
       - AIRFLOW_ADMIN_USERNAME=airflow
       - AIRFLOW_ADMIN_PASSWORD=airflow
+      - CREATE_DEFAULT_USER=${DOMINO_CREATE_DEFAULT_USER}
     networks:
       - domino-postgres-network
       - default

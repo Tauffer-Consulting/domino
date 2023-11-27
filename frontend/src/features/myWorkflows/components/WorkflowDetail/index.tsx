@@ -214,6 +214,7 @@ export const WorkflowDetail: React.FC = () => {
                   setAutoUpdate(true);
                 }
               }}
+              refresh={refresh}
               selectedRun={selectedRun}
               ref={workflowRunsTableRef}
               onSelectedRunChange={handleSelectRun}

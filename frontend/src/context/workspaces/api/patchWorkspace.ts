@@ -33,10 +33,7 @@ const patchWorkspace: (
 export const useAuthenticatedPatchWorkspace = () => {
   const { workspace } = useWorkspaces();
 
-  if (!workspace)
-    throw new Error(
-      "Impossible to run workflows without specifying a workspace",
-    );
+  if (!workspace) return async (_params: PatchWorkspaceParams) => {};
 
   const fetcher = async (params: PatchWorkspaceParams) =>
     await patchWorkspace(params).then((data) => data);

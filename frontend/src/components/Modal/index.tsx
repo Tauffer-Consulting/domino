@@ -1,3 +1,4 @@
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
   Dialog,
@@ -6,6 +7,7 @@ import {
   type DialogProps,
   DialogTitle,
   Grid,
+  IconButton,
 } from "@mui/material";
 import React, { useCallback, useImperativeHandle, useState } from "react";
 
@@ -16,6 +18,9 @@ interface Props {
   fullWidth?: boolean;
   confirmFn?: () => void;
   cancelFn?: () => void;
+  onClose?: () => void;
+  confirmText?: string;
+  cancelText?: string;
 }
 
 export interface ModalRef {
@@ -24,7 +29,20 @@ export interface ModalRef {
 }
 
 export const Modal = React.forwardRef<ModalRef, Props>(
-  ({ cancelFn, confirmFn, title, content, maxWidth, fullWidth }, ref) => {
+  (
+    {
+      onClose,
+      cancelFn,
+      confirmFn,
+      title,
+      content,
+      maxWidth,
+      fullWidth,
+      confirmText,
+      cancelText,
+    },
+    ref,
+  ) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const open = () => {
@@ -35,9 +53,12 @@ export const Modal = React.forwardRef<ModalRef, Props>(
       if (cancelFn) {
         cancelFn();
       }
+      if (onClose) {
+        onClose();
+      }
 
       setIsOpen(false);
-    }, [cancelFn]);
+    }, [cancelFn, onClose]);
 
     const handleConfirm = useCallback(() => {
       if (confirmFn) {
@@ -59,6 +80,18 @@ export const Modal = React.forwardRef<ModalRef, Props>(
         maxWidth={maxWidth}
         fullWidth={fullWidth}
       >
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{content}</DialogContent>
         <DialogActions>
@@ -66,15 +99,17 @@ export const Modal = React.forwardRef<ModalRef, Props>(
             {cancelFn && (
               <Grid item>
                 <Button onClick={handleClose} variant="contained">
-                  Cancel
+                  {cancelText ?? "Cancel"}
                 </Button>
               </Grid>
             )}
-            <Grid item>
-              <Button onClick={handleConfirm} variant="contained">
-                OK
-              </Button>
-            </Grid>
+            {confirmFn && (
+              <Grid item>
+                <Button onClick={handleConfirm} variant="contained">
+                  {confirmText ?? "OK"}
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </DialogActions>
       </Dialog>

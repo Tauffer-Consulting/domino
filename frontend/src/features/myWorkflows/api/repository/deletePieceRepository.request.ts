@@ -20,10 +20,7 @@ const deleteRepository: (id: string) => Promise<AxiosResponse> = async (id) => {
 export const useAuthenticatedDeleteRepository = () => {
   const { workspace } = useWorkspaces();
 
-  if (!workspace)
-    throw new Error(
-      "Impossible to run workflows without specifying a workspace",
-    );
+  if (!workspace) return async (_id: string) => {};
 
   const fetcher = async (id: string) =>
     await deleteRepository(id).then((data) => data);

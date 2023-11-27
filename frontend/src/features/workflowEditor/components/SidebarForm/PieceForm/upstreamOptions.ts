@@ -112,6 +112,18 @@ export const getUpstreamOptions = (
       currentType === "array" ||
       (Array.isArray(currentType) && currentType.includes("array"))
     ) {
+      if ("anyOf" in currentSchema && currentSchema.anyOf.length === 2) {
+        const hasNullType = currentSchema.anyOf.some(
+          (item: any) => item.type === "null",
+        );
+        if (hasNullType) {
+          const notNullAnyOf = currentSchema.anyOf.find(
+            (item: any) => item.type !== "null",
+          );
+          currentSchema.items = notNullAnyOf.items;
+        }
+      }
+
       let itemsSchema = currentSchema?.items;
       if (currentSchema?.items?.$ref) {
         const subItemSchemaName = currentSchema.items.$ref.split("/").pop();
@@ -119,7 +131,7 @@ export const getUpstreamOptions = (
       }
 
       const $array = getOptions(upstreamPieces, currentType);
-      if (itemsSchema.type === "object") {
+      if (itemsSchema.type === "object" && itemsSchema.properties) {
         const __data: any = {};
         Object.keys(itemsSchema.properties).forEach((subKey) => {
           const subSchema = itemsSchema.properties[subKey];

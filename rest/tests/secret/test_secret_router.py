@@ -45,6 +45,7 @@ class TestSecretRouter:
             GetSecretsByPieceResponse(
                 name = "EXAMPLE_VAR",
                 value = "123",
+                required=True
             )
         ]
         response = get_secrets_by_piece_name

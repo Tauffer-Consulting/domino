@@ -11,6 +11,8 @@ from routers.piece_repository_router import router as piece_repository_router
 from routers.secret_router import router as secret_router
 from routers.health_check_router import router as health_check_router
 from core.settings import settings
+from utils.populate_first_user import populate_first_user
+from contextlib import asynccontextmanager
 
 
 description = """
@@ -18,13 +20,19 @@ Documentation for Domino API
 """
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if settings.CREATE_DEFAULT_USER:
+        await populate_first_user()
+    yield
+
 def configure_app():
-    load_dotenv(find_dotenv())
     app = FastAPI(
         root_path=settings.ROOT_PATH,
         title=settings.APP_TITLE,
         description=description,
         version=settings.VERSION,
+        lifespan=lifespan
     )
 
     app.add_middleware(
@@ -49,6 +57,7 @@ def configure_app():
 
 
 app, settings = configure_app()
+
 
 
 

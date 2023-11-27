@@ -19,6 +19,7 @@ interface Props {
   selectedRun: IWorkflowRuns | null;
   onSelectedRunChange: (run: IWorkflowRuns | null) => void;
   triggerRun: () => void;
+  refresh: () => void;
 }
 
 export interface WorkflowRunsTableRef {
@@ -32,6 +33,7 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
       selectedRun,
       onSelectedRunChange: setSelectedRun,
       triggerRun,
+      refresh,
     },
     ref,
   ) => {
@@ -164,7 +166,7 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
                   footer: WorkflowRunTableFooter,
                 }}
                 slotProps={{
-                  footer: { triggerRun },
+                  footer: { triggerRun, refresh },
                 }}
                 sx={{
                   "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {

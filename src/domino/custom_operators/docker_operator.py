@@ -5,8 +5,8 @@ import os
 
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas import WorkflowSharedStorage, StorageSource
-
-
+from docker.types import Mount
+import docker
 class DominoDockerOperator(DockerOperator):
 
     def __init__(
@@ -20,6 +20,7 @@ class DominoDockerOperator(DockerOperator):
         workspace_id: int,
         piece_input_kwargs: Optional[Dict] = None,
         workflow_shared_storage: WorkflowSharedStorage = None,
+        container_resources: Optional[Dict] = None,
         **docker_operator_kwargs
     ) -> None:
         self.task_id = task_id
@@ -30,6 +31,7 @@ class DominoDockerOperator(DockerOperator):
         self.workspace_id = workspace_id
         self.piece_input_kwargs = piece_input_kwargs
         self.workflow_shared_storage = workflow_shared_storage
+        self.container_resources = container_resources or {}
 
         # Environment variables
         self.environment = {
@@ -57,6 +59,7 @@ class DominoDockerOperator(DockerOperator):
         if dev_pieces:
             piece_repo_name = repository_url.split("/")[-1]
             local_repos_path = f"/mnt/shared_storage/Github/{piece_repo_name}"
+            # local_repos_path = f"/home/vinicius/Documents/work/tauffer/{piece_repo_name}"
             mounts = [
                 # TODO remove
                 # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
@@ -75,11 +78,17 @@ class DominoDockerOperator(DockerOperator):
                 ),
             )
 
+        self.device_requests = []
+        if self.container_resources.get('use_gpu', False):
+            self.device_requests=[
+                docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])
+            ]
         super().__init__(
             **docker_operator_kwargs,
             task_id=task_id,
             docker_url='tcp://docker-proxy:2375',
             mounts=mounts,
+            device_requests=self.device_requests,
             environment=self.environment,
         )
 
@@ -102,10 +111,12 @@ class DominoDockerOperator(DockerOperator):
         )
         if secrets_response.status_code != 200:
             raise Exception(f"Error getting piece secrets: {secrets_response.json()}")
-        piece_secrets = {
-            e.get('name'): e.get('value')
-            for e in secrets_response.json()
-        }
+        piece_secrets = {}
+        for e in secrets_response.json():
+            if not e.get('value') and not e.get('required'):
+                continue
+            piece_secrets[e.get('name')] = e.get('value')
+
         return piece_secrets
 
     @staticmethod

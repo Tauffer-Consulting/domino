@@ -4,8 +4,8 @@ import CodeEditorInput from "components/CodeEditorInput";
 import DatetimeInput from "components/DatetimeInput";
 import NumberInput from "components/NumberInput";
 import SelectInput from "components/SelectInput";
-import TextInput from "components/TextInput";
 import TextAreaInput from "components/TextAreaInput";
+import TextInput from "components/TextInput";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
 import React, { useMemo } from "react";
 import { type Control, useWatch } from "react-hook-form";
@@ -54,6 +54,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       }
     }
   }
+
   if (checkedFromUpstream) {
     let options: Option[] = [];
     if (
@@ -89,8 +90,9 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    (schema.type === "number" || schema.type === "float")
+    ("type" in schema &&
+      (schema.type === "number" || schema.type === "float")) ||
+    anyOfType === "float"
   ) {
     inputElement = (
       <NumberInput<IWorkflowPieceData>
@@ -100,7 +102,10 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
         defaultValue={schema?.default ?? 10.5}
       />
     );
-  } else if ("type" in schema && schema.type === "integer") {
+  } else if (
+    ("type" in schema && schema.type === "integer") ||
+    anyOfType === "integer"
+  ) {
     inputElement = (
       <NumberInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
@@ -223,10 +228,11 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    ("type" in schema &&
-      "widget" in schema &&
-      schema.type === "string" &&
-      schema.widget === "textarea")) {
+    "type" in schema &&
+    "widget" in schema &&
+    schema.type === "string" &&
+    schema.widget === "textarea"
+  ) {
     inputElement = (
       <TextAreaInput<IWorkflowPieceData>
         variant="outlined"

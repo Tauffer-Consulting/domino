@@ -8,7 +8,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { AxiosError } from "axios";
 import Loading from "components/Loading";
-import { Modal, type ModalRef } from "components/Modal";
+import { type ModalRef } from "components/Modal";
 import {
   type WorkflowPanelRef,
   WorkflowPanel,
@@ -28,10 +28,13 @@ import { type GenerateWorkflowsParams } from "../context/workflowsEditor";
 import { containerResourcesSchema } from "../schemas/containerResourcesSchemas";
 import { extractDefaultInputValues, extractDefaultValues } from "../utils";
 import {
+  type Differences,
   importJsonWorkflow,
   validateJsonImported,
+  findDifferencesInJsonImported,
 } from "../utils/importWorkflow";
 
+import { DifferencesModal } from "./DifferencesModal";
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
 import { MyWorkflowExamplesGalleryModal } from "./MyWorkflowsGalleryModal";
 import SidebarPieceForm from "./SidebarForm";
@@ -87,7 +90,9 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const incompatiblePiecesModalRef = useRef<ModalRef>(null);
   const workflowsGalleryModalRef = useRef<ModalRef>(null);
   const myWorkflowsGalleryModalRef = useRef<ModalRef>(null);
-  const [incompatiblesPieces, setIncompatiblesPieces] = useState<string[]>([]);
+  const [incompatiblesPieces, setIncompatiblesPieces] = useState<Differences[]>(
+    [],
+  );
 
   const { workspace } = useWorkspaces();
 
@@ -244,12 +249,15 @@ export const WorkflowsEditorComponent: React.FC = () => {
     async (json: GenerateWorkflowsParams) => {
       try {
         if (json) {
-          const differences = await validateJsonImported(json);
+          await validateJsonImported(json);
 
-          if (differences) {
+          const differences = await findDifferencesInJsonImported(json);
+
+          if (differences.length) {
             toast.error(
               "Some repositories are missing or incompatible version",
             );
+
             setIncompatiblesPieces(differences);
             incompatiblePiecesModalRef.current?.open();
           } else {
@@ -491,24 +499,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
                   ref={fileInputRef}
                 />
                 Import
-                <Modal
-                  title="Missing or incompatibles Pieces Repositories"
-                  content={
-                    <ul>
-                      {incompatiblesPieces.map((item) => (
-                        <li key={item}>
-                          {`${item.split("ghcr.io/")[1].split(":")[0]}:  ${
-                            item
-                              .split("ghcr.io/")[1]
-                              .split(":")[1]
-                              .split("-")[0]
-                          }`}
-                        </li>
-                      ))}
-                    </ul>
-                  }
-                  ref={incompatiblePiecesModalRef}
-                />
               </Button>
               <Menu
                 id="import-menu"
@@ -544,6 +534,10 @@ export const WorkflowsEditorComponent: React.FC = () => {
                 confirmFn={(json) => {
                   void handleImportedJson(json);
                 }}
+              />
+              <DifferencesModal
+                incompatiblesPieces={incompatiblesPieces}
+                ref={incompatiblePiecesModalRef}
               />
             </Grid>
             <Grid item>

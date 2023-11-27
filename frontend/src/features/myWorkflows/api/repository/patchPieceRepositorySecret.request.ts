@@ -34,10 +34,7 @@ const patchRepositorySecret: (
 export const useAuthenticatedPatchRepositorySecret = () => {
   const { workspace } = useWorkspaces();
 
-  if (!workspace)
-    throw new Error(
-      "Impossible to run workflows without specifying a workspace",
-    );
+  if (!workspace) return async (_params: PatchRepositorySecretParams) => {};
 
   const fetcher = async (params: PatchRepositorySecretParams) =>
     await patchRepositorySecret(params).then((data) => data);
