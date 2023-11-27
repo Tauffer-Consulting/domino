@@ -32,7 +32,7 @@ export const importJsonWorkflow = (
   return null; // Return null if no file is selected
 };
 
-export const validateJsonImported = async (json: any) => {
+export const validateJsonImported = async (json: any): Promise<void> => {
   const schema = yup
     .object()
     .shape({
@@ -76,6 +76,7 @@ export const validateJsonImported = async (json: any) => {
             id: yup.number().required(),
             source_image: yup.string().required(),
             source_url: yup.string().required(),
+            repository_url: yup.string().required(),
             input_schema: yup.object().shape({}).required(),
             output_schema: yup.object().shape({}).required(),
           };
@@ -97,28 +98,53 @@ export const validateJsonImported = async (json: any) => {
     .noUnknown();
 
   await schema.validate(json);
+};
 
-  const currentRepositories = [
-    ...new Set(
-      Object.values((await localForage.getItem("pieces")) as any)?.map(
-        (p: any) => p?.source_image,
-      ),
-    ),
-  ];
-  const incomeRepositories = [
-    ...new Set(
-      Object.values(json.workflowPieces)
-        .reduce<Array<string | null>>((acc, next: any) => {
-          acc.push(next.source_image);
-          return acc;
-        }, [])
-        .filter((su) => !!su) as string[],
-    ),
-  ];
-
-  const differences = incomeRepositories.filter(
-    (x) => !currentRepositories.includes(x),
+export interface Differences {
+  source: string;
+  installedVersion: string | null;
+  requiredVersion: string;
+}
+export const findDifferencesInJsonImported = async (
+  json: any,
+): Promise<Differences[]> => {
+  const currentRepositories = new Set<string>(
+    Object.values((await localForage.getItem("pieces")) as any)?.map(
+      (p: any) =>
+        p?.repository_url.replace("https://github.com/", "") +
+          ":" +
+          p?.source_image.split(":")[1]?.replace(/-group\d+$/g, "") || "",
+    ) || [],
   );
 
-  return differences.length ? differences : null;
+  const incomeRepositories = new Set<string>(
+    Object.values(json.workflowPieces)
+      .flatMap(
+        (next: any) =>
+          next.repository_url.replace("https://github.com/", "") +
+            ":" +
+            next.source_image.split(":")[1].replace(/-group\d+$/g, "") || null,
+      )
+      .filter(Boolean) as string[],
+  );
+
+  const differences = [...incomeRepositories].filter(
+    (x) => !currentRepositories.has(x),
+  );
+
+  return differences.map((d) => {
+    const source = d.split(":")[0];
+    const requiredVersion = d.split(":")[1];
+    const installedVersion = [...currentRepositories].find((cr) =>
+      cr.startsWith(source + ":"),
+    );
+
+    return {
+      source,
+      installedVersion: installedVersion
+        ? installedVersion.split(":")[1]
+        : null,
+      requiredVersion,
+    };
+  });
 };

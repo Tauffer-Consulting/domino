@@ -2,6 +2,7 @@ import { CircularProgress, Container, Typography } from "@mui/material";
 import { type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
+import remarkGfm from "remark-gfm";
 import "./styles.css";
 // import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
@@ -68,7 +69,10 @@ export const TaskResult = (props: ITaskResultProps) => {
             style={{ overflow: "auto", maxWidth: "100%", width: "100%" }}
             className="markdown-container"
           >
-            <ReactMarkdown className="react-markdown-component">
+            <ReactMarkdown
+              className="react-markdown-component"
+              remarkPlugins={[remarkGfm]}
+            >
               {window.atob(base64_content)}
             </ReactMarkdown>
             ;

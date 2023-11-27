@@ -20,8 +20,6 @@ import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
-import { useWorkspaceSettings } from "../../context/workspaceSettings";
-
 /* eslint-disable react/prop-types */
 const WorkspaceSecretsCard = () => {
   // const filledDefaultValue = '******'
@@ -30,7 +28,7 @@ const WorkspaceSecretsCard = () => {
   const [currentEdittingToken, setCurrentEdittingToken] =
     useState<boolean>(false);
   const { handleUpdateWorkspace } = useWorkspaces();
-  const { workspaceData: workspace } = useWorkspaceSettings();
+  const { workspace } = useWorkspaces();
 
   const patchWorkspace = useAuthenticatedPatchWorkspace();
 
