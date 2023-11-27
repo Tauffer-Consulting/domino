@@ -194,7 +194,7 @@ export const RepositoriesCard: FC = () => {
       <CardContent>
         <Box>
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Add repository
+            Add repository by URL. To discover available Pieces repositories, visit the <a href="https://domino-workflows.io/gallery" target="_blank" rel="noopener noreferrer">Pieces gallery</a>.
           </Typography>
           <TextField
             value={url}
