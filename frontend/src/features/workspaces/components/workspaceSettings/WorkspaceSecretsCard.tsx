@@ -62,7 +62,7 @@ const WorkspaceSecretsCard = () => {
         })
           .then((response) => {
             toast.success("Secret updated.");
-            handleUpdateWorkspace(response.data);
+            handleUpdateWorkspace(response?.data);
             resetField(`github-token-workspace-${workspace?.id}`, {
               keepTouched: false,
             });
@@ -93,7 +93,7 @@ const WorkspaceSecretsCard = () => {
       })
         .then((response) => {
           toast.success("Secret updated.");
-          handleUpdateWorkspace(response.data);
+          handleUpdateWorkspace(response?.data);
         })
         .catch((_err) => {
           toast.error("Error while updating secrets");
