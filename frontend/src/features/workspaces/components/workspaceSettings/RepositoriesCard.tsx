@@ -121,7 +121,26 @@ export const RepositoriesCard: FC = () => {
         })
           .then((data) => {
             if (data) {
-              setAvailableVersions(data?.splice(0, 10));
+              const devVersion = data.find(
+                (item) =>
+                  item.version === "dev" || item.version === "development",
+              );
+              const versionsOnly = data
+                .filter(
+                  (item) =>
+                    item.version !== "dev" && item.version !== "development",
+                )
+                .splice(0, 10);
+
+              const sortedVersions = versionsOnly.sort(
+                (a, b) => parseFloat(b.version) - parseFloat(a.version),
+              );
+
+              const sortedData = devVersion
+                ? [...sortedVersions, devVersion]
+                : sortedVersions;
+
+              setAvailableVersions(sortedData);
             }
             setStep("SELECT_VERSION");
           })
