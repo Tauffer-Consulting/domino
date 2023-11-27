@@ -14,6 +14,7 @@ import {
 import { Modal, type ModalRef } from "components/Modal";
 import { useWorkspaces, usesPieces } from "context/workspaces";
 import { type Differences } from "features/workflowEditor/utils/importWorkflow";
+import theme from "providers/theme.config";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -162,6 +163,14 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                     variant="outlined"
                     onClick={handleInstallMissingRepositories}
                     disabled={installState !== 0}
+                    style={
+                      installState === 2
+                        ? {
+                            borderColor: theme.palette.success.main,
+                            color: theme.palette.success.main,
+                          }
+                        : {}
+                    }
                   >
                     {installState === 1 && (
                       <>
