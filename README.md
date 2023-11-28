@@ -12,8 +12,8 @@
   <a href="https://artifacthub.io/packages/helm/domino/domino">
     <img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/domino">
   </a>
-  <a href="https://codecov.io/gh/Tauffer-Consulting/domino" > 
-    <img src="https://codecov.io/gh/Tauffer-Consulting/domino/graph/badge.svg?token=WTJPH7FSNJ"/> 
+  <a href="https://codecov.io/gh/Tauffer-Consulting/domino" >
+    <img src="https://codecov.io/gh/Tauffer-Consulting/domino/graph/badge.svg?token=WTJPH7FSNJ"/>
   </a>
   <a href="https://github.com/sponsors/Tauffer-Consulting">
     <img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86">
@@ -23,7 +23,7 @@
 
 <br>
 
-![create-workflow](https://github.com/Tauffer-Consulting/domino/assets/54302847/34d619fa-4b6c-4761-8b24-3ca829cfc28c)
+![create-workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/media/gif-example.gif)
 
 # Table of contents
 - [About](#about)
@@ -64,6 +64,8 @@ You can think of Domino as Airflow with superpowers:
 
 # Quick start
 
+Check out the quick start guide in the [documentation](https://domino-workflows.io/docs/quickstart).
+
 The Domino Python package can be installed via pip. We reccommend you install Domino in a separate Python environment.
 
 ```bash
@@ -79,12 +81,12 @@ domino platform run-compose
 After all processes started successfully, navigate to `localhost:3000` to access the Domino frontend service. <br>
 Obs.: the first time you run the platform, it may take a few minutes to download the Docker images.
 
-Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you install Domino in a Kubernetes cluster. For local testing, check out the instructions for running Domino in a [local Kubernetes cluster with Kind](https://domino-py.readthedocs.io/en/latest/pages/platform.html).
+Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you deploy Domino and Airflow to a Kubernetes cluster. For other deployment modes, check out the instructions in the [documentation](https://domino-workflows.io/docs/category/run-domino).
 
 <br>
 
 # GUI
-The Domino frontend service is a React application that provides the GUI for easily creating, editing and monitoring Workflows. Here are some of its features:
+The Domino frontend service is a React application that provides the GUI for easily creating, editing and monitoring Workflows. Check out the [GUI documentation](https://domino-workflows.io/docs/domino_components/domino_components_gui) for more details.
 
 <details>
   <summary>
@@ -123,7 +125,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   Create Workflows by dragging and dropping Pieces to the canvas, and connecting them. <br></br>
 
   ![create-workflow](https://github.com/Tauffer-Consulting/domino/assets/54302847/34d619fa-4b6c-4761-8b24-3ca829cfc28c)
-  
+
 </details>
 
 <details>
@@ -177,7 +179,7 @@ It is very easy to create and share your own Pieces:
 
 The [Pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
 
-Read more in the [Pieces documentation](https://domino-py.readthedocs.io/en/latest/pages/pieces.html).
+Read more in the [Pieces documentation](https://domino-workflows.io/docs/pieces).
 
 
 <br>
