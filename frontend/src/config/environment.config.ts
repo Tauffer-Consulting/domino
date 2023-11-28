@@ -8,6 +8,7 @@ export interface IEnvironment {
   NODE_ENV: INodeEnv;
   API_ENV: IApiEnv;
   USE_MOCK: boolean;
+  USE_LOCAL_GALLERY: boolean;
 }
 
 /**
@@ -17,4 +18,5 @@ export const environment: IEnvironment = {
   NODE_ENV: import.meta.env.NODE_ENV as INodeEnv,
   API_ENV: import.meta.env.API_ENV as IApiEnv,
   USE_MOCK: !!import.meta.env.VITE_USE_MOCK,
+  USE_LOCAL_GALLERY: !!import.meta.env.USE_LOCAL_GALLERY,
 };
