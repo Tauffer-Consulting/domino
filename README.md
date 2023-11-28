@@ -15,6 +15,9 @@
   <a href="https://codecov.io/gh/Tauffer-Consulting/domino" >
     <img src="https://codecov.io/gh/Tauffer-Consulting/domino/graph/badge.svg?token=WTJPH7FSNJ"/>
   </a>
+  <a href="https://doi.org/10.5281/zenodo.10214754">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10214754.svg" alt="DOI">
+  </a>
   <a href="https://github.com/sponsors/Tauffer-Consulting">
     <img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86">
   </a>
