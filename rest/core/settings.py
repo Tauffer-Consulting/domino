@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     DOMINO_LOCAL_WORKFLOWS_REPOSITORY: str = '/opt/airflow/dags'
 
     # Default domino pieces repository
-    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: str | None = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', None)    
+    DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN: str | None = os.environ.get('DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN', None)
     DEFAULT_REPOSITORIES_LIST: list[dict] = [
         dict(
             path="Tauffer-Consulting/default_domino_pieces",
@@ -68,6 +68,13 @@ class Settings(BaseSettings):
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/data_apis_domino_pieces'
+        ),
+        dict(
+            path="Tauffer-Consulting/ml_domino_pieces",
+            version='0.2.0',
+            source='github',
+            require_token=True,
+            url='https://github.com/Tauffer-Consulting/ml_domino_pieces'
         )
     ]
 
