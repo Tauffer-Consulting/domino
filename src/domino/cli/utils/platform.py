@@ -642,10 +642,9 @@ def destroy_platform() -> None:
 
 
 def run_platform_compose(
-    github_token: str, 
-    detached: bool = False, 
+    github_token: str,
     use_config_file: bool = False,
-    dev: bool = False, 
+    dev: bool = False,
     debug: bool = False
 ) -> None:
     console.print("Starting Domino Platform using Docker Compose.")
@@ -653,11 +652,11 @@ def run_platform_compose(
     # Database default settings
     create_database = True
     os.environ['DOMINO_CREATE_DEFAULT_USER'] = 'true'
+    os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = github_token
     if use_config_file:
         console.print("Using config file...")
         with open("config-domino-local.toml", "rb") as f:
             platform_config = tomli.load(f)
-        os.environ['DOMINO_DEFAULT_PIECES_REPOSITORY_TOKEN'] = github_token
         create_database = platform_config['domino_db'].get('DOMINO_CREATE_DATABASE', True)
         os.environ['DOMINO_CREATE_DEFAULT_USER'] = str(platform_config['domino_db'].get('DOMINO_CREATE_DEFAULT_USER', 'true')).lower()
 
@@ -722,8 +721,6 @@ def run_platform_compose(
         "compose",
         "up"
     ]
-    if detached and not debug:
-        cmd.append("-d")
 
     if debug:
         subprocess.Popen(cmd, env=environment)

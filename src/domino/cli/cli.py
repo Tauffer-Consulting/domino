@@ -196,12 +196,6 @@ def cli_destroy_platform():
 
 @click.command()
 @click.option(
-    "--d",
-    is_flag=True,
-    help="Run in detached mode.",
-    default=False
-)
-@click.option(
     '--use-config-file',
     is_flag=True,
     help="Use config file to run platform.",
@@ -231,12 +225,12 @@ def cli_destroy_platform():
     help='Github token for access default pieces repositories.',
     default=get_github_token_pieces_from_config_or_env,
 )
-def cli_run_platform_compose(d, use_config_file, dev, debug, stop, github_token):
+def cli_run_platform_compose(use_config_file, dev, debug, stop, github_token):
     """Run Domino platform locally with docker compose. Do NOT use this in production."""
     if stop:
         platform.stop_platform_compose()
     else:
-        platform.run_platform_compose(github_token=github_token, detached=d, use_config_file=use_config_file, dev=dev, debug=debug)
+        platform.run_platform_compose(github_token=github_token, use_config_file=use_config_file, dev=dev, debug=debug)
 
 
 @click.command()

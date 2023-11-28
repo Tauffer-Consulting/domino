@@ -1,3 +1,12 @@
+# v0.8.1
+
+### Features
+* Update gallery workflows with latest repositories versions
+
+### Fixes
+* Fix bug on CLI run compose option
+
+
 # v0.8.0
 
 ### Features
