@@ -46,7 +46,7 @@ class PieceService(object):
         Returns:
             List[GetPiecesResponse]: List of all pieces data
         """
-        
+
         piece_repository = self.piece_repository_repository.find_by_id(id=piece_repository_id)
         if not piece_repository:
             raise ResourceNotFoundException(message="Workspace or Piece Repository not found")
@@ -63,8 +63,8 @@ class PieceService(object):
 
 
     def check_pieces_to_update_github(
-        self, 
-        repository_id: int, 
+        self,
+        repository_id: int,
         compiled_metadata: dict,
         dependencies_map: dict,
     ) -> None:
@@ -115,6 +115,8 @@ class PieceService(object):
             input_schema=piece_metadata.get("input_schema", {}),
             output_schema=piece_metadata.get("output_schema", {}),
             secrets_schema=piece_metadata.get("secrets_schema", {}),
+            container_resources=piece_metadata.get("container_resources", {}),
+            tags=piece_metadata.get("tags", []),
             style=style,
             repository_id=repository_id
         )
