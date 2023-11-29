@@ -54,7 +54,7 @@ class PieceService(object):
             filters=filters.model_dump(exclude_none=True),
         )
         return [
-            GetPiecesResponse(**piece.to_dict(),repository_url=piece_repository.url) for piece in pieces
+            GetPiecesResponse(**piece.to_dict(), repository_url=piece_repository.url) for piece in pieces
         ]
 
 
@@ -113,7 +113,7 @@ class PieceService(object):
             input_schema=piece_metadata.get("input_schema", {}),
             output_schema=piece_metadata.get("output_schema", {}),
             secrets_schema=piece_metadata.get("secrets_schema", {}),
-            container_resources=container_resources.model_dump_json(),
+            container_resources=container_resources.model_dump(),
             tags=piece_metadata.get("tags", []),
             style=style,
             repository_id=repository_id
