@@ -13,6 +13,9 @@ from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas import WorkflowSharedStorage, ContainerResourcesModel
 from domino.storage.s3 import S3StorageRepository
 from domino.logger import get_configured_logger
+from airflow.exceptions import AirflowException
+from airflow.kubernetes.pod_generator import PodDefaults
+import json
 
 class DominoKubernetesPodOperator(KubernetesPodOperator):
     def __init__(
@@ -533,7 +536,60 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             self.log.info('Sending signal to delete shared storage sidecar container')
             self.pod_manager._exec_pod_command(resp, 'kill -s SIGINT 1')
 
+    def extract_xcom(self, pod: k8s.V1Pod):
+        """Retrieves xcom value and kills xcom sidecar container"""
+        result = self.pod_manager_extract_xcom(pod)
+        if isinstance(result, str) and result.rstrip() == "__airflow_xcom_result_empty__":
+            self.log.info("Result file is empty.")
+            return None
+        else:
+            self.log.info("xcom result: \n%s", result)
+            return json.loads(result)
 
+    def pod_manager_extract_xcom(self, pod: k8s.V1Pod) -> str:
+        client = kubernetes_stream(
+            self.pod_manager._client.connect_get_namespaced_pod_exec,
+            pod.metadata.name,
+            pod.metadata.namespace,
+            container=PodDefaults.SIDECAR_CONTAINER_NAME,
+            command=[
+                '/bin/sh',
+                '-c',
+                f"if [ -s {PodDefaults.XCOM_MOUNT_PATH}/return.json ]; then cat {PodDefaults.XCOM_MOUNT_PATH}/return.json; else echo __airflow_xcom_result_empty__; fi",
+            ],
+            stderr=True,
+            stdin=False,
+            stdout=True,
+            tty=False,
+            _preload_content=False,
+            _request_timeout=10,
+        )
+        client.run_forever(timeout=10)
+        result = client.read_all()
+
+        _ = kubernetes_stream(
+            self.pod_manager._client.connect_get_namespaced_pod_exec,
+            pod.metadata.name,
+            pod.metadata.namespace,
+            container=PodDefaults.SIDECAR_CONTAINER_NAME,
+            command=[
+                '/bin/sh',
+                '-c',
+                'kill -s SIGINT 1',
+            ],
+            stderr=True,
+            stdin=False,
+            stdout=True,
+            tty=False,
+            _preload_content=True,
+            _request_timeout=10,
+        )
+        client.close()
+
+        if result is None:
+            raise AirflowException(f"Failed to extract xcom from pod: {pod.metadata.name}")
+
+        return result
 
 
 
