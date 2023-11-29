@@ -16,15 +16,15 @@ from domino.logger import get_configured_logger
 
 class DominoKubernetesPodOperator(KubernetesPodOperator):
     def __init__(
-        self, 
+        self,
         dag_id: str,
         task_id: str,
-        piece_name: str, 
+        piece_name: str,
         deploy_mode: str, # TODO enum
         repository_url: str,
         repository_version: str,
-        workspace_id: int, 
-        piece_input_kwargs: Optional[Dict] = None, 
+        workspace_id: int,
+        piece_input_kwargs: Optional[Dict] = None,
         workflow_shared_storage: WorkflowSharedStorage = None,
         container_resources: Optional[Dict] = None,
         **k8s_operator_kwargs
@@ -85,19 +85,19 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
 
 
     def _make_volumes_and_volume_mounts_dev(self):
-        """ 
+        """
         Make volumes and volume mounts for the pod when in DEVELOPMENT mode.
         """
         config.load_incluster_config()
         k8s_client = client.CoreV1Api()
-        
+
         all_volumes = []
         all_volume_mounts = []
-      
+
         repository_raw_project_name = str(self.piece_source_image).split('/')[-1].split(':')[0]
         persistent_volume_claim_name = 'pvc-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
         persistent_volume_name = 'pv-{}'.format(str(repository_raw_project_name.lower().replace('_', '-')))
-        
+
         pvc_exists = False
         try:
             k8s_client.read_namespaced_persistent_volume_claim(name=persistent_volume_claim_name, namespace='default')
@@ -122,14 +122,14 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
                 ),
             )
             volume_mount_dev_pieces = k8s.V1VolumeMount(
-                name='dev-op-{path_name}'.format(path_name=str(repository_raw_project_name.lower().replace('_', '-'))), 
+                name='dev-op-{path_name}'.format(path_name=str(repository_raw_project_name.lower().replace('_', '-'))),
                 mount_path=f'/home/domino/pieces_repository',
-                sub_path=None, 
+                sub_path=None,
                 read_only=True
             )
             all_volumes.append(volume_dev_pieces)
             all_volume_mounts.append(volume_mount_dev_pieces)
-        
+
         ######################## For local domino-py dev ###############################################
         domino_package_local_claim_name = 'domino-dev-volume-claim'
         pvc_exists = False
@@ -144,31 +144,22 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             volume_dev = k8s.V1Volume(
                 name='jobs-persistent-storage-dev',
                 persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(claim_name=domino_package_local_claim_name),
-            ) 
+            )
             """
             # TODO
             Remove deprecated_volume_mount_dev once we have all the pieces repositories updated
             with the new base pod image
             """
-            volume_mount_dev = k8s.V1VolumeMount(
-                name='jobs-persistent-storage-dev', 
-                mount_path='/home/domino/domino_py/src/domino',
-                sub_path=None,
-                read_only=True
-            )
-            deprecated_volume_mount_dev = k8s.V1VolumeMount(
-                name='jobs-persistent-storage-dev', 
-                mount_path='/home/domino/domino_py/domino',
+            volume_mount_pkg = k8s.V1VolumeMount(
+                name='jobs-persistent-storage-dev',
+                mount_path='/usr/local/lib/python3.10/site-packages/domino/',
                 sub_path=None,
                 read_only=True
             )
             all_volumes.append(volume_dev)
-            all_volume_mounts.append(volume_mount_dev)
-            # TODO remove
-            all_volume_mounts.append(deprecated_volume_mount_dev)
+            all_volume_mounts.append(volume_mount_pkg)
 
         return all_volumes, all_volume_mounts
-
 
     def build_pod_request_obj(self, context: Optional['Context'] = None) -> k8s.V1Pod:
         """
@@ -382,7 +373,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         return upstream_xcoms_data
 
     def _get_piece_kwargs_value_from_upstream_xcom(
-        self, 
+        self,
         value: Any
     ):
         if isinstance(value, dict) and value.get("type") == "fromUpstream":
@@ -395,7 +386,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             return [self._get_piece_kwargs_value_from_upstream_xcom(item) for item in value]
         elif isinstance(value, dict):
             return {
-                k: self._get_piece_kwargs_value_from_upstream_xcom(v) 
+                k: self._get_piece_kwargs_value_from_upstream_xcom(v)
                 for k, v in value.items()
             }
         return value
@@ -426,7 +417,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
 
 
     def _prepare_execute_environment(self, context: Context):
-        """ 
+        """
         Runs at the begining of the execute method.
         Pass extra arguments and configuration as environment variables to the pod
         """
@@ -447,7 +438,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         self.upstream_xcoms_data = self._get_upstream_xcom_data_from_task_ids(task_ids=upstream_task_ids, context=context)
         self._update_piece_kwargs_with_upstream_xcom()
         self._update_env_var_value_from_name(name='DOMINO_RUN_PIECE_KWARGS', value=str(self.piece_input_kwargs))
-        
+
         # Add pieces secrets to environment variables
         piece_secrets = self._get_piece_secrets(
             repository_url=self.repository_url,
