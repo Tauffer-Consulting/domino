@@ -25,8 +25,10 @@ import * as yup from "yup";
 
 import { type IWorkflowPieceData, storageAccessModes } from "../context/types";
 import { type GenerateWorkflowsParams } from "../context/workflowsEditor";
-import { containerResourcesSchema } from "../schemas/containerResourcesSchemas";
-import { extractDefaultInputValues, extractDefaultValues } from "../utils";
+import {
+  extractDefaultContainerResources,
+  extractDefaultInputValues,
+} from "../utils";
 import {
   type Differences,
   importJsonWorkflow,
@@ -352,8 +354,9 @@ export const WorkflowsEditorComponent: React.FC = () => {
       const defaultInputs = extractDefaultInputValues(
         piece as unknown as Piece,
       );
-      const defaultContainerResources = extractDefaultValues(
-        containerResourcesSchema as any,
+
+      const defaultContainerResources = extractDefaultContainerResources(
+        piece?.container_resources,
       );
 
       const currentWorkflowPieces = await getForageWorkflowPieces();
