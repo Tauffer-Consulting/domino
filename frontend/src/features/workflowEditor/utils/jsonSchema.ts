@@ -1,6 +1,12 @@
 // Extract default values from Schema
 
-import { type IWorkflowPieceData } from "../context/types";
+import { isEmpty } from "utils";
+
+import { defaultContainerResources } from "../components/SidebarForm/ContainerResourceForm";
+import {
+  type IContainerResourceFormData,
+  type IWorkflowPieceData,
+} from "../context/types";
 
 import { getFromUpstream } from "./getFromUpstream";
 
@@ -85,7 +91,7 @@ export const extractDefaultValues = (
 ) => {
   output = output === null ? {} : output;
 
-  if (schema) {
+  if (!isEmpty(schema) && "properties" in schema) {
     const properties = schema.properties;
     for (const [key, value] of Object.entries(properties)) {
       if (value?.from_upstream === "always") {
@@ -103,4 +109,24 @@ export const extractDefaultValues = (
   }
 
   return output;
+};
+
+export const extractDefaultContainerResources = (
+  cr?: Piece["container_resources"],
+): IContainerResourceFormData => {
+  if (cr && !isEmpty(cr) && "limits" in cr && "requests" in cr) {
+    return {
+      cpu: {
+        max: Number(cr.limits.cpu),
+        min: Number(cr.requests.cpu),
+      },
+      memory: {
+        max: Number(cr.limits.memory),
+        min: Number(cr.requests.memory),
+      },
+      useGpu: cr?.use_gpu ?? false,
+    };
+  } else {
+    return defaultContainerResources;
+  }
 };

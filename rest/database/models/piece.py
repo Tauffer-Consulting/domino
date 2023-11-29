@@ -1,6 +1,6 @@
 from database.models.base import Base, BaseDatabaseModel
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Integer, JSON, ForeignKey, text
+from sqlalchemy import Column, String, Integer, JSON, ForeignKey, text, ARRAY
 
 class Piece(Base, BaseDatabaseModel):
     __tablename__ = "piece"
@@ -13,6 +13,8 @@ class Piece(Base, BaseDatabaseModel):
     input_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb"))
     output_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb")) # Using server default empty JSON object to avoid null value in database
     secrets_schema = Column(JSON, nullable=False, server_default=text("'{}'::jsonb"))
+    tags = Column(ARRAY(String), nullable=False, server_default="{}")
+    container_resources = Column(JSON, nullable=False, server_default=text("'{}'::jsonb"))
     style = Column(JSON, nullable=True)
     source_url = Column(String, nullable=True)
     repository_id = Column(Integer, ForeignKey('piece_repository.id', ondelete='cascade'), nullable=False)

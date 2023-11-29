@@ -149,22 +149,6 @@ class BasePiece(metaclass=abc.ABCMeta):
             self.logger.info(f"Piece {self.__class__.__name__} is not returning a valid XCOM object. Auto-generating a base XCOM for it...")
             xcom_obj = dict()
 
-        # Add arguments types to XCOM 
-        # TODO - this is a temporary solution. We should find a better way to do this
-        # output_schema = output_obj.model_json_schema()
-        # for k, v in output_schema["properties"].items():
-        #     if "type" in v:
-        #         # Get file-path and directory-path types
-        #         if v["type"] == "string" and "format" in v:
-        #             v_type = v["format"]
-        #         else:
-        #             v_type = v["type"]
-        #     elif "anyOf" in v:
-        #         if "$ref" in v["anyOf"][0]:
-        #             type_model = v["anyOf"][0]["$ref"].split("/")[-1]
-        #             v_type = output_schema["definitions"][type_model]["type"]
-        #     xcom_obj[f"{k}_type"] = v_type
-
         # Serialize self.display_result and add it to XCOM
         if isinstance(self.display_result, dict):
             if "file_type" not in self.display_result:
@@ -185,6 +169,7 @@ class BasePiece(metaclass=abc.ABCMeta):
             self.display_result["file_path"] = None
             self.display_result["file_type"] = "txt"
             self.display_result["base64_content"] = base64_content
+
         xcom_obj["display_result"] = self.display_result
 
         # Update XCOM with extra metadata
@@ -240,7 +225,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         self,
         piece_input_data: dict,
         piece_input_model: pydantic.BaseModel,
-        piece_output_model: pydantic.BaseModel, 
+        piece_output_model: pydantic.BaseModel,
         piece_secrets_model: Optional[pydantic.BaseModel] = None,
         airflow_context: Optional[dict] = None
     ):
@@ -397,7 +382,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         It should have all the necessary content for auto-generating json schemas.
         All arguments should be type annotated and docstring should carry description for each argument.
         """
-        raise NotImplementedError("This method must be implemented in the child class!")        
+        raise NotImplementedError("This method must be implemented in the child class!")
 
     def serialize_display_result_file(self, file_path: Union[str, Path], file_type: DisplayResultFileType) -> dict:
         """

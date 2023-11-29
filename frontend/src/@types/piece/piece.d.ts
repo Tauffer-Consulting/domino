@@ -37,10 +37,25 @@ export interface PieceSchema {
   $defs: Definitions;
 }
 
+interface ContainerResources {
+  limits: {
+    cpu: number;
+    memory: number;
+  };
+  requests: {
+    cpu: number;
+    memory: number;
+  };
+  use_gpu?: boolean;
+}
+
 export interface Piece {
   id: number;
   name: string;
   description: string;
+
+  container_resources: ContainerResources;
+  tags: string[];
 
   repository_id: number;
 
