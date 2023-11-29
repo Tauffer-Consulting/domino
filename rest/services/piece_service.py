@@ -1,16 +1,12 @@
 from typing import List
-import json
 from schemas.requests.piece import ListPiecesFilters
 from schemas.exceptions.base import ResourceNotFoundException
-from clients.github_rest_client import GithubRestClient
-
+from constants.schemas import ContainerResourcesModel
 from core.logger import get_configured_logger
-from core.settings import settings
 from repository.user_repository import UserRepository
 from repository.workspace_repository import WorkspaceRepository
 from repository.piece_repository_repository import PieceRepositoryRepository
 from database.models import Piece, PieceRepository
-from database.models.enums import RepositorySource
 from clients.local_files_client import LocalFilesClient
 from repository.piece_repository import PieceRepository
 from schemas.responses.piece import GetPiecesResponse
@@ -106,6 +102,8 @@ class PieceService(object):
         piece_style = piece_metadata.get("style")
         name = piece_metadata.get("name")
         style = get_frontend_node_style(module_name=name, **piece_style)
+
+        container_resources = ContainerResourcesModel(**piece_metadata.get("container_resources", {}))
         new_piece = Piece(
             name=piece_metadata.get("name"),
             dependency=piece_metadata.get("dependency"),
@@ -115,7 +113,7 @@ class PieceService(object):
             input_schema=piece_metadata.get("input_schema", {}),
             output_schema=piece_metadata.get("output_schema", {}),
             secrets_schema=piece_metadata.get("secrets_schema", {}),
-            container_resources=piece_metadata.get("container_resources", {}),
+            container_resources=container_resources.model_dump_json(),
             tags=piece_metadata.get("tags", []),
             style=style,
             repository_id=repository_id
