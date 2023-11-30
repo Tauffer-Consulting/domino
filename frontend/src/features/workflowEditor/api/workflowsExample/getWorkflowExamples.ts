@@ -4,7 +4,7 @@ import { type Edge, type Node } from "reactflow";
 import useSWR from "swr";
 
 const REPO_URL =
-  "https://raw.githubusercontent.com/Tauffer-Consulting/domino_pieces_gallery/feature/workflows_gallery/workflows_gallery";
+  "https://raw.githubusercontent.com/Tauffer-Consulting/domino_pieces_gallery/main/workflows_gallery";
 
 const getWorkflowsExampleUrl = `${REPO_URL}/index.json`;
 
