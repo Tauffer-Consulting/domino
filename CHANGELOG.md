@@ -1,3 +1,14 @@
+# v0.8.2
+
+### Features
+- Add `container_resources` and `tags` to db and responses
+- Add default values for container resources in frontend forms
+- Import examples gallery from github json
+
+### Fixes
+- Fix k8s airflow xcom stream stdout
+- Fix `skip_envs` import in testing module
+
 # v0.8.1
 
 ### Features
