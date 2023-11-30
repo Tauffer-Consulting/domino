@@ -8,7 +8,7 @@ import * as yup from "yup";
 // TODO check if these values make sense
 const minAcceptedMemory = 128;
 const minAcceptedCpu = 100;
-const maxAcceptedMemory = 12800;
+const maxAcceptedMemory = 24000;
 const maxAcceptedCpu = 10000;
 
 export const defaultContainerResources: IContainerResourceFormData = {
