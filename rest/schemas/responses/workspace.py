@@ -49,7 +49,7 @@ class ListWorkspaceUsersResponseData(BaseModel):
     user_email: str
     user_permission: Permission
     status: UserWorkspaceStatus
-    
+
 
 class ListWorkspaceUsersResponse(BaseModel):
     data: List[ListWorkspaceUsersResponseData]

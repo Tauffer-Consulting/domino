@@ -46,7 +46,7 @@ workflow_service = WorkflowService()
 )
 def create_workflow(
     workspace_id: int,
-    body: CreateWorkflowRequest, 
+    body: CreateWorkflowRequest,
     auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
 ) -> CreateWorkflowResponse:
     """Create a new workflow"""
@@ -75,9 +75,8 @@ async def list_workflows(
     page: int = 0,
     page_size: int = 5,
     filters: ListWorkflowsFilters = Depends(),
-    #auth_context: AuthorizationContextData = Depends(auth_service.authorize_workspace_access_authorizer)
 ) -> GetWorkflowsResponse:
-    """List all workflows"""
+    """List all workflows with its basic information"""
     try:
         return await workflow_service.list_workflows(
             workspace_id=workspace_id,
@@ -102,10 +101,10 @@ async def list_workflows(
 @auth_service.authorize_workspace_access
 def get_workflow(
     workspace_id: int,
-    workflow_id: int, 
+    workflow_id: int,
     auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
 ) -> GetWorkflowResponse:
-    """Get a workflow"""
+    """Get a workflow information"""
     try:
         return workflow_service.get_workflow(
             workspace_id=workspace_id,
@@ -201,7 +200,7 @@ def list_workflow_runs(
 )
 def list_run_tasks(
     workspace_id: int,
-    workflow_id: int, 
+    workflow_id: int,
     workflow_run_id: str,
     page: int = 0,
     page_size: int = 5,
@@ -229,7 +228,7 @@ def list_run_tasks(
 )
 def get_task_logs(
     workspace_id: int,
-    workflow_id: int, 
+    workflow_id: int,
     workflow_run_id: str,
     task_id: str,
     task_try_number: int,
@@ -262,7 +261,7 @@ def get_task_logs(
 )
 def get_task_result(
     workspace_id: int,
-    workflow_id: int, 
+    workflow_id: int,
     workflow_run_id: str,
     task_id: str,
     task_try_number: int,
