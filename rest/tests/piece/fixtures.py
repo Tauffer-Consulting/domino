@@ -95,6 +95,19 @@ def get_pieces_mock_response(piece_repository: PieceRepository):
                     "EXAMPLE_VAR"
                 ]
             },
+            tags=['Example'],
+            container_resources={
+                "limits": {
+                    "cpu": 100,
+                    "memory": 128
+                },
+                "requests": {
+                    "cpu": 100,
+                    "memory": 128
+                },
+                "use_gpu": False
+
+            },
             style = {
                 "module": "SimpleLogPiece",
                 "label": "Example Piece",

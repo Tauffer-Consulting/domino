@@ -32,7 +32,7 @@ def get_pieces(
     filters: ListPiecesFilters = Depends(),
     auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
 ):
-    """List pieces in a piece repository in a workspace"""
+    """List pieces from a piece repository"""
     try:
         response = piece_service.list_pieces(
             piece_repository_id=piece_repository_id,

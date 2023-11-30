@@ -182,7 +182,7 @@ def get_piece_repository(
     piece_repository_id: int,
     auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
 ) -> GetRepositoryResponse:
-    """Get piece repository"""
+    """Get piece repository info by id"""
     try:
         response = piece_repository_service.get_piece_repository(
             piece_repository_id=piece_repository_id

@@ -54,4 +54,3 @@ class GetRepositoryResponse(BaseModel):
     path: Optional[str] = None
     version: Optional[str] = None
     workspace_id: int
-    #secrets: List[RepositorySecret]
