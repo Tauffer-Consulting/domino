@@ -29,7 +29,7 @@ interface WorkflowGalleryModalProps {
   confirmFn: (json: any) => void;
 }
 
-const USE_LOCAL_CARDS = true;
+const USE_LOCAL_CARDS = false;
 
 const localCardsContents = [
   {
