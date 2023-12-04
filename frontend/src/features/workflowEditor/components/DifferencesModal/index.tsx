@@ -27,6 +27,7 @@ enum installStateEnum {
   notInstalled = 0,
   installing = 1,
   installed = 2,
+  error = 3,
 }
 
 export const DifferencesModal = forwardRef<ModalRef, Props>(
@@ -53,10 +54,11 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
           version: e.requiredVersion,
           url: `https://github.com/${e.source}`,
         };
-
-        return await handleAddRepository(addRepository).catch((e) => {
-          console.log(e);
-        });
+        try {
+          await handleAddRepository(addRepository);
+        } catch (e) {
+          throw new Error();
+        }
       },
       [handleAddRepository],
     );
@@ -68,7 +70,7 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
         setInstallState(2);
       } catch (e) {
         toast.error(e as string);
-        setInstallState(0);
+        setInstallState(3);
       }
     }, [installRepositories, uninstalledPieces]);
 
@@ -169,6 +171,11 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                             borderColor: theme.palette.success.main,
                             color: theme.palette.success.main,
                           }
+                        : installState === 3
+                        ? {
+                            borderColor: theme.palette.error.main,
+                            color: theme.palette.error.main,
+                          }
                         : {}
                     }
                   >
@@ -183,6 +190,12 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                       <>
                         <CheckCircleOutlineIcon sx={{ marginRight: 1 }} />
                         Success
+                      </>
+                    )}
+                    {installState === 3 && (
+                      <>
+                        <ErrorOutlineIcon sx={{ marginRight: 1 }} />
+                        Error
                       </>
                     )}
                   </Button>
