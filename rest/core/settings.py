@@ -50,28 +50,28 @@ class Settings(BaseSettings):
         ),
         dict(
             path="Tauffer-Consulting/openai_domino_pieces",
-            version='0.7.0',
+            version='development',
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/openai_domino_pieces'
         ),
         dict(
             path="Tauffer-Consulting/social_media_domino_pieces",
-            version='0.5.1',
+            version='0.5.2',
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/social_media_domino_pieces'
         ),
         dict(
             path="Tauffer-Consulting/data_apis_domino_pieces",
-            version='0.2.0',
+            version='0.2.1',
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/data_apis_domino_pieces'
         ),
         dict(
             path="Tauffer-Consulting/ml_domino_pieces",
-            version='0.2.0',
+            version='0.2.1',
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/ml_domino_pieces'

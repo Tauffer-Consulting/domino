@@ -21,6 +21,7 @@ import ImageFilterWorkflow from "../../utils/workflows/image_filter_workflow.jso
 import NasaImageWorkflow from "../../utils/workflows/nasa_workflow.json";
 import RandomForestClassifierWorkflow from "../../utils/workflows/random_forest_pipeline.json";
 import YoutubeSummarizerWorkflow from "../../utils/workflows/youtube_summarizer.json";
+import YoutubeLocalTranscript from "../../utils/workflows/youtube_transcript_local.json";
 
 interface WorkflowGalleryModalRef extends ModalRef {}
 
@@ -28,7 +29,7 @@ interface WorkflowGalleryModalProps {
   confirmFn: (json: any) => void;
 }
 
-const USE_LOCAL_CARDS = true;
+const USE_LOCAL_CARDS = false;
 
 const localCardsContents = [
   {
@@ -70,6 +71,13 @@ const localCardsContents = [
       "A workflow that uses OpenCV to create a cloud segmentation over a NASA earth image. To use it, you must use Shared Storage",
     jsonFile: CloudSegmentationWorkflow,
     levelTag: "Intermediate",
+  },
+  {
+    title: "Youtube Transcript Local Model",
+    description:
+      "A workflow that uses a local whisper model with GPU access transcript a youtube video. To use it you must use Shared Storage",
+    jsonFile: YoutubeLocalTranscript,
+    levelTag: "Advanced",
   },
 ] as unknown as WorkflowsGalleryExamples;
 

@@ -1,35 +1,48 @@
-# TODO - THIS IS NOT TESTED YET
-# consider using this: https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch
-FROM nvidia/cuda:11.6.2-base-ubuntu20.04
+FROM nvidia/cuda:11.8.0-base-ubuntu22.04
 
-# Installing Python with miniconda
-RUN apt-get update && \
-    apt-get install -y build-essential  && \
-    apt-get install -y wget && \
-    apt-get install -y git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+ENV PYTHONUNBUFFERED=1
 
-RUN apt-get -y update && \
-    apt-get -y install python3 && \
-    apt-get -y install python3-pip && \
-    python3 -m pip install --upgrade pip
+# SYSTEM
+RUN apt-get update --yes --quiet && DEBIAN_FRONTEND=noninteractive apt-get install --yes --quiet --no-install-recommends \
+    software-properties-common \
+    build-essential apt-utils \
+ && rm -rf /var/lib/apt/lists/*
 
-# Create folders to store source code
+# Python
+RUN add-apt-repository --yes ppa:deadsnakes/ppa && apt-get update --yes --quiet
+RUN DEBIAN_FRONTEND=noninteractive apt-get install --yes --quiet --no-install-recommends \
+    python3.10 \
+    python3.10-dev \
+    python3.10-distutils \
+    python3.10-lib2to3 \
+    python3.10-gdbm \
+    python3.10-tk \
+    pip
+
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 999 \
+    && update-alternatives --config python3
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+RUN pip install --upgrade pip
+
+
+# Domino
+## Create folders to store source code
 RUN mkdir -p /home/domino/pieces_repository
 
-# Create folder to store run data results
+## Create folder to store run data results
 RUN mkdir -p /home/run_data
 WORKDIR /home/run_data
 RUN chmod -R 777 .
 
-# Create folder for sidecar pod mount to read xcom data
+## Create folder for sidecar pod mount to read xcom data
 RUN mkdir -p /airflow/xcom/
 RUN echo "{}" > /airflow/xcom/return.json
 WORKDIR /airflow/xcom
 RUN chmod -R 777 .
 
-# Editable pip install for Domino from local folder
+## Editable pip install for Domino from local folder
 RUN mkdir -p /home/domino/domino_py
 COPY pyproject.toml /home/domino/domino_py/
 COPY src/domino /home/domino/domino_py/src/domino
