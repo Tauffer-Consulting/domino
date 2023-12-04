@@ -1,5 +1,5 @@
-import { CircularProgress, Container, Typography } from "@mui/material";
-import { type CSSProperties } from "react";
+import { Button, CircularProgress, Container, Typography } from "@mui/material";
+import { useCallback, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
 import remarkGfm from "remark-gfm";
@@ -116,6 +116,48 @@ export const TaskResult = (props: ITaskResultProps) => {
     }
   };
 
+  const downloadContent = useCallback(() => {
+    let href = "";
+    switch (file_type) {
+      case "txt":
+        href = `data:text/plain;base64,${base64_content}`;
+        break;
+      case "json":
+        href = `data:application/json;base64,${base64_content}`;
+        break;
+      case "jpeg":
+      case "png":
+      case "bmp":
+      case "gif":
+      case "tiff":
+        href = `data:image/${file_type};base64,${base64_content}`;
+        break;
+      case "svg":
+        href = `data:image/svg+xml;base64,${base64_content}`;
+        break;
+      case "md":
+        href = `data:text/markdown;base64,${base64_content}`;
+        break;
+      case "pdf":
+        href = `data:application/pdf;base64,${base64_content}`;
+        break;
+      case "html":
+        href = `data:text/html;base64,${base64_content}`;
+        break;
+      case "plotly_json":
+        href = `data:text/plain;base64,${base64_content}`;
+        break;
+      default:
+        href = `data:text/plain;base64,${base64_content}`;
+        break;
+    }
+
+    const a = document.createElement("a"); // Create <a>
+    a.href = href; // Image Base64 Goes here
+    a.download = `download.${file_type}`; // File name Here
+    a.click(); // Downloaded file
+  }, [base64_content, file_type]);
+
   return (
     <Container
       sx={{
@@ -127,6 +169,7 @@ export const TaskResult = (props: ITaskResultProps) => {
         justifyContent: "center",
       }}
     >
+      <Button onClick={downloadContent}>Download content</Button>
       {renderContent()}
     </Container>
   );
