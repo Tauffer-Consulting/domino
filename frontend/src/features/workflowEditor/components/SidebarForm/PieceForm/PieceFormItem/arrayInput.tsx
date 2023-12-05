@@ -125,7 +125,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
       return "DatetimeInput";
     } else if (
       subItemSchema?.type === "string" &&
-      subItemSchema?.widget === "codeeditor"
+      subItemSchema?.widget.includes("codeeditor")
     ) {
       return "CodeEditorInput";
     } else if (subItemSchema?.type === "object") {
@@ -300,7 +300,14 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
               )}
               {!fromUpstream && elementType === "CodeEditorInput" && (
                 <Grid item xs={9}>
-                  <CodeEditorInput name={`${name}.${index}.value`} />
+                  <CodeEditorInput
+                    language={
+                      subItemSchema?.widget === "codeeditor"
+                        ? "python"
+                        : subItemSchema.widget.replace("codeeditor-", "")
+                    }
+                    name={`${name}.${index}.value`}
+                  />
                 </Grid>
               )}
               {!fromUpstream && elementType === "Unknown" && (
