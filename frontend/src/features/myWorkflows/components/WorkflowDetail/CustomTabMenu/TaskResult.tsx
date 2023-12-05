@@ -1,4 +1,10 @@
-import { Button, CircularProgress, Container, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Container,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { useCallback, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
@@ -122,6 +128,7 @@ export const TaskResult = (props: ITaskResultProps) => {
       case "txt":
         href = `data:text/plain;base64,${base64_content}`;
         break;
+      case "plotly_json":
       case "json":
         href = `data:application/json;base64,${base64_content}`;
         break;
@@ -144,9 +151,6 @@ export const TaskResult = (props: ITaskResultProps) => {
       case "html":
         href = `data:text/html;base64,${base64_content}`;
         break;
-      case "plotly_json":
-        href = `data:text/plain;base64,${base64_content}`;
-        break;
       default:
         href = `data:text/plain;base64,${base64_content}`;
         break;
@@ -167,10 +171,18 @@ export const TaskResult = (props: ITaskResultProps) => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        overflowY: "scroll",
+        overflowX: "hidden",
       }}
     >
-      <Button onClick={downloadContent}>Download content</Button>
       {renderContent()}
+      {!!base64_content && !!file_type && (
+        <Tooltip title="Will download the raw result content ">
+          <Button variant="contained" onClick={downloadContent}>
+            Download content
+          </Button>
+        </Tooltip>
+      )}
     </Container>
   );
 };

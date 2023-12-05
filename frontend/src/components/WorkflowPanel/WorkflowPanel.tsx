@@ -37,8 +37,8 @@ import { CustomConnectionLine } from "./ConnectionLine";
 import DefaultEdge from "./DefaultEdge";
 import { CustomNode } from "./DefaultNode";
 import RunNodeComponent from "./RunNode";
-
 import "reactflow/dist/style.css";
+import { type RunNode } from "./types";
 
 // Load CustomNode
 const DEFAULT_NODE_TYPES: NodeTypes = {
@@ -251,14 +251,24 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           ...node.data,
         },
       }));
-      const edges = [...rawEdges].map((edge: Edge) => ({
-        ...edge,
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 20,
-          height: 20,
-        },
-      }));
+
+      const edges = [...rawEdges].map((edge: Edge) => {
+        const animated = nodes.some(
+          (n: RunNode) =>
+            (n.id === edge.source || n.id === edge.target) &&
+            n.data?.state === "running",
+        );
+
+        return {
+          ...edge,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 20,
+            height: 20,
+          },
+          animated,
+        };
+      });
 
       return {
         nodes,
