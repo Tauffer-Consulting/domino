@@ -195,7 +195,7 @@ export const WorkflowDetail: React.FC = () => {
     }
   }, [selectedRun, refresh]);
 
-  useInterval(refresh, 1000, autoUpdate);
+  useInterval(refresh, 3000, autoUpdate);
 
   return (
     <Grid container spacing={3}>
