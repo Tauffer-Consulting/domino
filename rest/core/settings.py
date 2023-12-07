@@ -50,7 +50,7 @@ class Settings(BaseSettings):
         ),
         dict(
             path="Tauffer-Consulting/openai_domino_pieces",
-            version='development',
+            version='0.7.1',
             source='github',
             require_token=True,
             url='https://github.com/Tauffer-Consulting/openai_domino_pieces'
