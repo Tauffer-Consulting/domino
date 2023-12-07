@@ -5,6 +5,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import DOMPurify from "dompurify";
 import { useCallback, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
@@ -96,16 +97,12 @@ export const TaskResult = (props: ITaskResultProps) => {
                         </PDFViewer> */}
           </div>
         );
-      case "html":
-        return (
-          <div style={{ width: "100%", ...style }}>
-            HTML result display not yet implemented
-          </div>
-          // <iframe
-          //     src={`data:text/html;base64,${base64_content}`}
-          //     style={{ width: '100%', height: '100%' }}
-          // />
-        );
+      case "html": {
+        const decodedHTML = atob(base64_content);
+        const sanitizedHTML = DOMPurify.sanitize(decodedHTML);
+
+        return <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
+      }
       case "plotly_json": {
         const utf8String = atob(base64_content);
         const decodedJSON = JSON.parse(utf8String);
