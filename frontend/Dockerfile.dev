@@ -1,19 +1,14 @@
-# Refs:
-# https://dev.to/otomato_io/how-to-optimize-production-docker-images-running-nodejs-with-yarn-504b
-# https://snyk.io/blog/10-best-practices-to-containerize-nodejs-web-applications-with-docker/
-FROM node:18-alpine
-
-ENV VITE_API_ENV=dev
-
-# ENV PATH /app/node_modules/.bin:$PATH
+# Build Stage
+FROM node:18-alpine as build
 WORKDIR /usr/src/app
-COPY --chown=node:node . /usr/src/app
-RUN mkdir -p node_modules/.cache
-RUN chmod -R 777 node_modules/.cache
-RUN mkdir -p node_modules/.vite
-RUN chmod -R 777 node_modules/.vite
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
-RUN yarn install --frozen-lockfile && yarn cache clean
-
+# Final Stage
+FROM node:18-alpine
+WORKDIR /usr/src/app
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY . .
+RUN chmod -R 777 node_modules/
 USER node
 CMD ["yarn", "start"]

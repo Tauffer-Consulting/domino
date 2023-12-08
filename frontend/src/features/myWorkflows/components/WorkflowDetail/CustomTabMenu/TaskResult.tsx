@@ -5,13 +5,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { RenderPDF } from "components/RenderPDF";
 import DOMPurify from "dompurify";
 import { useCallback, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
 import remarkGfm from "remark-gfm";
 import "./styles.css";
-// import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 interface ITaskResultProps {
   isLoading: boolean;
@@ -87,16 +87,7 @@ export const TaskResult = (props: ITaskResultProps) => {
         );
 
       case "pdf":
-        return (
-          <div style={{ width: "100%", ...style }}>
-            PDF result display not yet implemented
-            {/* <PDFViewer>
-                            <Document file={`data:application/pdf;base64,${base64_content}`}>
-                                <Page pageNumber={1} />
-                            </Document>
-                        </PDFViewer> */}
-          </div>
-        );
+        return <RenderPDF base64Content={base64_content} />;
       case "html": {
         const decodedHTML = atob(base64_content);
         const sanitizedHTML = DOMPurify.sanitize(decodedHTML);
