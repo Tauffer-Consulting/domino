@@ -5,12 +5,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { RenderPDF } from "components/RenderPDF";
+import DOMPurify from "dompurify";
 import { useCallback, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
 import remarkGfm from "remark-gfm";
 import "./styles.css";
-// import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 interface ITaskResultProps {
   isLoading: boolean;
@@ -86,26 +87,13 @@ export const TaskResult = (props: ITaskResultProps) => {
         );
 
       case "pdf":
-        return (
-          <div style={{ width: "100%", ...style }}>
-            PDF result display not yet implemented
-            {/* <PDFViewer>
-                            <Document file={`data:application/pdf;base64,${base64_content}`}>
-                                <Page pageNumber={1} />
-                            </Document>
-                        </PDFViewer> */}
-          </div>
-        );
-      case "html":
-        return (
-          <div style={{ width: "100%", ...style }}>
-            HTML result display not yet implemented
-          </div>
-          // <iframe
-          //     src={`data:text/html;base64,${base64_content}`}
-          //     style={{ width: '100%', height: '100%' }}
-          // />
-        );
+        return <RenderPDF base64Content={base64_content} />;
+      case "html": {
+        const decodedHTML = atob(base64_content);
+        const sanitizedHTML = DOMPurify.sanitize(decodedHTML);
+
+        return <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
+      }
       case "plotly_json": {
         const utf8String = atob(base64_content);
         const decodedJSON = JSON.parse(utf8String);
@@ -165,6 +153,8 @@ export const TaskResult = (props: ITaskResultProps) => {
   return (
     <Container
       sx={{
+        paddingX: "24px",
+        paddingY: "12px",
         height: "100%",
         width: "100%",
         display: "flex",
