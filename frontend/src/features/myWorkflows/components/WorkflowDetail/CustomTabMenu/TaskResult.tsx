@@ -153,6 +153,8 @@ export const TaskResult = (props: ITaskResultProps) => {
   return (
     <Container
       sx={{
+        paddingX: "24px",
+        paddingY: "12px",
         height: "100%",
         width: "100%",
         display: "flex",

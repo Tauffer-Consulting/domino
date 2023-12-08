@@ -21,7 +21,7 @@ type Props =
   | { file: string };
 
 export const RenderPDF: React.FC<Props> = (props) => {
-  const [numPages, setNumPages] = useState<number>(1);
+  const [numPages, setNumPages] = useState<number>(0);
 
   const file =
     "file" in props
@@ -31,7 +31,6 @@ export const RenderPDF: React.FC<Props> = (props) => {
   function onDocumentLoadSuccess({
     numPages: nextNumPages,
   }: PDFDocumentProxy): void {
-    console.log("nextNumPages", nextNumPages);
     setNumPages(nextNumPages);
   }
 
@@ -43,7 +42,7 @@ export const RenderPDF: React.FC<Props> = (props) => {
         options={options}
       >
         {Array.from(new Array(numPages), (el, index) => (
-          <Page key={`page_${index + 1}`} pageNumber={index + 1} width={600} />
+          <Page key={`page_${index + 1}`} pageNumber={index + 1} width={650} />
         ))}
       </Document>
     </div>
