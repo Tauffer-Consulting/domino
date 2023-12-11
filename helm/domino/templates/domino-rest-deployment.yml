@@ -28,7 +28,7 @@ spec:
           ports:
             - containerPort: 8000
           imagePullPolicy: IfNotPresent
-          env: 
+          env:
             # TODO use load balancer instead of service ip for airflow webserver ?
             - name: AIRFLOW_WEBSERVER_HOST
               value: http://airflow-webserver:8080
@@ -59,7 +59,7 @@ spec:
             - name: DOMINO_GITHUB_WORKFLOWS_REPOSITORY
               value: {{ .Values.rest.workflowsRepository }}
           {{- if .Values.rest.extraVolumeMounts }}
-          volumeMounts:             
+          volumeMounts:
 {{ toYaml .Values.rest.extraVolumeMounts | indent 12 }}
           {{- end }}
           resources:
@@ -86,6 +86,4 @@ spec:
     app: {{ .Release.Name }}-rest
   ports:
   - port: 8000
-      #- protocol: "TCP"
-      #targetPort: 8000
 
