@@ -23,6 +23,7 @@ from schemas.responses.workflow import (
     GetWorkflowRunsResponseData,
     GetWorkflowRunTasksResponseData,
     GetWorkflowRunTasksResponse,
+    GetWorkflowResultReportResponse,
     GetWorkflowRunTaskLogsResponse,
     GetWorkflowRunTaskResultResponse,
     WorkflowStatus
@@ -692,6 +693,66 @@ class WorkflowService(object):
             )
         )
         return response
+    
+    def generate_report(self, workflow_id: int, workflow_run_id: str):
+        page_size = 100
+        page=0
+        workflow = self.workflow_repository.find_by_id(id=workflow_id)
+        if not workflow:
+            raise ResourceNotFoundException("Workflow not found")
+
+        airflow_workflow_id = workflow.uuid_name
+
+        response = self.airflow_client.get_all_run_tasks_instances(
+            dag_id=airflow_workflow_id,
+            dag_run_id=workflow_run_id,
+            page=page,
+            page_size=page_size
+        )
+
+        response_data = response.json()
+
+        if not response_data:
+            return []
+        
+        total_tasks = response_data.get("total_entries")
+        all_run_tasks = response_data["task_instances"]
+
+        while len(all_run_tasks) < total_tasks:
+            self.logger.info("oi amigo")
+            page+=1
+            response = self.airflow_client.get_all_run_tasks_instances(
+                dag_id=airflow_workflow_id,
+                dag_run_id=workflow_run_id,
+                page=page,
+                page_size=page_size
+            )
+            all_run_tasks.extend(response.json().get("task_instances")) 
+
+        sorted_all_run_tasks = sorted(all_run_tasks, key=lambda item: datetime.strptime(item["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"))
+
+        result_list = []
+
+        for task in sorted_all_run_tasks:
+            try:
+                task_result = self.airflow_client.get_task_result(
+                    dag_id=airflow_workflow_id,
+                    dag_run_id=workflow_run_id,
+                    task_id=task["task_id"],
+                    task_try_number=task["try_number"]
+                )
+
+                result_list.append(
+                    dict(
+                        base64_content=task_result.get("base64_content"), 
+                        file_type=task_result.get("file_type")
+                    )
+                )
+            except BaseException as e:
+                # Handle the exception as needed
+                self.logger.info(f"Skipping task {task['task_id']} due to exception: {e}")
+        
+        return GetWorkflowResultReportResponse(data=result_list)
 
     @staticmethod
     def parse_log(log_text: str):

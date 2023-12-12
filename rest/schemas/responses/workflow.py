@@ -196,6 +196,8 @@ class GetWorkflowRunTaskResultResponse(BaseModel):
     base64_content: Optional[str] = None
     file_type: Optional[str] = None
 
+class GetWorkflowResultReportResponse(BaseModel):
+    data: List[GetWorkflowRunTaskResultResponse]
 
 class GetWorkflowRunTaskLogsResponse(BaseModel):
     data: List[str]
