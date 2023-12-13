@@ -15,7 +15,7 @@ const configEndpoints: Record<IApiEnv, IEndpoints> = {
     api: "http://localhost/api",
   },
   prod: {
-    api: "http://localhost/api",
+    api: environment.API_URL,
   },
 };
 
