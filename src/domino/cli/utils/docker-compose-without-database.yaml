@@ -31,7 +31,7 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
-services: 
+services:
   postgres:
     image: postgres:13
     container_name: airflow-postgres
@@ -319,7 +319,8 @@ services:
     environment:
       - API_ENV=local
       - DOMINO_DEPLOY_MODE=local-compose
-  
+      - API_URL=http://localhost:8000
+
   # Domino Docker proxy
   docker-proxy:
     image: bobrik/socat
