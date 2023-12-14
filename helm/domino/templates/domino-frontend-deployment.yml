@@ -32,6 +32,8 @@ spec:
               value: {{ .Values.frontend.apiEnv }}
             - name: DOMINO_DEPLOY_MODE
               value: {{ .Values.frontend.deployMode }}
+            - name: API_URL
+              value: {{ .Values.frontend.apiUrl }}
 
 ---
 # Frontend Service
