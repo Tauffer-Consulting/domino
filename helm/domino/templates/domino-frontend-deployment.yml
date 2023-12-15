@@ -1,7 +1,7 @@
 {{- if .Values.frontend.enabled }}
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
+metadata:
   name: {{ .Release.Name }}-frontend
   labels:
     app: {{ .Release.Name }}-frontend
@@ -32,14 +32,8 @@ spec:
               value: {{ .Values.frontend.apiEnv }}
             - name: DOMINO_DEPLOY_MODE
               value: {{ .Values.frontend.deployMode }}
-
-          # resources:
-          #   limits:
-          #     memory: {{ .Values.frontend.memoryLimit }}
-          #     cpu: {{ .Values.frontend.cpuLimit }}
-          #   requests:
-          #     memory: {{ .Values.frontend.memoryRequest }}
-          #     cpu: {{ .Values.frontend.cpuRequest }}
+            - name: API_URL
+              value: {{ .Values.frontend.apiUrl }}
 
 ---
 # Frontend Service
@@ -52,7 +46,4 @@ spec:
     app: {{ .Release.Name }}-frontend
   ports:
   - port: 80
-    #targetPort: 3000
-    #nodePort: 30030
-  #type: NodePort
 {{- end}}
