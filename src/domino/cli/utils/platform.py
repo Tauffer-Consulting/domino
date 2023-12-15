@@ -384,7 +384,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         },
         "config": {
             "api": {
-                "auth_backend": "airflow.api.auth.backend.basic_auth"
+                "auth_backends": "airflow.api.auth.backend.basic_auth"
             },
         },
         "dags": {
