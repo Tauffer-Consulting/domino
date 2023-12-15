@@ -35,16 +35,14 @@ export const RenderPDF: React.FC<Props> = (props) => {
   }
 
   return (
-    <div style={{ overflow: "auto", maxWidth: "100%", width: "100%" }}>
-      <Document
-        file={file}
-        onLoadSuccess={onDocumentLoadSuccess}
-        options={options}
-      >
-        {Array.from(new Array(numPages), (el, index) => (
-          <Page key={`page_${index + 1}`} pageNumber={index + 1} width={650} />
-        ))}
-      </Document>
-    </div>
+    <Document
+      file={file}
+      onLoadSuccess={onDocumentLoadSuccess}
+      options={options}
+    >
+      {Array.from(new Array(numPages), (el, index) => (
+        <Page key={`page_${index + 1}`} pageNumber={index + 1} width={650} />
+      ))}
+    </Document>
   );
 };

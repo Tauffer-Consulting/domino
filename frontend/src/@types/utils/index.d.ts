@@ -4,9 +4,10 @@ declare global {
   ) => infer R
     ? R
     : T extends (
-        instance: ReactFlowInstance<NodeData, EdgeData>,
-      ) => Promise<infer R>
-    ? R
-    : never;
+          instance: ReactFlowInstance<NodeData, EdgeData>,
+        ) => Promise<infer R>
+      ? R
+      : never;
 }
+
 export {};
