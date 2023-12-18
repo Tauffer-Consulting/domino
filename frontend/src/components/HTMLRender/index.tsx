@@ -9,7 +9,9 @@ const HtmlRenderer: React.FC<Props> = ({ html }) => {
     <iframe
       title="html-renderer"
       srcDoc={html}
-      style={{ border: "none", width: "auto", height: "auto" }}
+      width="100%"
+      height="100%"
+      style={{ border: "none" }}
     ></iframe>
   );
 };
