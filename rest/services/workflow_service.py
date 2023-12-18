@@ -745,7 +745,14 @@ class WorkflowService(object):
                 result_list.append(
                     dict(
                         base64_content=task_result.get("base64_content"), 
-                        file_type=task_result.get("file_type")
+                        file_type=task_result.get("file_type"),
+                        dag_id=task.get("dag_id"),
+                        duration=task.get("duration"),
+                        start_date=task.get("start_date"),
+                        end_date=task.get("end_date"),
+                        execution_date=task.get("execution_date"),
+                        task_id=task.get("task_id"),
+                        state=task.get("state"),
                     )
                 )
             except BaseException as e:

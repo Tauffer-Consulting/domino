@@ -1,3 +1,4 @@
+import { DownloadAsPDF } from "components/DownloadPDF";
 import { RenderB64 } from "components/RenderB64";
 import { useAuthenticatedGetWorkflowRunResultReport } from "features/myWorkflows/api";
 import React, { useMemo } from "react";
@@ -25,17 +26,21 @@ export const ResultsReport: React.FC = () => {
   }, [data]);
 
   return (
-    <div
-      style={{
-        height: `88vh`,
-        width: "100%",
-        padding: 24,
-        margin: 0,
-        overflowY: "scroll",
-        border: "2px solid #000",
-      }}
-    >
-      <DynamicContent jsxContent={content} />
-    </div>
+    <>
+      <DownloadAsPDF contentId="DownloadAsPDF" />
+      <div
+        id="DownloadAsPDF"
+        style={{
+          height: `88vh`,
+          width: "100%",
+          padding: 24,
+          margin: 0,
+          overflowY: "scroll",
+          border: "2px solid #000",
+        }}
+      >
+        <DynamicContent jsxContent={content} />
+      </div>
+    </>
   );
 };
