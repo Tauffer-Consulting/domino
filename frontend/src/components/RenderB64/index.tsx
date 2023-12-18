@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
+import HtmlRenderer from "components/HTMLRender";
 import { RenderPDF } from "components/RenderPDF";
-import DOMPurify from "dompurify";
 import React, { type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import Plot from "react-plotly.js";
@@ -72,9 +72,8 @@ export const RenderB64: React.FC<Props> = ({
       return <RenderPDF base64Content={base64_content} />;
     case "html": {
       const decodedHTML = atob(base64_content);
-      const sanitizedHTML = DOMPurify.sanitize(decodedHTML);
 
-      return <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
+      return <HtmlRenderer html={decodedHTML} />;
     }
     case "plotly_json": {
       const utf8String = atob(base64_content);

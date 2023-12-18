@@ -28,7 +28,6 @@
     "cross-env": "^7.0.3",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.7",
-    "dompurify": "^3.0.6",
     "dotenv": "^16.3.1",
     "elkjs": "^0.8.2",
     "html2pdf.js": "^0.10.1",
