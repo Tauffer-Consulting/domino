@@ -29,10 +29,13 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
         end: props.taskData.duration * 1000,
       });
 
-      return `${duration.hours} ${(duration?.hours ?? 0) > 1 ? "hours" : "hour"
-        } : ${duration.minutes} ${(duration?.minutes ?? 0) > 1 ? "minutes" : "minute"
-        } : ${duration.seconds} ${(duration?.seconds ?? 0) > 1 ? "seconds" : "second"
-        }`;
+      return `${duration.hours} ${
+        (duration?.hours ?? 0) > 1 ? "hours" : "hour"
+      } : ${duration.minutes} ${
+        (duration?.minutes ?? 0) > 1 ? "minutes" : "minute"
+      } : ${duration.seconds} ${
+        (duration?.seconds ?? 0) > 1 ? "seconds" : "second"
+      }`;
     } else {
       return "Not done yet";
     }

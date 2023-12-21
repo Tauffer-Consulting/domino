@@ -719,7 +719,6 @@ class WorkflowService(object):
         all_run_tasks = response_data["task_instances"]
 
         while len(all_run_tasks) < total_tasks:
-            self.logger.info("oi amigo")
             page+=1
             response = self.airflow_client.get_all_run_tasks_instances(
                 dag_id=airflow_workflow_id,
@@ -742,10 +741,15 @@ class WorkflowService(object):
                     task_try_number=task["try_number"]
                 )
 
+                node = workflow.ui_schema.get("nodes", {}).get(task["task_id"], {})
+                piece_name = node.get("data", {}).get("style", {}).get("label", None) or \
+                            node.get("data", {}).get("name", None)
+
                 result_list.append(
                     dict(
                         base64_content=task_result.get("base64_content"), 
                         file_type=task_result.get("file_type"),
+                        piece_name=piece_name,
                         dag_id=task.get("dag_id"),
                         duration=task.get("duration"),
                         start_date=task.get("start_date"),

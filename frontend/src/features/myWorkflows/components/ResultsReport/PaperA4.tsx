@@ -1,21 +1,34 @@
 import { Container, Paper } from "@mui/material";
 import React from "react";
 
-const A4_ASPECT_RATIO = 1.414;
+const _A4_ASPECT_RATIO = 1.414;
 
-export const PaperA4: React.FC<{ children?: React.ReactNode }> = ({
+export const PaperA4: React.FC<{ children?: React.ReactNode; id: string }> = ({
   children,
+  id,
 }) => {
   return (
     <Container
       style={{
-        width: "100vw",
-        height: `${100 / A4_ASPECT_RATIO}vw`,
+        width: `calc(60vw)`,
         padding: 0,
+        height: `calc(60vw*1.414)`,
+        maxHeight: "88vh",
         display: "flex",
+        flexDirection: "column",
       }}
     >
-      <Paper sx={{ width: "100%", height: `100%` }}>{children}</Paper>
+      <Paper
+        id={id}
+        sx={{
+          width: "100%",
+          overflowX: "hidden",
+          overflowY: "scroll",
+          "&::WebkitScrollbar": { display: "none" },
+        }}
+      >
+        {children}
+      </Paper>
     </Container>
   );
 };

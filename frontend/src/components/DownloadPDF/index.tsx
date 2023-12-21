@@ -13,15 +13,22 @@ export const DownloadAsPDF: React.FC<Props> = ({ contentId }) => {
 
   useEffect(() => {
     const content = document.getElementById(contentId);
-
+    console.log("content", content);
     if (content) {
       setContent(content);
     }
   }, [contentId]);
 
+  const handlePrintWithTimeout = () => {
+    // Add a short timeout to ensure styles are applied before printing
+    setTimeout(() => {
+      handlePrint();
+    }, 2000); // Adjust the timeout duration as needed
+  };
+
   return (
     <div>
-      <button onClick={handlePrint}>Generate PDF</button>
+      <button onClick={handlePrintWithTimeout}>Generate PDF</button>
     </div>
   );
 };

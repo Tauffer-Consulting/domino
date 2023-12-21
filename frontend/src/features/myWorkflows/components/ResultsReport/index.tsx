@@ -1,10 +1,11 @@
+import { Grid, useMediaQuery } from "@mui/material";
 import { DownloadAsPDF } from "components/DownloadPDF";
-import { RenderB64 } from "components/RenderB64";
 import { useAuthenticatedGetWorkflowRunResultReport } from "features/myWorkflows/api";
-import React, { useMemo } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 
-import DynamicContent from "./PDFView";
+import { PaperA4 } from "./PaperA4";
+import { PieceReport } from "./PieceReport";
 
 export const ResultsReport: React.FC = () => {
   const { id, runId } = useParams<{ id: string; runId: string }>();
@@ -13,34 +14,37 @@ export const ResultsReport: React.FC = () => {
     runId,
   });
 
-  const content = useMemo(() => {
-    return (
-      data?.data.map((d, i) => (
-        <RenderB64
-          key={`render-b64-content-${i}`}
-          base64_content={d.base64_content}
-          file_type={d.file_type}
-        />
-      )) ?? []
-    );
-  }, [data]);
+  const isPrint = useMediaQuery("print");
 
   return (
-    <>
-      <DownloadAsPDF contentId="DownloadAsPDF" />
-      <div
-        id="DownloadAsPDF"
-        style={{
-          height: `88vh`,
-          width: "100%",
-          padding: 24,
-          margin: 0,
-          overflowY: "scroll",
-          border: "2px solid #000",
-        }}
-      >
-        <DynamicContent jsxContent={content} />
-      </div>
-    </>
+    <Grid
+      container
+      style={{
+        height: isPrint ? "auto" : `88vh`,
+        width: "100%",
+        margin: 0,
+      }}
+    >
+      <Grid item xs={3}>
+        {isPrint ? null : <DownloadAsPDF contentId="DownloadAsPDF" />}
+      </Grid>
+      <Grid item xs={isPrint ? 12 : 9}>
+        <PaperA4 id="DownloadAsPDF">
+          <Grid container sx={{ width: "100%" }} direction="column">
+            {data?.data.map((d, i) => (
+              <PieceReport
+                key={`piece-report-${i}`}
+                taskData={
+                  {
+                    pieceName: d.piece_name,
+                    ...d,
+                  } as any
+                }
+              />
+            ))}
+          </Grid>
+        </PaperA4>
+      </Grid>
+    </Grid>
   );
 };

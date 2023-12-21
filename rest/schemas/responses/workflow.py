@@ -199,6 +199,7 @@ class GetWorkflowRunTaskResultResponse(BaseModel):
 class GetWorkflowResultReport(BaseModel):
     base64_content: Optional[str] = None
     file_type: Optional[str] = None
+    piece_name: Optional[str] = None
     dag_id: str
     duration: Optional[float] = None
     start_date: Optional[datetime] = None

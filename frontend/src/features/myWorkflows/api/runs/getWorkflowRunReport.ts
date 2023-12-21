@@ -1,11 +1,25 @@
 import { type AxiosResponse } from "axios";
 import { useWorkspaces } from "context/workspaces";
+import { type taskState } from "features/myWorkflows/types";
 import { dominoApiClient } from "services/clients/domino.client";
 import useSWR from "swr";
 
 export interface IGetWorkflowRunResultReportParams {
   workflowId: string;
   runId: string;
+}
+
+export interface IGetWorkflowRunResultReportResponse {
+  base64_content: string;
+  file_type: string;
+  piece_name: string;
+  dag_id: string;
+  duration: number;
+  start_date: string;
+  end_date: string;
+  execution_date: string;
+  task_id: string;
+  state: taskState;
 }
 
 const getWorkflowRunResultReportUrl = ({
@@ -32,7 +46,7 @@ const getWorkflowRunResultReport: ({
   IGetWorkflowRunResultReportParams & { workspace: string }
 >) => Promise<
   | AxiosResponse<{
-      data: Array<{ base64_content: string; file_type: string }>;
+      data: IGetWorkflowRunResultReportResponse[];
     }>
   | undefined
 > = async ({ workspace, workflowId, runId }) => {
