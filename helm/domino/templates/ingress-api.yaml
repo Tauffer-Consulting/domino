@@ -7,7 +7,8 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - http:
+  - host: {{ .Values.ingress.hostName }}
+    http:
       paths:
       - pathType: ImplementationSpecific
         path: /api(/|$)(.*)
@@ -16,5 +17,3 @@ spec:
             name: {{ .Release.Name }}-rest-service
             port:
               number: 8000
-
-

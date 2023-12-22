@@ -3,6 +3,9 @@
 github_access_token_pieces: default-substitute-this-for-your-own-token
 github_access_token_workflows: default-substitute-this-for-your-own-token
 
+ingress:
+  hostName: localhost
+
 # Frontend service
 frontend:
   enabled: true
