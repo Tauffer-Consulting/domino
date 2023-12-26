@@ -22,6 +22,7 @@ export const TaskResult = ({
     overflowX: "hidden",
     wordWrap: "break-word",
     whiteSpace: "pre-wrap",
+    display: "inline-block",
   };
 
   if (isLoading) {
@@ -47,10 +48,8 @@ export const TaskResult = ({
         paddingY: "12px",
         height: "100%",
         width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        display: "block",
+        textAlign: "center",
         overflowY: "scroll",
         overflowX: "hidden",
       }}

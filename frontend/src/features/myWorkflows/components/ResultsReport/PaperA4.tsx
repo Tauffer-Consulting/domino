@@ -20,6 +20,7 @@ export const PaperA4: React.FC<{ children?: React.ReactNode; id: string }> = ({
     >
       <Paper
         id={id}
+        className="paper-a4-container"
         sx={{
           width: "100%",
           overflowX: "hidden",

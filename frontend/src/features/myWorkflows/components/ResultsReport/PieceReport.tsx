@@ -1,11 +1,10 @@
-import { Grid } from "@mui/material";
+import { Chip, Container, Divider, Grid } from "@mui/material";
 import { RenderB64 } from "components/RenderB64";
 import { type IWorkflowRunTasks } from "features/myWorkflows/types";
 import React from "react";
 
-import { TaskDetails } from "../WorkflowDetail/CustomTabMenu/TaskDetail";
-
 interface Props {
+  id: string;
   taskData: IWorkflowRunTasks & {
     pieceName: string;
     base64_content: string;
@@ -13,19 +12,29 @@ interface Props {
   };
 }
 
-export const PieceReport: React.FC<Props> = ({ taskData }) => {
+export const PieceReport: React.FC<Props> = ({ taskData, id }) => {
   return (
-    <Grid container item xs={6} style={{ marginBottom: "10mm", width: "100%" }}>
-      <Grid item xs={5}>
-        {/* this is the infos about the piece  */}
-        <TaskDetails taskData={taskData} />
+    <Grid
+      id={id}
+      container
+      item
+      xs={4}
+      style={{ marginBottom: "10mm", width: "100%" }}
+    >
+      <Grid item xs={12}>
+        <Divider>
+          <Chip label={taskData.pieceName} color={taskData.state as any} />
+        </Divider>
       </Grid>
-      <Grid item xs={7}>
+
+      <Grid item xs={12}>
         {/* This is the result (if exists) */}
-        <RenderB64
-          base64_content={taskData.base64_content}
-          file_type={taskData.file_type}
-        />
+        <Container>
+          <RenderB64
+            base64_content={taskData.base64_content}
+            file_type={taskData.file_type}
+          />
+        </Container>
       </Grid>
     </Grid>
   );
