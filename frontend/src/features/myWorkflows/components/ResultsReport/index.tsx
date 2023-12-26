@@ -1,5 +1,6 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import {
+  Button,
   Container,
   Divider,
   Grid,
@@ -13,18 +14,21 @@ import {
   useMediaQuery,
 } from "@mui/material";
 // import { DownloadAsPDF } from "components/DownloadPDF";
+import dayjs from "dayjs";
 import {
   useAuthenticatedGetWorkflowId,
   useAuthenticatedGetWorkflowRunResultReport,
 } from "features/myWorkflows/api";
-import React, { useCallback } from "react";
-import { useParams } from "react-router-dom";
+import React, { useCallback, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { PaperA4 } from "./PaperA4";
 import { PieceReport } from "./PieceReport";
 
 export const ResultsReport: React.FC = () => {
   const { id, runId } = useParams<{ id: string; runId: string }>();
+
+  const navigate = useNavigate();
   const { data } = useAuthenticatedGetWorkflowRunResultReport({
     workflowId: id,
     runId,
@@ -34,9 +38,7 @@ export const ResultsReport: React.FC = () => {
 
   const handleClickScroll = useCallback((id: string) => {
     const element = document.getElementById(id);
-    console.log(element);
     if (element) {
-      // Find the PaperA4 element containing the target element
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, []);
@@ -44,6 +46,26 @@ export const ResultsReport: React.FC = () => {
   const { data: workflow } = useAuthenticatedGetWorkflowId({
     id: id as string,
   });
+
+  const { startDate, endDate } = useMemo(() => {
+    if (!data?.data) {
+      return {
+        startDate: null,
+        endDate: null,
+      };
+    }
+
+    const startDate = dayjs(data?.data[0]?.start_date).format(
+      "YYYY-MM-DD HH:mm:ss",
+    );
+    const endDate = dayjs(data?.data[data?.data.length - 1]?.end_date).format(
+      "YYYY-MM-DD HH:mm:ss",
+    );
+    return {
+      startDate,
+      endDate,
+    };
+  }, [data]);
 
   return (
     <Grid
@@ -54,7 +76,15 @@ export const ResultsReport: React.FC = () => {
         margin: 0,
       }}
     >
-      <Grid item xs={2}>
+      <Grid item xs={2} direction="column">
+        <Button
+          variant="text"
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          {"< Go Back"}
+        </Button>
         <Paper>
           <Container sx={{ paddingTop: 2 }}>
             <Typography variant="h6" component="h2">
@@ -62,7 +92,7 @@ export const ResultsReport: React.FC = () => {
             </Typography>
 
             <List>
-              {data?.data.map((task) => (
+              {data?.data.map((task, idx) => (
                 <>
                   <ListItem
                     key={task.task_id}
@@ -80,7 +110,7 @@ export const ResultsReport: React.FC = () => {
                       <ListItemText primary={`${task.piece_name}`} />
                     </ListItemButton>
                   </ListItem>
-                  <Divider />
+                  {idx !== data?.data.length - 1 ? <Divider /> : null}
                 </>
               ))}
             </List>
@@ -103,10 +133,30 @@ export const ResultsReport: React.FC = () => {
               alignItems="center"
               justifyContent="center"
               sx={{ marginY: 4 }}
+              direction="column"
             >
-              <Typography variant="h1" component="h1" sx={{ margin: 0 }}>
-                {workflow?.name} tasks results
-              </Typography>
+              <Grid item xs={12}>
+                <Typography
+                  variant="h3"
+                  component="h1"
+                  sx={{ margin: 0, fontSize: 36 }}
+                >
+                  {workflow?.name} tasks results
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} alignSelf="flex-end">
+                {startDate ? (
+                  <Typography variant="caption" display="block" gutterBottom>
+                    Start date: {startDate}{" "}
+                  </Typography>
+                ) : null}
+                {endDate ? (
+                  <Typography variant="caption" display="block" gutterBottom>
+                    End date: {endDate}{" "}
+                  </Typography>
+                ) : null}
+              </Grid>
             </Grid>
 
             {data?.data.map((d, i) => (

@@ -16,6 +16,7 @@ export const PaperA4: React.FC<{ children?: React.ReactNode; id: string }> = ({
         maxHeight: "88vh",
         display: "flex",
         flexDirection: "column",
+        marginTop: "36px",
       }}
     >
       <Paper
@@ -24,8 +25,7 @@ export const PaperA4: React.FC<{ children?: React.ReactNode; id: string }> = ({
         sx={{
           width: "100%",
           overflowX: "hidden",
-          overflowY: "scroll",
-          "&::WebkitScrollbar": { display: "none" },
+          overflowY: "auto",
         }}
       >
         {children}

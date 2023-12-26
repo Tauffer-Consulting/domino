@@ -22,7 +22,7 @@ export const PieceReport: React.FC<Props> = ({ taskData, id }) => {
       style={{ marginBottom: "10mm", width: "100%" }}
     >
       <Grid item xs={12}>
-        <Divider>
+        <Divider variant="middle">
           <Chip label={taskData.pieceName} color={taskData.state as any} />
         </Divider>
       </Grid>
