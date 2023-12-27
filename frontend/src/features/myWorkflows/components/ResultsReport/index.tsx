@@ -24,6 +24,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { PaperA4 } from "./PaperA4";
 import { PieceReport } from "./PieceReport";
+import { ResultsReportSkeleton } from "./skeleton";
 
 export const ResultsReport: React.FC = () => {
   const { id, runId } = useParams<{ id: string; runId: string }>();
@@ -66,6 +67,10 @@ export const ResultsReport: React.FC = () => {
       endDate,
     };
   }, [data]);
+
+  if (!data?.data) {
+    return <ResultsReportSkeleton />;
+  }
 
   return (
     <Grid
