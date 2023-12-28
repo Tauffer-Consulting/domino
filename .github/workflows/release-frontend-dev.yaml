@@ -56,5 +56,4 @@ jobs:
           context: frontend
           file: frontend/Dockerfile.prod # Path to the Dockerfile
         env:
-          API_ENV: local
           DOMINO_DEPLOY_MODE: local-compose

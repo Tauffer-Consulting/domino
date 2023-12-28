@@ -28,8 +28,6 @@ spec:
             ["-c","yarn start"]
           {{- end }}
           env:
-            - name: API_ENV
-              value: {{ .Values.frontend.apiEnv }}
             - name: DOMINO_DEPLOY_MODE
               value: {{ .Values.frontend.deployMode }}
             - name: API_URL

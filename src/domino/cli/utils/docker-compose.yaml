@@ -348,7 +348,6 @@ services:
       domino_rest:
         condition: service_started
     environment:
-      - API_ENV=local
       - DOMINO_DEPLOY_MODE=local-compose
       - API_URL=http://localhost:8000
 
