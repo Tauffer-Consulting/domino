@@ -196,6 +196,20 @@ class GetWorkflowRunTaskResultResponse(BaseModel):
     base64_content: Optional[str] = None
     file_type: Optional[str] = None
 
+class GetWorkflowResultReport(BaseModel):
+    base64_content: Optional[str] = None
+    file_type: Optional[str] = None
+    piece_name: Optional[str] = None
+    dag_id: str
+    duration: Optional[float] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    execution_date: Optional[datetime] = None
+    task_id: str
+    state: Optional[WorkflowRunTaskState] = None
+
+class GetWorkflowResultReportResponse(BaseModel):
+    data: List[GetWorkflowResultReport]
 
 class GetWorkflowRunTaskLogsResponse(BaseModel):
     data: List[str]

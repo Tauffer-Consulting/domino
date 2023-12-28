@@ -1,4 +1,5 @@
-import { Card, Grid, Skeleton } from "@mui/material";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import { Card, Grid, IconButton, Skeleton, Tooltip } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { NoDataOverlay } from "components/NoDataOverlay";
 import { useAuthenticatedGetWorkflowRuns } from "features/myWorkflows/api";
@@ -10,6 +11,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { States } from "./States";
 import { WorkflowRunTableFooter } from "./WorkflowRunTableFooter";
@@ -37,6 +39,7 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
     },
     ref,
   ) => {
+    const navigation = useNavigate();
     const [paginationModel, setPaginationModel] = useState({
       pageSize: 10,
       page: 0,
@@ -95,6 +98,28 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
             return <States state={params.value} />;
           },
         },
+        {
+          field: "actions",
+          headerName: "",
+          maxWidth: 10,
+          renderCell: ({ row }) => (
+            <Tooltip title="Visualize workflow results">
+              <IconButton
+                onClick={() => {
+                  navigation(
+                    `/my-workflows/${workflowId}/report/${row.workflow_run_id}`,
+                  );
+                }}
+                disabled={row.state !== "success" && row.state !== "failed"}
+              >
+                <AssessmentIcon />
+              </IconButton>
+            </Tooltip>
+          ),
+          headerAlign: "center",
+          align: "center",
+          sortable: false,
+        },
       ],
       [],
     );
@@ -125,7 +150,7 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
     return (
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Card sx={{ height: "38vh" }}>
+          <Card sx={{ height: "36vh" }}>
             {isLoading ? (
               <Skeleton
                 animation="wave"

@@ -202,7 +202,7 @@ export const WorkflowDetail: React.FC = () => {
       <Grid item xs={12}>
         <Breadcrumbs />
       </Grid>
-      <Grid container spacing={3}>
+      <Grid item xs={12} container spacing={3}>
         {/* Left Column */}
         <Grid item lg={7} xs={12}>
           {/* WorkflowRunsTable */}
@@ -223,7 +223,7 @@ export const WorkflowDetail: React.FC = () => {
           </Grid>
           {/* WorkflowPanel */}
           <Grid item xs={12} sx={{ paddingLeft: "1rem", paddingTop: "2vh" }}>
-            <Paper sx={{ height: "46vh" }}>
+            <Paper sx={{ height: "44vh" }}>
               <WorkflowPanel
                 ref={workflowPanelRef}
                 editable={false}

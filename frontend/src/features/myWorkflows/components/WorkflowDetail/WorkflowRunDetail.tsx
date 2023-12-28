@@ -89,7 +89,7 @@ export const WorkflowRunDetail = forwardRef<WorkflowRunDetailRef, Props>(
     }));
 
     return (
-      <Paper sx={{ height: "86vh" }}>
+      <Paper sx={{ height: "82vh" }}>
         {runId ? (
           nodeId ? (
             <CustomTabMenu
