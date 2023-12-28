@@ -195,7 +195,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       <CodeEditorInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         language={language}
-        placeholder={`Enter yor ${language} code here.`}
+        placeholder={`Enter your ${language} code here.`}
       />
     );
   } else if (
