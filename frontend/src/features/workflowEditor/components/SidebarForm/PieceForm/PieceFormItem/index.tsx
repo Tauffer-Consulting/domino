@@ -181,50 +181,21 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     ("type" in schema &&
       "widget" in schema &&
       schema.type === "string" &&
-      (schema.widget === "codeeditor" ||
-        schema.widget === "codeeditor-python")) ||
+      schema.widget?.includes("codeeditor")) ??
     ("widget" in schema &&
-      (schema.widget === "codeeditor" ||
-        schema.widget === "codeeditor-python") &&
+      schema.widget?.includes("codeeditor") &&
       anyOfType === "string")
   ) {
+    const language =
+      schema.widget === "codeeditor"
+        ? "python"
+        : schema.widget.replace("codeeditor-", "");
+
     inputElement = (
       <CodeEditorInput<IWorkflowPieceData>
         name={`inputs.${itemKey}.value`}
-        language="python"
-        placeholder="Enter Python code."
-      />
-    );
-  } else if (
-    ("type" in schema &&
-      "widget" in schema &&
-      schema.type === "string" &&
-      schema.widget === "codeeditor-json") ||
-    ("widget" in schema &&
-      (schema.widget === "codeeditor" || schema.widget === "codeeditor-json") &&
-      anyOfType === "string")
-  ) {
-    inputElement = (
-      <CodeEditorInput<IWorkflowPieceData>
-        name={`inputs.${itemKey}.value`}
-        language="json"
-        placeholder="Enter JSON code."
-      />
-    );
-  } else if (
-    ("type" in schema &&
-      "widget" in schema &&
-      schema.type === "string" &&
-      schema.widget === "codeeditor-sql") ||
-    ("widget" in schema &&
-      (schema.widget === "codeeditor" || schema.widget === "codeeditor-sql") &&
-      anyOfType === "string")
-  ) {
-    inputElement = (
-      <CodeEditorInput<IWorkflowPieceData>
-        name={`inputs.${itemKey}.value`}
-        language="sql"
-        placeholder="Enter SQL code."
+        language={language}
+        placeholder={`Enter your ${language} code here.`}
       />
     );
   } else if (

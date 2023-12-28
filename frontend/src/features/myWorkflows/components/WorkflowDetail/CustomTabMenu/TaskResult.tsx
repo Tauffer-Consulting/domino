@@ -1,10 +1,8 @@
 import { CircularProgress, Container, Typography } from "@mui/material";
+import { DownloadB64Button } from "components/DownloadB64Button";
+import { RenderB64 } from "components/RenderB64";
 import { type CSSProperties } from "react";
-import ReactMarkdown from "react-markdown";
-import Plot from "react-plotly.js";
-import remarkGfm from "remark-gfm";
 import "./styles.css";
-// import { PDFViewer, Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 interface ITaskResultProps {
   isLoading: boolean;
@@ -12,9 +10,11 @@ interface ITaskResultProps {
   file_type?: string;
 }
 
-export const TaskResult = (props: ITaskResultProps) => {
-  const { base64_content, file_type } = props;
-
+export const TaskResult = ({
+  base64_content,
+  file_type,
+  isLoading,
+}: ITaskResultProps) => {
   const style: CSSProperties = {
     height: "100%",
     width: "100%",
@@ -22,112 +22,53 @@ export const TaskResult = (props: ITaskResultProps) => {
     overflowX: "hidden",
     wordWrap: "break-word",
     whiteSpace: "pre-wrap",
+    display: "inline-block",
   };
 
-  const renderContent = () => {
-    if (props.isLoading) {
-      return <CircularProgress />;
-    }
-
-    if (!base64_content || !file_type) {
-      return <Typography variant="h2">No content</Typography>;
-    }
-    switch (file_type) {
-      case "txt":
-        return <pre style={style}>{window.atob(base64_content)}</pre>;
-      case "json":
-        return (
-          <pre style={style}>
-            {JSON.stringify(JSON.parse(window.atob(base64_content)), null, 2)}
-          </pre>
-        );
-      case "jpeg":
-      case "png":
-      case "bmp":
-      case "gif":
-      case "tiff":
-        return (
-          <img
-            src={`data:image/${file_type};base64,${base64_content}`}
-            alt="Content"
-            style={{ maxWidth: "100%", maxHeight: "100%", ...style }}
-          />
-        );
-      case "svg":
-        return (
-          <object
-            type="image/svg+xml"
-            data={`data:image/svg+xml;base64,${base64_content}`}
-            style={{ maxWidth: "100%", maxHeight: "100%", ...style }}
-          >
-            Your browser does not support SVG
-          </object>
-        );
-      case "md":
-        return (
-          <div
-            style={{ overflow: "auto", maxWidth: "100%", width: "100%" }}
-            className="markdown-container"
-          >
-            <ReactMarkdown
-              className="react-markdown-component"
-              remarkPlugins={[remarkGfm]}
-            >
-              {window.atob(base64_content)}
-            </ReactMarkdown>
-            ;
-          </div>
-        );
-
-      case "pdf":
-        return (
-          <div style={{ width: "100%", ...style }}>
-            PDF result display not yet implemented
-            {/* <PDFViewer>
-                            <Document file={`data:application/pdf;base64,${base64_content}`}>
-                                <Page pageNumber={1} />
-                            </Document>
-                        </PDFViewer> */}
-          </div>
-        );
-      case "html":
-        return (
-          <div style={{ width: "100%", ...style }}>
-            HTML result display not yet implemented
-          </div>
-          // <iframe
-          //     src={`data:text/html;base64,${base64_content}`}
-          //     style={{ width: '100%', height: '100%' }}
-          // />
-        );
-      case "plotly_json": {
-        const utf8String = atob(base64_content);
-        const decodedJSON = JSON.parse(utf8String);
-        return (
-          <Plot
-            data={decodedJSON.data}
-            layout={decodedJSON.layout}
-            style={{ width: "100%", height: "100%" }}
-          />
-        );
-      }
-      default:
-        return <div>Unsupported file type</div>;
-    }
-  };
+  if (isLoading) {
+    return (
+      <Container
+        sx={{
+          display: "flex",
+          height: "100%",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container
       sx={{
+        paddingX: "24px",
+        paddingY: "12px",
         height: "100%",
         width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        display: "block",
+        textAlign: "center",
+        overflowY: "scroll",
+        overflowX: "hidden",
       }}
     >
-      {renderContent()}
+      {!!base64_content && !!file_type ? (
+        <RenderB64
+          base64_content={base64_content}
+          file_type={file_type}
+          style={style}
+        />
+      ) : (
+        <Typography variant="h2">No content</Typography>
+      )}
+      {!!base64_content && !!file_type && (
+        <DownloadB64Button
+          base64_content={base64_content}
+          file_type={file_type}
+        />
+      )}
     </Container>
   );
 };

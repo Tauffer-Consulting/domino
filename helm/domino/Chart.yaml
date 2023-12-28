@@ -2,8 +2,8 @@ apiVersion: v2
 name: domino
 description: A Helm chart for Domino
 type: application
-version: 0.1.8
-appVersion: 0.1.8
+version: 0.1.9
+appVersion: 0.1.9
 home: https://github.com/Tauffer-Consulting/domino
 sources:
   - https://github.com/Tauffer-Consulting/domino

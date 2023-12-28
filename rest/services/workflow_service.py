@@ -23,6 +23,7 @@ from schemas.responses.workflow import (
     GetWorkflowRunsResponseData,
     GetWorkflowRunTasksResponseData,
     GetWorkflowRunTasksResponse,
+    GetWorkflowResultReportResponse,
     GetWorkflowRunTaskLogsResponse,
     GetWorkflowRunTaskResultResponse,
     WorkflowStatus
@@ -67,7 +68,7 @@ class WorkflowService(object):
     ) -> CreateWorkflowResponse:
         # If workflow with this name already exists for the group raise conflict
         workflow = self.workflow_repository.find_by_name_and_workspace_id(
-            body.workflow.name, 
+            body.workflow.name,
             workspace_id=workspace_id
         )
         if workflow:
@@ -89,15 +90,15 @@ class WorkflowService(object):
             workspace_id=workspace_id
         )
         workflow = self.workflow_repository.create(new_workflow)
-        
+
         data_dict = body.model_dump()
         data_dict['workflow']['id'] = workflow_id
-        
+
         try:
             self._validate_workflow_tasks(tasks_dict=data_dict.get('tasks'), workspace_id=workspace_id)
 
             _, workflow_code, pieces_repositories_ids = self._create_dag_code_from_raw_json(data_dict, workspace_id=workspace_id)
-            
+
             workflow_piece_repository_associations = [
                 WorkflowPieceRepositoryAssociative(
                     workflow_id=workflow.id,
@@ -158,7 +159,7 @@ class WorkflowService(object):
             workspace_id=workspace_id,
             page=page,
             page_size=page_size,
-            filters=filters.dict(exclude_none=True),
+            filters=filters.model_dump(exclude_none=True),
             descending=True
         )
 
@@ -167,14 +168,14 @@ class WorkflowService(object):
             for workflow, _ in workflows
         }
 
-        # TODO - Create chunks of N dag_ids if necessary 
+        # TODO - Create chunks of N dag_ids if necessary
         airflow_dags_responses = await self.get_airflow_dags_by_id_gather_chunk(list(workflow_uuid_map.keys()))
-        
+
         max_total_errors_limit = 100
         import_errors_response = self.airflow_client.list_import_errors(limit=max_total_errors_limit)
         if import_errors_response.status_code != 200:
             raise BaseException("Error when trying to fetch import errors from airflow webserver.")
-        
+
         import_errors_response_content = import_errors_response.json()
         if import_errors_response_content['total_entries'] >= max_total_errors_limit:
             # TODO handle to many import errors
@@ -203,7 +204,7 @@ class WorkflowService(object):
                 is_paused = False
 
             if response and not is_dag_broken:
-                schedule = response.get("schedule")
+                schedule = response.get("schedule_interval")
                 if isinstance(schedule, dict):
                     schedule = schedule.get("value")
                 status = WorkflowStatus.active.value
@@ -211,7 +212,7 @@ class WorkflowService(object):
                 is_paused = response.get("is_paused")
                 is_active = response.get("is_active")
                 next_dagrun = response.get("next_dagrun")
-            
+
             data.append(
                 GetWorkflowsResponseData(
                     id=dag_data.id,
@@ -253,7 +254,7 @@ class WorkflowService(object):
             raise ForbiddenException()
 
         airflow_dag_info = self.airflow_client.get_dag_by_id(dag_id=workflow.uuid_name)
-        
+
         if airflow_dag_info.status_code == 404:
             airflow_dag_info = {
                 'is_paused': 'creating',
@@ -272,7 +273,7 @@ class WorkflowService(object):
             }
         else:
             airflow_dag_info = airflow_dag_info.json()
-        
+
         # Airflow 2.4.0 deprecated schedule_interval in dag but the API (2.7.2) still using it
         schedule = airflow_dag_info.pop("schedule_interval")
         if isinstance(schedule, dict):
@@ -293,11 +294,11 @@ class WorkflowService(object):
         )
 
         return response
-        
+
 
     def check_existing_workflow(self):
         pass
-    
+
     def _validate_workflow_tasks(self, tasks_dict: dict, workspace_id: int):
         # get all repositories ids necessary for tasks
         # get all workspaces ids necessary for repositories referenced by tasks
@@ -309,7 +310,7 @@ class WorkflowService(object):
             pieces_names.add(v['piece']['name'])
             pieces_source_images.add(v['piece']['source_image'])
             shared_storage_sources.append(v['workflow_shared_storage']['source'])
-        
+
         shared_storage_source = list(set(shared_storage_sources))
         if len(shared_storage_source) > 1:
             raise BadRequestException("Workflow can't have more than one shared storage source.")
@@ -333,7 +334,7 @@ class WorkflowService(object):
             for secret in shared_storage_secrets:
                 if not secret.value and not secret.required:
                     raise BadRequestException("Missing secrets for shared storage.")
-        
+
         # Find necessary repositories from pieces names and workspace_id
         necessary_repositories_and_pieces = self.piece_repository.find_repositories_by_piece_name_and_workspace_id(
             pieces_names=pieces_names,
@@ -358,13 +359,13 @@ class WorkflowService(object):
     def _get_storage_repository_from_tasks(self, tasks: list, workspace_id: int):
         if not tasks:
             return None
-        
+
         usage_task = tasks[list(tasks.keys())[0]]
         workflow_shared_storage = usage_task.get('workflow_shared_storage', None)
 
         shared_source = WorkflowSharedStorageSourceEnum(workflow_shared_storage['source']).name
         shared_model = storage_default_piece_model_map.get(shared_source, None)
-        
+
         if not shared_model:
             return None
 
@@ -410,7 +411,7 @@ class WorkflowService(object):
 
         if 'end_date' in workflow_kwargs and not workflow_kwargs['end_date']:
             workflow_kwargs.pop('end_date')
-        
+
         # TODO define how to use generate report
         remove_from_dag_kwargs = ['name', 'workspace_id', 'generate_report', 'description', 'id']
         for key in remove_from_dag_kwargs:
@@ -424,7 +425,7 @@ class WorkflowService(object):
             raw_input_kwargs = task_value.get('piece_input_kwargs', {})
             workflow_shared_storage = task_value.get('workflow_shared_storage', None)
             container_resources = task_value.get('container_resources', None)
-            
+
             if container_resources:
                 container_resources['requests']['cpu'] = f'{container_resources["requests"]["cpu"]}m'
                 container_resources['requests']['memory'] = f'{container_resources["requests"]["memory"]}Mi'
@@ -470,7 +471,7 @@ class WorkflowService(object):
                     input_kwargs[input_key] = array_input_kwargs
                 else:
                     input_kwargs[input_key] = input_value['value']
-            
+
 
             # piece_request = {"id": 1, "name": "SimpleLogPiece"}
             piece_db = self.piece_repository.find_repository_by_piece_name_and_workspace_id(
@@ -500,7 +501,7 @@ class WorkflowService(object):
         )
         workflow_processed_schema['tasks'] = stream_tasks_dict
         io_obj = io.StringIO()
-        stream.dump(io_obj)  
+        stream.dump(io_obj)
         py_code = io_obj.getvalue()
 
         return workflow_processed_schema, py_code, pieces_repositories_ids
@@ -523,7 +524,7 @@ class WorkflowService(object):
             "is_paused": False
         }
         update_response = self.airflow_client.update_dag(
-            dag_id=airflow_workflow_id, 
+            dag_id=airflow_workflow_id,
             payload=payload
         )
         if update_response.status_code == 404:
@@ -553,7 +554,7 @@ class WorkflowService(object):
                 path=f"{settings.DOMINO_LOCAL_WORKFLOWS_REPOSITORY}/{workflow_uuid}.py"
             )
             return
-        
+
         self.github_rest_client.delete_file(
             repo_name=settings.DOMINO_GITHUB_WORKFLOWS_REPOSITORY,
             file_path=f"workflows/{workflow_uuid}.py"
@@ -617,11 +618,11 @@ class WorkflowService(object):
                 )
             )
             return response
-        
+
         records = len(response_data['dag_runs'])
         total = response_data['total_entries']
         last_page = ceil(total / page_size) - 1
-        
+
         # Airflow API returns always the same number of elements defined by page size.
         # So if we are in the last page we need to remove the extra elements.
         # Example: total = 12, page_size = 10, last_page = 1.
@@ -651,7 +652,7 @@ class WorkflowService(object):
         workflow = self.workflow_repository.find_by_id(id=workflow_id)
         if not workflow:
             raise ResourceNotFoundException("Workflow not found")
-        
+
         airflow_workflow_id = workflow.uuid_name
 
         response = self.airflow_client.get_all_run_tasks_instances(
@@ -692,6 +693,77 @@ class WorkflowService(object):
             )
         )
         return response
+    
+    def generate_report(self, workflow_id: int, workflow_run_id: str):
+        page_size = 100
+        page=0
+        workflow = self.workflow_repository.find_by_id(id=workflow_id)
+        if not workflow:
+            raise ResourceNotFoundException("Workflow not found")
+
+        airflow_workflow_id = workflow.uuid_name
+
+        response = self.airflow_client.get_all_run_tasks_instances(
+            dag_id=airflow_workflow_id,
+            dag_run_id=workflow_run_id,
+            page=page,
+            page_size=page_size
+        )
+
+        response_data = response.json()
+
+        if not response_data:
+            return []
+        
+        total_tasks = response_data.get("total_entries")
+        all_run_tasks = response_data["task_instances"]
+
+        while len(all_run_tasks) < total_tasks:
+            page+=1
+            response = self.airflow_client.get_all_run_tasks_instances(
+                dag_id=airflow_workflow_id,
+                dag_run_id=workflow_run_id,
+                page=page,
+                page_size=page_size
+            )
+            all_run_tasks.extend(response.json().get("task_instances")) 
+
+        sorted_all_run_tasks = sorted(all_run_tasks, key=lambda item: datetime.strptime(item["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"))
+
+        result_list = []
+
+        for task in sorted_all_run_tasks:
+            try:
+                task_result = self.airflow_client.get_task_result(
+                    dag_id=airflow_workflow_id,
+                    dag_run_id=workflow_run_id,
+                    task_id=task["task_id"],
+                    task_try_number=task["try_number"]
+                )
+
+                node = workflow.ui_schema.get("nodes", {}).get(task["task_id"], {})
+                piece_name = node.get("data", {}).get("style", {}).get("label", None) or \
+                            node.get("data", {}).get("name", None)
+
+                result_list.append(
+                    dict(
+                        base64_content=task_result.get("base64_content"), 
+                        file_type=task_result.get("file_type"),
+                        piece_name=piece_name,
+                        dag_id=task.get("dag_id"),
+                        duration=task.get("duration"),
+                        start_date=task.get("start_date"),
+                        end_date=task.get("end_date"),
+                        execution_date=task.get("execution_date"),
+                        task_id=task.get("task_id"),
+                        state=task.get("state"),
+                    )
+                )
+            except BaseException as e:
+                # Handle the exception as needed
+                self.logger.info(f"Skipping task {task['task_id']} due to exception: {e}")
+        
+        return GetWorkflowResultReportResponse(data=result_list)
 
     @staticmethod
     def parse_log(log_text: str):
@@ -704,17 +776,17 @@ class WorkflowService(object):
         # If the log is empty probably it is still running so we can parse all logs from the start pattern
         if not log:
             log = re.findall(f"[^\n]*{start_command_pattern}.*", log_text, re.DOTALL)
-        
+
         if not log:
             return []
-        
+
         # Parse the log lines
         output_lines = []
         for line in log[0].split('\n')[:-1]:
             # Remove pod manager info it exists
             l = re.sub(r"{pod_manager.py:[0-9]*}", '', line)
             # Get datetime pattern
-            datetime_pattern = r'\[*\d{4}[-/]\d{2}[-/]\d{2} \d{2}:\d{2}:\d{2}(,|.)\d+\]*' 
+            datetime_pattern = r'\[*\d{4}[-/]\d{2}[-/]\d{2} \d{2}:\d{2}:\d{2}(,|.)\d+\]*'
             # Remove duplicated datetimes if they exist (they are added by the airflow logger and the domino so in some cases we have 2 datetimes in one line)
             matches = list(re.finditer(datetime_pattern, l))
             if len(matches) > 1:
@@ -750,8 +822,8 @@ class WorkflowService(object):
                 if l:
                     output_lines.append(l)
                 continue
-            
-            # Is header, get the header and the values for the domino header and the content 
+
+            # Is header, get the header and the values for the domino header and the content
             header_value = header_match.group()
             content_value = l.replace(header_value, '')
             content_value = content_value.strip()

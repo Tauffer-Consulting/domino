@@ -57,7 +57,7 @@ class WorkflowConfigResponse(BaseModel):
     @field_validator('schedule')
     def set_schedule(cls, schedule):
         return schedule or ScheduleIntervalTypeResponse.none
-    
+
 class BaseWorkflowModel(BaseModel):
     workflow: WorkflowConfigResponse
     tasks: Dict[
@@ -82,20 +82,20 @@ class GetWorkflowsResponseData(BaseModel):
     @field_validator('schedule')
     def set_schedule(cls, schedule):
         return schedule or ScheduleIntervalTypeResponse.none
-    
+
 
     @field_validator('created_at', mode='before')
     def add_utc_timezone_created_at(cls, v):
         if isinstance(v, datetime) and v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
         return v
-    
+
     @field_validator('last_changed_at', mode='before')
     def add_utc_timezone_last_changed_at(cls, v):
         if isinstance(v, datetime) and v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
         return v
-    
+
     @field_validator('next_dagrun', mode='before')
     def add_utc_timezone_next_dagrun(cls, v):
         if isinstance(v, datetime) and v.tzinfo is None:
@@ -152,7 +152,7 @@ class GetWorkflowRunsResponseData(BaseModel):
     @field_validator('state')
     def set_state(cls, state):
         return state or WorkflowRunState.none
-    
+
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -178,7 +178,7 @@ class GetWorkflowRunTasksResponseData(BaseModel):
     def set_state(cls, state):
         return state or WorkflowRunTaskState.none
 
-    
+
     model_config = ConfigDict(populate_by_name=True)
 
 
@@ -196,6 +196,20 @@ class GetWorkflowRunTaskResultResponse(BaseModel):
     base64_content: Optional[str] = None
     file_type: Optional[str] = None
 
+class GetWorkflowResultReport(BaseModel):
+    base64_content: Optional[str] = None
+    file_type: Optional[str] = None
+    piece_name: Optional[str] = None
+    dag_id: str
+    duration: Optional[float] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    execution_date: Optional[datetime] = None
+    task_id: str
+    state: Optional[WorkflowRunTaskState] = None
+
+class GetWorkflowResultReportResponse(BaseModel):
+    data: List[GetWorkflowResultReport]
 
 class GetWorkflowRunTaskLogsResponse(BaseModel):
     data: List[str]

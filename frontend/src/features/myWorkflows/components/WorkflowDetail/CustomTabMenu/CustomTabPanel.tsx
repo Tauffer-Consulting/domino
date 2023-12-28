@@ -14,7 +14,7 @@ export function CustomTabPanel(props: TabPanelProps) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       style={{
-        height: "85%",
+        height: "calc(100% - 48px)",
       }}
       {...other}
     >

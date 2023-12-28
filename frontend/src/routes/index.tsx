@@ -30,6 +30,10 @@ const { WorkflowDetailPage } = lazyImport(
   async () => await import("features/myWorkflows/pages"),
   "WorkflowDetailPage",
 );
+const { ResultsReportPage } = lazyImport(
+  async () => await import("features/myWorkflows/pages"),
+  "ResultsReportPage",
+);
 
 /**
  * Application router
@@ -87,6 +91,13 @@ export const ApplicationRoutes: FC = () => (
         path="/my-workflows/:id"
         element={
           <PrivateRoute requireWorkspace component={WorkflowDetailPage} />
+        }
+      />
+
+      <Route
+        path="/my-workflows/:id/report/:runId"
+        element={
+          <PrivateRoute requireWorkspace component={ResultsReportPage} />
         }
       />
 

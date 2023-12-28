@@ -31,8 +31,6 @@ jobs:
           tags: ghcr.io/tauffer-consulting/domino-frontend:k8s
           context: frontend
           file: frontend/Dockerfile.prod # Path to the Dockerfile
-        env:
-          VITE_API_ENV: prod
 
   release-domino-frontend-compose:
     name: Domino Frontend Image
@@ -58,5 +56,4 @@ jobs:
           context: frontend
           file: frontend/Dockerfile.prod # Path to the Dockerfile
         env:
-          API_ENV: local
           DOMINO_DEPLOY_MODE: local-compose

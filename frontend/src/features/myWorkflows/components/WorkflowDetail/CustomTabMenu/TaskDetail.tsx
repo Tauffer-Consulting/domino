@@ -8,10 +8,13 @@ import {
   Typography,
   Container,
 } from "@mui/material";
-import { intervalToDuration } from "date-fns";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import { taskStatesColorMap } from "features/myWorkflows/constants";
 import { type IWorkflowRunTasks } from "features/myWorkflows/types/runs";
 import { useMemo } from "react";
+
+dayjs.extend(duration);
 
 interface IWorkflowRunTasksExtended extends IWorkflowRunTasks {
   pieceName: string;
@@ -24,19 +27,25 @@ interface ITaskDetailsProps {
 export const TaskDetails = (props: ITaskDetailsProps) => {
   const duration = useMemo(() => {
     if (props.taskData.duration) {
-      const duration = intervalToDuration({
-        start: 0,
-        end: props.taskData.duration * 1000,
-      });
+      const duration = dayjs.duration(props.taskData.duration * 1000);
 
-      return `${duration.hours} ${(duration?.hours ?? 0) > 1 ? "hours" : "hour"
-        } : ${duration.minutes} ${(duration?.minutes ?? 0) > 1 ? "minutes" : "minute"
-        } : ${duration.seconds} ${(duration?.seconds ?? 0) > 1 ? "seconds" : "second"
-        }`;
+      return `${duration.hours()} ${
+        duration.hours() > 1 ? "hours" : "hour"
+      } : ${duration.minutes()} ${
+        duration.minutes() > 1 ? "minutes" : "minute"
+      } : ${duration.seconds()} ${
+        duration.seconds() > 1 ? "seconds" : "second"
+      }`;
     } else {
       return "Not done yet";
     }
   }, [props.taskData.duration]);
+
+  const formatDate = (date?: string | null) => {
+    return date
+      ? dayjs(date).format("YYYY-MM-DD HH:mm:ss")
+      : "Not executed yet";
+  };
 
   return (
     <Container
@@ -111,9 +120,7 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
                 fontWeight="500"
               >
                 <CalendarMonthIcon sx={{ marginRight: "8px" }} />
-                {props.taskData.start_date
-                  ? new Date(props.taskData.start_date).toLocaleString()
-                  : "Not executed yet"}
+                {formatDate(props.taskData.start_date)}
               </Typography>
             </ListItem>
             <ListItem
@@ -133,9 +140,7 @@ export const TaskDetails = (props: ITaskDetailsProps) => {
                 fontWeight="500"
               >
                 <CalendarMonthIcon sx={{ marginRight: "8px" }} />
-                {props.taskData.end_date
-                  ? new Date(props.taskData.end_date).toLocaleString()
-                  : "Not ended yet"}
+                {formatDate(props.taskData.end_date)}
               </Typography>
             </ListItem>
             <ListItem

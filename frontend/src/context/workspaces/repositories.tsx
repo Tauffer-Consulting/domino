@@ -126,22 +126,15 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleAddRepository = useCallback(
     async (payload: Omit<IPostWorkspaceRepositoryPayload, "workspace_id">) =>
-      await postRepository({ ...payload, workspace_id: workspace?.id ?? "" })
-        .then(async (data) => {
-          toast.success(`Repository added successfully!`);
-          handleRefreshWorkspaces();
-          await handleRefreshRepositories();
-          return data;
-        })
-        .catch((e) => {
-          if (e.response?.status === 403) {
-            toast.error(
-              `You don't have permission to add repositories to this workspace.`,
-            );
-            return;
-          }
-          toast.error(`Error adding repository, try again later.`);
-        }),
+      await postRepository({
+        ...payload,
+        workspace_id: workspace?.id ?? "",
+      }).then(async (data) => {
+        toast.success(`Repository added successfully!`);
+        handleRefreshWorkspaces();
+        await handleRefreshRepositories();
+        return data;
+      }),
     [postRepository, handleRefreshWorkspaces, workspace?.id],
   );
 

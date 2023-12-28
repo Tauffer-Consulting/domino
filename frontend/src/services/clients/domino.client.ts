@@ -3,12 +3,12 @@ import { environment } from "config/environment.config";
 import { dispatchLogout } from "context/authentication";
 import { toast } from "react-toastify";
 
-import { endpoints } from "../config/endpoints.config";
+import { endpoint } from "../config/endpoints.config";
 
 import { dominoMock } from "./domino.mock";
 
 export const dominoApiClient = axios.create({
-  baseURL: endpoints?.api ?? "",
+  baseURL: endpoint,
 });
 
 if (environment.USE_MOCK) {
