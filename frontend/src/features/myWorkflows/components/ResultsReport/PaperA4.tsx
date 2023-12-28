@@ -10,13 +10,15 @@ export const PaperA4: React.FC<{ children?: React.ReactNode; id: string }> = ({
   return (
     <Container
       style={{
-        width: `calc(60vw)`,
+        width: `76vw`,
         padding: 0,
-        height: `calc(60vw*1.414)`,
-        maxHeight: "88vh",
+        height: `calc(82vh - 14px)`,
+        maxHeight: "calc(82vh - 14px)",
         display: "flex",
         flexDirection: "column",
-        marginTop: "36px",
+        marginLeft: 0,
+        marginRight: 0,
+        maxWidth: "none",
       }}
     >
       <Paper

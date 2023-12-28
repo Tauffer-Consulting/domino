@@ -1,21 +1,21 @@
-import { Button } from "@mui/material";
+import { Button, type ButtonProps } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
-interface Props {
+interface Props extends ButtonProps {
   contentId: string;
 }
 
-export const DownloadAsPDF: React.FC<Props> = ({ contentId }) => {
+export const DownloadAsPDF: React.FC<Props> = ({ contentId, ...props }) => {
   const [content, setContent] = useState<HTMLElement | null>(null);
   const handlePrint = useReactToPrint({
     content: () => content,
   });
 
   useEffect(() => {
-    if (content) {
-      setContent(content);
-    }
+    // Fetch the content element using the contentId
+    const newContent = document.getElementById(contentId);
+    setContent(newContent);
   }, [contentId]);
 
   const handlePrintWithTimeout = () => {
@@ -26,7 +26,7 @@ export const DownloadAsPDF: React.FC<Props> = ({ contentId }) => {
   };
 
   return (
-    <Button variant="outlined" onClick={handlePrintWithTimeout}>
+    <Button variant="outlined" onClick={handlePrintWithTimeout} {...props}>
       Generate PDF
     </Button>
   );

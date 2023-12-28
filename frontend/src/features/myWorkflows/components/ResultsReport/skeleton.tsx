@@ -21,16 +21,19 @@ export const ResultsReportSkeleton: React.FC = () => {
   return (
     <Grid
       container
+      spacing={2}
       style={{
-        height: `88vh`,
+        height: `86vh`,
         width: "100%",
         margin: 0,
       }}
     >
-      <Grid item xs={2} direction="column">
-        <Button variant="text" onClick={() => {}}>
-          {"< Go Back"}
+      <Grid item xs={12}>
+        <Button onClick={() => {}} variant="text">
+          <Typography component="span">{`< Go back to Detail`}</Typography>
         </Button>
+      </Grid>
+      <Grid item xs={2} direction="column">
         <Paper>
           <Container sx={{ paddingTop: 2 }}>
             <Typography variant="h6" component="h2">
@@ -61,7 +64,7 @@ export const ResultsReportSkeleton: React.FC = () => {
           <Skeleton
             variant="rectangular"
             sx={{
-              height: "84vh",
+              height: "80vh",
             }}
           ></Skeleton>
         </PaperA4>

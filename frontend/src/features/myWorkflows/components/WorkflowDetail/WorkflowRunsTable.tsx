@@ -1,4 +1,4 @@
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import { Card, Grid, IconButton, Skeleton, Tooltip } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { NoDataOverlay } from "components/NoDataOverlay";
@@ -103,7 +103,7 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
           headerName: "",
           maxWidth: 10,
           renderCell: ({ row }) => (
-            <Tooltip title="Generate report pdf for this run">
+            <Tooltip title="Visualize workflow results">
               <IconButton
                 onClick={() => {
                   navigation(
@@ -112,7 +112,7 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
                 }}
                 disabled={row.state !== "success" && row.state !== "failed"}
               >
-                <PictureAsPdfIcon />
+                <AssessmentIcon />
               </IconButton>
             </Tooltip>
           ),
@@ -150,7 +150,7 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
     return (
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Card sx={{ height: "38vh" }}>
+          <Card sx={{ height: "36vh" }}>
             {isLoading ? (
               <Skeleton
                 animation="wave"
