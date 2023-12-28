@@ -1,3 +1,18 @@
+# v0.8.3
+
+### Features
+- [x] Allow download results [Issue #174](https://github.com/Tauffer-Consulting/domino/issues/174)
+- [x] Highlight edges on running pieces [Issue #166](https://github.com/Tauffer-Consulting/domino/issues/166)
+- [x] Generalize options of languages for codeeditor [Issue #170](https://github.com/Tauffer-Consulting/domino/issues/170)
+- [x] New formats for display results [Issue #25](https://github.com/Tauffer-Consulting/domino/issues/25)
+- [x] New page for display results and export as PDF[Issue #208](https://github.com/Tauffer-Consulting/domino/issues/208)
+
+### Fixes
+- [x] Add `API_URL` to frontend env entrypoint
+- [x] Update helm with new `API_URL` var
+- [x] Update base compose fies with `API_URL`
+- [x] Remove `API_ENV` from frontend entrypoint
+
 # v0.8.2
 
 ### Features
