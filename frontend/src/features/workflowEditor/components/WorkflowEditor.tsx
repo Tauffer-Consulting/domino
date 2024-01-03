@@ -35,13 +35,13 @@ import {
   validateJsonImported,
   findDifferencesInJsonImported,
 } from "../utils/importWorkflow";
+import { createInputsSchemaValidation } from "../utils/validation";
 
 import { DifferencesModal } from "./DifferencesModal";
 import { PermanentDrawerRightWorkflows } from "./DrawerMenu";
 import { MyWorkflowExamplesGalleryModal } from "./MyWorkflowsGalleryModal";
 import SidebarPieceForm from "./SidebarForm";
 import { ContainerResourceFormSchema } from "./SidebarForm/ContainerResourceForm";
-import { createInputsSchemaValidation } from "./SidebarForm/PieceForm/validation";
 import { storageFormSchema } from "./SidebarForm/StorageForm";
 import {
   SidebarSettingsForm,

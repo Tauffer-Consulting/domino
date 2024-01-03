@@ -14,11 +14,12 @@ import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "utils";
 import * as yup from "yup";
 
+import { createInputsSchemaValidation } from "../../utils/validation";
+
 import ContainerResourceForm, {
   ContainerResourceFormSchema,
 } from "./ContainerResourceForm";
 import PieceForm from "./PieceForm";
-import { createInputsSchemaValidation } from "./PieceForm/validation";
 import StorageForm, { storageFormSchema } from "./StorageForm";
 
 interface ISidebarPieceFormProps {

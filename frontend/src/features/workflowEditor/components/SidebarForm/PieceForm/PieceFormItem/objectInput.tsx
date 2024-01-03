@@ -6,7 +6,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useWatch } from "react-hook-form";
 import { getDefinition } from "utils";
 
-import { type ComplexArrayOption } from "../upstreamOptions";
+import { type ComplexArrayOption } from "../../../../utils/upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import SelectUpstreamInput from "./selectUpstreamInput";

@@ -172,11 +172,11 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                             color: theme.palette.success.main,
                           }
                         : installState === 3
-                        ? {
-                            borderColor: theme.palette.error.main,
-                            color: theme.palette.error.main,
-                          }
-                        : {}
+                          ? {
+                              borderColor: theme.palette.error.main,
+                              color: theme.palette.error.main,
+                            }
+                          : {}
                     }
                   >
                     {installState === 1 && (

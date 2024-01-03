@@ -3,8 +3,12 @@ import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
+import {
+  type UpstreamOptions,
+  getUpstreamOptions,
+} from "../../../utils/upstreamOptions";
+
 import PieceFormItem from "./PieceFormItem";
-import { type UpstreamOptions, getUpstreamOptions } from "./upstreamOptions";
 
 interface PieceFormProps {
   formId: string;

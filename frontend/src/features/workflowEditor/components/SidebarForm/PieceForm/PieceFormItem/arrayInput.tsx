@@ -24,7 +24,7 @@ import {
   type ComplexArrayOption,
   type ArrayOption,
   type Option,
-} from "../upstreamOptions";
+} from "../../../../utils/upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import ObjectInputComponent from "./objectInput";
