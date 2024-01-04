@@ -70,7 +70,7 @@ def update_repository_secret(
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
 @router.get(
-    path='/{piece_name}',
+    path='/{piece_name}/secrets-values', # using sufix /secrets-values only because istio does not support wildcards in paths
     status_code=200,
     responses={
         status.HTTP_200_OK: {'model': List[GetSecretsByPieceResponse]},
@@ -79,13 +79,15 @@ def update_repository_secret(
     },
     include_in_schema=False
 )
-#@auth_service.authorize_repository_workspace_access # TODO authorize only worker
 def get_piece_secrets(
     piece_repository_id: int,
-    piece_name: str, # TODO check what is better to use. query or path ?
-    #auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    piece_name: str,
 ) -> List[GetSecretsByPieceResponse]:
-    """Get secrets for a specific Piece from an piece repository, in a specific workspace"""
+    """
+    Get secrets values for a specific Piece from an piece repository, in a specific workspace
+    This endpoint is not using authorization service because it is used by airflow to get secrets values
+    In production this endpoint should be blocked from external access using security strategies like authorization policies.
+    """
     try:
         response = secret_service.get_piece_secrets(
             piece_repository_id=piece_repository_id,
