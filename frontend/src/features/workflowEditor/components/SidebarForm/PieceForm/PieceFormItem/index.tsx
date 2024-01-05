@@ -21,7 +21,7 @@ import SelectUpstreamInput from "./selectUpstreamInput";
 
 interface PieceFormItemProps {
   formId: string;
-  schema: InputSchemaProperty;
+  schema: Property;
   itemKey: string;
   control: Control<IWorkflowPieceData, any>;
   definitions?: Definitions;
@@ -52,7 +52,10 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     if (hasNullType) {
       for (const itemSchema of schema.anyOf) {
         if (itemSchema.type !== "null") {
-          anyOfType = itemSchema.format ? itemSchema.format : itemSchema.type;
+          anyOfType =
+            "format" in itemSchema && itemSchema.format
+              ? itemSchema.format
+              : itemSchema.type;
         }
       }
     }

@@ -12,7 +12,7 @@ import PieceFormItem from "./PieceFormItem";
 
 interface PieceFormProps {
   formId: string;
-  schema: any;
+  schema: Schema;
 }
 
 const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {

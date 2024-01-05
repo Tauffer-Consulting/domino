@@ -22,8 +22,8 @@ import {
 import { useWorkspaces } from "./workspaces";
 
 export interface IPiecesContext {
-  repositories: PieceRepository[];
-  defaultRepositories: PieceRepository[];
+  repositories: Repository[];
+  defaultRepositories: Repository[];
   repositoryPieces: PiecesRepository;
   repositoriesLoading: boolean;
 
@@ -48,6 +48,8 @@ export interface IPiecesContext {
   }) => Promise<IGetRepoPiecesResponseInterface>;
   fetchForagePieceById: (id: number) => Promise<Piece | undefined>;
 }
+
+type PieceForageSchema = Record<string | number, Piece>;
 
 export const [PiecesContext, usesPieces] =
   createCustomContext<IPiecesContext>("Pieces Context");
