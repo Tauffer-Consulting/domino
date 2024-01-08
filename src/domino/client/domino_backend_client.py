@@ -31,15 +31,7 @@ class DominoBackendRestClient(requests.Session):
         return response
 
     def get_piece_secrets(self, piece_repository_id: int, piece_name: str) -> requests.Response:
-        resource = f"/pieces-repositories/{piece_repository_id}/secrets/{piece_name}"
-        response = self.request(
-            method='get',
-            resource=resource
-        )
-        return response
-
-    def get_piece_repository(self, piece_repository_id: int) -> requests.Response:
-        resource = f"/pieces-repositories/{piece_repository_id}"
+        resource = f"/pieces-repositories/{piece_repository_id}/secrets/{piece_name}/secrets-values"
         response = self.request(
             method='get',
             resource=resource
@@ -47,14 +39,14 @@ class DominoBackendRestClient(requests.Session):
         return response
 
     def get_piece_repositories_from_workspace_id(self, params: dict) -> requests.Response:
-        resource = "/pieces-repositories"
+        resource = "/pieces-repositories/worker"
         response = self.request(
             method='get',
             resource=resource,
             params=params
         )
         return response
-    
+
     def check_create_airflow_connection(self, conn_id: str, conn_type: str):
         """
         This should check if a specific Airflow connection exists and create it if it doesn't.

@@ -397,6 +397,22 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
                 "sshKeySecret": "airflow-ssh-secret"
             },
         },
+        "migrateDatabaseJob": {
+            "jobAnnotations": {
+                "sidecar.istio.io/inject": "false"
+            },
+            "annotations": {
+                "sidecar.istio.io/inject": "false"
+            },
+        },
+        "createUserJob": {
+            "jobAnnotations": {
+                "sidecar.istio.io/inject": "false"
+            },
+            "annotations": {
+                "sidecar.istio.io/inject": "false"
+            },
+        },
         **workers,
         **scheduler,
     }
@@ -417,7 +433,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
                 "-f", str(fp.name),
                 "airflow",
                 "apache-airflow/airflow",
-                "--version", " 1.9.0",
+                "--version", " 1.11.0",
             ]
             subprocess.run(commands)
 
