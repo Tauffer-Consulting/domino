@@ -9,7 +9,7 @@ pytest_plugins = [
     "tests.secret.fixtures"
 ]
 @pytest.mark.usefixtures("register", "login", "add_piece_repository", "teardown_piece_repository")
-class TestSecretRouter:    
+class TestSecretRouter:
     @staticmethod
     def test_get_repository_secrets(get_repository_secrets: Response, get_repository_secrets_mock_response: List):
         mock_response = get_repository_secrets_mock_response
@@ -26,18 +26,18 @@ class TestSecretRouter:
             secret_content = json.loads(secret.model_dump_json())
             mock_response_secrets_names.append(secret_content.get("name"))
         mock_response_secrets_names.sort()
-        
+
         assert response.status_code == 200
 
         mock_response_content = json.loads(mock_response[0].model_dump_json())
         assert content[0].keys() == mock_response_content.keys()
         assert response_secrets_names == mock_response_secrets_names
-    
+
     @staticmethod
     def test_patch_piece_secret(patch_piece_secret: Response):
         response = patch_piece_secret
         assert response.status_code == 204
-    
+
     @staticmethod
     @pytest.mark.parametrize("get_secrets_by_piece_name", [{"piece_name": "SimpleLogPiece"}], indirect=True)
     def test_get_secrets_by_piece_name(get_secrets_by_piece_name: Response):
@@ -55,4 +55,3 @@ class TestSecretRouter:
         assert response.status_code == 200
         assert content[0] == mock_response_content
 
-    

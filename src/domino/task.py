@@ -103,6 +103,7 @@ class Task(object):
             # - https://www.astronomer.io/guides/templating/
             # - good example: https://github.com/apache/airflow/blob/main/tests/system/providers/cncf/kubernetes/example_kubernetes.py
             # - commands HAVE to go in a list object: https://stackoverflow.com/a/55149915/11483674
+
             return DominoKubernetesPodOperator(
                 dag_id=self.dag_id,
                 task_id=self.task_id,
@@ -115,11 +116,12 @@ class Task(object):
                 workflow_shared_storage=self.workflow_shared_storage,
                 container_resources=self.container_resources,
                 # ----------------- Kubernetes -----------------
-                namespace='default',  # TODO - separate namespace by User or Workspace?
+                namespace='default',
                 image=self.piece.get("source_image"),
                 image_pull_policy='IfNotPresent',
                 name=f"airflow-worker-pod-{self.task_id}",
                 startup_timeout_seconds=600,
+                annotations={"sidecar.istio.io/inject": "false"}, # TODO - remove this when istio is working with airflow k8s pod
                 # cmds=["/bin/bash"],
                 # arguments=["-c", "sleep 120;"],
                 cmds=["domino"],

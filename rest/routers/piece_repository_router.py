@@ -120,8 +120,7 @@ def get_piece_repository_release_data(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
         status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
     },
-    # TODO - I commented this to make it easier to test, but we should solve the auth service
-    # dependencies=[Depends(auth_service.workspace_access_authorizer)]
+    dependencies=[Depends(auth_service.workspace_access_authorizer)]
 )
 def get_pieces_repositories(
     workspace_id: int,
@@ -130,6 +129,39 @@ def get_pieces_repositories(
     filters: ListRepositoryFilters = Depends(),
 ) -> GetWorkspaceRepositoriesResponse:
     """Get pieces repositories for workspace"""
+    try:
+        response = piece_repository_service.get_pieces_repositories(
+            workspace_id=workspace_id,
+            page=page,
+            page_size=page_size,
+            filters=filters
+        )
+        return response
+    except (BaseException, ForbiddenException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+
+
+@router.get(
+    path="/worker",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {'model': GetWorkspaceRepositoriesResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
+    },
+)
+def get_pieces_repositories_worker(
+    workspace_id: int,
+    page: Optional[int] = 0,
+    page_size: Optional[int] = 100,
+    filters: ListRepositoryFilters = Depends(),
+) -> GetWorkspaceRepositoriesResponse:
+    """
+    Get pieces repositories for workspace.
+    This endpoint is used by the worker to get the repositories to be processed.
+    Is the same endpoint as the one above, but without the auth service.
+    The authorization is done by our service mesh Authorization Policy.
+    """
     try:
         response = piece_repository_service.get_pieces_repositories(
             workspace_id=workspace_id,

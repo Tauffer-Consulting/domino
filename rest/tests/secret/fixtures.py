@@ -33,7 +33,7 @@ def patch_piece_secret(client: ApiTestClient, authorization_token: Dict, piece_r
 @pytest.fixture(scope="function")
 def get_secrets_by_piece_name(request, client: ApiTestClient, authorization_token: Dict, piece_repository: PieceRepository):
     return client.get(
-        f"/pieces-repositories/{piece_repository.id}/secrets/{request.param['piece_name']}",
+        f"/pieces-repositories/{piece_repository.id}/secrets/{request.param['piece_name']}/secrets-values",
         headers={"Authorization": authorization_token["header"]}
     )
 
@@ -72,5 +72,5 @@ def get_repository_secrets_mock_response():
         # )
     ]
     return mock_response
-    
+
 
