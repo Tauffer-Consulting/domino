@@ -1,3 +1,14 @@
+# v0.8.4
+
+### Features
+- [x] Add basic config in helm chart and CLI for Istio.
+- [x] Add worker route to get pieces repository.
+
+
+### Fixes
+- [x] Add classic authorization to default route for get pieces repositories.
+
+
 # v0.8.3
 
 ### Features
