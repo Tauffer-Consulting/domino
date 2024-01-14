@@ -1,3 +1,12 @@
+export type TypeName =
+  | "string"
+  | "number"
+  | "boolean"
+  | "object"
+  | "integer"
+  | "array"
+  | "null";
+
 export interface Schema {
   title: string;
   description: string;
@@ -10,16 +19,19 @@ export interface Schema {
 
 export type Properties = Record<string, Property>;
 
-export type Property =
+export type Property = SimpleProperty | ArrayProperty | AnyOfProperty;
+
+export type SimpleProperty =
   | BooleanProperty
   | NumberProperty
   | StringProperty
-  | EnumProperty
-  | ArrayStringProperty
-  | ArrayNumberProperty
+  | EnumProperty;
+
+export type ArrayProperty =
   | ArrayBooleanProperty
-  | ArrayObjectProperty
-  | AnyOfProperty;
+  | ArrayNumberProperty
+  | ArrayStringProperty
+  | ArrayObjectProperty;
 
 interface DefaultPropertyAttrs {
   title: string;
@@ -35,7 +47,7 @@ export type BooleanProperty = DefaultPropertyAttrs & {
 };
 
 export type NumberProperty = DefaultPropertyAttrs & {
-  type: "number" | "integer" | "float";
+  type: "number" | "integer";
   default: number;
   exclusiveMaximum?: number;
   exclusiveMinimum?: number;
@@ -45,7 +57,7 @@ export type StringProperty = DefaultPropertyAttrs & {
   type: "string";
   default: string;
 
-  widget?: string;
+  widget?: `codeeditor-${string}` | "textarea";
   format?: "date" | "time" | "date-time";
 };
 
@@ -54,31 +66,22 @@ export type EnumProperty = DefaultPropertyAttrs & {
   default: string;
 };
 
-export type ArrayStringProperty = DefaultPropertyAttrs & {
+export type ArrayBooleanProperty = DefaultPropertyAttrs & {
   type: "array";
-  default: string[];
-  items: {
-    type: "string";
-
-    widget?: string;
-    format?: "date" | "time" | "date-time";
-  };
+  default: boolean[];
+  items: Omit<BooleanProperty, "default">;
 };
 
 export type ArrayNumberProperty = DefaultPropertyAttrs & {
   type: "array";
   default: number[];
-  items: {
-    type: "number" | "integer";
-  };
+  items: Omit<NumberProperty, "default">;
 };
 
-export type ArrayBooleanProperty = DefaultPropertyAttrs & {
+export type ArrayStringProperty = DefaultPropertyAttrs & {
   type: "array";
-  default: boolean[];
-  items: {
-    type: "boolean";
-  };
+  default: string[];
+  items: Omit<StringProperty, "default">;
 };
 
 export type ArrayObjectProperty = DefaultPropertyAttrs & {
@@ -91,41 +94,26 @@ export interface Reference {
   $ref: `#/$defs/${string}`;
 }
 
-export type AnyOfProperty =
-  | (DefaultPropertyAttrs & {
-      anyOf: Array<{
-        type: "null";
-        format?: string;
-      }>;
-      default: any;
-    })
-  | (DefaultPropertyAttrs & {
-      anyOf: Array<{
-        type: "number" | "integer" | "float";
-      }>;
-      default: NumberProperty["default"];
-    })
-  | (DefaultPropertyAttrs & {
-      anyOf: Array<{
-        type: "string";
-        format?: string;
-      }>;
-      default: StringProperty["default"];
-    })
-  | (DefaultPropertyAttrs & {
-      anyOf: Array<{ type: "boolean" }>;
-      default: BooleanProperty["default"];
-    })
-  | (DefaultPropertyAttrs & {
-      anyOf: Array<{ type: "array" }>;
-      default:
-        | ArrayStringProperty["default"]
-        | ArrayNumberProperty["default"]
-        | ArrayBooleanProperty["default"]
-        | ArrayObjectProperty["default"];
-    });
+type AnyOf = DefaultPropertyAttrs & {
+  anyOf: Array<{
+    type: "null" | "number" | "integer" | "string" | "boolean";
+    widget?: `codeeditor-${string}` | "textarea";
+    format?: "date" | "time" | "date-time";
+  }>;
+  default: any;
+};
 
-export type Definitions = Record<string, EnumDefinition | ObjectDefinition>;
+export type AnyOfArray = DefaultPropertyAttrs & {
+  anyOf: Array<{ items: AnyOf["anyOf"]; type: "array" } | { type: "null" }>;
+  default: any[];
+};
+
+export type AnyOfProperty = AnyOf | AnyOfArray;
+
+export type Definitions = Record<
+  string,
+  EnumDefinition | ObjectDefinition | SimpleProperty
+>;
 
 export interface EnumDefinition {
   title: string;
@@ -138,15 +126,7 @@ export interface ObjectDefinition {
   title: string;
   description: string;
   type: "object";
-  properties: Record<
-    string,
-    | EnumDefinition
-    | BooleanProperty
-    | NumberProperty
-    | StringProperty
-    | EnumProperty
-    | AnyOfProperty
-  >;
+  properties: Record<string, EnumDefinition | SimpleProperty | AnyOfProperty>;
   required: string[];
 }
 
