@@ -20,11 +20,7 @@ import {
   useWatch,
 } from "react-hook-form";
 
-import {
-  type ComplexArrayOption,
-  type ArrayOption,
-  type Option,
-} from "../../../../utils/upstreamOptions";
+import { type UpstreamOptions } from "../../../../utils/upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import ObjectInputComponent from "./objectInput";
@@ -36,7 +32,7 @@ interface ArrayInputItemProps {
   schema: any;
   control: Control<IWorkflowPieceData, any>;
   definitions?: any;
-  upstreamOptions: ArrayOption | ComplexArrayOption;
+  upstreamOptions: UpstreamOptions;
 }
 
 const ArrayInput: React.FC<ArrayInputItemProps> = ({
@@ -219,7 +215,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
                   <SelectUpstreamInput
                     name={`${name}.${index}`}
                     label={schema?.title}
-                    options={upstreamOptions.items as Option[]}
+                    options={upstreamOptions[`${inputKey}.__items`] ?? []}
                   />
                 </Grid>
               )}
@@ -331,9 +327,10 @@ const ArrayInput: React.FC<ArrayInputItemProps> = ({
                 <Grid item xs={11}>
                   <ObjectInputComponent
                     name={`${name}.${index}`}
+                    inputKey={inputKey}
                     schema={schema}
                     definitions={definitions}
-                    upstreamOptions={upstreamOptions as ComplexArrayOption}
+                    upstreamOptions={upstreamOptions}
                   />
                 </Grid>
               )}

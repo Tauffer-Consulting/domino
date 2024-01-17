@@ -24,7 +24,7 @@ import StorageForm, { storageFormSchema } from "./StorageForm";
 
 interface ISidebarPieceFormProps {
   formId: string;
-  schema: PieceSchema;
+  schema: Schema;
   title: string;
   open: boolean;
   onClose: (event: any) => void;

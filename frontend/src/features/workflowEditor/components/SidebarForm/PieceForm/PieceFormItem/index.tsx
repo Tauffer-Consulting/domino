@@ -11,7 +11,7 @@ import React, { useMemo } from "react";
 import { type Control, useWatch } from "react-hook-form";
 
 import {
-  type ArrayOption,
+  type UpstreamOptions,
   type Option,
 } from "../../../../utils/upstreamOptions";
 
@@ -25,7 +25,7 @@ interface PieceFormItemProps {
   itemKey: string;
   control: Control<IWorkflowPieceData, any>;
   definitions?: Definitions;
-  upstreamOptions: Option[] | ArrayOption;
+  upstreamOptions: UpstreamOptions;
 }
 
 const PieceFormItem: React.FC<PieceFormItemProps> = ({
@@ -62,16 +62,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
   }
 
   if (checkedFromUpstream) {
-    let options: Option[] = [];
-    if (
-      ("type" in schema && schema.type === "array") ||
-      (anyOfType && anyOfType === "array")
-    ) {
-      options = (upstreamOptions as ArrayOption).$array;
-    } else {
-      options = upstreamOptions as Option[];
-    }
-
+    const options: Option[] = upstreamOptions[itemKey] ?? [];
     inputElement = (
       <SelectUpstreamInput
         name={`inputs.${itemKey}`}
@@ -96,8 +87,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    ("type" in schema &&
-      (schema.type === "number" || schema.type === "float")) ||
+    ("type" in schema && schema.type === "number") ||
     anyOfType === "float"
   ) {
     inputElement = (
@@ -137,7 +127,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
         inputKey={itemKey}
         schema={schema}
         definitions={definitions}
-        upstreamOptions={upstreamOptions as ArrayOption}
+        upstreamOptions={upstreamOptions}
         control={control}
       />
     );
@@ -192,10 +182,9 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       schema.widget?.includes("codeeditor") &&
       anyOfType === "string")
   ) {
-    const language =
-      schema.widget === "codeeditor"
-        ? "python"
-        : schema.widget.replace("codeeditor-", "");
+    const language = schema.widget.includes("codeeditor-")
+      ? schema.widget.replace("codeeditor-", "")
+      : "python";
 
     inputElement = (
       <CodeEditorInput<IWorkflowPieceData>

@@ -39,6 +39,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
       workflowPieces,
       workflowEdges,
     );
+
     setUpstreamOptions(upstreamOptions);
   }, [
     fetchForageWorkflowEdges,
@@ -63,7 +64,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
             itemKey={key}
             control={control}
             definitions={schema?.$defs}
-            upstreamOptions={upstreamOptions[key] ?? []}
+            upstreamOptions={upstreamOptions}
           />
         </div>
       ))}

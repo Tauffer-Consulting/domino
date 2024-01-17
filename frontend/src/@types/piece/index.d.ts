@@ -7,11 +7,13 @@ declare global {
   type Schema = import("./schema").Schema;
   type FromUpstream = import("./schema").FromUpstream;
   type TypeName = import("./schema").TypeName;
+  type Reference = import("./schema").Reference;
 
   type Properties = import("./schema").Properties;
   type Property = import("./schema").Property;
   type SimpleProperty = import("./schema").SimpleProperty;
   type ArrayProperty = import("./schema").ArrayProperty;
+  type AnyOfProperty = import("./schema").AnyOfProperty;
 
   type StringProperty = import("./schema").StringProperty;
   type BooleanProperty = import("./schema").BooleanProperty;
@@ -24,6 +26,8 @@ declare global {
   type ArrayObjectProperty = import("./schema").ArrayObjectProperty;
 
   type Definitions = import("./schema").Definitions;
+  type Definition = import("./schema").Definition;
+  type SimpleDefinition = import("./schema").SimpleDefinition;
   type ObjectDefinition = import("./schema").ObjectDefinition;
   type EnumDefinition = import("./schema").EnumDefinition;
 }

@@ -6,21 +6,23 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useWatch } from "react-hook-form";
 import { getDefinition } from "utils";
 
-import { type ComplexArrayOption } from "../../../../utils/upstreamOptions";
+import { type UpstreamOptions } from "../../../../utils/upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import SelectUpstreamInput from "./selectUpstreamInput";
 
 interface Prop {
   name: `inputs.${string}.value.${number}`;
+  inputKey: string;
   schema: ArrayObjectProperty;
   definitions: Definitions;
-  upstreamOptions: ComplexArrayOption;
+  upstreamOptions: UpstreamOptions;
 }
 
 const ObjectInputComponent: React.FC<Prop> = ({
   schema,
   name,
+  inputKey,
   upstreamOptions,
   definitions,
 }) => {
@@ -81,6 +83,7 @@ const ObjectInputComponent: React.FC<Prop> = ({
       {Object.entries(elementType).map(([key]) => {
         const fromUpstream = isFromUpstream(key);
         const disableUpstream = disableCheckboxOptions(itensSchema[key] as any);
+
         return (
           <Grid
             key={key}
@@ -95,11 +98,7 @@ const ObjectInputComponent: React.FC<Prop> = ({
                 <SelectUpstreamInput
                   label={key}
                   name={`${name}.upstreamValue.${key}`}
-                  options={
-                    upstreamOptions[key] !== undefined
-                      ? upstreamOptions[key].items
-                      : []
-                  }
+                  options={upstreamOptions[`${inputKey}.__items.${key}`] ?? []}
                   object
                 />
               </Grid>

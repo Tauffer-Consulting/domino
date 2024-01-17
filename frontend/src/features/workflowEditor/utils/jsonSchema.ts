@@ -86,7 +86,7 @@ export const extractDefaultInputValues = (pieceSchema: Piece) => {
 };
 
 export const extractDefaultValues = (
-  schema: PieceSchema,
+  schema: Schema,
   output: any | null = null,
 ) => {
   output = output === null ? {} : output;
@@ -94,7 +94,7 @@ export const extractDefaultValues = (
   if (!isEmpty(schema) && "properties" in schema) {
     const properties = schema.properties;
     for (const [key, value] of Object.entries(properties)) {
-      if (value?.from_upstream === "always") {
+      if ("from_upstream" in value && value.from_upstream === "always") {
         output[key] = "";
       }
 

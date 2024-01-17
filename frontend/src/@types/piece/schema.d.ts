@@ -110,10 +110,14 @@ export type AnyOfArray = DefaultPropertyAttrs & {
 
 export type AnyOfProperty = AnyOf | AnyOfArray;
 
-export type Definitions = Record<
-  string,
-  EnumDefinition | ObjectDefinition | SimpleProperty
->;
+export type Definition = EnumDefinition | ObjectDefinition | SimpleDefinition;
+
+export type Definitions = Record<string, Definition>;
+
+export type SimpleDefinition =
+  | Omit<StringProperty, "default">
+  | Omit<BooleanProperty, "default">
+  | Omit<NumberProperty, "default">;
 
 export interface EnumDefinition {
   title: string;
