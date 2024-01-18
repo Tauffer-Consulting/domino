@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-node",
+      "name": "Debug Vite",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "sourceMapPathOverrides": {
+        "node_modules/*": "${workspaceRoot}/node_modules/*"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

@@ -53,6 +53,7 @@
     "yup": "^1.2.0"
   },
   "scripts": {
+    "debug": "NODE_OPTIONS=--inspect=0.0.0.0:9229 vite",
     "start": "vite",
     "start:mock": "cross-env NODE_OPTIONS=--openssl-legacy-provider VITE_USE_MOCK=true vite",
     "build": "tsc && vite build",

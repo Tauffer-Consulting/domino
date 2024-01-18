@@ -1,3 +1,8 @@
+# Debug Stage
+FROM node:18-alpine as debug
+WORKDIR /usr/src/app
+EXPOSE 9229
+
 # Build Stage
 FROM node:18-alpine as build
 WORKDIR /usr/src/app
@@ -11,4 +16,4 @@ COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY . .
 RUN chmod -R 777 node_modules/
 USER node
-CMD ["yarn", "start"]
+CMD ["yarn", "debug"]

@@ -9,7 +9,6 @@ domino_data/*
 **/**.swp
 **/**.swo
 **/**.swm
-.vscode
 **/__pycache__/**
 .python-version
 **/ENV/**

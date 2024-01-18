@@ -360,14 +360,15 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     container_name: domino-frontend
-    command: yarn start
+    command: yarn debug
     environment:
       - DOMINO_DEPLOY_MODE=local-compose
       - API_URL=http://localhost:8000
     ports:
       - 3000:3000
+      - 9229:9229  # Expose debug port
     volumes:
-      - ./frontend:/usr/src/app # Enable hot reload for frontend
+      - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       domino_rest:
