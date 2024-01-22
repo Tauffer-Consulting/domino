@@ -194,10 +194,13 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       />
     );
   } else if (
-    "type" in schema &&
-    "widget" in schema &&
-    schema.type === "string" &&
-    schema.widget === "textarea"
+    ("type" in schema &&
+      "widget" in schema &&
+      schema.type === "string" &&
+      schema.widget === "textarea") ||
+    (anyOfType === "string" &&
+      "widget" in schema &&
+      schema?.widget === "textarea")
   ) {
     inputElement = (
       <TextAreaInput<IWorkflowPieceData>
