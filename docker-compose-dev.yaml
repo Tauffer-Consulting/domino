@@ -366,7 +366,7 @@ services:
       - API_URL=http://localhost:8000
     ports:
       - 3000:3000
-      - 9229:9229  # Expose debug port
+      - 9222:9222  # Expose debug port
     volumes:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules

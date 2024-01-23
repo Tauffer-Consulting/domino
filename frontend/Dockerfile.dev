@@ -1,7 +1,7 @@
 # Debug Stage
 FROM node:18-alpine as debug
 WORKDIR /usr/src/app
-EXPOSE 9229
+EXPOSE 9222
 
 # Build Stage
 FROM node:18-alpine as build

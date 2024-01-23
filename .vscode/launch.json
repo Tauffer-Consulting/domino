@@ -1,18 +1,40 @@
 {
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "pwa-node",
-      "name": "Debug Vite",
-      "request": "attach",
-      "port": 9229,
-      "restart": true,
+      "type": "chrome",
+      "request": "launch",
+      "name": "Chrome Debug",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "enableContentValidation": false,
       "sourceMapPathOverrides": {
-        "node_modules/*": "${workspaceRoot}/node_modules/*"
+          "webpack:///./src/*": "${webRoot}/*"
       },
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
-    }
+      "runtimeArgs": [
+          "--remote-debugging-port=9222"
+      ],
+      "sourceMaps": true,
+      "pathMapping": {"url": "/src/", "path": "${webRoot}/"}
+    },
+    {
+      "type": "msedge",
+      "request": "launch",
+      "name": "Edge Debug",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "enableContentValidation": false,
+      "sourceMapPathOverrides": {
+          "webpack:///./src/*": "${webRoot}/*"
+      },
+      "runtimeArgs": [
+          "--remote-debugging-port=9222"
+      ],
+      "sourceMaps": true,
+      "pathMapping": {"url": "/src/", "path": "${webRoot}/"}
+    },
   ]
 }
