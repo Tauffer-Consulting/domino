@@ -5,21 +5,19 @@ on:
     branches:
       - main
     paths:
-      - src/domino/**
       - Dockerfile-airflow-domino.prod
       - Dockerfile-domino-piece.gpu-prod
       - Dockerfile-domino-piece.prod
-  # workflow_run:
-  #   workflows:
-  #     - "Build and publish domino-py package"
-  #   branches:
-  #     - main
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["Build and publish domino-py package"]
+    branches: [main]
+    types:
+      - completed
+    paths:
+      - src/domino/**
 
 jobs:
   domino-airflow-base:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Airflow Base Image
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +42,6 @@ jobs:
           file: Dockerfile-airflow-domino.prod
 
   domino-base-piece:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Base Piece Image
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +66,6 @@ jobs:
           file: Dockerfile-domino-piece.prod
 
   domino-base-piece-gpu:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Base Piece GPU Image
     runs-on: ubuntu-latest
     steps:
@@ -94,7 +90,6 @@ jobs:
           file: Dockerfile-domino-piece.gpu-prod
 
   domino-storage-sidecar:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Domino Storage Sidecar Image
     runs-on: ubuntu-latest
     steps:
