@@ -6,6 +6,14 @@ function convertToAdjacencyList(
   const adjacencyList: Record<string, string[]> = {};
 
   // Create an adjacency list from the given elements
+  /*
+  Example:
+    {
+        "node-1": ["node-2", "node-3"],
+        "node-2": ["node-3"],
+        "node-3": ["node-4"],
+    }
+  */
   elements.forEach((element: Edge | Node) => {
     if (isNode(element)) {
       adjacencyList[element.id] = [];
@@ -16,18 +24,18 @@ function convertToAdjacencyList(
       adjacencyList[element.source].push(element.target);
     }
   });
-
   return adjacencyList;
 }
 
 function hasCycle(adjacencyList: Record<string, string[]>): boolean {
+  // ref: https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/
   const visited: Record<string, boolean> = {};
   const recursionStack: Record<string, boolean> = {};
 
   // Helper function for DFS traversal
   function isNodeCyclic(nodeId: string): boolean {
     if (recursionStack[nodeId]) {
-      return true; // Cycle detected
+      return true;
     }
 
     if (visited[nodeId]) {
@@ -43,7 +51,7 @@ function hasCycle(adjacencyList: Record<string, string[]>): boolean {
         return true; // Cycle detected in a neighbor
       }
     }
-    recursionStack[nodeId] = false; // Backtrack
+    recursionStack[nodeId] = false; // Backtrack stack
     return false;
   }
 
