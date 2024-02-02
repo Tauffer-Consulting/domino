@@ -50,7 +50,6 @@ function hasCycle(adjacencyList: Record<string, string[]>): boolean {
   // Perform DFS traversal for each node
   for (const node in adjacencyList) {
     if (isNodeCyclic(node)) {
-      console.log("isNodeCyclic", node);
       return true; // Cycle detected on node
     }
   }

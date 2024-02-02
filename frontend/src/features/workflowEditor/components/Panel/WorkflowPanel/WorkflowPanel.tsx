@@ -17,6 +17,7 @@ import React, {
   useImperativeHandle,
   useMemo,
 } from "react";
+import { toast } from "react-toastify";
 import ReactFlow, {
   type Node,
   addEdge,
@@ -40,6 +41,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   extractDefaultContainerResources,
   extractDefaultInputValues,
+  isDag,
 } from "../../../utils";
 
 import { CustomConnectionLine } from "./ConnectionLine";
@@ -188,13 +190,22 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
 
     const onConnect = useCallback(
       (connection: Connection) => {
+        const newEdge: any = {
+          ...connection,
+          id: `${Math.random()}`,
+        };
+        const newEdges = [...edges, newEdge];
+        if (!isDag(nodes, newEdges)) {
+          toast.error("Workflow must be acyclic!");
+          return;
+        }
         setEdges((prevEdges: Edge[]) => {
           const edges = addEdge(connection, prevEdges);
           setWorkflowEdges(edges);
           return edges;
         });
       },
-      [setEdges, setWorkflowEdges],
+      [rawEdges, rawNodes],
     );
 
     const onNodesDelete = useCallback(
@@ -317,6 +328,7 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           nodes={nodes}
           edges={edges}
           connectionLineComponent={CustomConnectionLine}
+          fitView={true}
           onInit={onInit}
           deleteKeyCode={["Delete", "Backspace"]}
           onConnect={onConnect}
