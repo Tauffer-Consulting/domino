@@ -144,7 +144,11 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
 
                 {Boolean(filteredRepositoryPieces[repo.id]?.length) &&
                   filteredRepositoryPieces[repo.id].map((piece) => (
-                    <PiecesSidebarNode piece={piece} key={piece.id} />
+                    <PiecesSidebarNode
+                      piece={piece}
+                      key={piece.id}
+                      orientation={orientation}
+                    />
                   ))}
               </AccordionDetails>
             </Accordion>

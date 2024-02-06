@@ -1,15 +1,15 @@
+import { useStorage } from "@nathan-vm/use-storage";
 import { type IWorkflowElement } from "features/myWorkflows/types";
 import React, { useCallback } from "react";
 import { type Node, type Edge } from "reactflow";
-import localForage from "services/config/localForage.config";
 import { createCustomContext } from "utils";
 
 export interface IReactWorkflowPersistenceContext {
-  setWorkflowEdges: (edges: Edge[]) => Promise<void>;
-  setWorkflowNodes: (edges: Node[]) => Promise<void>;
-  fetchForageWorkflowEdges: () => Promise<Edge[]>;
-  fetchForageWorkflowNodes: () => Promise<IWorkflowElement[]>;
-  clearReactWorkflowPersistence: () => Promise<void>;
+  setWorkflowEdges: (edges: Edge[]) => void;
+  setWorkflowNodes: (edges: Node[]) => void;
+  fetchForageWorkflowEdges: () => Edge[];
+  fetchForageWorkflowNodes: () => IWorkflowElement[];
+  clearReactWorkflowPersistence: () => void;
 }
 
 export const [ReactWorkflowPersistenceContext, useReactWorkflowPersistence] =
@@ -20,31 +20,33 @@ export const [ReactWorkflowPersistenceContext, useReactWorkflowPersistence] =
 const ReactWorkflowPersistenceProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const setWorkflowEdges = useCallback(async (edges: Edge[]) => {
-    await localForage.setItem("workflowEdges", edges);
+  const localStorage = useStorage();
+
+  const setWorkflowEdges = useCallback((edges: Edge[]) => {
+    localStorage.setItem("workflowEdges", edges);
   }, []);
-  const setWorkflowNodes = useCallback(async (nodes: Node[]) => {
-    await localForage.setItem("workflowNodes", nodes);
+  const setWorkflowNodes = useCallback((nodes: Node[]) => {
+    localStorage.setItem("workflowNodes", nodes);
   }, []);
 
-  const fetchForageWorkflowEdges = useCallback(async () => {
-    let workflowEdges = await localForage.getItem<any>("workflowEdges");
+  const fetchForageWorkflowEdges = useCallback(() => {
+    let workflowEdges = localStorage.getItem<any>("workflowEdges");
     if (!workflowEdges || workflowEdges.length === 0) {
       workflowEdges = [];
     }
     return workflowEdges;
   }, []);
-  const fetchForageWorkflowNodes = useCallback(async () => {
-    let workflowEdges = await localForage.getItem<any>("workflowNodes");
+  const fetchForageWorkflowNodes = useCallback(() => {
+    let workflowEdges = localStorage.getItem<any>("workflowNodes");
     if (!workflowEdges || workflowEdges.length === 0) {
       workflowEdges = [];
     }
     return workflowEdges;
   }, []);
 
-  const clearReactWorkflowPersistence = useCallback(async () => {
-    await localForage.setItem<any>("workflowEdges", []);
-    await localForage.setItem<any>("workflowNodes", []);
+  const clearReactWorkflowPersistence = useCallback(() => {
+    localStorage.setItem("workflowEdges", []);
+    localStorage.setItem("workflowNodes", []);
   }, []);
 
   const value: IReactWorkflowPersistenceContext = {

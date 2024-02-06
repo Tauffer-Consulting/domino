@@ -2,11 +2,10 @@ import { Grid } from "@mui/material";
 import CheckboxInput from "components/CheckboxInput";
 import SelectInput from "components/SelectInput";
 import TextInput from "components/TextInput";
+import { type UpstreamOptions } from "features/workflowEditor/utils";
 import React, { useCallback, useMemo, useState } from "react";
 import { useWatch } from "react-hook-form";
 import { getDefinition } from "utils";
-
-import { type UpstreamOptions } from "../../../../utils/upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import SelectUpstreamInput from "./selectUpstreamInput";

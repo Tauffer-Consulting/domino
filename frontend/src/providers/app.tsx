@@ -1,5 +1,6 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
+import { StorageProvider } from "@nathan-vm/use-storage";
 import { AuthenticationProvider } from "context/authentication";
 import { WorkspacesProvider } from "context/workspaces";
 import PiecesProvider from "context/workspaces/repositories";
@@ -22,13 +23,15 @@ export const App: FC = () => (
     <CssBaseline />
     <SWRConfig value={{ errorRetryCount: 2 }} />
     <BrowserRouter>
-      <AuthenticationProvider>
-        <WorkspacesProvider>
-          <PiecesProvider>
-            <ApplicationRoutes />
-          </PiecesProvider>
-        </WorkspacesProvider>
-      </AuthenticationProvider>
+      <StorageProvider>
+        <AuthenticationProvider>
+          <WorkspacesProvider>
+            <PiecesProvider>
+              <ApplicationRoutes />
+            </PiecesProvider>
+          </WorkspacesProvider>
+        </AuthenticationProvider>
+      </StorageProvider>
     </BrowserRouter>
     <ToastContainer />
   </ThemeProvider>

@@ -27,7 +27,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "utils";
 import * as yup from "yup";
 
-interface ISidebarSettingsFormProps {
+interface ISettingsFormDrawerProps {
   open: boolean;
   onClose: (event: any) => void;
 }
@@ -107,17 +107,17 @@ export const WorkflowSettingsFormSchema: ValidationSchema = yup.object().shape({
   }),
 });
 
-export interface SidebarSettingsFormRef {
-  loadData: () => Promise<void>;
+export interface SettingsFormDrawerRef {
+  loadData: () => void;
 }
 
-const SidebarSettingsForm = forwardRef<
-  SidebarSettingsFormRef,
-  ISidebarSettingsFormProps
+const SettingsFormDrawer = forwardRef<
+  SettingsFormDrawerRef,
+  ISettingsFormDrawerProps
 >(
   (
-    props: ISidebarSettingsFormProps,
-    ref: ForwardedRef<SidebarSettingsFormRef>,
+    props: ISettingsFormDrawerProps,
+    ref: ForwardedRef<SettingsFormDrawerRef>,
   ) => {
     const { open, onClose } = props;
 
@@ -139,29 +139,29 @@ const SidebarSettingsForm = forwardRef<
       validate();
     }, [validate]);
 
-    const loadData = useCallback(async () => {
-      const data = await fetchWorkflowSettingsData();
+    const loadData = useCallback(() => {
+      const data = fetchWorkflowSettingsData();
       if (Object.keys(data).length === 0) {
         reset(defaultSettingsData);
-        await setWorkflowSettingsData(defaultSettingsData);
+        setWorkflowSettingsData(defaultSettingsData);
       } else {
         reset(data);
       }
       setLoaded(true);
     }, [reset, fetchWorkflowSettingsData, setWorkflowSettingsData]);
 
-    const saveData = useCallback(async () => {
+    const saveData = useCallback(() => {
       if (open) {
-        await setWorkflowSettingsData(formData);
+        setWorkflowSettingsData(formData);
       }
     }, [formData, open, setWorkflowSettingsData]);
 
     useEffect(() => {
-      void loadData();
+      loadData();
     }, [open, loadData]);
 
     useEffect(() => {
-      void saveData();
+      saveData();
     }, [saveData]);
 
     useImperativeHandle(
@@ -305,5 +305,5 @@ const SidebarSettingsForm = forwardRef<
     );
   },
 );
-SidebarSettingsForm.displayName = "SidebarSettingsForm";
-export { SidebarSettingsForm };
+SettingsFormDrawer.displayName = "SettingsFormDrawer";
+export { SettingsFormDrawer };

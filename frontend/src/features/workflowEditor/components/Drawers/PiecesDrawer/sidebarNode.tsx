@@ -4,7 +4,10 @@ import React, { type FC, useState } from "react";
 
 import PieceDocsPopover from "./pieceDocsPopover";
 
-const PiecesSidebarNode: FC<{ piece: Piece }> = ({ piece }) => {
+const PiecesSidebarNode: FC<{
+  piece: Piece;
+  orientation: "horizontal" | "vertical";
+}> = ({ piece, orientation }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   // Drag and drop from sidebar to Workflow area
@@ -12,7 +15,7 @@ const PiecesSidebarNode: FC<{ piece: Piece }> = ({ piece }) => {
     event: React.DragEvent<HTMLDivElement>,
     nodeData: any,
   ) => {
-    const data = JSON.stringify(nodeData.nodeData);
+    const data = JSON.stringify({ ...nodeData.nodeData, orientation });
     event.dataTransfer.setData("application/reactflow", data);
     event.dataTransfer.effectAllowed = "move";
   };

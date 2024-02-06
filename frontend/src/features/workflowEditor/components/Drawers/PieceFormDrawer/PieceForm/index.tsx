@@ -1,12 +1,11 @@
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import {
+  getUpstreamOptions,
+  type UpstreamOptions,
+} from "features/workflowEditor/utils";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
-
-import {
-  type UpstreamOptions,
-  getUpstreamOptions,
-} from "../../../utils/upstreamOptions";
 
 import PieceFormItem from "./PieceFormItem";
 
@@ -25,13 +24,13 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
     return schema?.properties;
   }, [schema]);
 
-  const handleUpstreamOptions = useCallback(async () => {
+  const handleUpstreamOptions = useCallback(() => {
     if (!shouldRender) {
       return;
     }
 
-    const workflowPieces = await getForageWorkflowPieces();
-    const workflowEdges = await fetchForageWorkflowEdges();
+    const workflowPieces = getForageWorkflowPieces();
+    const workflowEdges = fetchForageWorkflowEdges();
 
     const upstreamOptions = getUpstreamOptions(
       formId,
@@ -50,7 +49,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
   ]);
 
   useEffect(() => {
-    void handleUpstreamOptions();
+    handleUpstreamOptions();
   }, [handleUpstreamOptions]);
 
   if (!shouldRender) return null;

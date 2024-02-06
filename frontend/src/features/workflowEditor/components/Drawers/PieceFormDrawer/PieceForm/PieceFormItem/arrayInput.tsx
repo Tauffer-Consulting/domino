@@ -11,7 +11,10 @@ import {
   type InputArray,
   type IWorkflowPieceData,
 } from "features/workflowEditor/context/types";
-import { getFromUpstream } from "features/workflowEditor/utils";
+import {
+  type UpstreamOptions,
+  getFromUpstream,
+} from "features/workflowEditor/utils";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   type Control,
@@ -19,8 +22,6 @@ import {
   useFieldArray,
   useWatch,
 } from "react-hook-form";
-
-import { type UpstreamOptions } from "../../../../utils/upstreamOptions";
 
 import { disableCheckboxOptions } from "./disableCheckboxOptions";
 import ObjectInputComponent from "./objectInput";

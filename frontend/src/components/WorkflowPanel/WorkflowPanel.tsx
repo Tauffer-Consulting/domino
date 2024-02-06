@@ -10,6 +10,7 @@ import React, {
   useImperativeHandle,
   type ForwardedRef,
   useMemo,
+  useEffect,
 } from "react";
 import ReactFlow, {
   type Node,
@@ -275,6 +276,13 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
         edges,
       };
     }, [rawNodes, rawEdges]);
+
+    useEffect(() => {
+      console.log("aqui sempre");
+      if (edges && props.editable && props.onConnect) {
+        props.onConnect(edges[0] as any);
+      }
+    }, [edges]);
 
     useImperativeHandle(
       ref,

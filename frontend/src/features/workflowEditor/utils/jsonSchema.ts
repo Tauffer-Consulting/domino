@@ -2,7 +2,7 @@
 
 import { isEmpty } from "utils";
 
-import { defaultContainerResources } from "../components/SidebarForm/ContainerResourceForm";
+import { defaultContainerResources } from "../components/Drawers/PieceFormDrawer/ContainerResourceForm";
 import {
   type IContainerResourceFormData,
   type IWorkflowPieceData,

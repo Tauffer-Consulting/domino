@@ -1,17 +1,14 @@
+import { useStorage } from "@nathan-vm/use-storage";
 import React, { useCallback } from "react";
-import localForage from "services/config/localForage.config";
 import { createCustomContext } from "utils";
 
 export interface IWorkflowPieceContext {
-  setForageWorkflowPieces: (workflowPieces: any) => Promise<void>; // TODO add type
-  getForageWorkflowPieces: () => Promise<Record<string, Piece>>; // TODO add type
-  removeForageWorkflowPiecesById: (id: string) => Promise<void>;
-  fetchWorkflowPieceById: (id: string) => Promise<Piece>; // TODO add type
-  clearForageWorkflowPieces: () => Promise<void>;
-  setForageWorkflowPiecesOutputSchema: (
-    id: string,
-    properties: any,
-  ) => Promise<void>;
+  setForageWorkflowPieces: (workflowPieces: any) => void; // TODO add type
+  getForageWorkflowPieces: () => Record<string, Piece>; // TODO add type
+  removeForageWorkflowPiecesById: (id: string) => void;
+  fetchWorkflowPieceById: (id: string) => Piece; // TODO add type
+  clearForageWorkflowPieces: () => void;
+  setForageWorkflowPiecesOutputSchema: (id: string, properties: any) => void;
 }
 
 export const [WorkflowPiecesContext, useWorkflowPiece] =
@@ -20,45 +17,47 @@ export const [WorkflowPiecesContext, useWorkflowPiece] =
 const WorkflowPiecesProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const setForageWorkflowPieces = useCallback(async (workflowPieces: any) => {
-    await localForage.setItem("workflowPieces", workflowPieces);
+  const localStorage = useStorage();
+
+  const setForageWorkflowPieces = useCallback((workflowPieces: any) => {
+    localStorage.setItem("workflowPieces", workflowPieces);
   }, []);
 
   const setForageWorkflowPiecesOutputSchema = useCallback(
-    async (id: any, properties: any) => {
-      const workflowPieces = await localForage.getItem<any>("workflowPieces");
+    (id: any, properties: any) => {
+      const workflowPieces = localStorage.getItem<any>("workflowPieces");
       if (workflowPieces?.[id]) {
         workflowPieces[id].output_schema.properties = properties;
-        void localForage.setItem("workflowPieces", workflowPieces);
+        localStorage.setItem("workflowPieces", workflowPieces);
       }
     },
     [],
   );
 
-  const clearForageWorkflowPieces = useCallback(async () => {
-    await localForage.setItem("workflowPieces", {});
+  const clearForageWorkflowPieces = useCallback(() => {
+    localStorage.setItem("workflowPieces", {});
   }, []);
 
-  const getForageWorkflowPieces = useCallback(async () => {
-    const workflowPieces = await localForage.getItem<any>("workflowPieces");
+  const getForageWorkflowPieces = useCallback(() => {
+    const workflowPieces = localStorage.getItem<any>("workflowPieces");
     if (!workflowPieces) {
       return {};
     }
     return workflowPieces;
   }, []);
 
-  const removeForageWorkflowPiecesById = useCallback(async (id: string) => {
-    const workflowPieces = await localForage.getItem<any>("workflowPieces");
+  const removeForageWorkflowPiecesById = useCallback((id: string) => {
+    const workflowPieces = localStorage.getItem<any>("workflowPieces");
     if (!workflowPieces) {
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete workflowPieces[id];
-    await localForage.setItem("workflowPieces", workflowPieces);
+    localStorage.setItem("workflowPieces", workflowPieces);
   }, []);
 
-  const fetchWorkflowPieceById = useCallback(async (id: string) => {
-    const workflowPieces = await localForage.getItem<any>("workflowPieces");
+  const fetchWorkflowPieceById = useCallback((id: string) => {
+    const workflowPieces = localStorage.getItem<any>("workflowPieces");
     if (workflowPieces !== null) {
       return workflowPieces[id];
     }

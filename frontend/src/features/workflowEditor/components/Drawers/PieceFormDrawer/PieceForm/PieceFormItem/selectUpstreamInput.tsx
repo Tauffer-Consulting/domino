@@ -7,11 +7,10 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import { type Option } from "features/workflowEditor/utils";
 import React, { useCallback } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { fetchFromObject } from "utils";
-
-import { type Option } from "../../../../utils/upstreamOptions";
 
 type ObjectName = `inputs.${string}.value.${number}.upstreamValue.${string}`;
 type Name = `inputs.${string}`;

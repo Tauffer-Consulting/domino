@@ -7,13 +7,12 @@ import SelectInput from "components/SelectInput";
 import TextAreaInput from "components/TextAreaInput";
 import TextInput from "components/TextInput";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import {
+  type Option,
+  type UpstreamOptions,
+} from "features/workflowEditor/utils";
 import React, { useMemo } from "react";
 import { type Control, useWatch } from "react-hook-form";
-
-import {
-  type UpstreamOptions,
-  type Option,
-} from "../../../../utils/upstreamOptions";
 
 import ArrayInput from "./arrayInput";
 import { disableCheckboxOptions } from "./disableCheckboxOptions";

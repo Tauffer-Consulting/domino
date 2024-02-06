@@ -18,7 +18,7 @@ import { type FC, type ReactNode, useState } from "react";
 
 import SidebarAddNode from "./sidebarAddNode";
 
-interface PermanentDrawerRightWorkflowsProps {
+interface PiecesDrawerProps {
   isOpen?: boolean;
   handleClose: () => void;
   children?: ReactNode;
@@ -29,9 +29,10 @@ interface PermanentDrawerRightWorkflowsProps {
   orientation: "vertical" | "horizontal";
 }
 
-export const PermanentDrawerRightWorkflows: FC<
-  PermanentDrawerRightWorkflowsProps
-> = ({ setOrientation, orientation }) => {
+export const PiecesDrawer: FC<PiecesDrawerProps> = ({
+  setOrientation,
+  orientation,
+}) => {
   const theme = useTheme();
   const [openDrawer, setOpenDrawer] = useState(true);
 

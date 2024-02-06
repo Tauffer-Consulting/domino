@@ -1,3 +1,4 @@
+import { useStorage } from "@nathan-vm/use-storage";
 import {
   type IGetRepoPiecesResponseInterface,
   useAuthenticatedGetPieceRepositories,
@@ -10,7 +11,6 @@ import {
 } from "features/myWorkflows/api";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import localForage from "services/config/localForage.config";
 import { type KeyedMutator } from "swr";
 import { createCustomContext } from "utils";
 
@@ -46,7 +46,7 @@ export interface IPiecesContext {
   fetchRepoById: (params: {
     id: string;
   }) => Promise<IGetRepoPiecesResponseInterface>;
-  fetchForagePieceById: (id: number) => Promise<Piece | undefined>;
+  fetchForagePieceById: (id: number) => Piece | undefined;
 }
 
 type PieceForageSchema = Record<string | number, Piece>;
@@ -57,6 +57,8 @@ export const [PiecesContext, usesPieces] =
 const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const localStorage = useStorage();
+
   const [selectedRepositoryId, setSelectedRepositoryId] = useState<
     number | null
   >(null);
@@ -89,7 +91,7 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
       if (!repositories?.data?.length) {
-        void localForage.setItem("pieces", foragePieces);
+        localStorage.setItem("pieces", foragePieces);
         setRepositoryPieces(repositoryPiecesAux);
       } else {
         for (const repo of repositories.data) {
@@ -100,7 +102,7 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
                 repositoryPiecesAux[repo.id].push(op);
                 foragePieces[op.id] = op;
               }
-              void localForage.setItem("pieces", foragePieces);
+              localStorage.setItem("pieces", foragePieces);
             })
             .catch((e) => {
               console.log(e);
@@ -115,8 +117,8 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     source: "default",
   });
 
-  const fetchForagePieceById = useCallback(async (id: number) => {
-    const pieces = await localForage.getItem<PieceForageSchema>("pieces");
+  const fetchForagePieceById = useCallback((id: number) => {
+    const pieces = localStorage.getItem<PieceForageSchema>("pieces");
     if (pieces !== null) {
       return pieces[id];
     }

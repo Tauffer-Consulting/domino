@@ -5,9 +5,9 @@ import { createCustomContext } from "utils";
 import { type IWorkflowSettings } from "./types";
 
 export interface IWorkflowSettingsContext {
-  fetchWorkflowSettingsData: () => Promise<IWorkflowSettings>;
-  setWorkflowSettingsData: (data: any) => Promise<void>;
-  clearWorkflowSettingsData: () => Promise<void>;
+  fetchWorkflowSettingsData: () => IWorkflowSettings;
+  setWorkflowSettingsData: (data: any) => void;
+  clearWorkflowSettingsData: () => void;
 }
 
 export const [WorkflowSettingsDataContext, useWorkflowSettings] =

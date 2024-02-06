@@ -16,6 +16,7 @@
     "@mui/material": "^5.14.20",
     "@mui/x-data-grid": "^6.15.0",
     "@mui/x-date-pickers": "^6.5.0",
+    "@nathan-vm/use-storage": "^0.2.1",
     "@types/dompurify": "^3.0.5",
     "@types/react": ">=18",
     "@types/react-dom": "^18.0.9",
@@ -61,16 +62,9 @@
     "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix"
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "extends": ["react-app", "react-app/jest"]
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ],
+  "browserslist": [">0.2%", "not dead", "not op_mini all"],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.5.0",

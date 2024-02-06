@@ -1,5 +1,5 @@
+import { useStorage } from "@nathan-vm/use-storage";
 import React, { useCallback } from "react";
-import localForage from "services/config/localForage.config";
 import { createCustomContext, getUuid } from "utils";
 
 import { type IWorkflowPieceData } from "./types";
@@ -10,15 +10,15 @@ export interface IWorkflowPiecesDataContext {
   setForageWorkflowPiecesDataById: (
     id: string,
     pieceData: IWorkflowPieceData,
-  ) => Promise<void>;
-  setForageWorkflowPiecesData: (pieceData: ForagePiecesData) => Promise<void>;
-  fetchForageWorkflowPiecesData: () => Promise<ForagePiecesData>;
+  ) => void;
+  setForageWorkflowPiecesData: (pieceData: ForagePiecesData) => void;
+  fetchForageWorkflowPiecesData: () => ForagePiecesData;
   fetchForageWorkflowPiecesDataById: (
     id: string,
-  ) => Promise<IWorkflowPieceData | undefined>;
-  removeForageWorkflowPieceDataById: (id: string) => Promise<void>;
-  clearForageWorkflowPiecesData: () => Promise<void>;
-  clearDownstreamDataById: (id: string) => Promise<void>;
+  ) => IWorkflowPieceData | undefined;
+  removeForageWorkflowPieceDataById: (id: string) => void;
+  clearForageWorkflowPiecesData: () => void;
+  clearDownstreamDataById: (id: string) => void;
 }
 
 export const [WorkflowPiecesDataContext, useWorkflowPiecesData] =
@@ -27,35 +27,37 @@ export const [WorkflowPiecesDataContext, useWorkflowPiecesData] =
 const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const localStorage = useStorage();
+
   const setForageWorkflowPiecesDataById = useCallback(
-    async (id: string, pieceData: IWorkflowPieceData) => {
+    (id: string, pieceData: IWorkflowPieceData) => {
       let currentData =
-        await localForage.getItem<ForagePiecesData>("workflowPiecesData");
+        localStorage.getItem<ForagePiecesData>("workflowPiecesData");
       if (!currentData) {
         currentData = {};
       }
       currentData[id] = pieceData;
-      await localForage.setItem("workflowPiecesData", currentData);
+      localStorage.setItem("workflowPiecesData", currentData);
     },
     [],
   );
   const setForageWorkflowPiecesData = useCallback(
-    async (pieceData: ForagePiecesData) => {
-      await localForage.setItem("workflowPiecesData", pieceData);
+    (pieceData: ForagePiecesData) => {
+      localStorage.setItem("workflowPiecesData", pieceData);
     },
     [],
   );
 
-  const fetchForageWorkflowPiecesData = useCallback(async () => {
+  const fetchForageWorkflowPiecesData = useCallback(() => {
     const workflowPiecesData =
-      await localForage.getItem<ForagePiecesData>("workflowPiecesData");
+      localStorage.getItem<ForagePiecesData>("workflowPiecesData");
 
     return workflowPiecesData ?? {};
   }, []);
 
-  const fetchForageWorkflowPiecesDataById = useCallback(async (id: string) => {
+  const fetchForageWorkflowPiecesDataById = useCallback((id: string) => {
     const workflowPiecesData =
-      await localForage.getItem<ForagePiecesData>("workflowPiecesData");
+      localStorage.getItem<ForagePiecesData>("workflowPiecesData");
 
     if (!workflowPiecesData?.[id]) {
       return;
@@ -64,10 +66,10 @@ const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({
     return workflowPiecesData[id];
   }, []);
 
-  const clearDownstreamDataById = useCallback(async (id: string) => {
+  const clearDownstreamDataById = useCallback((id: string) => {
     const hashId = getUuid(id).replaceAll("-", "");
     const workflowPieceData =
-      await localForage.getItem<ForagePiecesData>("workflowPiecesData");
+      localStorage.getItem<ForagePiecesData>("workflowPiecesData");
 
     if (!workflowPieceData) {
       return;
@@ -102,28 +104,28 @@ const WorkflowPiecesDataProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       });
     });
-    await localForage.setItem("workflowPiecesData", workflowPieceData);
+    localStorage.setItem("workflowPiecesData", workflowPieceData);
   }, []);
 
   const removeForageWorkflowPieceDataById = useCallback(
-    async (id: string) => {
+    (id: string) => {
       const workflowPieceData =
-        await localForage.getItem<ForagePiecesData>("workflowPiecesData");
+        localStorage.getItem<ForagePiecesData>("workflowPiecesData");
 
       if (!workflowPieceData) {
         return;
       }
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete workflowPieceData[id];
-      await localForage.setItem("workflowPiecesData", workflowPieceData);
+      localStorage.setItem("workflowPiecesData", workflowPieceData);
 
-      await clearDownstreamDataById(id);
+      clearDownstreamDataById(id);
     },
     [clearDownstreamDataById],
   );
 
-  const clearForageWorkflowPiecesData = useCallback(async () => {
-    await localForage.setItem("workflowPiecesData", {});
+  const clearForageWorkflowPiecesData = useCallback(() => {
+    localStorage.setItem("workflowPiecesData", {});
   }, []);
 
   const value: IWorkflowPiecesDataContext = {

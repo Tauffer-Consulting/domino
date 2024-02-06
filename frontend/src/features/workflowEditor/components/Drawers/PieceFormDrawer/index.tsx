@@ -9,12 +9,11 @@ import {
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import { createInputsSchemaValidation } from "features/workflowEditor/utils/validation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "utils";
 import * as yup from "yup";
-
-import { createInputsSchemaValidation } from "../../utils/validation";
 
 import ContainerResourceForm, {
   ContainerResourceFormSchema,
@@ -30,7 +29,7 @@ interface ISidebarPieceFormProps {
   onClose: (event: any) => void;
 }
 
-const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
+export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   const { schema, formId, open, onClose, title } = props;
 
   const {
@@ -40,7 +39,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     clearDownstreamDataById,
   } = useWorkflowsEditor();
 
-  const SidebarPieceFormSchema = useMemo(() => {
+  const PieceFormSchema = useMemo(() => {
     return yup.object().shape({
       storage: storageFormSchema,
       containerResources: ContainerResourceFormSchema,
@@ -48,7 +47,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     });
   }, [schema]);
 
-  const resolver = yupResolver(SidebarPieceFormSchema);
+  const resolver = yupResolver(PieceFormSchema);
 
   const [formLoaded, setFormLoaded] = useState(false);
 
@@ -61,7 +60,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
 
   const loadData = useCallback(async () => {
     setFormLoaded(false);
-    const data = await fetchForageWorkflowPiecesDataById(formId);
+    const data = fetchForageWorkflowPiecesDataById(formId);
     if (data) {
       reset(data); // put forage data on form if exist
     } else {
@@ -71,7 +70,7 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     setFormLoaded(true);
   }, [formId, fetchForageWorkflowPiecesDataById, reset, trigger]);
 
-  const updateOutputSchema = useCallback(async () => {
+  const updateOutputSchema = useCallback(() => {
     if (schema?.properties) {
       const outputSchemaProperty = Object.keys(schema.properties).find(
         (key) => {
@@ -128,8 +127,8 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
           {},
         );
 
-        await setForageWorkflowPiecesOutputSchema(formId, newProperties);
-        await clearDownstreamDataById(formId);
+        setForageWorkflowPiecesOutputSchema(formId, newProperties);
+        clearDownstreamDataById(formId);
       }
     }
   }, [
@@ -142,8 +141,8 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
 
   const saveData = useCallback(async () => {
     if (formId && open) {
-      await setForageWorkflowPiecesDataById(formId, data as IWorkflowPieceData);
-      await updateOutputSchema();
+      setForageWorkflowPiecesDataById(formId, data as IWorkflowPieceData);
+      updateOutputSchema();
     }
   }, [formId, open, setForageWorkflowPiecesDataById, data, updateOutputSchema]);
 
@@ -270,5 +269,3 @@ const SidebarPieceForm: React.FC<ISidebarPieceFormProps> = (props) => {
     </Drawer>
   );
 };
-
-export default SidebarPieceForm;

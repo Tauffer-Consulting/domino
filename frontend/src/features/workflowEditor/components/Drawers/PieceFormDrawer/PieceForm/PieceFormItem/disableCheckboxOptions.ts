@@ -1,4 +1,4 @@
-function getFromUpstreamType(schema: InputSchemaProperty): FromUpstream {
+function getFromUpstreamType(schema: Property): FromUpstream {
   if (schema?.from_upstream) {
     return schema?.from_upstream;
   }
@@ -6,7 +6,7 @@ function getFromUpstreamType(schema: InputSchemaProperty): FromUpstream {
   return "allowed";
 }
 
-export function disableCheckboxOptions(schema: InputSchemaProperty): boolean {
+export function disableCheckboxOptions(schema: Property): boolean {
   let disable: boolean = false;
   const fromUpstream = getFromUpstreamType(schema);
 

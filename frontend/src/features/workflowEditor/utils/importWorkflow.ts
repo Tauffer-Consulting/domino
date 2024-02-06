@@ -1,4 +1,3 @@
-import localForage from "services/config/localForage.config";
 import { isEmpty } from "utils";
 import * as yup from "yup";
 
@@ -32,7 +31,7 @@ export const importJsonWorkflow = (
   return null; // Return null if no file is selected
 };
 
-export const validateJsonImported = async (json: any): Promise<void> => {
+export const validateJsonImported = (json: any): void => {
   const schema = yup
     .object()
     .shape({
@@ -97,7 +96,7 @@ export const validateJsonImported = async (json: any): Promise<void> => {
     .strict()
     .noUnknown();
 
-  await schema.validate(json);
+  schema.validateSync(json);
 };
 
 export interface Differences {
@@ -105,12 +104,13 @@ export interface Differences {
   installedVersion: string | null;
   requiredVersion: string;
 }
-export const findDifferencesInJsonImported = async (
+export const findDifferencesInJsonImported = (
   json: any,
-): Promise<Differences[]> => {
+  pieces: Piece[],
+): Differences[] => {
   const currentRepositories = new Set<string>(
-    Object.values((await localForage.getItem("pieces")) as any)?.map(
-      (p: any) =>
+    Object.values(pieces)?.map(
+      (p) =>
         p?.repository_url.replace("https://github.com/", "") +
           ":" +
           p?.source_image.split(":")[1]?.replace(/-group\d+$/g, "") || "",
