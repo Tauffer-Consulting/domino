@@ -360,7 +360,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     container_name: domino-frontend
-    command: yarn debug
+    command: pnpm debug
     environment:
       - DOMINO_DEPLOY_MODE=local-compose
       - API_URL=http://localhost:8000

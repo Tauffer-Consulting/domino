@@ -6,8 +6,9 @@ EXPOSE 9222
 # Build Stage
 FROM node:18-alpine as build
 WORKDIR /usr/src/app
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN npm i -g pnpm
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
 
 # Final Stage
 FROM node:18-alpine
@@ -16,4 +17,4 @@ COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY . .
 RUN chmod -R 777 node_modules/
 USER node
-CMD ["yarn", "debug"]
+CMD ["pnpm", "run", "debug"]

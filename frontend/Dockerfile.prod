@@ -4,11 +4,9 @@ FROM node:18-slim as build
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and yarn.lock files
-COPY package.json yarn.lock ./
-
-# Install dependencies
-RUN yarn install --production --frozen-lockfile && yarn cache clean
+RUN npm i -g pnpm
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
 
 RUN npx pkg ./node_modules/@import-meta-env/cli/bin/import-meta-env.js \
   -o import-meta-env -y
@@ -17,7 +15,7 @@ RUN npx pkg ./node_modules/@import-meta-env/cli/bin/import-meta-env.js \
 COPY . .
 
 # Build the app for production
-RUN yarn build
+RUN pnpm build
 
 # Stage 2: Create a minimal NGINX image
 FROM nginx:1.25.2
