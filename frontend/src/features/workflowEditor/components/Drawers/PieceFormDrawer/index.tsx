@@ -8,7 +8,7 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { createInputsSchemaValidation } from "features/workflowEditor/utils/validation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -33,9 +33,9 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   const { schema, formId, open, onClose, title } = props;
 
   const {
-    setForageWorkflowPiecesDataById,
-    fetchForageWorkflowPiecesDataById,
-    setForageWorkflowPiecesOutputSchema,
+    setWorkflowPieceDataById,
+    getWorkflowPieceDataById,
+    setWorkflowPieceOutputSchema,
     clearDownstreamDataById,
   } = useWorkflowsEditor();
 
@@ -60,7 +60,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
 
   const loadData = useCallback(async () => {
     setFormLoaded(false);
-    const data = fetchForageWorkflowPiecesDataById(formId);
+    const data = getWorkflowPieceDataById(formId);
     if (data) {
       reset(data); // put forage data on form if exist
     } else {
@@ -68,7 +68,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
     }
     void trigger();
     setFormLoaded(true);
-  }, [formId, fetchForageWorkflowPiecesDataById, reset, trigger]);
+  }, [formId, getWorkflowPieceDataById, reset, trigger]);
 
   const updateOutputSchema = useCallback(() => {
     if (schema?.properties) {
@@ -127,24 +127,24 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
           {},
         );
 
-        setForageWorkflowPiecesOutputSchema(formId, newProperties);
+        setWorkflowPieceOutputSchema(formId, newProperties);
         clearDownstreamDataById(formId);
       }
     }
   }, [
     schema,
     data.inputs,
-    setForageWorkflowPiecesOutputSchema,
+    setWorkflowPieceOutputSchema,
     formId,
     clearDownstreamDataById,
   ]);
 
   const saveData = useCallback(async () => {
     if (formId && open) {
-      setForageWorkflowPiecesDataById(formId, data as IWorkflowPieceData);
+      setWorkflowPieceDataById(formId, data as WorkflowPieceData);
       updateOutputSchema();
     }
-  }, [formId, open, setForageWorkflowPiecesDataById, data, updateOutputSchema]);
+  }, [formId, open, setWorkflowPieceDataById, data, updateOutputSchema]);
 
   // load forage
   useEffect(() => {

@@ -1,12 +1,12 @@
+import { useStorage } from "@nathan-vm/use-storage";
 import React, { useCallback } from "react";
-import localForage from "services/config/localForage.config";
 import { createCustomContext } from "utils";
 
 import { type IWorkflowSettings } from "./types";
 
 export interface IWorkflowSettingsContext {
-  fetchWorkflowSettingsData: () => IWorkflowSettings;
-  setWorkflowSettingsData: (data: any) => void;
+  getWorkflowSettingsData: () => IWorkflowSettings;
+  setWorkflowSettingsData: (data: IWorkflowSettings) => void;
   clearWorkflowSettingsData: () => void;
 }
 
@@ -16,25 +16,26 @@ export const [WorkflowSettingsDataContext, useWorkflowSettings] =
 const WorkflowSettingsDataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // Forage forms data
-  const fetchWorkflowSettingsData = useCallback(async () => {
-    const data = await localForage.getItem<any>("workflowSettingsData");
-    if (data === null) {
-      return {};
-    }
-    return data;
+  const localStorage = useStorage();
+
+  const getWorkflowSettingsData = useCallback(() => {
+    return (
+      localStorage.getItem<IWorkflowSettings>("workflowSettingsData") ??
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      ({} as IWorkflowSettings)
+    );
   }, []);
 
-  const setWorkflowSettingsData = useCallback(async (data: any) => {
-    await localForage.setItem("workflowSettingsData", data);
+  const setWorkflowSettingsData = useCallback((data: IWorkflowSettings) => {
+    localStorage.setItem("workflowSettingsData", data);
   }, []);
 
-  const clearWorkflowSettingsData = useCallback(async () => {
-    await localForage.setItem("workflowSettingsData", {});
+  const clearWorkflowSettingsData = useCallback(() => {
+    localStorage.removeItem("workflowSettingsData");
   }, []);
 
   const value = {
-    fetchWorkflowSettingsData,
+    getWorkflowSettingsData,
     setWorkflowSettingsData,
     clearWorkflowSettingsData,
   };

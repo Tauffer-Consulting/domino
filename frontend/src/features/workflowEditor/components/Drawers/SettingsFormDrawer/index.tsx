@@ -121,7 +121,7 @@ const SettingsFormDrawer = forwardRef<
   ) => {
     const { open, onClose } = props;
 
-    const { fetchWorkflowSettingsData, setWorkflowSettingsData } =
+    const { getWorkflowSettingsData, setWorkflowSettingsData } =
       useWorkflowsEditor();
 
     const resolver = yupResolver(WorkflowSettingsFormSchema);
@@ -140,7 +140,7 @@ const SettingsFormDrawer = forwardRef<
     }, [validate]);
 
     const loadData = useCallback(() => {
-      const data = fetchWorkflowSettingsData();
+      const data = getWorkflowSettingsData();
       if (Object.keys(data).length === 0) {
         reset(defaultSettingsData);
         setWorkflowSettingsData(defaultSettingsData);
@@ -148,7 +148,7 @@ const SettingsFormDrawer = forwardRef<
         reset(data);
       }
       setLoaded(true);
-    }, [reset, fetchWorkflowSettingsData, setWorkflowSettingsData]);
+    }, [reset, getWorkflowSettingsData, setWorkflowSettingsData]);
 
     const saveData = useCallback(() => {
       if (open) {

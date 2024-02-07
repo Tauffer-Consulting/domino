@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import {
   type IStorageFormData,
-  type IWorkflowPieceData,
+  type WorkflowPieceData,
   type StorageAccessModes,
   storageAccessModes,
 } from "features/workflowEditor/context/types";
@@ -29,7 +29,7 @@ export const defaultStorage: IStorageFormData = {
 };
 
 const StorageForm: React.FC = () => {
-  const { formState, control } = useFormContext<IWorkflowPieceData>();
+  const { formState, control } = useFormContext<WorkflowPieceData>();
 
   return (
     <Grid container spacing={2}>

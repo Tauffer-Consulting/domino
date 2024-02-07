@@ -5,7 +5,7 @@ import Elk from "elkjs";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import {
   storageAccessModes,
-  type IWorkflowPieceData,
+  type WorkflowPieceData,
 } from "features/workflowEditor/context/types";
 import theme from "providers/theme.config";
 import React, {
@@ -78,13 +78,13 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
     const [rawEdges, setEdges, onEdgesChange] = useEdgesState([]);
 
     const {
-      fetchForageWorkflowNodes,
-      fetchForageWorkflowEdges,
-      setForageWorkflowPieces,
-      getForageWorkflowPieces,
-      removeForageWorkflowPiecesById,
-      removeForageWorkflowPieceDataById,
-      setForageWorkflowPiecesDataById,
+      getWorkflowNodes,
+      getWorkflowEdges,
+      setWorkflowPieces,
+      getWorkflowPieces,
+      deleteWorkflowPieceById,
+      deleteWorkflowPieceDataById,
+      setWorkflowPieceDataById,
       clearDownstreamDataById,
       setWorkflowEdges,
       setWorkflowNodes,
@@ -95,13 +95,13 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
     const onInit = useCallback(
       (instance: ReactFlowInstance) => {
         setInstance(instance);
-        const edges = fetchForageWorkflowEdges();
-        const nodes = fetchForageWorkflowNodes();
+        const edges = getWorkflowEdges();
+        const nodes = getWorkflowNodes();
         setNodes(nodes);
         setEdges(edges);
         window.requestAnimationFrame(() => instance.fitView());
       },
-      [fetchForageWorkflowEdges, fetchForageWorkflowNodes, setNodes, setEdges],
+      [getWorkflowEdges, getWorkflowNodes, setNodes, setEdges],
     );
 
     const createNewNode = useCallback(
@@ -124,36 +124,34 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           data: newNodeData,
         };
 
-        const piece = fetchForagePieceById(data.id);
-        const defaultInputs = extractDefaultInputValues(
-          piece as unknown as Piece,
-        );
+        const piece = fetchForagePieceById(data.id) as unknown as Piece;
+        const defaultInputs = extractDefaultInputValues(piece);
 
         const defaultContainerResources = extractDefaultContainerResources(
           piece?.container_resources,
         );
 
-        const currentWorkflowPieces = getForageWorkflowPieces();
+        const currentWorkflowPieces = getWorkflowPieces();
         const newWorkflowPieces = {
           ...currentWorkflowPieces,
           [newNode.id]: piece,
         };
-        setForageWorkflowPieces(newWorkflowPieces);
+        setWorkflowPieces(newWorkflowPieces);
 
-        const defaultWorkflowPieceData: IWorkflowPieceData = {
+        const defaultWorkflowPieceData: WorkflowPieceData = {
           storage: { storageAccessMode: storageAccessModes.ReadWrite },
           containerResources: defaultContainerResources,
           inputs: defaultInputs,
         };
 
-        setForageWorkflowPiecesDataById(newNode.id, defaultWorkflowPieceData);
+        setWorkflowPieceDataById(newNode.id, defaultWorkflowPieceData);
         return newNode;
       },
       [
         fetchForagePieceById,
-        setForageWorkflowPieces,
-        getForageWorkflowPieces,
-        setForageWorkflowPiecesDataById,
+        setWorkflowPieces,
+        getWorkflowPieces,
+        setWorkflowPieceDataById,
       ],
     );
 
@@ -202,11 +200,11 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
     const onNodesDelete = useCallback(
       (nodes: any) => {
         for (const node of nodes) {
-          removeForageWorkflowPiecesById(node.id);
-          removeForageWorkflowPieceDataById(node.id);
+          deleteWorkflowPieceById(node.id);
+          deleteWorkflowPieceDataById(node.id);
         }
       },
-      [removeForageWorkflowPieceDataById, removeForageWorkflowPiecesById],
+      [deleteWorkflowPieceDataById, deleteWorkflowPieceById],
     );
 
     const onEdgesDelete = useCallback(

@@ -9,7 +9,7 @@ import SelectInput from "components/SelectInput";
 import TextInput from "components/TextInput";
 import {
   type InputArray,
-  type IWorkflowPieceData,
+  type WorkflowPieceData,
 } from "features/workflowEditor/context/types";
 import {
   type UpstreamOptions,
@@ -31,7 +31,7 @@ interface ArrayInputItemProps {
   formId: string;
   inputKey: string;
   schema: any;
-  control: Control<IWorkflowPieceData, any>;
+  control: Control<WorkflowPieceData, any>;
   definitions?: any;
   upstreamOptions: UpstreamOptions;
 }

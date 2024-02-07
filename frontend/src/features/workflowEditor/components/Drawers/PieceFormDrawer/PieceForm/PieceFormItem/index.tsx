@@ -6,7 +6,7 @@ import NumberInput from "components/NumberInput";
 import SelectInput from "components/SelectInput";
 import TextAreaInput from "components/TextAreaInput";
 import TextInput from "components/TextInput";
-import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import {
   type Option,
   type UpstreamOptions,
@@ -22,7 +22,7 @@ interface PieceFormItemProps {
   formId: string;
   schema: Property;
   itemKey: string;
-  control: Control<IWorkflowPieceData, any>;
+  control: Control<WorkflowPieceData, any>;
   definitions?: Definitions;
   upstreamOptions: UpstreamOptions;
 }
@@ -78,7 +78,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     }
 
     inputElement = (
-      <SelectInput<IWorkflowPieceData>
+      <SelectInput<WorkflowPieceData>
         label={itemKey}
         emptyValue
         name={`inputs.${itemKey}.value`}
@@ -90,7 +90,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     anyOfType === "float"
   ) {
     inputElement = (
-      <NumberInput<IWorkflowPieceData>
+      <NumberInput<WorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         type="float"
         label={schema.title}
@@ -102,7 +102,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     anyOfType === "integer"
   ) {
     inputElement = (
-      <NumberInput<IWorkflowPieceData>
+      <NumberInput<WorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         type="int"
         label={schema.title}
@@ -111,7 +111,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     );
   } else if ("type" in schema && schema.type === "boolean") {
     inputElement = (
-      <CheckboxInput<IWorkflowPieceData>
+      <CheckboxInput<WorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
       />
@@ -138,7 +138,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     anyOfType === "date"
   ) {
     inputElement = (
-      <DatetimeInput<IWorkflowPieceData>
+      <DatetimeInput<WorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date"
@@ -152,7 +152,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     anyOfType === "time"
   ) {
     inputElement = (
-      <DatetimeInput<IWorkflowPieceData>
+      <DatetimeInput<WorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="time"
@@ -166,7 +166,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     anyOfType === "date-time"
   ) {
     inputElement = (
-      <DatetimeInput<IWorkflowPieceData>
+      <DatetimeInput<WorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         label={schema.title}
         type="date-time"
@@ -186,7 +186,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       : "python";
 
     inputElement = (
-      <CodeEditorInput<IWorkflowPieceData>
+      <CodeEditorInput<WorkflowPieceData>
         name={`inputs.${itemKey}.value`}
         language={language}
         placeholder={`Enter your ${language} code here.`}
@@ -202,7 +202,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       schema?.widget === "textarea")
   ) {
     inputElement = (
-      <TextAreaInput<IWorkflowPieceData>
+      <TextAreaInput<WorkflowPieceData>
         variant="outlined"
         name={`inputs.${itemKey}.value`}
         label={schema.title}
@@ -213,7 +213,7 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     anyOfType === "string"
   ) {
     inputElement = (
-      <TextInput<IWorkflowPieceData>
+      <TextInput<WorkflowPieceData>
         variant="outlined"
         name={`inputs.${itemKey}.value`}
         label={schema.title}

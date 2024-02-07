@@ -49,12 +49,12 @@ export const WorkflowsEditorComponent: React.FC = () => {
   useInterval(saveDataToLocalForage, 40000);
 
   const {
-    clearForageData,
+    clearStorageData,
     generateWorkflowsEditorBodyParams,
-    fetchWorkflowForage,
+    getWorkflow,
     handleCreateWorkflow,
-    fetchWorkflowPieceById,
-    importWorkflowToForage,
+    getWorkflowPieceById,
+    importWorkflowToStorage,
     setWorkflowEdges,
     setWorkflowNodes,
   } = useWorkflowsEditor();
@@ -120,7 +120,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       if (!workspace?.id) {
         throw new Error("No selected Workspace");
       }
-      const payload = fetchWorkflowForage();
+      const payload = getWorkflow();
 
       await validateWorkflowPiecesData(payload);
       await validateWorkflowSettings(payload);
@@ -143,7 +143,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       }
     }
   }, [
-    fetchWorkflowForage,
+    getWorkflow,
     handleCreateWorkflow,
     validateWorkflowPiecesData,
     validateWorkflowSettings,
@@ -152,15 +152,15 @@ export const WorkflowsEditorComponent: React.FC = () => {
   ]);
 
   const handleClear = useCallback(() => {
-    clearForageData();
+    clearStorageData();
     workflowPanelRef.current?.setEdges([]);
     workflowPanelRef.current?.setNodes([]);
     sidebarSettingsRef.current?.loadData();
-  }, [clearForageData]);
+  }, [clearStorageData]);
 
   const handleExport = useCallback(() => {
     saveDataToLocalForage();
-    const payload = fetchWorkflowForage();
+    const payload = getWorkflow();
     if (Object.keys(payload.workflowPieces).length === 0) {
       toast.error("Workflow must have at least one piece to be exported.");
       return;
@@ -178,15 +178,15 @@ export const WorkflowsEditorComponent: React.FC = () => {
     (json: GenerateWorkflowsParams) => {
       workflowPanelRef?.current?.setNodes(json.workflowNodes);
       workflowPanelRef?.current?.setEdges(json.workflowEdges);
-      importWorkflowToForage(json);
+      importWorkflowToStorage(json);
     },
-    [workflowPanelRef, importWorkflowToForage],
+    [workflowPanelRef, importWorkflowToStorage],
   );
 
   // Node double click open drawer with forms
   const onNodeDoubleClick = useCallback(
     (_e: any, node: Node) => {
-      const pieceNode = fetchWorkflowPieceById(node.id);
+      const pieceNode = getWorkflowPieceById(node.id);
       setFormSchema(pieceNode?.input_schema);
       setFormId(node.id);
       setFormTitle(() => {
@@ -194,7 +194,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       });
       setSidebarPieceDrawer(true);
     },
-    [fetchWorkflowPieceById],
+    [getWorkflowPieceById],
   );
 
   // Left drawers controls

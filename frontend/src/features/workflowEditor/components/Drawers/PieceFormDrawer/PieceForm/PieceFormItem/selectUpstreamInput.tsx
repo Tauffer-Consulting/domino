@@ -6,7 +6,7 @@ import {
   Select,
   type SelectChangeEvent,
 } from "@mui/material";
-import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { type Option } from "features/workflowEditor/utils";
 import React, { useCallback } from "react";
 import { Controller, useFormContext } from "react-hook-form";
@@ -38,7 +38,7 @@ const SelectUpstreamInput: React.FC<Props> = ({
     setValue,
     control,
     formState: { errors },
-  } = useFormContext<IWorkflowPieceData>();
+  } = useFormContext<WorkflowPieceData>();
 
   const handleSelectChange = useCallback(
     (event: SelectChangeEvent<string | null>, onChange: (e: any) => void) => {

@@ -1,12 +1,6 @@
 import { Grid, Paper } from "@mui/material";
 import { Breadcrumbs } from "components/Breadcrumbs";
 import {
-  WorkflowPanel,
-  type WorkflowPanelRef,
-  type RunNode,
-  type DefaultNode,
-} from "components/WorkflowPanel";
-import {
   useAuthenticatedGetWorkflowId,
   useAuthenticatedGetWorkflowRunTasks,
   useAuthenticatedPostWorkflowRunId,
@@ -15,11 +9,17 @@ import {
   type IWorkflowRuns,
   type IWorkflowRunTasks,
 } from "features/myWorkflows/types";
+import { type DefaultNode } from "features/workflowEditor/components/Panel/WorkflowPanel";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { type NodeMouseHandler } from "reactflow";
 import { useInterval } from "utils";
 
+import {
+  WorkflowPanel,
+  type WorkflowPanelRef,
+  type RunNode,
+} from "./WorkflowPanel";
 import {
   WorkflowRunDetail,
   type WorkflowRunDetailRef,
@@ -226,7 +226,6 @@ export const WorkflowDetail: React.FC = () => {
             <Paper sx={{ height: "44vh" }}>
               <WorkflowPanel
                 ref={workflowPanelRef}
-                editable={false}
                 onNodeDoubleClick={onNodeDoubleClick}
               />
             </Paper>

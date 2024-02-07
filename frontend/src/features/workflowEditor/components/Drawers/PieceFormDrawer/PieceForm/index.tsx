@@ -1,5 +1,5 @@
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import {
   getUpstreamOptions,
   type UpstreamOptions,
@@ -15,9 +15,8 @@ interface PieceFormProps {
 }
 
 const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
-  const { fetchForageWorkflowEdges, getForageWorkflowPieces } =
-    useWorkflowsEditor();
-  const { control } = useFormContext<IWorkflowPieceData>();
+  const { getWorkflowEdges, getWorkflowPieces } = useWorkflowsEditor();
+  const { control } = useFormContext<WorkflowPieceData>();
   const [upstreamOptions, setUpstreamOptions] = useState<UpstreamOptions>({});
 
   const shouldRender = useMemo(() => {
@@ -29,8 +28,8 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
       return;
     }
 
-    const workflowPieces = getForageWorkflowPieces();
-    const workflowEdges = fetchForageWorkflowEdges();
+    const workflowPieces = getWorkflowPieces();
+    const workflowEdges = getWorkflowEdges();
 
     const upstreamOptions = getUpstreamOptions(
       formId,
@@ -40,13 +39,7 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
     );
 
     setUpstreamOptions(upstreamOptions);
-  }, [
-    fetchForageWorkflowEdges,
-    formId,
-    getForageWorkflowPieces,
-    schema,
-    shouldRender,
-  ]);
+  }, [getWorkflowEdges, formId, getWorkflowPieces, schema, shouldRender]);
 
   useEffect(() => {
     handleUpstreamOptions();

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { type IWorkflowPieceData } from "features/workflowEditor/context/types";
+import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { type Edge, type Node } from "reactflow";
 import useSWR from "swr";
 
@@ -17,7 +17,7 @@ type GithubReposContent = Array<{
 
 interface JSONFile {
   workflowPieces: Record<string, Piece>;
-  workflowPiecesData: IWorkflowPieceData;
+  workflowPiecesData: WorkflowPieceData;
   workflowNodes: Node[];
   workflowEdges: Edge[];
 }

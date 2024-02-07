@@ -13,13 +13,6 @@ interface IStyleData {
   module: string;
 }
 
-interface DefaultNodeData {
-  name: string;
-  style: IStyleData;
-  validationError: boolean;
-  orientation: "vertical" | "horizontal";
-}
-
 interface RunNodeData {
   taskId: string;
   name: string;
@@ -28,12 +21,7 @@ interface RunNodeData {
   orientation: "vertical" | "horizontal";
 }
 
-export type DefaultNode = Node<DefaultNodeData>;
 export type RunNode = Node<RunNodeData>;
-
-export interface DefaultNodeProps extends NodeProps {
-  data: DefaultNodeData;
-}
 
 export interface RunNodeProps extends NodeProps {
   data: RunNodeData;

@@ -5,7 +5,7 @@ import { isEmpty } from "utils";
 import { defaultContainerResources } from "../components/Drawers/PieceFormDrawer/ContainerResourceForm";
 import {
   type IContainerResourceFormData,
-  type IWorkflowPieceData,
+  type WorkflowPieceData,
 } from "../context/types";
 
 import { getFromUpstream } from "./getFromUpstream";
@@ -15,7 +15,7 @@ export const extractDefaultInputValues = (pieceSchema: Piece) => {
   const definitions = pieceSchema.input_schema.$defs;
   const defaultData = extractDefaultValues(pieceSchema.input_schema);
 
-  const defaultInputs: IWorkflowPieceData["inputs"] = {};
+  const defaultInputs: WorkflowPieceData["inputs"] = {};
   for (const key in defaultData) {
     const fromUpstream = getFromUpstream(schema[key]);
 
