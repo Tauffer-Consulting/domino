@@ -1,13 +1,16 @@
-# Stage 1: Build the React app
-FROM node:18-slim as build
+# Install pnpm
+FROM node:18-alpine as base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-# Set the working directory
+# Build the React app
+FROM base as build
 WORKDIR /app
-
-RUN npm i -g pnpm
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
+# Import ENVs to the builded app
 RUN npx pkg ./node_modules/@import-meta-env/cli/bin/import-meta-env.js \
   -o import-meta-env -y
 

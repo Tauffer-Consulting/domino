@@ -1,17 +1,22 @@
-# Debug Stage
-FROM node:18-alpine as debug
-WORKDIR /usr/src/app
-EXPOSE 9222
+# Install pnpm
+FROM node:18-alpine as base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 # Build Stage
-FROM node:18-alpine as build
+FROM base as build
 WORKDIR /usr/src/app
-RUN npm i -g pnpm
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
+# Debug Stage
+FROM base as debug
+WORKDIR /usr/src/app
+EXPOSE 9222
+
 # Final Stage
-FROM node:18-alpine
+FROM base
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY . .
