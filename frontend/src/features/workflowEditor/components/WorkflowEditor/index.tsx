@@ -234,7 +234,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
             handleExport={handleExport}
             handleImported={handleImportedJson}
             handleSave={handleSaveWorkflow}
-            handleSettings={() => toggleSidebarSettingsDrawer(true)}
+            handleSettings={toggleSidebarSettingsDrawer(true)}
           />
           <Paper sx={{ height: "80vh" }}>
             <WorkflowPanel

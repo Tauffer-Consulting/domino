@@ -23,7 +23,7 @@ import {
 } from "../Modals";
 
 interface Props {
-  handleSettings: () => void;
+  handleSettings: (event: any) => void;
   handleSave: () => void;
   handleExport: () => void;
   handleImported: (json: any) => void;
