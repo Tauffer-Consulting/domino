@@ -109,8 +109,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         .then(() => {
           toast.success(`User removed successfully from workspace.`);
           const storageWorkspace = JSON.parse(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            localStorage.getItem("workspace")!,
+            localStorage.getItem("workspace") ?? "{}",
           );
           if (storageWorkspace && storageWorkspace.id === workspaceId) {
             localStorage.removeItem("workspace");
