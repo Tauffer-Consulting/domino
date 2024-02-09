@@ -43,7 +43,6 @@ function generateOptions(
     schema: Schema | Property | Definition,
   ): UpstreamOptions {
     const options: UpstreamOptions = {};
-    console.log(schema);
     const addOptions = (opts: Option[] | UpstreamOptions, key: string = "") => {
       if (Array.isArray(opts)) {
         options[key] = opts;
