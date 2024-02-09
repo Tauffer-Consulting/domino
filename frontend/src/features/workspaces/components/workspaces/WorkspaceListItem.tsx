@@ -16,7 +16,6 @@ import {
   Tooltip,
   Chip,
 } from "@mui/material";
-import Stack from "@mui/material/Stack";
 import { type IWorkspaceSummary } from "context/workspaces/types";
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";

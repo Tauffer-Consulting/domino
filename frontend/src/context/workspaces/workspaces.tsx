@@ -108,6 +108,13 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
       removeUserWorkspace({ workspaceId, userId })
         .then(() => {
           toast.success(`User removed successfully from workspace.`);
+          const storageWorkspace = JSON.parse(
+            localStorage.getItem("workspace") ?? "{}",
+          );
+          if (storageWorkspace && storageWorkspace.id === workspaceId) {
+            localStorage.removeItem("workspace");
+            setWorkspace(null);
+          }
           void workspacesRefresh();
         })
         .catch((error) => {
