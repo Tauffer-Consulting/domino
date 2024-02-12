@@ -305,8 +305,8 @@ def cli_create_piece_repository(name, container_registry):
 @click.option(
     '--dev',
     is_flag=True,
-    prompt='Build from dev base images?',
-    default=False
+    default=False,
+    help="Build pieces images using development base piece image."
 )
 def cli_organize_pieces_repository(build_images: bool, source_url: str, tag_overwrite: str, dev: bool):
     """Organize Pieces repository."""
