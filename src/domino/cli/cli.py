@@ -302,9 +302,15 @@ def cli_create_piece_repository(name, container_registry):
     default="",
     help='Overwrite tag for release.'
 )
-def cli_organize_pieces_repository(build_images: bool, source_url: str, tag_overwrite: str):
+@click.option(
+    '--dev',
+    is_flag=True,
+    prompt='Build from dev base images?',
+    default=False
+)
+def cli_organize_pieces_repository(build_images: bool, source_url: str, tag_overwrite: str, dev: bool):
     """Organize Pieces repository."""
-    pieces_repository.organize_pieces_repository(build_images, source_url, tag_overwrite)
+    pieces_repository.organize_pieces_repository(build_images, source_url, tag_overwrite, dev)
 
 
 @click.command()
