@@ -60,7 +60,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         self.logger = get_configured_logger(f"{self.__class__.__name__ }-{self.task_id}")
 
         self.display_result = None
-        self.storage_size_in_bytes = 0
+        self._storage_size_in_bytes = 0
 
     def start_logger(self):
         """
@@ -303,8 +303,8 @@ class BasePiece(metaclass=abc.ABCMeta):
         xcom_obj = self.format_xcom(output_obj=output_obj)
         self.push_xcom(xcom_obj=xcom_obj)
         base_results_path = f"{self.workflow_shared_storage_path}/{self.task_id}"
-        self.storage_size_in_bytes = self._get_folder_size(base_results_path)
-        self.logger.info(f"Piece used {self.storage_size_in_bytes} bytes of storage.")
+        self._storage_size_in_bytes = self._get_folder_size(base_results_path)
+        self.logger.info(f"Piece used {self._storage_size_in_bytes} bytes of storage.")
         self.logger.info("End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
 
 
