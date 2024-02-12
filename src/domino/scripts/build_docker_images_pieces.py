@@ -56,7 +56,7 @@ def build_image_from_tmp_dockerfile(
         (Path(path) / dockerfile).unlink()
 
 
-def build_images_from_pieces_repository(tag_overwrite: str | None = None):
+def build_images_from_pieces_repository(tag_overwrite: str | None = None, dev: bool = False):
     """
     Each dependencies group will need to have its own Docker image built and published to be used by Domino.
     This is because the Pieces source code goes baked in the images.
@@ -89,9 +89,13 @@ def build_images_from_pieces_repository(tag_overwrite: str | None = None):
         source_image_name = f"{github_container_registry_name}/{docker_image_repository}:{docker_image_version}-{group}"
 
         # If no extra dependency, use base Pod image and just copy the Pieces source code
+        base_image = "ghcr.io/tauffer-consulting/domino-base-piece:latest"
+        if dev:
+            base_image = "ghcr.io/tauffer-consulting/domino-base-piece:latest-dev"
+
         if not any([dependency_dockerfile, dependency_requirements]):
             pieces_dependencies_map[group]["source_image"] = source_image_name
-            dockerfile_str = """FROM ghcr.io/tauffer-consulting/domino-base-piece:latest
+            dockerfile_str = f"""FROM {base_image}
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino
@@ -108,7 +112,7 @@ COPY .domino domino/pieces_repository/.domino
         # If dependency is defined as a requirements.txt
         elif dependency_requirements:
             pieces_dependencies_map[group]["source_image"] = source_image_name
-            dockerfile_str = f"""FROM ghcr.io/tauffer-consulting/domino-base-piece:latest
+            dockerfile_str = f"""FROM {base_image}
 COPY config.toml domino/pieces_repository/
 COPY pieces domino/pieces_repository/pieces
 COPY .domino domino/pieces_repository/.domino

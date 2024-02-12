@@ -60,6 +60,7 @@ class BasePiece(metaclass=abc.ABCMeta):
         self.logger = get_configured_logger(f"{self.__class__.__name__ }-{self.task_id}")
 
         self.display_result = None
+        self._storage_size_in_bytes = 0
 
     def start_logger(self):
         """
@@ -75,13 +76,22 @@ class BasePiece(metaclass=abc.ABCMeta):
                 break
             time.sleep(2)
 
+    @staticmethod
+    def _get_folder_size(folder_path):
+        total_size = 0
+        for dirpath, _, filenames in os.walk(folder_path):
+            for filename in filenames:
+                file_path = os.path.join(dirpath, filename)
+                total_size += os.path.getsize(file_path)
+        return total_size
+
     def generate_paths(self):
         """
         Generates paths for shared storage.
         """
         # Base path for fetching and storing runs results
-        if not Path(self.workflow_shared_storage).is_dir():
-            Path(self.workflow_shared_storage).mkdir(parents=True, exist_ok=True)
+        if not Path(self.workflow_shared_storage_path).is_dir():
+            Path(self.workflow_shared_storage_path).mkdir(parents=True, exist_ok=True)
 
         # # Path to store results data
         if not Path(self.results_path).is_dir():
@@ -114,8 +124,8 @@ class BasePiece(metaclass=abc.ABCMeta):
             upstream_tasks_ids = ast.literal_eval(os.getenv("AIRFLOW_UPSTREAM_TASKS_IDS", str(list())))
             for tid in upstream_tasks_ids:
                 self.upstream_tasks_data[tid] = dict()
-                self.upstream_tasks_data[tid]["results"] = self.workflow_shared_storage + f"/{tid}/results"
-                with open(f"{self.workflow_shared_storage}/{tid}/xcom/return.json") as f:
+                self.upstream_tasks_data[tid]["results"] = self.workflow_shared_storage_path + f"/{tid}/results"
+                with open(f"{self.workflow_shared_storage_path}/{tid}/xcom/return.json") as f:
                     self.upstream_tasks_data[tid]["xcom"] = json.load(f)
         else:
             raise NotImplementedError(f"Get upstream XCOM not implemented for deploy_mode=={self.deploy_mode}")
@@ -262,12 +272,12 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Generate paths
         workflow_run_subpath = os.environ.get('DOMINO_WORKFLOW_RUN_SUBPATH', '')
-        self.workflow_shared_storage = Path("/home/shared_storage")
+        self.workflow_shared_storage_path = Path("/home/shared_storage")
         if self.deploy_mode == 'local-compose':
-            self.workflow_shared_storage = str(self.workflow_shared_storage / workflow_run_subpath)
-        self.results_path = f"{self.workflow_shared_storage}/{self.task_id}/results"
-        self.xcom_path = f"{self.workflow_shared_storage}/{self.task_id}/xcom"
-        self.report_path = f"{self.workflow_shared_storage}/{self.task_id}/report"
+            self.workflow_shared_storage_path = str(self.workflow_shared_storage_path / workflow_run_subpath)
+        self.results_path = f"{self.workflow_shared_storage_path}/{self.task_id}/results"
+        self.xcom_path = f"{self.workflow_shared_storage_path}/{self.task_id}/xcom"
+        self.report_path = f"{self.workflow_shared_storage_path}/{self.task_id}/report"
         shared_storage_source_name = os.environ.get('DOMINO_WORKFLOW_SHARED_STORAGE_SOURCE_NAME', None)
         if not shared_storage_source_name or shared_storage_source_name == "none" or self.deploy_mode == "local-compose":
             self.generate_paths()
@@ -292,7 +302,11 @@ class BasePiece(metaclass=abc.ABCMeta):
         # Push XCom
         xcom_obj = self.format_xcom(output_obj=output_obj)
         self.push_xcom(xcom_obj=xcom_obj)
+        base_results_path = f"{self.workflow_shared_storage_path}/{self.task_id}"
+        self._storage_size_in_bytes = self._get_folder_size(base_results_path)
+        self.logger.info(f"Piece used {self._storage_size_in_bytes} bytes of storage.")
         self.logger.info("End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
+
 
     @classmethod
     def dry_run(
