@@ -301,11 +301,11 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Push XCom
         xcom_obj = self.format_xcom(output_obj=output_obj)
-        self._storage_size_in_bytes = self._get_folder_size(base_results_path)
+        shared_storage_base_path = f"{self.workflow_shared_storage_path}/{self.task_id}"
+        self._storage_size_in_bytes = self._get_folder_size(shared_storage_base_path)
         xcom_obj['_storage_size_in_bytes'] = self._storage_size_in_bytes
         self.push_xcom(xcom_obj=xcom_obj)
         base_results_path = f"{self.workflow_shared_storage_path}/{self.task_id}"
-        self._storage_size_in_bytes = self._get_folder_size(base_results_path)
         self.logger.info(f"Piece used {self._storage_size_in_bytes} bytes of storage.")
         self.logger.info("End cut point for logger 48c94577-0225-4c3f-87c0-8add3f4e6d4b")
 
