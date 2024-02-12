@@ -190,4 +190,6 @@ class DominoDockerOperator(DockerOperator):
         self.domino_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
         # env var format = {"name": "value"}
         self._prepare_execute_environment(context=context)
-        return super().execute(context=context)
+        result = super().execute(context=context)
+        self._shared_storage_usage_in_bytes = result['_shared_storage_usage_in_bytes']
+        return result
