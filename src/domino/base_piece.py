@@ -301,6 +301,8 @@ class BasePiece(metaclass=abc.ABCMeta):
 
         # Push XCom
         xcom_obj = self.format_xcom(output_obj=output_obj)
+        self._storage_size_in_bytes = self._get_folder_size(base_results_path)
+        xcom_obj['_storage_size_in_bytes'] = self._storage_size_in_bytes
         self.push_xcom(xcom_obj=xcom_obj)
         base_results_path = f"{self.workflow_shared_storage_path}/{self.task_id}"
         self._storage_size_in_bytes = self._get_folder_size(base_results_path)
