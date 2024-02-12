@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - dev
-      - update-base-piece # TODO remove
     paths:
       - src/domino/**
       - Dockerfile-airflow-domino.dev
