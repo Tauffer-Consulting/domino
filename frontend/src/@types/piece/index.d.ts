@@ -7,6 +7,8 @@ declare global {
   type Schema = import("./schema").Schema;
   type FromUpstream = import("./schema").FromUpstream;
   type TypeName = import("./schema").TypeName;
+  type FormatType = import("./schema").FormatType;
+  type WidgetType = import("./schema").WidgetType;
   type Reference = import("./schema").Reference;
 
   type Properties = import("./schema").Properties;

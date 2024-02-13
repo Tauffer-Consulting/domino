@@ -1,11 +1,9 @@
 import { useWorkflowsEditor } from "features/workflowEditor/context";
-import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import {
   getUpstreamOptions,
   type UpstreamOptions,
 } from "features/workflowEditor/utils";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
 
 import PieceFormItem from "./PieceFormItem";
 
@@ -16,7 +14,6 @@ interface PieceFormProps {
 
 const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
   const { getWorkflowEdges, getWorkflowPieces } = useWorkflowsEditor();
-  const { control } = useFormContext<WorkflowPieceData>();
   const [upstreamOptions, setUpstreamOptions] = useState<UpstreamOptions>({});
 
   const shouldRender = useMemo(() => {
@@ -51,10 +48,8 @@ const PieceForm: React.FC<PieceFormProps> = ({ formId, schema }) => {
       {Object.keys(schema.properties).map((key) => (
         <div key={key}>
           <PieceFormItem
-            formId={formId}
             schema={schema.properties[key]}
             itemKey={key}
-            control={control}
             definitions={schema?.$defs}
             upstreamOptions={upstreamOptions}
           />

@@ -7,6 +7,10 @@ export type TypeName =
   | "array"
   | "null";
 
+export type FormatType = "date" | "time" | "date-time";
+
+export type WidgetType = "codeeditor" | `codeeditor-${string}` | "textarea";
+
 export interface Schema {
   title: string;
   description: string;
@@ -19,13 +23,13 @@ export interface Schema {
 
 export type Properties = Record<string, Property>;
 
-export type Property = SimpleProperty | ArrayProperty | AnyOfProperty;
+export type Property =
+  | SimpleProperty
+  | EnumProperty
+  | ArrayProperty
+  | AnyOfProperty;
 
-export type SimpleProperty =
-  | BooleanProperty
-  | NumberProperty
-  | StringProperty
-  | EnumProperty;
+export type SimpleProperty = BooleanProperty | NumberProperty | StringProperty;
 
 export type ArrayProperty =
   | ArrayBooleanProperty
@@ -48,45 +52,45 @@ export type BooleanProperty = DefaultPropertyAttrs & {
 
 export type NumberProperty = DefaultPropertyAttrs & {
   type: "number" | "integer";
-  default: number;
+  default?: number;
   exclusiveMaximum?: number;
   exclusiveMinimum?: number;
 };
 
 export type StringProperty = DefaultPropertyAttrs & {
   type: "string";
-  default: string;
+  default?: string;
 
-  widget?: `codeeditor-${string}` | "textarea";
-  format?: "date" | "time" | "date-time";
+  widget?: WidgetType;
+  format?: FormatType;
 };
 
 export type EnumProperty = DefaultPropertyAttrs & {
   allOf: Reference[];
-  default: string;
+  default?: string;
 };
 
 export type ArrayBooleanProperty = DefaultPropertyAttrs & {
   type: "array";
-  default: boolean[];
+  default?: boolean[];
   items: Omit<BooleanProperty, "default">;
 };
 
 export type ArrayNumberProperty = DefaultPropertyAttrs & {
   type: "array";
-  default: number[];
+  default?: number[];
   items: Omit<NumberProperty, "default">;
 };
 
 export type ArrayStringProperty = DefaultPropertyAttrs & {
   type: "array";
-  default: string[];
+  default?: string[];
   items: Omit<StringProperty, "default">;
 };
 
 export type ArrayObjectProperty = DefaultPropertyAttrs & {
   type: "array";
-  default: Array<Record<string, string | boolean | number>>;
+  default?: Array<Record<string, string | boolean | number>>;
   items: Reference;
 };
 
@@ -100,12 +104,12 @@ type AnyOf = DefaultPropertyAttrs & {
     widget?: `codeeditor-${string}` | "textarea";
     format?: "date" | "time" | "date-time";
   }>;
-  default: any;
+  default?: any;
 };
 
 export type AnyOfArray = DefaultPropertyAttrs & {
   anyOf: Array<{ items: AnyOf["anyOf"]; type: "array" } | { type: "null" }>;
-  default: any[];
+  default?: any[];
 };
 
 export type AnyOfProperty = AnyOf | AnyOfArray;

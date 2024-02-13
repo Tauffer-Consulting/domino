@@ -85,11 +85,9 @@ export const extractDefaultInputValues = (pieceSchema: Piece) => {
   return defaultInputs;
 };
 
-export const extractDefaultValues = (
-  schema: Schema,
-  output: any | null = null,
-) => {
-  output = output === null ? {} : output;
+export const extractDefaultValues = (schema: Schema, output?: any) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  output = output ?? ({} as Schema);
 
   if (!isEmpty(schema) && "properties" in schema) {
     const properties = schema.properties;
@@ -99,9 +97,7 @@ export const extractDefaultValues = (
       }
 
       if ("default" in value) {
-        output[key] = value.default;
-      } else if ("properties" in value) {
-        output[key] = extractDefaultValues(value as any, output[key]);
+        output[key] = value.default ?? "";
       } else {
         output[key] = "";
       }
