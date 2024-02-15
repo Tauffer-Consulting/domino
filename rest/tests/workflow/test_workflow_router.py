@@ -37,7 +37,6 @@ class TestWorkflowRouter:
         content=response.json()
         mock_response_content=json.loads(mock_response.model_dump_json(by_alias=True))
 
-        print('RESPONSE', response.json())
         assert response.status_code == 201
         assert content.keys() == mock_response_content.keys()
 
