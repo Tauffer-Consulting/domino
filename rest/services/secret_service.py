@@ -66,7 +66,7 @@ class SecretService(object):
         self.logger.info(f"Updating secret {secret_id} for repository {piece_repository_id}")
         secret = self.secret_repository.find_by_id(id=secret_id)
         if not secret:
-            raise ResourceNotFoundException()
+            raise ResourceNotFoundException("Secret not found.")
 
         if not body.value:
             secret.value = None
