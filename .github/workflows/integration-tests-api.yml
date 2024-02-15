@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - dev
-      - test/*
+      - test
 
 jobs:
   api-tests:
@@ -55,7 +55,7 @@ jobs:
           DOMINO_GITHUB_ACCESS_TOKEN_WORKFLOWS: ${{ secrets.TESTS_GITHUB_WORKFLOWS_TOKEN }}
           DOMINO_GITHUB_WORKFLOWS_REPOSITORY: ${{secrets.TESTS_WORKFLOWS_REPOSITORY}}
         run: pytest --cov=rest --cov-report=xml --cov-report=term-missing rest/tests/ -v -s
-      
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:

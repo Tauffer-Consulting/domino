@@ -21,7 +21,7 @@ pytest_plugins = [
     "tests.workflow.fixtures"
 ]
 @pytest.mark.usefixtures("register", "login", "add_piece_repository", "teardown_piece_repository")
-class TestWorkflowRouter: 
+class TestWorkflowRouter:
     @staticmethod
     def test_create_workflow(patch_piece_secret: Response, create_workflow: Response, piece_repository: PieceRepository, user: User):
         mock_response = CreateWorkflowResponse(
@@ -39,7 +39,7 @@ class TestWorkflowRouter:
 
         assert response.status_code == 201
         assert content.keys() == mock_response_content.keys()
-        
+
         assert content.get("name") == mock_response_content.get("name")
 
         assert content.get("created_by") == mock_response_content.get("created_by")
@@ -82,4 +82,4 @@ class TestWorkflowRouter:
         assert response.status_code == 204
         #TODO assert not found with get workflow
 
-        
+

@@ -225,7 +225,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     console.print("")
     console.print("Installing NGINX controller...")
     subprocess.run(["kubectl", "apply", "-f", "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"], stdout=subprocess.DEVNULL)
-    result = subprocess.run(["kubectl", "wait", "--namespace", "ingress-nginx", "--for", "condition=ready", "pod", "--selector=app.kubernetes.io/component=controller", "--timeout=180s"])
+    result = subprocess.run(["kubectl", "wait", "--namespace", "ingress-nginx", "--for", "condition=ready", "pod", "--selector=app.kubernetes.io/component=controller", "--timeout=660s"])
     if result.returncode != 0:
         error_message = result.stderr.strip() if result.stderr else result.stdout.strip()
         raise Exception("An error occurred while installing NGINX controller: {error_message}")
