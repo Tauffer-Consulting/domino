@@ -63,6 +63,7 @@ def edit_workflow_request_model(client: ApiTestClient, authorization_token: Dict
         headers = {"Authorization": authorization_token["header"]},
         params = {"name__like": "SimpleLogPiece"}
     )
+    print('edit workflow request response', response.json())
     possible_pieces = response.json()
     example_piece = [i for i in possible_pieces if i["name"]=="SimpleLogPiece"][0]
 

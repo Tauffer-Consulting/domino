@@ -131,8 +131,8 @@ class AuthService():
         )
         if not workspace_associative_data:
             raise HTTPException(
-                status_code=400,#ResourceNotFoundError().status_code,
-                detail="error test",#ResourceNotFoundError(message='Workspace not found').message
+                status_code=ResourceNotFoundError().status_code,
+                detail=ResourceNotFoundError(message='Workspace not found').message
             )
         if workspace_associative_data and not workspace_associative_data.permission:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)

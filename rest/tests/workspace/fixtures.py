@@ -90,9 +90,9 @@ def invite_user(client: ApiTestClient, authorization_token: Dict, workspace: Wor
 
 @pytest.fixture(scope='function')
 def accept_invite(
-    client: ApiTestClient, 
+    client: ApiTestClient,
     login_user_extra: Response,
-    authorization_token_user_extra: Dict, 
+    authorization_token_user_extra: Dict,
     workspace: Workspace,
 ):
     return client.post(
@@ -103,9 +103,9 @@ def accept_invite(
 
 @pytest.fixture(scope='function')
 def reject_invite(
-    client: ApiTestClient, 
+    client: ApiTestClient,
     login_user_extra: Response,
-    authorization_token_user_extra: Dict, 
+    authorization_token_user_extra: Dict,
     workspace: Workspace
 ):
     return client.post(
