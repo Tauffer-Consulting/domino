@@ -1,5 +1,5 @@
 export function getDefinition(
-  schema: InputSchemaProperty | SimpleInputSchemaProperty | EnumDefinition,
+  schema: Property | SimpleProperty | EnumDefinition,
   definitions: Definitions,
 ) {
   if ("items" in schema && "$ref" in schema.items) {

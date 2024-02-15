@@ -20,10 +20,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "sourceMap": true
   },
   "include": [
-    "src"
+    "src",
+    "./vite.config.js"
   ],
   "exclude": [
     "node_modules"

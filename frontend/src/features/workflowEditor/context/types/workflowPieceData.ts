@@ -11,7 +11,7 @@ import {
 } from "./settings";
 import { type IStorageFormData, type StorageAccessModes } from "./storage";
 
-export interface IWorkflowPieceData {
+export interface WorkflowPieceData {
   storage: IStorageFormData;
   containerResources: IContainerResourceFormData;
   inputs: Record<string, Input | InputArray>;

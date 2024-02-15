@@ -3,7 +3,7 @@
 ### Recommended
 
 This config allow you to ensure code style every time you save a file in frontend folder,
-alternatively you can just run the command `yarn lint:fix`
+alternatively you can just run the command `pnpm run lint:fix`
 
 - [ESlint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
   - Add to settings.json ([Ctrl + Shift + P] to open 'Open Settings (JSON)')
@@ -29,13 +29,13 @@ alternatively you can just run the command `yarn lint:fix`
 #### Install dependencies
 
 ```bash
-yarn install
+pnpm install
 ```
 
 #### Run the application
 Running Domino frontend locally:
 ```bash
-yarn start
+pnpm start
 ```
 
 ### Build  image
