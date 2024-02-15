@@ -16,7 +16,6 @@
     "@mui/material": "^5.15.10",
     "@mui/x-data-grid": "^6.19.4",
     "@mui/x-date-pickers": "^6.19.4",
-    "@nathan-vm/use-storage": "^0.2.1",
     "@uiw/react-textarea-code-editor": "^2.1.9",
     "@vitejs/plugin-react": "^4.2.1",
     "axios": "^1.6.7",

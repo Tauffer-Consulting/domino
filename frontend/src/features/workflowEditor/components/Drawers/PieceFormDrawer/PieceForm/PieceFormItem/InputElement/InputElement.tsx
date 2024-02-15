@@ -66,7 +66,7 @@ const InputElement: React.FC<Props> = React.memo(
       const checkboxKey = isItemObject
         ? itemKey.replace(/(\.value)(?!.*\.value)/, "fromUpstream")
         : itemKey.replace(/\.value$/, "");
-      console.log(checkboxKey);
+
       return (
         <SelectUpstreamInput
           name={checkboxKey as any}

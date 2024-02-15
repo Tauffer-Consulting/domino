@@ -35,9 +35,6 @@ dependencies:
   '@mui/x-date-pickers':
     specifier: ^6.19.4
     version: 6.19.4(@emotion/react@11.11.3)(@emotion/styled@11.11.0)(@mui/material@5.15.10)(@mui/system@5.15.9)(@types/react@18.2.55)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0)
-  '@nathan-vm/use-storage':
-    specifier: ^0.2.1
-    version: 0.2.1(react@18.2.0)
   '@uiw/react-textarea-code-editor':
     specifier: ^2.1.9
     version: 2.1.9(@babel/runtime@7.23.9)(react-dom@18.2.0)(react@18.2.0)
@@ -1288,16 +1285,6 @@ packages:
       react-transition-group: 4.4.5(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
-    dev: false
-
-  /@nathan-vm/use-storage@0.2.1(react@18.2.0):
-    resolution: {integrity: sha512-Im1u/XYG9T4mOsXQk1DAnpVWNU2unw/n4AzWzzAJTE+Nt8kT1iP130w1+1Gj4lI7sNTS0dkwzRxUQYTa4EqvjA==}
-    engines: {node: '>=14'}
-    requiresBuild: true
-    peerDependencies:
-      react: '>=16'
-    dependencies:
-      react: 18.2.0
     dev: false
 
   /@nodelib/fs.scandir@2.1.5:

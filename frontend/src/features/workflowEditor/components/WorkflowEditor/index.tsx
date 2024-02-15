@@ -46,7 +46,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
     }
   }, [workflowPanelRef.current]);
 
-  useInterval(saveDataToLocalForage, 40000);
+  useInterval(saveDataToLocalForage, 1000);
 
   const {
     clearStorageData,

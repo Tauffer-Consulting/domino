@@ -80,18 +80,13 @@ const ArrayInput: React.FC<ArrayInputItemProps> = React.memo(
         } as unknown;
       }
 
-      console.log(defaultObj);
-
       append([defaultObj] as any);
     }, [append, definitions, schema]);
 
-    const disableUpstream = useMemo(() => {
-      if (disableCheckboxOptions(subItemSchema)) {
-        console.log(subItemSchema);
-      }
-
-      return disableCheckboxOptions(subItemSchema);
-    }, [subItemSchema]);
+    const disableUpstream = useMemo(
+      () => disableCheckboxOptions(subItemSchema),
+      [subItemSchema],
+    );
 
     const options = useMemo(() => upstreamOptions[inputKey], []);
 

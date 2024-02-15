@@ -11,7 +11,7 @@ import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { createInputsSchemaValidation } from "features/workflowEditor/utils/validation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "utils";
 import * as yup from "yup";
 
@@ -56,9 +56,9 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
     mode: "onChange",
   });
   const { trigger, reset } = methods;
-  const data = methods.watch();
+  const data = useWatch({ control: methods.control });
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(() => {
     setFormLoaded(false);
     const data = getWorkflowPieceDataById(formId);
     if (data) {
@@ -139,7 +139,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
     clearDownstreamDataById,
   ]);
 
-  const saveData = useCallback(async () => {
+  const saveData = useCallback(() => {
     if (formId && open) {
       setWorkflowPieceDataById(formId, data as WorkflowPieceData);
       updateOutputSchema();
@@ -149,7 +149,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   // load forage
   useEffect(() => {
     if (open) {
-      void loadData();
+      loadData();
     } else {
       setFormLoaded(false);
       reset();
@@ -158,7 +158,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
 
   // save on forage
   useEffect(() => {
-    void saveData();
+    saveData();
   }, [saveData]);
 
   if (!formLoaded) {

@@ -1,4 +1,4 @@
-import { Drawer, Grid, Typography, TextField } from "@mui/material";
+import { Drawer, Grid, Typography } from "@mui/material";
 import DatetimeInput from "components/DatetimeInput";
 import SelectInput from "components/SelectInput";
 import TextInput from "components/TextInput";
@@ -18,13 +18,12 @@ import {
 import {
   useCallback,
   useEffect,
-  useState,
   forwardRef,
   useImperativeHandle,
   type ForwardedRef,
 } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "utils";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { isEmpty, yupResolver } from "utils";
 import * as yup from "yup";
 
 interface ISettingsFormDrawerProps {
@@ -125,34 +124,26 @@ const SettingsFormDrawer = forwardRef<
       useWorkflowsEditor();
 
     const resolver = yupResolver(WorkflowSettingsFormSchema);
-    const methods = useForm<IWorkflowSettings>({ mode: "onChange", resolver });
-    const { register, watch, reset, trigger, getValues } = methods;
-    const formData = watch();
-
-    const [loaded, setLoaded] = useState(false);
-
-    const validate = useCallback(() => {
-      if (loaded) void trigger();
-    }, [loaded, trigger]);
-
-    useEffect(() => {
-      validate();
-    }, [validate]);
+    const methods = useForm<IWorkflowSettings>({
+      mode: "onChange",
+      resolver,
+      defaultValues: defaultSettingsData,
+    });
+    const formData = useWatch({ control: methods.control });
 
     const loadData = useCallback(() => {
       const data = getWorkflowSettingsData();
-      if (Object.keys(data).length === 0) {
-        reset(defaultSettingsData);
+      if (isEmpty(data)) {
+        methods.reset(defaultSettingsData);
         setWorkflowSettingsData(defaultSettingsData);
       } else {
-        reset(data);
+        methods.reset(data);
       }
-      setLoaded(true);
-    }, [reset, getWorkflowSettingsData, setWorkflowSettingsData]);
+    }, [methods.reset, getWorkflowSettingsData, setWorkflowSettingsData]);
 
     const saveData = useCallback(() => {
-      if (open) {
-        setWorkflowSettingsData(formData);
+      if (open && !isEmpty(formData)) {
+        setWorkflowSettingsData(formData as any);
       }
     }, [formData, open, setWorkflowSettingsData]);
 
@@ -174,7 +165,7 @@ const SettingsFormDrawer = forwardRef<
       [loadData],
     );
 
-    if (Object.keys(formData).length === 0) {
+    if (isEmpty(formData)) {
       return null;
     }
 
@@ -241,7 +232,7 @@ const SettingsFormDrawer = forwardRef<
                       defaultValue={defaultSettingsData.config.endDateType}
                     />
                   </Grid>
-                  {getValues().config.endDateType ===
+                  {formData?.config?.endDateType ===
                     endDateTypes.UserDefined && (
                     <Grid item xs={8}>
                       <DatetimeInput
@@ -275,24 +266,25 @@ const SettingsFormDrawer = forwardRef<
                     defaultValue={defaultSettingsData.storage.storageSource}
                   />
                 </Grid>
-                {formData.storage.storageSource === storageSourcesAWS.AWS_S3 ? (
+                {formData?.storage?.storageSource ===
+                storageSourcesAWS.AWS_S3 ? (
                   <>
                     <Grid item xs={12}>
-                      <TextField
+                      <TextInput
+                        name="storage.bucket"
                         label="Bucket"
                         defaultValue={defaultSettingsData.storage.bucket}
                         required
                         fullWidth
-                        {...register("storage.bucket")}
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField
+                      <TextInput
                         label="Base Folder"
                         defaultValue={defaultSettingsData.storage.baseFolder}
                         required
                         fullWidth
-                        {...register("storage.baseFolder")}
+                        name="storage.baseFolder"
                       />
                     </Grid>
                   </>

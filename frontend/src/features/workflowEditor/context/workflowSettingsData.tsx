@@ -1,4 +1,4 @@
-import { useStorage } from "@nathan-vm/use-storage";
+import { useStorage } from "context/storage/useStorage";
 import React, { useCallback } from "react";
 import { createCustomContext } from "utils";
 

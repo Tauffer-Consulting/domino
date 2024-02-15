@@ -1,7 +1,7 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
-import { StorageProvider } from "@nathan-vm/use-storage";
 import { AuthenticationProvider } from "context/authentication";
+import { StorageProvider } from "context/storage/useStorage";
 import { WorkspacesProvider } from "context/workspaces";
 import PiecesProvider from "context/workspaces/repositories";
 import { type FC } from "react";
