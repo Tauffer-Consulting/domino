@@ -58,7 +58,11 @@ export const SignInPage: FC = () => {
             justifyContent: "center",
           }}
         >
-          <img src="assets/logo2.png" alt="logo" style={{ width: "360px" }} />
+          <img
+            src="assets/main_logo_black.png"
+            alt="logo"
+            style={{ width: "360px" }}
+          />
         </Box>
       </Box>
       <Box sx={{ textAlign: "center" }}>

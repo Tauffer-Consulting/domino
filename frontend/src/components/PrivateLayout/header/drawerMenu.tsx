@@ -49,9 +49,9 @@ export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
             {theme.direction === "rtl" ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
           <img
-            src="../../../../../assets/logo2.png"
+            src="../../../../../assets/main_logo_white.png"
             alt="logo"
-            style={{ width: "160px", marginRight: "8px", marginLeft: "20px" }}
+            style={{ width: "190px", marginRight: "8px", marginLeft: "20px" }}
           />
           <IconButton
             component="p"
