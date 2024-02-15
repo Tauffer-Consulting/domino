@@ -66,11 +66,7 @@ export const SignInPage: FC = () => {
         </Box>
       </Box>
       <Box sx={{ textAlign: "center" }}>
-        <Typography
-          variant="h1"
-          component="h1"
-          sx={{ fontWeight: "semi-bold" }}
-        >
+        <Typography variant="h1" component="h1" sx={{ fontWeight: 600 }}>
           Welcome Back
         </Typography>
       </Box>
@@ -110,7 +106,8 @@ export const SignInPage: FC = () => {
             fullWidth
             variant="contained"
             disabled={authLoading}
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 3, mb: 2, fontSize: 18 }}
+            color="success"
           >
             Sign In
           </Button>

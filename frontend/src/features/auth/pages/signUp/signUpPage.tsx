@@ -74,11 +74,7 @@ export const SignUpPage: FC = () => {
         </Box>
       </Box>
       <Box sx={{ textAlign: "center" }}>
-        <Typography
-          variant="h1"
-          component="h1"
-          sx={{ fontWeight: "semi-bold" }}
-        >
+        <Typography variant="h1" component="h1" sx={{ fontWeight: 600 }}>
           Create an account
         </Typography>
       </Box>
@@ -120,7 +116,8 @@ export const SignUpPage: FC = () => {
             fullWidth
             variant="contained"
             disabled={authLoading}
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 3, mb: 2, fontSize: 18 }}
+            color="success"
           >
             {authLoading ? <CircularProgress size={20} /> : "Sign Up"}
           </Button>
