@@ -14,7 +14,7 @@ export const States: React.FC<Props> = ({ state }) => {
         label="Success"
         color="success"
         style={{
-          backgroundColor: theme.palette.success.light,
+          backgroundColor: theme.palette.success.main,
           color: theme.palette.success.contrastText,
           fontWeight: "bold",
         }}
@@ -27,7 +27,7 @@ export const States: React.FC<Props> = ({ state }) => {
         label="Failed"
         color="error"
         style={{
-          backgroundColor: theme.palette.error.light,
+          backgroundColor: theme.palette.error.main,
           color: theme.palette.success.contrastText,
           fontWeight: "bold",
         }}
