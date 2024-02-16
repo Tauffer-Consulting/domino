@@ -191,5 +191,5 @@ class DominoDockerOperator(DockerOperator):
         # env var format = {"name": "value"}
         self._prepare_execute_environment(context=context)
         result = super().execute(context=context)
-        self._shared_storage_usage_in_bytes = result['_shared_storage_usage_in_bytes']
+        self._shared_storage_usage_in_bytes = result.get('_shared_storage_usage_in_bytes', None)
         return result
