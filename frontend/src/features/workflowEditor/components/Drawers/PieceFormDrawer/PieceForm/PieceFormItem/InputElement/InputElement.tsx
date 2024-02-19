@@ -78,14 +78,14 @@ const InputElement: React.FC<Props> = React.memo(
       return (
         <EnumInput
           schema={schema as EnumProperty}
-          itemKey={itemKey}
+          itemKey={isItemArray ? `${itemKey}.value` : itemKey}
           definitions={definitions as Definitions}
         />
       );
     } else if (isNumberType(schema, optionalType)) {
       return (
         <NumberInput<WorkflowPieceData>
-          name={itemKey}
+          name={isItemArray ? `${itemKey}.value` : itemKey}
           type={optionalType === "integer" ? "int" : "float"}
           label={schema.title}
           defaultValue={
@@ -99,12 +99,15 @@ const InputElement: React.FC<Props> = React.memo(
       );
     } else if (isBooleanType(schema)) {
       return (
-        <CheckboxInput<WorkflowPieceData> name={itemKey} label={schema.title} />
+        <CheckboxInput<WorkflowPieceData>
+          name={isItemArray ? `${itemKey}.value` : itemKey}
+          label={schema.title}
+        />
       );
     } else if (isDateOrTimeType(schema, optionalType)) {
       return (
         <DatetimeInput<WorkflowPieceData>
-          name={itemKey}
+          name={isItemArray ? `${itemKey}.value` : itemKey}
           label={schema.title}
           type={(schema as StringProperty).format}
         />
@@ -113,7 +116,7 @@ const InputElement: React.FC<Props> = React.memo(
       const language = extractCodeEditorLanguage(schema as StringProperty);
       return (
         <CodeEditorInput<WorkflowPieceData>
-          name={itemKey}
+          name={isItemArray ? `${itemKey}.value` : itemKey}
           language={language}
           placeholder={`Enter your ${language} code here.`}
         />
@@ -122,7 +125,7 @@ const InputElement: React.FC<Props> = React.memo(
       return (
         <TextAreaInput<WorkflowPieceData>
           variant="outlined"
-          name={itemKey}
+          name={isItemArray ? `${itemKey}.value` : itemKey}
           label={schema.title}
         />
       );
@@ -130,7 +133,7 @@ const InputElement: React.FC<Props> = React.memo(
       return (
         <TextInput<WorkflowPieceData>
           variant="outlined"
-          name={itemKey}
+          name={isItemArray ? `${itemKey}.value` : itemKey}
           label={schema.title}
         />
       );
