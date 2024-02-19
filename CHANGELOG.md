@@ -1,3 +1,19 @@
+# v0.9.0
+
+### Features
+- [x] Add new visual identity colors.
+- [x] Add new visual identity logo.
+- [x] Add new visual identity fonts.
+- [x] Improve Workspace cards layout and navigation.
+- [x] Add tracking of piece storage usage.
+
+
+### Fixes
+- [x] Fix selected workspace Leave action messages.
+- [x] Fix delay on loading upstream options.
+- [x] Stop using local forage for storage.
+
+
 # v0.8.4
 
 ### Features
