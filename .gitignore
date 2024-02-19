@@ -3,6 +3,8 @@ pieces_repository_test/*
 airflow/*
 domino_data/*
 
+.vscode/*
+
 **/**.pyc
 **/**.swn
 **/**.swl
