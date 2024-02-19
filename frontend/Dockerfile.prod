@@ -1,14 +1,16 @@
 # Stage 1: Build the React app
 FROM node:18-slim as build
-
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 # Set the working directory
 WORKDIR /app
 
 # Copy package.json and yarn.lock files
-COPY package.json yarn.lock ./
+COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
-RUN yarn install --production --frozen-lockfile && yarn cache clean
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 RUN npx pkg ./node_modules/@import-meta-env/cli/bin/import-meta-env.js \
   -o import-meta-env -y
@@ -17,7 +19,7 @@ RUN npx pkg ./node_modules/@import-meta-env/cli/bin/import-meta-env.js \
 COPY . .
 
 # Build the app for production
-RUN yarn build
+RUN pnpm run build
 
 # Stage 2: Create a minimal NGINX image
 FROM nginx:1.25.2

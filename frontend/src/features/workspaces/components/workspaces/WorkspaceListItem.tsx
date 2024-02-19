@@ -1,3 +1,8 @@
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import LogoutIcon from "@mui/icons-material/Logout";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Card,
   CardActionArea,
@@ -7,8 +12,12 @@ import {
   CardActions,
   Button,
   Grid,
+  Divider,
+  Tooltip,
+  Chip,
 } from "@mui/material";
 import { type IWorkspaceSummary } from "context/workspaces/types";
+import theme from "providers/theme.config";
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -43,7 +52,7 @@ export const WorkspaceListItem: FC<{
         sx={{
           display: "flex",
           flexDirection: "column",
-          borderColor: isSelected ? "darkgray" : "primary.main",
+          borderColor: isSelected ? theme.palette.success.main : "primary",
         }}
       >
         <CardActionArea
@@ -60,24 +69,71 @@ export const WorkspaceListItem: FC<{
             title={workspace.workspace_name}
             titleTypographyProps={{ variant: "body1" }}
             color={isSelected ? "success" : "primary.main"}
+            action={
+              isSelected ? (
+                <Typography
+                  display="flex"
+                  variant="body1"
+                  sx={{
+                    mt: "4px",
+                    mr: "8px",
+                    color: theme.palette.success.main,
+                  }}
+                >
+                  <CheckBoxOutlinedIcon color="success" />
+                  Selected
+                </Typography>
+              ) : (
+                <Typography
+                  display="flex"
+                  variant="body1"
+                  color="primary"
+                  sx={{ mt: "4px", mr: "8px" }}
+                >
+                  <CheckBoxOutlineBlankIcon />
+                  Select
+                </Typography>
+              )
+            }
+            sx={{ py: 1, width: "100%" }}
           />
-          <CardContent sx={{ width: "100%" }}>
-            <Grid container>
-              <Grid item xs={12} md={3}>
-                <Typography sx={{ fontSize: 14, my: 0 }} color="text.secondary">
+          <CardContent
+            sx={{
+              width: "100%",
+              borderTop: 1,
+              borderBottom: 1,
+              borderColor: "grey.300",
+            }}
+          >
+            <Grid container columns={13}>
+              <Grid item xs={6} md={3} sx={{ mr: "auto" }}>
+                <Typography sx={{ fontSize: 16, my: 0 }} color="text.secondary">
                   Permission:
                 </Typography>
-                <Typography>{workspace.user_permission}</Typography>
+                <Chip
+                  label={workspace.user_permission}
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                />
               </Grid>
-              <Grid item xs={12} md={3}>
-                <Typography sx={{ fontSize: 14, my: 0 }} color="text.secondary">
+              <Grid item xs={1}>
+                <Divider orientation="vertical" sx={{ mr: "16px" }} />
+              </Grid>
+              <Grid item xs={6} md={3} sx={{ mr: "auto" }}>
+                <Typography sx={{ fontSize: 16, my: 0 }} color="text.secondary">
                   Status:
                 </Typography>
-                <Typography>
-                  {workspace.status === "accepted"
-                    ? "Collaborating"
-                    : "Refused"}
-                </Typography>
+                <Chip
+                  label={
+                    workspace.status === "accepted"
+                      ? "Collaborating"
+                      : "Refused"
+                  }
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                />
               </Grid>
             </Grid>
           </CardContent>
@@ -85,27 +141,36 @@ export const WorkspaceListItem: FC<{
         <CardActions sx={{ width: "100%" }}>
           <Button
             size="small"
-            color={isSelected ? "success" : "primary"}
-            onClick={handleSelect}
-          >
-            {isSelected ? "Selected" : "Select"}
-          </Button>
-          <Button
-            size="small"
-            color="info"
-            sx={{ ml: "auto" }}
+            color="primary"
+            sx={{ minWidth: "auto" }}
             onClick={() => {
               handleSelect();
               navigate("/workspace-settings");
             }}
           >
-            Config
+            <Tooltip title="Configure workspace">
+              <SettingsIcon fontSize="medium" />
+            </Tooltip>
           </Button>
-          <Button size="small" color="warning" onClick={handleLeave}>
-            Leave
+          <Button
+            size="small"
+            color="primary"
+            sx={{ minWidth: "auto" }}
+            onClick={handleLeave}
+          >
+            <Tooltip title="Leave workspace">
+              <LogoutIcon fontSize="medium" />
+            </Tooltip>
           </Button>
-          <Button size="small" color="error" onClick={handleDelete}>
-            Delete
+          <Button
+            size="small"
+            color="error"
+            sx={{ minWidth: "auto" }}
+            onClick={handleDelete}
+          >
+            <Tooltip title="Delete workspace">
+              <DeleteOutlineIcon />
+            </Tooltip>
           </Button>
         </CardActions>
       </Card>

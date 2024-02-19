@@ -1,24 +1,20 @@
-function isEnum(
-  schema: SimpleInputSchemaProperty | InputSchemaProperty | Definition,
-): boolean {
+function isEnum(schema: Property | Definition): boolean {
   if ("allOf" in schema || "enum" in schema) {
     return true;
   }
   return false;
 }
 
+function getFromUpstream(itemSchema: Property): boolean;
 function getFromUpstream(
-  itemSchema: SimpleInputSchemaProperty | InputSchemaProperty,
-): boolean;
-function getFromUpstream(
-  itemSchema: InputSchemaProperty | EnumDefinition,
+  itemSchema: Property | EnumDefinition,
   definitions: Definitions,
   key: string,
 ): boolean;
 
 function getFromUpstream(
-  itemSchema: SimpleInputSchemaProperty | InputSchemaProperty | EnumDefinition,
-  definitions?: any,
+  itemSchema: Property | EnumDefinition,
+  definitions?: Definitions,
   key?: string,
 ): boolean {
   // Enum type cant be from upstream
@@ -28,7 +24,7 @@ function getFromUpstream(
 
   if (definitions && "items" in itemSchema && "$ref" in itemSchema.items) {
     const name = itemSchema.items.$ref.split("/").pop() as string;
-    const definition = (definitions as Definitions)[name];
+    const definition = definitions[name];
 
     // Enum type cant be from upstream
     if (isEnum(definition)) {
@@ -52,10 +48,7 @@ function getFromUpstream(
     }
   }
 
-  switch (
-    (itemSchema as SimpleInputSchemaProperty | InputSchemaProperty)
-      ?.from_upstream
-  ) {
+  switch ((itemSchema as Property)?.from_upstream) {
     case "always":
       return true;
 

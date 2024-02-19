@@ -11,7 +11,7 @@ interface IPaginationMetadata {
  * Get Piece Repositories response interface
  */
 export interface IGetPiecesRepositoriesResponseInterface {
-  data: PieceRepository[];
+  data: Repository[];
   metadata: IPaginationMetadata;
 }
 

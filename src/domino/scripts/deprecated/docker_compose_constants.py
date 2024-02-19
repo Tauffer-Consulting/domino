@@ -395,7 +395,7 @@ flowui_postgres = {
 flowui_frontend = {
     "image": "taufferconsulting/flowui-frontend:latest",
     "container_name": "flowui-frontend",
-    "command": "yarn start",
+    "command": "pnpm start",
     "ports": [
         "3000:3000"
     ]
@@ -408,7 +408,7 @@ flowui_frontend_dev = {
         "dockerfile": "Dockerfile"
     },
     "container_name": "flowui-frontend",
-    "command": "yarn start",
+    "command": "pnpm start",
     "ports": [
         "3000:3000"
     ],

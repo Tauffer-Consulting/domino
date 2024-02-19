@@ -510,6 +510,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         ti.xcom_push(key='pod_name', value=self.pod.metadata.name)
         ti.xcom_push(key='pod_namespace', value=self.pod.metadata.namespace)
         if self.do_xcom_push:
+            self._shared_storage_usage_in_bytes = result['_shared_storage_usage_in_bytes']
             return result
 
 
@@ -543,7 +544,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
             self.log.info("Result file is empty.")
             return None
         else:
-            self.log.info("xcom result: \n%s", result)
+            self.log.info('xcom result is not empty, parsing to json')
             return json.loads(result)
 
     def pod_manager_extract_xcom(self, pod: k8s.V1Pod) -> str:

@@ -3,13 +3,14 @@ pieces_repository_test/*
 airflow/*
 domino_data/*
 
+.vscode/*
+
 **/**.pyc
 **/**.swn
 **/**.swl
 **/**.swp
 **/**.swo
 **/**.swm
-.vscode
 **/__pycache__/**
 .python-version
 **/ENV/**

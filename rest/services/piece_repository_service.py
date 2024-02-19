@@ -66,7 +66,7 @@ class PieceRepositoryService(object):
             workspace_id=workspace_id,
             page=page,
             page_size=page_size,
-            filters=filters.dict(exclude_none=True)
+            filters=filters.model_dump(exclude_none=True)
         )
         data = []
         for piece_repository in pieces_repositories:

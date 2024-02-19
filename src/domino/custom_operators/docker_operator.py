@@ -58,12 +58,12 @@ class DominoDockerOperator(DockerOperator):
         dev_pieces = False
         if dev_pieces:
             piece_repo_name = repository_url.split("/")[-1]
-            local_repos_path = f"/mnt/shared_storage/Github/{piece_repo_name}"
-            # local_repos_path = f"/home/vinicius/Documents/work/tauffer/{piece_repo_name}"
+            #local_repos_path = f"/mnt/shared_storage/Github/{piece_repo_name}"
+            local_repos_path = f"/home/vinicius/Documents/work/tauffer/{piece_repo_name}"
             mounts = [
                 # TODO remove
-                # Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
-                Mount(source='/mnt/shared_storage/Github/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+                Mount(source='/home/vinicius/Documents/work/tauffer/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
+                #Mount(source='/mnt/shared_storage/Github/domino/src/domino', target='/usr/local/lib/python3.10/site-packages/domino/', type='bind', read_only=True),
                 Mount(source=local_repos_path, target='/home/domino/pieces_repository/', type='bind', read_only=True),
             ]
         ########################################################
@@ -190,4 +190,6 @@ class DominoDockerOperator(DockerOperator):
         self.domino_client = DominoBackendRestClient(base_url="http://domino-rest:8000/")
         # env var format = {"name": "value"}
         self._prepare_execute_environment(context=context)
-        return super().execute(context=context)
+        result = super().execute(context=context)
+        self._shared_storage_usage_in_bytes = result.get('_shared_storage_usage_in_bytes', None)
+        return result

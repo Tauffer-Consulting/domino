@@ -216,7 +216,7 @@ def list_run_tasks(
         )
     except (BaseException, ForbiddenException, ResourceNotFoundException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-    
+
 @router.get(
     "/{workflow_id}/runs/{workflow_run_id}/tasks/report",
     status_code=200,

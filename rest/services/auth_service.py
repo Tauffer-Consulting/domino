@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 import jwt
 from schemas.errors.base import ForbiddenError, ResourceNotFoundError
-from core.settings import settings 
+from core.settings import settings
 from schemas.context.auth_context import AuthorizationContextData, WorkspaceAuthorizerData
 from repository.user_repository import UserRepository
 from repository.workspace_repository import WorkspaceRepository
@@ -102,7 +102,7 @@ class AuthService():
             workspace_associative_data = cls.workspace_repository.find_by_id_and_user_id(id=repository.workspace_id, user_id=auth_context.user_id)
             if not workspace_associative_data:
                 raise HTTPException(status_code=ResourceNotFoundError().status_code, detail=ResourceNotFoundError().message)
-            
+
             if workspace_associative_data and not workspace_associative_data.permission:
                 raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
 
@@ -118,7 +118,7 @@ class AuthService():
 
     @classmethod
     def workspace_access_authorizer(
-        cls, 
+        cls,
         workspace_id: Optional[int],
         auth: HTTPAuthorizationCredentials = Security(security),
     ):
@@ -126,12 +126,12 @@ class AuthService():
         if not workspace_id:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
         workspace_associative_data = cls.workspace_repository.find_by_id_and_user_id(
-            id=workspace_id, 
+            id=workspace_id,
             user_id=auth_context.user_id
         )
         if not workspace_associative_data:
             raise HTTPException(
-                status_code=ResourceNotFoundError().status_code, 
+                status_code=ResourceNotFoundError().status_code,
                 detail=ResourceNotFoundError(message='Workspace not found').message
             )
         if workspace_associative_data and not workspace_associative_data.permission:
@@ -148,7 +148,7 @@ class AuthService():
             user_permission=workspace_associative_data.permission
         )
         return auth_context
-    
+
     @classmethod
     def workspace_owner_access_authorizer_body(
         cls,
@@ -157,7 +157,7 @@ class AuthService():
     ):
         workspace_id = body.get('workspace_id')
         return cls.workspace_owner_access_authorizer(workspace_id=workspace_id, auth=auth)
-   
+
 
     @classmethod
     def workspace_owner_access_authorizer(
@@ -169,12 +169,12 @@ class AuthService():
         if not workspace_id:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
         workspace_associative_data = cls.workspace_repository.find_by_id_and_user_id(
-            id=workspace_id, 
+            id=workspace_id,
             user_id=auth_context.user_id
         )
         if not workspace_associative_data:
             raise HTTPException(status_code=ResourceNotFoundError().status_code, detail=ResourceNotFoundError().message)
-        
+
         if workspace_associative_data and not workspace_associative_data.permission:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
 
@@ -213,7 +213,7 @@ class AuthService():
 
         if workspace_associative_data and not workspace_associative_data.permission:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
-        
+
         if workspace_associative_data and workspace_associative_data.status != UserWorkspaceStatus.accepted.value:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
 
@@ -233,7 +233,7 @@ class AuthService():
             workspace_associative_data = cls.workspace_repository.find_by_id_and_user_id(id=workspace_id, user_id=auth_context.user_id)
             if not workspace_associative_data:
                 raise HTTPException(status_code=ResourceNotFoundError().status_code, detail=ResourceNotFoundError().message)
-            
+
             if workspace_associative_data and not workspace_associative_data.permission:
                 raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
 
@@ -262,7 +262,7 @@ class AuthService():
 
             if workspace_associative_data.permission != Permission.owner.value:
                 raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
-            
+
             if workspace_associative_data and workspace_associative_data.status != UserWorkspaceStatus.accepted.value:
                 raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
             return func(*args, **kwargs)

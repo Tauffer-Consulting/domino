@@ -1,13 +1,6 @@
-export interface IWorkflowElement {
-  id: string;
-  type?: string;
-  data: {
-    name: string;
-    handleOrientation: "horizontal" | "vertical";
-    style: any;
-  };
-  position: { x: number; y: number };
-}
+import { type DefaultNode } from "features/workflowEditor/components/Panel/WorkflowPanel";
+
+export type IWorkflowElement = DefaultNode;
 
 enum workflowStatus {
   creating = "creating",

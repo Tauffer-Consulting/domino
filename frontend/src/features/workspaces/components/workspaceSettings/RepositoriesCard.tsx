@@ -120,7 +120,7 @@ export const RepositoriesCard: FC = () => {
           source: source as repositorySource,
         })
           .then((data) => {
-            if (data) {
+            if (data && data.length > 0) {
               const devVersion = data.find(
                 (item) =>
                   item.version === "dev" || item.version === "development",
@@ -141,6 +141,9 @@ export const RepositoriesCard: FC = () => {
                 : sortedVersions;
 
               setAvailableVersions(sortedData);
+            } else {
+              toast.warning("No releases found for this repository");
+              return;
             }
             setStep("SELECT_VERSION");
           })

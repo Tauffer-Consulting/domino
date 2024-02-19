@@ -5,18 +5,26 @@ import { createTheme } from "@mui/material/styles";
 // TODO - make this styles work
 export const theme = createTheme({
   palette: {
-    // type: 'light',
     primary: {
-      main: "#323c3d",
+      main: "#101820",
+      light: "#223344",
+      dark: "#070A0E",
     },
     secondary: {
-      main: "#f50057",
+      main: "#FFFFFF",
     },
     background: {
-      default: "#f1f3f3",
+      default: "#F1F5F8",
+    },
+    success: {
+      main: "#00B140",
+      light: "#00E052",
+      dark: "#008F34",
+      contrastText: "#FFFFFF",
     },
   },
   typography: {
+    fontFamily: "Rethink-Sans",
     h1: {
       fontSize: 30,
       marginLeft: 30,
@@ -27,12 +35,9 @@ export const theme = createTheme({
     h3: {
       fontSize: 20,
     },
-    // h4: {
-    //   fontSize: 15
-    // },
-    // h5: {
-    //   fontSize: 10
-    // }
+    button: {
+      textTransform: "capitalize",
+    },
   },
 });
 

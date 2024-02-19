@@ -96,7 +96,7 @@ class Task(object):
                 )
             )
 
-        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod"]:
+        elif self.deploy_mode in ["local-k8s", "local-k8s-dev", "prod", "k8s"]:
             # References:
             # - https://airflow.apache.org/docs/apache-airflow/1.10.14/_api/airflow/contrib/operators/kubernetes_pod_operator/index.html
             # - https://airflow.apache.org/docs/apache-airflow/stable/templates-ref.html

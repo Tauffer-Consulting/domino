@@ -2,10 +2,10 @@
 
 import { isEmpty } from "utils";
 
-import { defaultContainerResources } from "../components/SidebarForm/ContainerResourceForm";
+import { defaultContainerResources } from "../components/Drawers/PieceFormDrawer/ContainerResourceForm";
 import {
   type IContainerResourceFormData,
-  type IWorkflowPieceData,
+  type WorkflowPieceData,
 } from "../context/types";
 
 import { getFromUpstream } from "./getFromUpstream";
@@ -15,7 +15,7 @@ export const extractDefaultInputValues = (pieceSchema: Piece) => {
   const definitions = pieceSchema.input_schema.$defs;
   const defaultData = extractDefaultValues(pieceSchema.input_schema);
 
-  const defaultInputs: IWorkflowPieceData["inputs"] = {};
+  const defaultInputs: WorkflowPieceData["inputs"] = {};
   for (const key in defaultData) {
     const fromUpstream = getFromUpstream(schema[key]);
 
@@ -85,23 +85,19 @@ export const extractDefaultInputValues = (pieceSchema: Piece) => {
   return defaultInputs;
 };
 
-export const extractDefaultValues = (
-  schema: PieceSchema,
-  output: any | null = null,
-) => {
-  output = output === null ? {} : output;
+export const extractDefaultValues = (schema: Schema, output?: any) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  output = output ?? ({} as Schema);
 
   if (!isEmpty(schema) && "properties" in schema) {
     const properties = schema.properties;
     for (const [key, value] of Object.entries(properties)) {
-      if (value?.from_upstream === "always") {
+      if ("from_upstream" in value && value.from_upstream === "always") {
         output[key] = "";
       }
 
       if ("default" in value) {
-        output[key] = value.default;
-      } else if ("properties" in value) {
-        output[key] = extractDefaultValues(value as any, output[key]);
+        output[key] = value.default ?? "";
       } else {
         output[key] = "";
       }
