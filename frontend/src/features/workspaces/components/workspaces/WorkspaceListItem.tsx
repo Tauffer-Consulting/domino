@@ -17,6 +17,7 @@ import {
   Chip,
 } from "@mui/material";
 import { type IWorkspaceSummary } from "context/workspaces/types";
+import theme from "providers/theme.config";
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -51,7 +52,7 @@ export const WorkspaceListItem: FC<{
         sx={{
           display: "flex",
           flexDirection: "column",
-          borderColor: isSelected ? "green" : "primary",
+          borderColor: isSelected ? theme.palette.success.main : "primary",
         }}
       >
         <CardActionArea
@@ -73,8 +74,11 @@ export const WorkspaceListItem: FC<{
                 <Typography
                   display="flex"
                   variant="body1"
-                  color="darkgreen"
-                  sx={{ mt: "4px", mr: "8px" }}
+                  sx={{
+                    mt: "4px",
+                    mr: "8px",
+                    color: theme.palette.success.main,
+                  }}
                 >
                   <CheckBoxOutlinedIcon color="success" />
                   Selected

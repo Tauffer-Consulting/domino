@@ -64,9 +64,9 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
 
     switch (state) {
       case taskState.success:
-        colors.backgroundColor = theme.palette.success.light;
+        colors.backgroundColor = theme.palette.success.main;
         colors.color = theme.palette.getContrastText(
-          theme.palette.success.light,
+          theme.palette.success.main,
         );
         break;
       case taskState.running:
@@ -75,8 +75,8 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
         break;
 
       case taskState.failed:
-        colors.backgroundColor = theme.palette.error.light;
-        colors.color = theme.palette.getContrastText(theme.palette.error.light);
+        colors.backgroundColor = theme.palette.error.main;
+        colors.color = theme.palette.getContrastText(theme.palette.error.main);
         break;
     }
 
