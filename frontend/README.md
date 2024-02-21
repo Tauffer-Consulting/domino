@@ -45,3 +45,54 @@ DOCKER_BUILDKIT=1 docker build -f ./Dockerfile.prod -t domino-frontend .
 ```
 
 ### [Project Structure](./docs/project-structure.md)
+
+
+### Debug
+
+#### VSCode:
+
+Create a `.vscode` folder in the root project and add a `launch.json` file in it:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    // Google Chrome configuration
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Chrome Debug",
+      "userDataDir": false,
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "enableContentValidation": false,
+      "sourceMapPathOverrides": {
+          "webpack:///./src/*": "${webRoot}/*"
+      },
+      "runtimeArgs": [
+          "--remote-debugging-port=9222"
+      ],
+      "sourceMaps": true,
+      "pathMapping": {"url": "/src/", "path": "${webRoot}/"}
+    },
+    // Microsoft Edge configuration
+    {
+      "type": "msedge",
+      "request": "launch",
+      "name": "Edge Debug",
+      "userDataDir": false,
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "enableContentValidation": false,
+      "sourceMapPathOverrides": {
+          "webpack:///./src/*": "${webRoot}/*"
+      },
+      "runtimeArgs": [
+          "--remote-debugging-port=9222"
+      ],
+      "sourceMaps": true,
+      "pathMapping": {"url": "/src/", "path": "${webRoot}/"}
+    },
+  ]
+}
+```
