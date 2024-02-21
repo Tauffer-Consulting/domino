@@ -126,7 +126,7 @@ export type SimpleDefinition =
 export interface EnumDefinition {
   title: string;
   description: string;
-  type: "string";
+  type: "string" | "number" | "integer";
   enum: string[];
 }
 

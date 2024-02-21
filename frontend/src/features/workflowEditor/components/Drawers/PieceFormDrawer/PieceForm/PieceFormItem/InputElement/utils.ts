@@ -1,3 +1,5 @@
+import { getFromUpstream } from "features/workflowEditor/utils";
+
 export const getOptionalType = (
   property: Property | EnumDefinition | EnumDefinition,
 ): TypeName | FormatType | undefined => {
@@ -115,3 +117,89 @@ export const extractCodeEditorLanguage = (property: StringProperty) => {
     ? property.widget.replace("codeeditor-", "")
     : "python";
 };
+
+export const extractArrayDefaultValue = (
+  property: ArrayProperty,
+  definitions: Definitions,
+) => {
+  if ("$ref" in property.items) {
+    const definition = getDefinition(
+      definitions,
+      property.items,
+    ) as ObjectDefinition;
+
+    return {
+      fromUpstream: emptyFromUpstreamObject(
+        definition,
+        property as ArrayObjectProperty,
+        definitions,
+      ),
+      upstreamValue: emptyObject(definition, ""),
+      upstreamId: emptyObject(definition, ""),
+      value: emptyObject(definition),
+    };
+  } else {
+    const value =
+      property.items.type === "string"
+        ? ""
+        : property.items.type === "number"
+          ? 0.0
+          : property.items.type === "boolean"
+            ? false
+            : property.items.type === "integer"
+              ? 0
+              : null;
+
+    return {
+      fromUpstream: getFromUpstream(property),
+      upstreamValue: "",
+      upstreamId: "",
+      value,
+    };
+  }
+};
+
+function getDefinition(definitions: Definitions, ref: Reference) {
+  const typeClass = ref.$ref.split("/").pop() as string;
+  const definition = definitions?.[typeClass] ? definitions[typeClass] : null;
+  return definition;
+}
+
+function emptyFromUpstreamObject(
+  object: ObjectDefinition,
+  property: ArrayObjectProperty,
+  definitions: Definitions,
+) {
+  const newObject: Record<string, any> = {};
+
+  Object.keys(object.properties).forEach((k) => {
+    const fromUpstream = getFromUpstream(property, definitions, k);
+    newObject[k] = fromUpstream;
+  });
+  return newObject;
+}
+
+function emptyObject(objectDefinition: ObjectDefinition, defaultValue?: any) {
+  const newObject: Record<string, any> = {};
+
+  for (const [key, property] of Object.entries(objectDefinition.properties)) {
+    if ("anyOf" in property) {
+      newObject[key] = "";
+    } else {
+      const value =
+        property.type === "string"
+          ? ""
+          : property.type === "number"
+            ? 0.0
+            : property.type === "boolean"
+              ? false
+              : property.type === "integer"
+                ? 0
+                : null;
+
+      newObject[key] = defaultValue ?? value;
+    }
+  }
+
+  return newObject;
+}

@@ -3,23 +3,20 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Card, CardContent, IconButton, Grid } from "@mui/material";
 import CheckboxInput from "components/CheckboxInput";
 import { type WorkflowPieceData } from "features/workflowEditor/context/types";
-import {
-  type UpstreamOptions,
-  getFromUpstream,
-} from "features/workflowEditor/utils";
+import { type UpstreamOptions } from "features/workflowEditor/utils";
 import React, { useCallback, useMemo } from "react";
 import { useWatch, useFieldArray, useFormContext } from "react-hook-form";
 
 import { disableCheckboxOptions } from "../../../../../../utils/disableCheckboxOptions";
 
 import SelectUpstreamInput from "./SelectUpstreamInput";
-import { isObjectType } from "./utils";
+import { extractArrayDefaultValue, isObjectType } from "./utils";
 
 import { InputElement } from ".";
 
 interface ArrayInputItemProps {
   inputKey: `inputs.${string}`;
-  schema: any;
+  schema: ArrayProperty;
   definitions?: any;
   upstreamOptions: UpstreamOptions;
   checkedFromUpstream: boolean;
@@ -37,51 +34,18 @@ const ArrayInput: React.FC<ArrayInputItemProps> = React.memo(
 
     const subItemSchema = useMemo(() => {
       let subItemSchema: any = schema?.items;
-      if (schema?.items?.$ref) {
-        const subItemSchemaName = schema.items.$ref.split("/").pop();
+      if ("$ref" in schema?.items) {
+        const subItemSchemaName = schema.items.$ref.split("/").pop() as string;
         subItemSchema = definitions?.[subItemSchemaName];
       }
       return subItemSchema;
     }, [definitions, schema]);
 
     const handleAddInput = useCallback(() => {
-      function empty(object: Record<string, any>, fromUpstream = false) {
-        Object.keys(object).forEach(function (k) {
-          if (object[k] && typeof object[k] === "object") {
-            return empty(object[k]);
-          }
-          if (fromUpstream) {
-            object[k] = getFromUpstream(schema, definitions, k);
-          } else {
-            object[k] = schema[k]?.default;
-          }
-        });
-        return object;
-      }
-      const defaultValue = schema?.default?.length ? schema.default[0] : "";
-      const isObject = typeof defaultValue === "object";
-      let defaultObj = {
-        fromUpstream: getFromUpstream(schema),
-        upstreamArgument: "",
-        upstreamId: "",
-        upstreamValue: "",
-        value: schema?.default ?? null,
-      } as unknown;
-
-      if (isObject) {
-        const emptyObjValue = empty({ ...defaultValue });
-        const emptyObjFromUpstream = empty({ ...defaultValue }, true);
-        defaultObj = {
-          fromUpstream: emptyObjFromUpstream,
-          upstreamArgument: emptyObjValue,
-          upstreamId: emptyObjValue,
-          upstreamValue: emptyObjValue,
-          value: defaultValue,
-        } as unknown;
-      }
+      const defaultObj = extractArrayDefaultValue(schema, definitions);
 
       append([defaultObj] as any);
-    }, [append, definitions, schema]);
+    }, [append, definitions, schema, fields]);
 
     const disableUpstream = useMemo(
       () => disableCheckboxOptions(subItemSchema),
