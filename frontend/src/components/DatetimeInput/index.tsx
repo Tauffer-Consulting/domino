@@ -1,3 +1,4 @@
+import { FormHelperText } from "@mui/material";
 import {
   DatePicker,
   DateTimePicker,
@@ -14,28 +15,34 @@ import {
   type Path,
   useFormContext,
 } from "react-hook-form";
+import { fetchFromObject } from "utils";
 
 interface Props<T> {
   label: string;
   name: Path<T>;
   type?: "time" | "date" | "date-time";
-  defaultValue?: Date;
+  defaultValue?: string | null;
 }
 
 function DatetimeInput<T extends FieldValues>({
   label,
   name,
   type = "date",
-  defaultValue = new Date(),
+  defaultValue = null,
 }: Props<T>) {
-  const { control } = useFormContext();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
+
+  const error = fetchFromObject(errors, name);
 
   switch (type) {
     case "date-time": {
-      const defaultDateTime = dayjs(
-        defaultValue ?? new Date(),
-        "YYYY-MM-DD HH:mm",
-      );
+      const defaultDateTime =
+        typeof defaultValue === "string"
+          ? dayjs(new Date(defaultValue), "YYYY-MM-DD HH:mm")
+          : defaultValue;
 
       return (
         <Controller
@@ -49,9 +56,17 @@ function DatetimeInput<T extends FieldValues>({
                   label={label}
                   ampm={false}
                   format="DD/MM/YYYY HH:mm"
-                  value={dayjs(value)}
+                  value={value ? dayjs(value) : null}
                   onChange={(e) => {
                     e?.isValid() ? onChange(e.toISOString()) : onChange(null);
+                  }}
+                  slotProps={{
+                    textField: {
+                      error: !!error,
+                      helperText: (
+                        <FormHelperText error>{error?.message}</FormHelperText>
+                      ),
+                    },
                   }}
                   {...rest}
                 />
@@ -62,7 +77,10 @@ function DatetimeInput<T extends FieldValues>({
       );
     }
     case "time": {
-      const defaultTime = dayjs(defaultValue ?? new Date(), "HH:mm");
+      const defaultTime =
+        typeof defaultValue === "string"
+          ? dayjs(defaultValue, "HH:mm")
+          : defaultValue;
 
       return (
         <Controller
@@ -77,11 +95,19 @@ function DatetimeInput<T extends FieldValues>({
                   label={label}
                   format="HH:mm"
                   sx={{ width: "100%" }}
-                  value={dayjs(value as string, "HH:mm")}
+                  value={value ? dayjs(value as string, "HH:mm") : null}
                   onChange={(e) => {
                     e?.isValid()
                       ? onChange(dayjs(e).format("HH:mm") as any)
                       : onChange(null);
+                  }}
+                  slotProps={{
+                    textField: {
+                      error: !!error,
+                      helperText: (
+                        <FormHelperText error>{error?.message}</FormHelperText>
+                      ),
+                    },
                   }}
                   {...rest}
                 />
@@ -94,7 +120,10 @@ function DatetimeInput<T extends FieldValues>({
     case "date":
     default:
       // eslint-disable-next-line no-case-declarations
-      const defaultDate = dayjs(defaultValue ?? new Date(), "YYYY-MM-DD");
+      const defaultDate =
+        typeof defaultValue === "string"
+          ? dayjs(defaultValue, "YYYY-MM-DD")
+          : defaultValue;
 
       return (
         <Controller
@@ -109,11 +138,19 @@ function DatetimeInput<T extends FieldValues>({
                   views={["day", "month", "year"]}
                   format="DD/MM/YYYY"
                   sx={{ width: "100%" }}
-                  value={dayjs(value as string)}
+                  value={value ? dayjs(value as string) : null}
                   onChange={(e) => {
                     e?.isValid()
                       ? onChange(dayjs(e).format("YYYY-MM-DD") as any)
                       : onChange(null);
+                  }}
+                  slotProps={{
+                    textField: {
+                      error: !!error,
+                      helperText: (
+                        <FormHelperText error>{error?.message}</FormHelperText>
+                      ),
+                    },
                   }}
                   {...rest}
                 />
