@@ -109,7 +109,10 @@ const InputElement: React.FC<Props> = React.memo(
         <DatetimeInput<WorkflowPieceData>
           name={isItemArray ? `${itemKey}.value` : itemKey}
           label={schema.title}
-          type={(schema as StringProperty).format}
+          defaultValue={(schema as StringProperty)?.default}
+          type={
+            (schema as StringProperty)?.format ?? (optionalType as FormatType)
+          }
         />
       );
     } else if (isCodeEditorType(schema, optionalType)) {
