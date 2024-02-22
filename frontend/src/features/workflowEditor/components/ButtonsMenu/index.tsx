@@ -95,6 +95,7 @@ export const ButtonsMenu: React.FC<Props> = ({
 
         setIncompatiblesPieces(differences);
         incompatiblePiecesModalRef.current?.open();
+        return;
       }
 
       handleImported(json);
