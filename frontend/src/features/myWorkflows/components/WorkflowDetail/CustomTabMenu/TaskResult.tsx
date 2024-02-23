@@ -16,9 +16,8 @@ export const TaskResult = ({
   isLoading,
 }: ITaskResultProps) => {
   const style: CSSProperties = {
-    height: "100%",
     width: "100%",
-    overflowY: "scroll",
+    overflowY: "auto",
     overflowX: "hidden",
     wordWrap: "break-word",
     whiteSpace: "pre-wrap",

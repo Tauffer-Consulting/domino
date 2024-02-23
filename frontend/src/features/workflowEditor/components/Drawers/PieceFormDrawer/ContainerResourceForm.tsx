@@ -29,14 +29,14 @@ export const ContainerResourceFormSchema: yup.ObjectSchema<IContainerResourceFor
       min: yup
         .number()
         .integer()
-        .typeError("Must must be a number")
+        .transform((value) => (isNaN(value) ? undefined : value))
         .max(maxAcceptedCpu)
         .min(minAcceptedCpu)
         .required(),
       max: yup
         .number()
         .integer()
-        .typeError("Must be a number")
+        .transform((value) => (isNaN(value) ? undefined : value))
         .max(maxAcceptedCpu)
         .when("min", ([min], schema) => schema.min(min))
         .required(),

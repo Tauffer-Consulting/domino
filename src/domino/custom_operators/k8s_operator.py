@@ -510,7 +510,7 @@ class DominoKubernetesPodOperator(KubernetesPodOperator):
         ti.xcom_push(key='pod_name', value=self.pod.metadata.name)
         ti.xcom_push(key='pod_namespace', value=self.pod.metadata.namespace)
         if self.do_xcom_push:
-            self._shared_storage_usage_in_bytes = result['_shared_storage_usage_in_bytes']
+            self._shared_storage_usage_in_bytes = result.get('_shared_storage_usage_in_bytes', 0)
             return result
 
 

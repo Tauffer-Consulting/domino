@@ -74,7 +74,10 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.number().typeError("Must must be a number").required(); // number is always required
+        return yup
+          .number()
+          .transform((value) => (isNaN(value) ? undefined : value))
+          .required(); // number is always required
       }),
     });
   } else if (schema.type === "integer" && !schema.format) {
@@ -87,7 +90,7 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
         return yup
           .number()
           .integer()
-          .typeError("Must must be a number")
+          .transform((value) => (isNaN(value) ? undefined : value))
           .required(); // number is always required
       }),
     });
@@ -108,7 +111,10 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
         if (fromUpstream) {
           return yup.mixed().notRequired();
         }
-        return yup.date().required(); // date is always required
+        return yup
+          .date()
+          .transform((value) => (isNaN(value) ? undefined : value))
+          .required(); // date is always required
       }),
     });
   } else if (schema.type === "string" && schema?.format === "time") {

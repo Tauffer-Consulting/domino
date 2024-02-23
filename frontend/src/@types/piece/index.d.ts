@@ -15,6 +15,8 @@ declare global {
   type Property = import("./schema").Property;
   type SimpleProperty = import("./schema").SimpleProperty;
   type ArrayProperty = import("./schema").ArrayProperty;
+  type AnyOfArray = import("./schema").AnyOfArray;
+  type AnyOf = import("./schema").AnyOf;
   type AnyOfProperty = import("./schema").AnyOfProperty;
 
   type StringProperty = import("./schema").StringProperty;

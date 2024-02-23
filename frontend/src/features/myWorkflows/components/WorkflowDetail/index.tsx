@@ -59,6 +59,15 @@ export const WorkflowDetail: React.FC = () => {
   const fetchWorkflowTasks = useAuthenticatedGetWorkflowRunTasks();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
+  const triggerRun = () => {
+    if (workflow?.id) {
+      void handleRunWorkflow({ id: String(workflow.id) });
+      setInterval(() => {
+        setAutoUpdate(true);
+      }, 1500);
+    }
+  };
+
   const refreshDetails = useCallback(() => {
     void workflowRunDetailRef.current?.refreshTaskLogs();
     void workflowRunDetailRef.current?.refreshTaskResults();
@@ -208,12 +217,7 @@ export const WorkflowDetail: React.FC = () => {
           {/* WorkflowRunsTable */}
           <Grid item xs={12} sx={{ paddingLeft: "1rem" }}>
             <WorkflowRunsTable
-              triggerRun={() => {
-                if (workflow?.id) {
-                  void handleRunWorkflow({ id: String(workflow.id) });
-                  setAutoUpdate(true);
-                }
-              }}
+              triggerRun={triggerRun}
               refresh={refresh}
               selectedRun={selectedRun}
               ref={workflowRunsTableRef}

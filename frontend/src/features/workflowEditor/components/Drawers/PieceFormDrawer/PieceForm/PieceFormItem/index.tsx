@@ -8,6 +8,7 @@ import React, { useMemo } from "react";
 import { useWatch } from "react-hook-form";
 
 import { InputElement, ArrayInput, isArrayInput } from "./InputElement";
+import { getOptionalType } from "./InputElement/utils";
 
 interface PieceFormItemProps {
   schema: Property;
@@ -30,6 +31,8 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
     name: `inputs.${itemKey}.fromUpstream`,
   });
 
+  const optionalType = getOptionalType(schema);
+
   return (
     <Box
       display="flex"
@@ -38,9 +41,9 @@ const PieceFormItem: React.FC<PieceFormItemProps> = ({
       sx={{ paddingTop: "10px" }}
     >
       <Grid item xs={10}>
-        {isArrayInput(schema) ? (
+        {isArrayInput(schema, optionalType) ? (
           <ArrayInput
-            schema={schema}
+            schema={schema as any}
             inputKey={`inputs.${itemKey}`}
             upstreamOptions={upstreamOptions}
             definitions={definitions}
