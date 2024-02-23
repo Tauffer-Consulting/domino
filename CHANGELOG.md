@@ -1,4 +1,4 @@
-# v0.8.5
+# v0.9.1
 
 ### Fixes
 - [x] fix k8s operator to allow old pieces without shared storage usage info
@@ -8,6 +8,22 @@
   
 ### Docs
 - [x] added how to debug in frontend docs
+
+# v0.9.0
+
+### Features
+- [x] Add new visual identity colors.
+- [x] Add new visual identity logo.
+- [x] Add new visual identity fonts.
+- [x] Improve Workspace cards layout and navigation.
+- [x] Add tracking of piece storage usage.
+
+
+### Fixes
+- [x] Fix selected workspace Leave action messages.
+- [x] Fix delay on loading upstream options.
+- [x] Stop using local forage for storage.
+
 
 # v0.8.4
 

@@ -6,7 +6,7 @@ metadata:
 spec:
   completions: 1
   parallelism: 1
-  backoffLimit: 4
+  backoffLimit: 10
   template:
     metadata:
       annotations:
