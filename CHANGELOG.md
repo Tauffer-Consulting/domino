@@ -1,3 +1,14 @@
+# v0.8.5
+
+### Fixes
+- [x] fix k8s operator to allow old pieces without shared storage usage info
+- [x] fix errors messages on some inputs
+- [x] fix import incompatible JSONs should not add anything to the workflow 
+- [x] fix new entries of object arrays
+  
+### Docs
+- [x] added how to debug in frontend docs
+
 # v0.8.4
 
 ### Features
