@@ -154,6 +154,8 @@ const InputElement: React.FC<Props> = React.memo(
         />
       );
     } else {
+      console.log("optionalType", optionalType);
+
       return (
         <div style={{ color: "red", fontWeight: "bold" }}>
           Unknown widget type for {schema.title}

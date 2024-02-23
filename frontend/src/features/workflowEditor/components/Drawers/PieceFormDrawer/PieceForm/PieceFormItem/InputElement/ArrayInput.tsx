@@ -16,7 +16,7 @@ import { InputElement } from ".";
 
 interface ArrayInputItemProps {
   inputKey: `inputs.${string}`;
-  schema: ArrayProperty;
+  schema: ArrayProperty | AnyOfArray;
   definitions?: any;
   upstreamOptions: UpstreamOptions;
   checkedFromUpstream: boolean;
@@ -33,11 +33,15 @@ const ArrayInput: React.FC<ArrayInputItemProps> = React.memo(
     const formsData = useWatch({ name });
 
     const subItemSchema = useMemo(() => {
-      let subItemSchema: any = schema?.items;
-      if ("$ref" in schema?.items) {
-        const subItemSchemaName = schema.items.$ref.split("/").pop() as string;
+      let subItemSchema =
+        "items" in schema
+          ? schema.items
+          : (schema.anyOf.find((s) => s.type === "array") as any)?.items;
+      if (subItemSchema && "$ref" in subItemSchema && subItemSchema?.$ref) {
+        const subItemSchemaName = subItemSchema.$ref.split("/").pop() as string;
         subItemSchema = definitions?.[subItemSchemaName];
       }
+
       return subItemSchema;
     }, [definitions, schema]);
 
@@ -48,7 +52,7 @@ const ArrayInput: React.FC<ArrayInputItemProps> = React.memo(
     }, [append, definitions, schema, fields]);
 
     const disableUpstream = useMemo(
-      () => disableCheckboxOptions(subItemSchema),
+      () => (subItemSchema ? disableCheckboxOptions(subItemSchema) : false),
       [subItemSchema],
     );
 

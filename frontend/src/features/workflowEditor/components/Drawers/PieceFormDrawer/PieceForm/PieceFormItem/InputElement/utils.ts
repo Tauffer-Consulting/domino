@@ -1,9 +1,9 @@
-import { getFromUpstream } from "features/workflowEditor/utils";
+import { getDefinition, getFromUpstream } from "features/workflowEditor/utils";
 
 export const getOptionalType = (
   property: Property | EnumDefinition | EnumDefinition,
 ): TypeName | FormatType | undefined => {
-  if ("anyOf" in property && property.anyOf.length === 2) {
+  if (property && "anyOf" in property && property.anyOf.length === 2) {
     const hasNullType = property.anyOf.some((item) => item.type === "null");
     if (hasNullType) {
       const itemSchema = property.anyOf.find(
@@ -119,10 +119,10 @@ export const extractCodeEditorLanguage = (property: StringProperty) => {
 };
 
 export const extractArrayDefaultValue = (
-  property: ArrayProperty,
+  property: ArrayProperty | AnyOfArray,
   definitions: Definitions,
 ) => {
-  if ("$ref" in property.items) {
+  if ("items" in property && "$ref" in property.items) {
     const definition = getDefinition(
       definitions,
       property.items,
@@ -138,15 +138,72 @@ export const extractArrayDefaultValue = (
       upstreamId: emptyObject(definition, ""),
       value: emptyObject(definition),
     };
-  } else {
+  } else if (
+    "anyOf" in property &&
+    property.anyOf.find((s) => s.type === "array" && "$ref" in s.items)
+  ) {
+    const anyOf = property.anyOf.find(
+      (s) => s.type === "array" && "$ref" in s.items,
+    ) as { items: Reference; type: "array" };
+
+    const subProperty = getDefinition(
+      definitions,
+      anyOf.items,
+    ) as ObjectDefinition;
+
+    const response = {
+      fromUpstream: emptyFromUpstreamObject(subProperty, property, definitions),
+      upstreamValue: emptyObject(subProperty, ""),
+      upstreamId: emptyObject(subProperty, ""),
+      value: emptyObject(subProperty),
+    };
+
+    console.log("ta caindo aqui", response);
+
+    return response;
+  } else if (
+    "anyOf" in property &&
+    property.anyOf.find((s) => s.type === "array" && !("$ref" in s.items))
+  ) {
+    const anyOf = property.anyOf.find(
+      (s) => s.type === "array" && "$ref" in s.items,
+    ) as { items: AnyOf["anyOf"]; type: "array" };
+
+    const subProperty = anyOf.items.find((i) => i.type !== "null");
+
     const value =
-      property.items.type === "string"
+      subProperty?.type === "string"
         ? ""
-        : property.items.type === "number"
+        : subProperty?.type === "number"
           ? 0.0
-          : property.items.type === "boolean"
+          : subProperty?.type === "boolean"
             ? false
-            : property.items.type === "integer"
+            : subProperty?.type === "integer"
+              ? 0
+              : null;
+
+    return {
+      fromUpstream: getFromUpstream(property),
+      upstreamValue: "",
+      upstreamId: "",
+      value,
+    };
+  } else {
+    const subProperty = (
+      property as
+        | ArrayBooleanProperty
+        | ArrayNumberProperty
+        | ArrayStringProperty
+    ).items;
+
+    const value =
+      subProperty.type === "string"
+        ? ""
+        : subProperty.type === "number"
+          ? 0.0
+          : subProperty.type === "boolean"
+            ? false
+            : subProperty.type === "integer"
               ? 0
               : null;
 
@@ -159,15 +216,9 @@ export const extractArrayDefaultValue = (
   }
 };
 
-function getDefinition(definitions: Definitions, ref: Reference) {
-  const typeClass = ref.$ref.split("/").pop() as string;
-  const definition = definitions?.[typeClass] ? definitions[typeClass] : null;
-  return definition;
-}
-
 function emptyFromUpstreamObject(
   object: ObjectDefinition,
-  property: ArrayObjectProperty,
+  property: ArrayObjectProperty | AnyOfArray,
   definitions: Definitions,
 ) {
   const newObject: Record<string, any> = {};

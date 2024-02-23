@@ -98,17 +98,21 @@ export interface Reference {
   $ref: `#/$defs/${string}`;
 }
 
-type AnyOf = DefaultPropertyAttrs & {
-  anyOf: Array<{
-    type: "null" | "number" | "integer" | "string" | "boolean";
-    widget?: `codeeditor-${string}` | "textarea";
-    format?: "date" | "time" | "date-time";
-  }>;
+export type AnyOf = DefaultPropertyAttrs & {
+  anyOf: Array<
+    {
+      type: "null" | "number" | "integer" | "string" | "boolean";
+      widget?: `codeeditor-${string}` | "textarea";
+      format?: "date" | "time" | "date-time";
+    } & DefaultPropertyAttrs
+  >;
   default?: any;
 };
 
 export type AnyOfArray = DefaultPropertyAttrs & {
-  anyOf: Array<{ items: AnyOf["anyOf"]; type: "array" } | { type: "null" }>;
+  anyOf: Array<
+    { items: AnyOf["anyOf"] | Reference; type: "array" } | { type: "null" }
+  >;
   default?: any[];
 };
 
