@@ -1,7 +1,9 @@
+import { getDefinition, getFromUpstream } from "features/workflowEditor/utils";
+
 export const getOptionalType = (
   property: Property | EnumDefinition | EnumDefinition,
 ): TypeName | FormatType | undefined => {
-  if ("anyOf" in property && property.anyOf.length === 2) {
+  if (property && "anyOf" in property && property.anyOf.length === 2) {
     const hasNullType = property.anyOf.some((item) => item.type === "null");
     if (hasNullType) {
       const itemSchema = property.anyOf.find(
@@ -115,3 +117,140 @@ export const extractCodeEditorLanguage = (property: StringProperty) => {
     ? property.widget.replace("codeeditor-", "")
     : "python";
 };
+
+export const extractArrayDefaultValue = (
+  property: ArrayProperty | AnyOfArray,
+  definitions: Definitions,
+) => {
+  if ("items" in property && "$ref" in property.items) {
+    const definition = getDefinition(
+      definitions,
+      property.items,
+    ) as ObjectDefinition;
+
+    return {
+      fromUpstream: emptyFromUpstreamObject(
+        definition,
+        property as ArrayObjectProperty,
+        definitions,
+      ),
+      upstreamValue: emptyObject(definition, ""),
+      upstreamId: emptyObject(definition, ""),
+      value: emptyObject(definition),
+    };
+  } else if (
+    "anyOf" in property &&
+    property.anyOf.find((s) => s.type === "array" && "$ref" in s.items)
+  ) {
+    const anyOf = property.anyOf.find(
+      (s) => s.type === "array" && "$ref" in s.items,
+    ) as { items: Reference; type: "array" };
+
+    const subProperty = getDefinition(
+      definitions,
+      anyOf.items,
+    ) as ObjectDefinition;
+
+    const response = {
+      fromUpstream: emptyFromUpstreamObject(subProperty, property, definitions),
+      upstreamValue: emptyObject(subProperty, ""),
+      upstreamId: emptyObject(subProperty, ""),
+      value: emptyObject(subProperty),
+    };
+
+    console.log("ta caindo aqui", response);
+
+    return response;
+  } else if (
+    "anyOf" in property &&
+    property.anyOf.find((s) => s.type === "array" && !("$ref" in s.items))
+  ) {
+    const anyOf = property.anyOf.find(
+      (s) => s.type === "array" && "$ref" in s.items,
+    ) as { items: AnyOf["anyOf"]; type: "array" };
+
+    const subProperty = anyOf.items.find((i) => i.type !== "null");
+
+    const value =
+      subProperty?.type === "string"
+        ? ""
+        : subProperty?.type === "number"
+          ? 0.0
+          : subProperty?.type === "boolean"
+            ? false
+            : subProperty?.type === "integer"
+              ? 0
+              : null;
+
+    return {
+      fromUpstream: getFromUpstream(property),
+      upstreamValue: "",
+      upstreamId: "",
+      value,
+    };
+  } else {
+    const subProperty = (
+      property as
+        | ArrayBooleanProperty
+        | ArrayNumberProperty
+        | ArrayStringProperty
+    ).items;
+
+    const value =
+      subProperty.type === "string"
+        ? ""
+        : subProperty.type === "number"
+          ? 0.0
+          : subProperty.type === "boolean"
+            ? false
+            : subProperty.type === "integer"
+              ? 0
+              : null;
+
+    return {
+      fromUpstream: getFromUpstream(property),
+      upstreamValue: "",
+      upstreamId: "",
+      value,
+    };
+  }
+};
+
+function emptyFromUpstreamObject(
+  object: ObjectDefinition,
+  property: ArrayObjectProperty | AnyOfArray,
+  definitions: Definitions,
+) {
+  const newObject: Record<string, any> = {};
+
+  Object.keys(object.properties).forEach((k) => {
+    const fromUpstream = getFromUpstream(property, definitions, k);
+    newObject[k] = fromUpstream;
+  });
+  return newObject;
+}
+
+function emptyObject(objectDefinition: ObjectDefinition, defaultValue?: any) {
+  const newObject: Record<string, any> = {};
+
+  for (const [key, property] of Object.entries(objectDefinition.properties)) {
+    if ("anyOf" in property) {
+      newObject[key] = "";
+    } else {
+      const value =
+        property.type === "string"
+          ? ""
+          : property.type === "number"
+            ? 0.0
+            : property.type === "boolean"
+              ? false
+              : property.type === "integer"
+                ? 0
+                : null;
+
+      newObject[key] = defaultValue ?? value;
+    }
+  }
+
+  return newObject;
+}
