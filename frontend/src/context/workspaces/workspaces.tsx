@@ -181,7 +181,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
     async (name: string) =>
       await postWorkspace({ name })
         .then((data) => {
-          toast.success(`Workflow ${name} created successfully`);
+          toast.success(`Workspace ${name} created successfully`);
           void workspacesRefresh();
           return data;
         })
