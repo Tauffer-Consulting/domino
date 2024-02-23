@@ -1,13 +1,13 @@
 # v0.9.1
 
 ### Fixes
-- [x] fix k8s operator to allow old pieces without shared storage usage info
-- [x] fix errors messages on some inputs
-- [x] fix import incompatible JSONs should not add anything to the workflow 
-- [x] fix new entries of object arrays
-  
+- [x] Fix Domino k8s Operator to allow handle old pieces without shared storage usage info.
+- [x] Fix errors messages on some inputs.
+- [x] Fix import incompatible JSONs should not add anything to the workflow.
+- [x] Fix new entries of object arrays.
+
 ### Docs
-- [x] added how to debug in frontend docs
+- [x] Added how to debug in frontend docs.
 
 # v0.9.0
 
