@@ -56,7 +56,10 @@ const ArrayInput: React.FC<ArrayInputItemProps> = React.memo(
       [subItemSchema],
     );
 
-    const options = useMemo(() => upstreamOptions[inputKey], []);
+    const options = useMemo(() => {
+      const upstreamKey = inputKey.replace("inputs.", "");
+      return upstreamOptions[upstreamKey];
+    }, [upstreamOptions]);
 
     const isFromUpstream = useCallback(
       (index: number) => {
