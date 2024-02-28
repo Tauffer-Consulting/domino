@@ -26,7 +26,7 @@
 
 <br>
 
-![create-workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/media/gif-example.gif)
+![create-workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/intro/gif-example.gif)
 
 # Table of contents
 - [About](#about)
@@ -97,17 +97,17 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Sign up and login to use the Domino platform. <br></br>
 
-  ![signup and login](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/1_sign_up.gif)
+  ![signup and login](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/quickstart/signin.gif)
 
 </details>
 
 <details>
   <summary>
-    <strong>Create Workspaces</strong>
+    <strong>Select or Create Workspaces</strong>
   </summary>
-  Create new Workspaces and add your github access token. <br></br>
+  Select an existing or create a new Workspace. <br></br>
 
-  ![create workspace](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/2_create_workspace_and_token.gif)
+  ![create workspace](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/quickstart/select-workspace.png)
 
 </details>
 
@@ -117,7 +117,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Install bundles of Pieces to your Domino Workspaces direclty from Github repositories, and use them in your Workflows. <br></br>
 
-  ![install pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino/main/docs/source/_static/media/6_install_pieces.gif)
+  ![install pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/pieces/install_repository.gif)
 
 </details>
 
@@ -127,7 +127,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Create Workflows by dragging and dropping Pieces to the canvas, and connecting them. <br></br>
 
-  ![create-workflow](https://github.com/Tauffer-Consulting/domino/assets/54302847/34d619fa-4b6c-4761-8b24-3ca829cfc28c)
+  ![create-workflow](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/quickstart/create_workflow.gif)
 
 </details>
 
@@ -137,17 +137,17 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Edit Pieces by changing their input. Outputs from upstream Pieces are automatically available as inputs for downstream Pieces. Pieces can pass forward any type of data, from simple strings to heavy files, all automatically handled by Domino shared storage system. <br></br>
 
-  ![edit pieces](https://github.com/Tauffer-Consulting/domino/assets/54302847/d453ac81-5485-4159-b2f3-bf57eb969906)
+  ![edit pieces](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/quickstart/edit_pieces.gif)
 
 </details>
 
 <details>
   <summary>
-    <strong>Schedule Workflows</strong>
+    <strong>Configure Workflows</strong>
   </summary>
-  Schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
+  Configure and schedule Workflows to run periodically, at a specific date/time, or trigger them manually. <br></br>
 
-  ![schedule workflows](https://github.com/Tauffer-Consulting/domino/assets/54302847/e881d225-e8e0-4344-bc3f-c170cb820274)
+  ![schedule workflows](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/quickstart/workflow_settings.gif)
 
 </details>
 
@@ -157,7 +157,7 @@ The Domino frontend service is a React application that provides the GUI for eas
   </summary>
   Monitor Workflows in real time, including the status of each Piece, the logs and results of each run. <br></br>
 
-  ![run-pieces7](https://github.com/Tauffer-Consulting/domino/assets/54302847/fb5a30c5-0314-4271-bb46-81a159ab2696)
+  ![run-pieces7](https://raw.githubusercontent.com/Tauffer-Consulting/domino-docs/main/static/img/quickstart/monitoring_workflow.gif)
 
 </details>
 
