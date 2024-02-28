@@ -194,7 +194,7 @@ The Backend service is a REST API that controls a running Apache Airflow instanc
 - interacting with the Airflow instance, including triggering, creating, editing and deleting Workflows (DAGs)
 - interacting with the Domino Database
 
-The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://domino-py.readthedocs.io/en/latest/pages/rest.html).
+The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://domino-workflows.io/docs/domino_components/domino_components_rest).
 
 <br>
 
