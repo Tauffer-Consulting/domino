@@ -6,10 +6,11 @@ export const PublicLayout: FC<{ children: ReactNode }> = ({ children }) => {
     <Container component="main" maxWidth="sm">
       <Box
         sx={{
-          marginTop: 8,
+          height: "100vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Card variant="outlined" sx={{ padding: 2 }}>
