@@ -10,14 +10,14 @@ class Workspace(Base, BaseDatabaseModel):
     # Table columns
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     github_access_token = Column(String, nullable=True)
-    
+
 
     users = relationship(
-        "UserWorkspaceAssociative", 
-        back_populates="workspace", 
-        lazy='subquery', 
+        "UserWorkspaceAssociative",
+        back_populates="workspace",
+        lazy='subquery',
         uselist=True,
         cascade="all, delete"
     )
@@ -29,9 +29,9 @@ class Workspace(Base, BaseDatabaseModel):
         cascade="all, delete"
     )
     piece_repositories = relationship(
-        "PieceRepository", 
-        back_populates="workspace", 
-        lazy='subquery', 
+        "PieceRepository",
+        back_populates="workspace",
+        lazy='subquery',
         uselist=True,
         cascade="all, delete"
     )
