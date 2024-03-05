@@ -10,7 +10,7 @@ interface IPrivateLayoutProps {
 
 export const PrivateLayout: FC<IPrivateLayoutProps> = ({ children }) => {
   return (
-    <Box sx={{ display: "flex", width: "100%", marginTop: "3rem" }}>
+    <Box sx={{ display: "flex", width: "100%", marginTop: "64px" }}>
       <Header />
 
       <Container component="main" maxWidth={false} sx={{ padding: 3 }}>
