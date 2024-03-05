@@ -12,6 +12,7 @@ export interface IWorkflow {
   id: number;
   name: string;
   created_at: string;
+  start_date: string;
   schema: IWorkflowSchema;
   ui_schema: IWorkDominoSchema;
   last_changed_at: string;

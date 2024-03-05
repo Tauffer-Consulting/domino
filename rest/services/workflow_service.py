@@ -5,7 +5,7 @@ import asyncio
 from copy import deepcopy
 from uuid import uuid4
 import io
-from datetime import datetime
+from datetime import datetime, timezone
 from repository.piece_repository import PieceRepository
 from schemas.context.auth_context import AuthorizationContextData
 
@@ -243,8 +243,6 @@ class WorkflowService(object):
             data=data,
             metadata=pagination_metadata
         )
-
-        print('response', response)
 
         return response
 
@@ -521,7 +519,7 @@ class WorkflowService(object):
             raise ResourceNotFoundException("Workflow not found")
 
         # Check if start date is in the past
-        if workflow.start_date and workflow.start_date > datetime.utcnow():
+        if workflow.start_date and workflow.start_date > datetime.utcnow().replace(tzinfo=timezone.utc):
             raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
 
         airflow_workflow_id = workflow.uuid_name
