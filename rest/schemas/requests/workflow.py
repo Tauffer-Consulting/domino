@@ -55,8 +55,10 @@ class WorkflowBaseSettings(BaseModel):
                 converted_date =  datetime.strptime(v, "%Y-%m-%dT%H:%M:%S")
             else:
                 converted_date =  datetime.strptime(v, "%Y-%m-%d")
-            if converted_date < datetime.now():
-                raise ValueError("Start date must be in the future")
+
+            # Validate if start date is in the future
+            # if converted_date < datetime.now():
+            #     raise ValueError("Start date must be in the future")
             # Get only date and time without seconds from date
             converted_date = converted_date.replace(second=0, microsecond=0)
             return converted_date.isoformat()
