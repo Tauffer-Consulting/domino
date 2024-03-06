@@ -1,4 +1,3 @@
-import Loading from "components/Loading";
 import React, {
   type ReactNode,
   useCallback,
@@ -13,7 +12,6 @@ import { createCustomContext } from "utils";
 
 import { postAuthLogin, postAuthRegister } from "./api";
 import {
-  authStatus,
   type IAuthenticationContext,
   type IAuthenticationStore,
 } from "./authentication.interface";
@@ -30,7 +28,6 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const [status, setStatus] = useState(authStatus.Loading);
   const [authLoading, setAuthLoading] = useState(false);
   const [store, setStore] = useState<IAuthenticationStore>({
     token: localStorage.getItem("auth_token"),
@@ -58,7 +55,6 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
         "tokenExpiresAtTimestamp",
         tokenExpirationDate.getTime().toString(),
       );
-      setStatus(authStatus.SignedIn);
       navigate(redirect);
     },
     [navigate],
@@ -71,7 +67,6 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       ...store,
       token: null,
     }));
-    setStatus(authStatus.SignedOut);
     navigate("/sign-in");
   }, [navigate]);
 
@@ -123,9 +118,9 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const tokenExpired = useCallback(() => {
     const tokenTimestamp = localStorage.getItem("tokenExpiresAtTimestamp");
     if (tokenTimestamp) {
-      const date1 = Number(tokenTimestamp);
-      const date2 = new Date().getTime();
-      return date1 <= date2;
+      const expireDate = Number(tokenTimestamp);
+      const currentDate = new Date().getTime();
+      return expireDate <= currentDate;
     }
     return true;
   }, []);
@@ -146,13 +141,10 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     const expired = tokenExpired();
-
-    if (expired) {
+    if (expired && isLogged.current) {
       logout();
-    } else {
-      setStatus(authStatus.SignedIn);
     }
-  }, [tokenExpired]);
+  }, [tokenExpired, isLogged]);
 
   const value = useMemo((): IAuthenticationContext => {
     return {
@@ -164,10 +156,6 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       register,
     };
   }, [store, logout, authenticate, register, authLoading]);
-
-  if (status === authStatus.Loading) {
-    return <Loading />;
-  }
 
   return (
     <AuthenticationContext.Provider value={value}>

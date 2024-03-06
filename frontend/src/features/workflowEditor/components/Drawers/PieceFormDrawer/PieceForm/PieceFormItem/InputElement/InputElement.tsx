@@ -83,15 +83,19 @@ const InputElement: React.FC<Props> = React.memo(
         />
       );
     } else if (isNumberType(schema, optionalType)) {
+      const isInteger =
+        ("type" in schema && schema.type === "integer") ||
+        optionalType === "integer";
+
       return (
         <NumberInput<WorkflowPieceData>
           name={isItemArray ? `${itemKey}.value` : itemKey}
-          type={optionalType === "integer" ? "int" : "float"}
+          type={isInteger ? "int" : "float"}
           label={schema.title}
           defaultValue={
             "default" in schema
-              ? schema?.default ?? (optionalType === "integer" ? 10 : 10.5)
-              : optionalType === "integer"
+              ? schema?.default ?? (isInteger ? 10 : 10.5)
+              : isInteger
                 ? 10
                 : 10.5
           }
