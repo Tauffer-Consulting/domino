@@ -15,6 +15,7 @@ import {
 import { type IWorkflow } from "features/myWorkflows/types";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useInterval } from "utils";
 
 import { Actions } from "./Actions";
@@ -178,6 +179,12 @@ export const WorkflowList: React.FC = () => {
         event.target instanceof Element &&
         event.target.classList.contains(".action-button");
       if (!isActionButtonClick) {
+        if (new Date(params.row.start_date) > new Date()) {
+          toast.warning(
+            "Future workflows runs cannot be accessed. Wait until the start date.",
+          );
+          return;
+        }
         if (params.row.status !== "failed" && params.row.status !== "creating")
           navigate(`/my-workflows/${params.id}`);
       }

@@ -31,12 +31,17 @@ class SelectEndDate(str, Enum):
     never = "never"
     user_defined = "User defined"
 
+class SelectStartDate(str, Enum):
+    now = "now"
+    user_defined = "User defined"
+
 class WorkflowBaseSettings(BaseModel):
     # TODO remove regex ?
     name: str = Field(
         description="Workflow name",
         pattern=r"^[\w]*$"
     )
+    select_start_date: Optional[SelectStartDate] = Field(alias="selectStartDate", default=SelectStartDate.now)
     start_date: str = Field(alias="startDateTime")
     select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
     end_date: Optional[str] = Field(alias='endDateTime', default=None)
@@ -47,8 +52,12 @@ class WorkflowBaseSettings(BaseModel):
 
 
     @field_validator('start_date')
-    def start_date_validator(cls, v):
+    def start_date_validator(cls, v, values):
         try:
+            select_start_date = values.data.get('select_start_date')
+            if select_start_date.value == SelectStartDate.now.value:
+                return datetime.now().replace(second=0, microsecond=0).isoformat()
+
             if '.' in v:
                 v = v.split('.')[0]
             if 'T' in v:
@@ -61,6 +70,8 @@ class WorkflowBaseSettings(BaseModel):
             #     raise ValueError("Start date must be in the future")
             # Get only date and time without seconds from date
             converted_date = converted_date.replace(second=0, microsecond=0)
+            if converted_date < datetime.now().replace(second=0, microsecond=0):
+                converted_date = datetime.now().replace(second=0, microsecond=0)
             return converted_date.isoformat()
 
         except ValueError:

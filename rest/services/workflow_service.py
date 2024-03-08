@@ -403,6 +403,7 @@ class WorkflowService(object):
         """
         workflow_kwargs['dag_id'] = workflow_kwargs.pop('id')
         select_end_date = workflow_kwargs.pop('select_end_date') # TODO define how to use select end date
+        workflow_kwargs.pop('select_start_date')
         workflow_kwargs['schedule'] = None if workflow_kwargs['schedule'] == 'none' else f"@{workflow_kwargs['schedule']}"
 
         workflow_processed_schema = {

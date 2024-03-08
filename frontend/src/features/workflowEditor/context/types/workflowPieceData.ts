@@ -8,6 +8,7 @@ import {
   type ScheduleIntervals,
   type StorageSourcesAWS,
   type StorageSourcesLocal,
+  type StartDateTypes,
 } from "./settings";
 import { type IStorageFormData, type StorageAccessModes } from "./storage";
 
@@ -19,7 +20,8 @@ export interface WorkflowPieceData {
 
 interface WorkflowBaseSettings {
   name: string;
-  start_date: string; // ISOFormat
+  select_start_date: StartDateTypes;
+  start_date?: string; // ISOFormat
   select_end_date: EndDateTypes;
   schedule: ScheduleIntervals;
 
