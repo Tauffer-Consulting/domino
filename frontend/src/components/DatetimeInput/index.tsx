@@ -22,6 +22,7 @@ interface Props<T> {
   name: Path<T>;
   type?: "time" | "date" | "date-time";
   defaultValue?: string | null;
+  disablePast?: boolean;
 }
 
 function DatetimeInput<T extends FieldValues>({
@@ -29,6 +30,7 @@ function DatetimeInput<T extends FieldValues>({
   name,
   type = "date",
   defaultValue = null,
+  disablePast = false,
 }: Props<T>) {
   const {
     control,
@@ -53,6 +55,7 @@ function DatetimeInput<T extends FieldValues>({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["DateTimePicker"]}>
                 <DateTimePicker
+                  disablePast={disablePast}
                   label={label}
                   ampm={false}
                   format="DD/MM/YYYY HH:mm"
@@ -91,6 +94,7 @@ function DatetimeInput<T extends FieldValues>({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]} sx={{ width: "100%" }}>
                 <TimePicker
+                  disablePast={disablePast}
                   ampm={false}
                   label={label}
                   format="HH:mm"
@@ -134,6 +138,7 @@ function DatetimeInput<T extends FieldValues>({
             <DemoContainer components={["DatePicker"]} sx={{ width: "100%" }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
+                  disablePast={disablePast}
                   label={label}
                   views={["day", "month", "year"]}
                   format="DD/MM/YYYY"

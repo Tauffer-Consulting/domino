@@ -15,6 +15,13 @@ export enum endDateTypes {
   UserDefined = "User defined",
 }
 
+export enum startDateTypes {
+  Now = "now",
+  UserDefined = "User defined",
+}
+
+export type StartDateTypes = `${startDateTypes}`;
+
 export type EndDateTypes = `${endDateTypes}`;
 
 export enum storageSourcesAWS {
@@ -34,9 +41,10 @@ export type StorageSourcesLocal = `${storageSourcesLocal}`;
 export interface IWorkflowSettingsConfig {
   name: string;
   scheduleInterval: ScheduleIntervals;
-  startDate: string;
+  startDate?: string;
   endDate?: string;
   endDateType: EndDateTypes;
+  startDateType: StartDateTypes;
 }
 
 export interface IWorkflowSettingsStorage {

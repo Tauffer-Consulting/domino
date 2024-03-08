@@ -136,10 +136,10 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
         name: workflowSettingsData.config.name,
         schedule: workflowSettingsData.config.scheduleInterval,
         select_end_date: workflowSettingsData.config.endDateType,
+        select_start_date: workflowSettingsData.config.startDateType,
         start_date: workflowSettingsData.config.startDate,
         end_date: workflowSettingsData.config.endDate,
       };
-
       const ui_schema: CreateWorkflowRequest["ui_schema"] = {
         nodes: {},
         edges: workflowEdges,

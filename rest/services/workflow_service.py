@@ -5,7 +5,7 @@ import asyncio
 from copy import deepcopy
 from uuid import uuid4
 import io
-from datetime import datetime
+from datetime import datetime, timezone
 from repository.piece_repository import PieceRepository
 from schemas.context.auth_context import AuthorizationContextData
 
@@ -218,6 +218,7 @@ class WorkflowService(object):
                     id=dag_data.id,
                     name=dag_data.name,
                     created_at=dag_data.created_at,
+                    start_date=dag_data.start_date,
                     last_changed_at=dag_data.last_changed_at,
                     last_changed_by=dag_data.last_changed_by,
                     created_by=dag_data.created_by,
@@ -402,6 +403,7 @@ class WorkflowService(object):
         """
         workflow_kwargs['dag_id'] = workflow_kwargs.pop('id')
         select_end_date = workflow_kwargs.pop('select_end_date') # TODO define how to use select end date
+        workflow_kwargs.pop('select_start_date')
         workflow_kwargs['schedule'] = None if workflow_kwargs['schedule'] == 'none' else f"@{workflow_kwargs['schedule']}"
 
         workflow_processed_schema = {
@@ -516,6 +518,10 @@ class WorkflowService(object):
         workflow = self.workflow_repository.find_by_id(id=workflow_id)
         if not workflow:
             raise ResourceNotFoundException("Workflow not found")
+
+        # Check if start date is in the past
+        if workflow.start_date and workflow.start_date > datetime.utcnow().replace(tzinfo=timezone.utc):
+            raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
 
         airflow_workflow_id = workflow.uuid_name
 
@@ -693,7 +699,7 @@ class WorkflowService(object):
             )
         )
         return response
-    
+
     def generate_report(self, workflow_id: int, workflow_run_id: str):
         page_size = 100
         page=0
@@ -714,7 +720,7 @@ class WorkflowService(object):
 
         if not response_data:
             return []
-        
+
         total_tasks = response_data.get("total_entries")
         all_run_tasks = response_data["task_instances"]
 
@@ -726,7 +732,7 @@ class WorkflowService(object):
                 page=page,
                 page_size=page_size
             )
-            all_run_tasks.extend(response.json().get("task_instances")) 
+            all_run_tasks.extend(response.json().get("task_instances"))
 
         sorted_all_run_tasks = sorted(all_run_tasks, key=lambda item: datetime.strptime(item["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"))
 
@@ -747,7 +753,7 @@ class WorkflowService(object):
 
                 result_list.append(
                     dict(
-                        base64_content=task_result.get("base64_content"), 
+                        base64_content=task_result.get("base64_content"),
                         file_type=task_result.get("file_type"),
                         piece_name=piece_name,
                         dag_id=task.get("dag_id"),
@@ -762,7 +768,7 @@ class WorkflowService(object):
             except BaseException as e:
                 # Handle the exception as needed
                 self.logger.info(f"Skipping task {task['task_id']} due to exception: {e}")
-        
+
         return GetWorkflowResultReportResponse(data=result_list)
 
     @staticmethod

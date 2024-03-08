@@ -1,7 +1,7 @@
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { type CommonProps } from "@mui/material/OverridableComponent";
 import { Modal, type ModalRef } from "components/Modal";
 import { type IWorkflow } from "features/myWorkflows/types";
@@ -15,19 +15,47 @@ interface Props extends CommonProps {
   deleteFn: () => void;
   runFn: () => void;
   pauseFn: () => void;
+  disabled: boolean;
 }
 
-export const Actions: React.FC<Props> = ({ runFn, deleteFn, className }) => {
+export const Actions: React.FC<Props> = ({
+  runFn,
+  deleteFn,
+  className,
+  disabled = false,
+}) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const newFeatureModal = useRef<ModalRef>(null);
 
   return (
     <>
-      <IconButton className={className} onClick={runFn}>
-        <PlayCircleOutlineIcon
-          style={{ pointerEvents: "none", color: theme.palette.success.main }}
-        />
-      </IconButton>
+      {disabled ? (
+        <Tooltip title="Can't run future workflows." arrow>
+          <span>
+            <IconButton
+              className={className}
+              onClick={runFn}
+              disabled={disabled}
+            >
+              <PlayCircleOutlineIcon
+                style={{
+                  pointerEvents: "none",
+                  color: theme.palette.grey[500],
+                }}
+              />
+            </IconButton>
+          </span>
+        </Tooltip>
+      ) : (
+        <IconButton className={className} onClick={runFn}>
+          <PlayCircleOutlineIcon
+            style={{
+              pointerEvents: "none",
+              color: theme.palette.success.main,
+            }}
+          />
+        </IconButton>
+      )}
       <IconButton
         className={className}
         onClick={() => {
