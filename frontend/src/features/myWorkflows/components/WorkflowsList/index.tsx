@@ -1,4 +1,5 @@
-import { Paper } from "@mui/material";
+import { InfoOutlined } from "@mui/icons-material";
+import { Paper, Tooltip } from "@mui/material";
 import {
   DataGrid,
   type GridRowParams,
@@ -14,6 +15,7 @@ import {
 import { type IWorkflow } from "features/myWorkflows/types";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useInterval } from "utils";
 
 import { Actions } from "./Actions";
@@ -91,6 +93,22 @@ export const WorkflowList: React.FC = () => {
       },
       { field: "name", headerName: "Workflow Name", flex: 2 },
       {
+        field: "start_date",
+        headerName: (
+          <Tooltip title="Start date is the date when your workflow begins scheduling. Workflows cannot be run before this start date">
+            <span style={{ display: "flex", alignItems: "center" }}>
+              Start Date{" "}
+              <InfoOutlined style={{ marginLeft: "5px" }} fontSize="small" />
+            </span>
+          </Tooltip>
+        ) as any,
+        flex: 1,
+        align: "center",
+
+        valueFormatter: ({ value }) => new Date(value).toLocaleString(),
+        headerAlign: "center",
+      },
+      {
         field: "created_at",
         headerName: "Created At",
         flex: 1,
@@ -129,21 +147,24 @@ export const WorkflowList: React.FC = () => {
         field: "actions",
         headerName: "Actions",
         flex: 1,
-        renderCell: ({ row }) => (
-          <Actions
-            id={row.id}
-            className=".action-button"
-            deleteFn={() => {
-              void deleteWorkflow(row.id);
-            }}
-            runFn={() => {
-              void runWorkflow(row.id);
-            }}
-            pauseFn={() => {
-              pauseWorkflow(row.id);
-            }}
-          />
-        ),
+        renderCell: ({ row }) => {
+          return (
+            <Actions
+              id={row.id}
+              className=".action-button"
+              deleteFn={() => {
+                void deleteWorkflow(row.id);
+              }}
+              runFn={() => {
+                void runWorkflow(row.id);
+              }}
+              pauseFn={() => {
+                pauseWorkflow(row.id);
+              }}
+              disabled={new Date(row.start_date) > new Date()}
+            />
+          );
+        },
         headerAlign: "center",
         align: "center",
         sortable: false,
@@ -158,6 +179,12 @@ export const WorkflowList: React.FC = () => {
         event.target instanceof Element &&
         event.target.classList.contains(".action-button");
       if (!isActionButtonClick) {
+        if (new Date(params.row.start_date) > new Date()) {
+          toast.warning(
+            "Future workflows runs cannot be accessed. Wait until the start date.",
+          );
+          return;
+        }
         if (params.row.status !== "failed" && params.row.status !== "creating")
           navigate(`/my-workflows/${params.id}`);
       }

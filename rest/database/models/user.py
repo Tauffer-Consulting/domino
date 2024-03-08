@@ -8,13 +8,13 @@ class User(Base, BaseDatabaseModel):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     email = Column(String(50), unique=True)
     password = Column(String(200), nullable=False)
 
     workspaces = relationship(
         "UserWorkspaceAssociative",
         back_populates="user",
-        lazy="subquery", 
+        lazy="subquery",
         uselist=True
     )

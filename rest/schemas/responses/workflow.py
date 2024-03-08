@@ -69,6 +69,7 @@ class GetWorkflowsResponseData(BaseModel):
     id: int
     name: str
     created_at: datetime
+    start_date: datetime
     last_changed_at: datetime
     last_changed_by: int
     created_by: int
@@ -83,6 +84,11 @@ class GetWorkflowsResponseData(BaseModel):
     def set_schedule(cls, schedule):
         return schedule or ScheduleIntervalTypeResponse.none
 
+    @field_validator('start_date', mode='before')
+    def add_utc_timezone_start_date(cls, v):
+        if isinstance(v, datetime) and v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+        return v
 
     @field_validator('created_at', mode='before')
     def add_utc_timezone_created_at(cls, v):

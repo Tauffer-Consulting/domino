@@ -13,11 +13,12 @@ dag_config_0 = {{ workflow_kwargs }}
 # Parse datetime values
 dt_keys = ['start_date', 'end_date']
 dag_config = { k: (v if k not in dt_keys else parse(v)) for k, v in dag_config_0.items()}
+dag_config = {**dag_config, 'is_paused_upon_creation': False}
 
 with DAG(**dag_config) as dag:
 {% for key, value in tasks_dict.items() %}
     {{ key }} = Task(
-        dag, 
+        dag,
         task_id='{{ key }}',
         workspace_id={{ value["workspace_id"] }},
         workflow_shared_storage={% if value["workflow_shared_storage"] %}{{ value["workflow_shared_storage"] }}{% else %}None{% endif %},

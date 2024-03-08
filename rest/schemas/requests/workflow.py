@@ -31,12 +31,17 @@ class SelectEndDate(str, Enum):
     never = "never"
     user_defined = "User defined"
 
+class SelectStartDate(str, Enum):
+    now = "now"
+    user_defined = "User defined"
+
 class WorkflowBaseSettings(BaseModel):
     # TODO remove regex ?
     name: str = Field(
-        description="Workflow name", 
+        description="Workflow name",
         pattern=r"^[\w]*$"
     )
+    select_start_date: Optional[SelectStartDate] = Field(alias="selectStartDate", default=SelectStartDate.now)
     start_date: str = Field(alias="startDateTime")
     select_end_date: Optional[SelectEndDate] = Field(alias="selectEndDate", default=SelectEndDate.never)
     end_date: Optional[str] = Field(alias='endDateTime', default=None)
@@ -44,19 +49,29 @@ class WorkflowBaseSettings(BaseModel):
     catchup: Optional[bool] = False # TODO add catchup to UI?
     generate_report: Optional[bool] = Field(alias="generateReport", default=False) # TODO add generate report to UI?
     description: Optional[str] = None # TODO add description to UI?
-    
+
 
     @field_validator('start_date')
-    def start_date_validator(cls, v):
+    def start_date_validator(cls, v, values):
         try:
+            select_start_date = values.data.get('select_start_date')
+            if select_start_date.value == SelectStartDate.now.value:
+                return datetime.now().replace(second=0, microsecond=0).isoformat()
+
             if '.' in v:
                 v = v.split('.')[0]
             if 'T' in v:
-                converted_date =  datetime.strptime(v, "%Y-%m-%dT%H:%M:%S").date()
+                converted_date =  datetime.strptime(v, "%Y-%m-%dT%H:%M:%S")
             else:
-                converted_date =  datetime.strptime(v, "%Y-%m-%d").date()
-            if converted_date < datetime.now().date():
-                raise ValueError("Start date must be in the future")
+                converted_date =  datetime.strptime(v, "%Y-%m-%d")
+
+            # Validate if start date is in the future
+            # if converted_date < datetime.now():
+            #     raise ValueError("Start date must be in the future")
+            # Get only date and time without seconds from date
+            converted_date = converted_date.replace(second=0, microsecond=0)
+            if converted_date < datetime.now().replace(second=0, microsecond=0):
+                converted_date = datetime.now().replace(second=0, microsecond=0)
             return converted_date.isoformat()
 
         except ValueError:
@@ -70,18 +85,20 @@ class WorkflowBaseSettings(BaseModel):
             converted_start_date =  datetime.fromisoformat(info.data['start_date'])
             if 'select_end_date' not in info.data:
                 raise ValueError("Select end date must be provided")
-            
+
             if info.data['select_end_date'] == SelectEndDate.never.value:
                 return None
 
-            converted_end_date = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ").date()
+            converted_end_date = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
             if converted_end_date <= converted_start_date:
                 raise ValueError("End date must greater than start date")
+
+            converted_end_date = converted_end_date.replace(second=0, microsecond=0)
             return converted_end_date.isoformat()
         except ValueError:
             raise ValueError(f"Invalid end date: {v}")
-    
-    
+
+
     model_config = ConfigDict(populate_by_name=True)
 
 
@@ -99,14 +116,14 @@ class WorkflowSharedStorageModeEnum(str, Enum):
     none = 'None'
     read = 'Read'
     read_write = 'Read/Write'
-    
+
 
 class WorkflowSharedStorageDataModel(BaseModel):
     source: Optional[WorkflowSharedStorageSourceEnum] = None
     mode: Optional[WorkflowSharedStorageModeEnum] = None
     provider_options: Optional[Dict] = None
 
-    
+
     model_config = ConfigDict(use_enum_values=True)
 
 class TaskPieceDataModel(BaseModel):

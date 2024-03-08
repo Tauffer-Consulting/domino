@@ -110,7 +110,7 @@ class AirflowRestClient(requests.Session):
             resource=resource,
         )
         return response
-    
+
     def list_import_errors(self, limit: int = 100, offset: int = 0):
         resource = "api/v1/importErrors"
         response = self.request(

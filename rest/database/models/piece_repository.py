@@ -9,7 +9,7 @@ class PieceRepository(Base, BaseDatabaseModel):
     __tablename__ = "piece_repository"
 
     id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     name = Column(String(50), unique=False)
     label = Column(String(50), unique=False)
     source = Column(Enum(RepositorySource), nullable=True, default=RepositorySource.github.value)

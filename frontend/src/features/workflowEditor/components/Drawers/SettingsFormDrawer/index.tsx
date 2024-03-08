@@ -1,4 +1,4 @@
-import { Drawer, Grid, Typography } from "@mui/material";
+import { Drawer, Grid, Typography, Tooltip } from "@mui/material";
 import DatetimeInput from "components/DatetimeInput";
 import SelectInput from "components/SelectInput";
 import TextInput from "components/TextInput";
@@ -10,7 +10,9 @@ import {
   type ScheduleIntervals,
   type StorageSourcesAWS,
   type StorageSourcesLocal,
+  type StartDateTypes,
   endDateTypes,
+  startDateTypes,
   scheduleIntervals,
   storageSourcesAWS,
   storageSourcesLocal,
@@ -37,6 +39,7 @@ const defaultSettingsData: IWorkflowSettings = {
     scheduleInterval: scheduleIntervals.None,
     startDate: dayjs(new Date()).toISOString(),
     endDateType: endDateTypes.Never,
+    startDateType: startDateTypes.Now,
   },
   storage: {
     storageSource: storageSourcesLocal.None,
@@ -81,11 +84,15 @@ export const WorkflowSettingsFormSchema: ValidationSchema = yup.object().shape({
       .mixed<ScheduleIntervals>()
       .oneOf(Object.values(scheduleIntervals))
       .required(),
-    startDate: yup.string().required(),
+    startDate: yup.string(),
     endDate: yup.string(),
     endDateType: yup
       .mixed<EndDateTypes>()
       .oneOf(Object.values(endDateTypes))
+      .required(),
+    startDateType: yup
+      .mixed<StartDateTypes>()
+      .oneOf(Object.values(startDateTypes))
       .required(),
   }),
   storage: yup.object().shape({
@@ -211,12 +218,31 @@ const SettingsFormDrawer = forwardRef<
                     label="Schedule"
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <DatetimeInput
-                    name="config.startDate"
-                    label="Start Date/Time"
-                    type="date-time"
-                  />
+                <Grid
+                  container
+                  spacing={2}
+                  alignItems="center"
+                  sx={{ margin: "0px" }}
+                >
+                  <Grid item xs={4}>
+                    <SelectInput
+                      name="config.startDateType"
+                      label="Start Date/Time"
+                      options={Object.values(startDateTypes)}
+                      defaultValue={defaultSettingsData.config.startDateType}
+                    />
+                  </Grid>
+                  {formData?.config?.startDateType ===
+                    startDateTypes.UserDefined && (
+                    <Grid item xs={8}>
+                      <DatetimeInput
+                        disablePast={true}
+                        name="config.startDate"
+                        label="Start Date/Time"
+                        type="date-time"
+                      />
+                    </Grid>
+                  )}
                 </Grid>
                 <Grid
                   container
@@ -236,6 +262,7 @@ const SettingsFormDrawer = forwardRef<
                     endDateTypes.UserDefined && (
                     <Grid item xs={8}>
                       <DatetimeInput
+                        disablePast={true}
                         name="config.endDate"
                         label="End Date/Time"
                         type="date-time"
