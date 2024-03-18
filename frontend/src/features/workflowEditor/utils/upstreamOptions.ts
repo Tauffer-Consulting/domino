@@ -26,6 +26,8 @@ export const getUpstreamOptions = (
     }
   }
 
+  console.log("upstreamPieces", upstreamPieces);
+
   if (!schema.properties || isEmpty(schema.properties)) {
     return {};
   }
@@ -45,7 +47,9 @@ function generateOptions(
     const options: UpstreamOptions = {};
     const addOptions = (opts: Option[] | UpstreamOptions, key: string = "") => {
       if (Array.isArray(opts)) {
-        options[key] = opts;
+        const otherOpts = options[key] ?? [];
+
+        options[key] = [...otherOpts, ...opts];
       } else {
         Object.entries(opts).forEach(([subKey, subOpts]) => {
           if (subKey) {
