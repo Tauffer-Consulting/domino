@@ -145,7 +145,7 @@ export const WorkspaceListItem: FC<{
             sx={{ minWidth: "auto" }}
             onClick={() => {
               handleSelect();
-              navigate("/workspace-settings");
+              navigate("/workspaces/settings");
             }}
           >
             <Tooltip title="Configure workspace">

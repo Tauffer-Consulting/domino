@@ -59,7 +59,7 @@ export const SignInPage: FC = () => {
           }}
         >
           <img
-            src="assets/main_logo_black.png"
+            src="/assets/main_logo_black.png"
             alt="logo"
             style={{ width: "360px" }}
           />

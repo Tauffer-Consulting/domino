@@ -15,11 +15,6 @@ import { Link } from "react-router-dom";
 import { yupResolver } from "utils";
 import * as yup from "yup";
 
-/**
- * Sign up component
- * @TODO: differentiate more from the login page?
- */
-
 interface ISignUp {
   email: string;
   password: string;
@@ -67,7 +62,7 @@ export const SignUpPage: FC = () => {
           }}
         >
           <img
-            src="assets/main_logo_black.png"
+            src="/assets/main_logo_black.png"
             alt="logo"
             style={{ width: "360px" }}
           />

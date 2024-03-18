@@ -1,3 +1,5 @@
+import { type Roles } from "@utils/roles";
+
 export enum repositorySource {
   github = "github",
 }
@@ -19,7 +21,7 @@ interface IPaginationMetadata {
 export interface IWorkspaceSummary {
   id: string;
   workspace_name: string;
-  user_permission: string;
+  user_permission: Roles;
   status: workspaceStatus;
   github_access_token_filled: boolean;
 }

@@ -1,5 +1,4 @@
 import { Grid } from "@mui/material";
-import PrivateLayout from "components/PrivateLayout";
 
 import { WorkflowDetail } from "../components/WorkflowDetail";
 
@@ -9,12 +8,10 @@ import { WorkflowDetail } from "../components/WorkflowDetail";
 
 export const WorkflowDetailPage: React.FC = () => {
   return (
-    <PrivateLayout>
-      <Grid container rowGap={6}>
-        <Grid item xs={12}>
-          <WorkflowDetail />
-        </Grid>
+    <Grid container rowGap={6}>
+      <Grid item xs={12}>
+        <WorkflowDetail />
       </Grid>
-    </PrivateLayout>
+    </Grid>
   );
 };
