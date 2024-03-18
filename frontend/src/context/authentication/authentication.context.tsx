@@ -80,6 +80,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
               res.data.access_token,
               res.data.user_id,
               res.data.token_expires_in,
+              "/workspaces",
             );
           }
         })

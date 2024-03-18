@@ -3,12 +3,11 @@ import { type FC, type ReactNode } from "react";
 
 import { Header } from "./header/header";
 
-interface IPrivateLayoutProps {
+interface Props {
   children: ReactNode;
-  sidePanel?: ReactNode;
 }
 
-export const PrivateLayout: FC<IPrivateLayoutProps> = ({ children }) => {
+export const PrivateLayout: FC<Props> = ({ children }) => {
   return (
     <Box sx={{ display: "flex", width: "100%", marginTop: "64px" }}>
       <Header />

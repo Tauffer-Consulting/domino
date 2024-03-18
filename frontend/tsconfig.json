@@ -7,7 +7,15 @@
       "esnext"
     ],
     "types": ["vite/client", "vite-plugin-svgr/client"],
-    "baseUrl": "src",
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@config/*": ["config/*"],
+      "@context/*": ["context/*"],
+      "@features/*": ["features/*"],
+      "@services/*": ["services/*"],
+      "@utils/*": ["utils/*"]
+    },
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
