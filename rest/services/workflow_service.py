@@ -574,6 +574,7 @@ class WorkflowService(object):
             raise ForbiddenException("Workflow does not belong to workspace!")
         try:
             await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
+            self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
             self.workflow_repository.delete(id=workflow_id)
         except Exception as e: # TODO improve exception handling
             self.logger.exception(e)
