@@ -1,5 +1,6 @@
 import HelpIcon from "@mui/icons-material/Help";
 import { Box, Typography, IconButton } from "@mui/material";
+import theme from "providers/theme.config";
 import React, { type FC, useState } from "react";
 
 import PieceDocsPopover from "./pieceDocsPopover";
@@ -60,7 +61,9 @@ const PiecesSidebarNode: FC<{
         </Typography>
 
         <IconButton sx={{ padding: 0 }} onClick={handlePopoverOpen}>
-          <HelpIcon sx={{ height: "20px" }} />
+          <HelpIcon
+            sx={{ height: "20px", color: theme.palette.primary.main }}
+          />
         </IconButton>
       </div>
 
