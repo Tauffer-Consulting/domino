@@ -90,8 +90,9 @@ export const WorkflowList: React.FC = () => {
         align: "center",
         headerAlign: "center",
         sortable: false,
+        minWidth: 100,
       },
-      { field: "name", headerName: "Workflow Name", flex: 2 },
+      { field: "name", headerName: "Workflow Name", flex: 2, minWidth: 220 },
       {
         field: "start_date",
         headerName: (
@@ -104,15 +105,35 @@ export const WorkflowList: React.FC = () => {
         ) as any,
         flex: 1,
         align: "center",
+        minWidth: 220,
 
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
         headerAlign: "center",
+      },
+      {
+        field: "end_date",
+        headerName: (
+          <Tooltip title="End Date is the date when your workflow stop to be scheduled.">
+            <span style={{ display: "flex", alignItems: "center" }}>
+              Start Date{" "}
+              <InfoOutlined style={{ marginLeft: "5px" }} fontSize="small" />
+            </span>
+          </Tooltip>
+        ) as any,
+        headerAlign: "center",
+        align: "center",
+        type: "string",
+        flex: 1,
+        minWidth: 220,
+        valueFormatter: ({ value }) =>
+          value ? new Date(value).toLocaleString() : "None",
       },
       {
         field: "created_at",
         headerName: "Created At",
         flex: 1,
         align: "center",
+        minWidth: 220,
 
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
         headerAlign: "center",
@@ -124,6 +145,7 @@ export const WorkflowList: React.FC = () => {
         align: "center",
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
         headerAlign: "center",
+        minWidth: 220,
       },
       {
         field: "schedule",
@@ -132,6 +154,7 @@ export const WorkflowList: React.FC = () => {
         align: "center",
         headerAlign: "center",
         sortable: false,
+        minWidth: 100,
       },
       {
         field: "next_dagrun",
@@ -139,6 +162,7 @@ export const WorkflowList: React.FC = () => {
         flex: 1,
         align: "center",
         headerAlign: "center",
+        minWidth: 220,
         sortable: false,
         valueFormatter: ({ value }) =>
           value ? new Date(value).toLocaleString() : "none",
@@ -168,6 +192,7 @@ export const WorkflowList: React.FC = () => {
         headerAlign: "center",
         align: "center",
         sortable: false,
+        minWidth: 150,
       },
     ],
     [],

@@ -219,6 +219,7 @@ class WorkflowService(object):
                     name=dag_data.name,
                     created_at=dag_data.created_at,
                     start_date=dag_data.start_date,
+                    end_date=dag_data.end_date,
                     last_changed_at=dag_data.last_changed_at,
                     last_changed_by=dag_data.last_changed_by,
                     created_by=dag_data.created_by,
@@ -520,8 +521,11 @@ class WorkflowService(object):
             raise ResourceNotFoundException("Workflow not found")
 
         # Check if start date is in the past
-        if workflow.start_date and workflow.start_date > datetime.utcnow().replace(tzinfo=timezone.utc):
+        if workflow.start_date and workflow.start_date > datetime.now(tz=timezone.utc):
             raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
+
+        if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
+            raise ForbiddenException('You cannot run workflows that have ended.')
 
         airflow_workflow_id = workflow.uuid_name
 

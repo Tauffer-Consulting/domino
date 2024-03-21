@@ -70,6 +70,7 @@ class GetWorkflowsResponseData(BaseModel):
     name: str
     created_at: datetime
     start_date: datetime
+    end_date: Optional[datetime]
     last_changed_at: datetime
     last_changed_by: int
     created_by: int
