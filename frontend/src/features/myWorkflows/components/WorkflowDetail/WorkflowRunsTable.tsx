@@ -12,6 +12,7 @@ import React, {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { secondsToHMS } from "utils";
 
 import { States } from "./States";
 import { WorkflowRunTableFooter } from "./WorkflowRunTableFooter";
@@ -78,13 +79,13 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
           valueFormatter: ({ value }) => new Date(value).toLocaleString(),
         },
         {
-          field: "execution_date",
-          headerName: "Execution Date",
+          field: "duration_in_seconds",
+          headerName: "Duration",
           headerAlign: "center",
           align: "center",
           minWidth: 150,
           flex: 1,
-          valueFormatter: ({ value }) => new Date(value).toLocaleString(),
+          valueFormatter: ({ value }) => (value ? secondsToHMS(value) : "N/A"),
         },
         {
           field: "state",

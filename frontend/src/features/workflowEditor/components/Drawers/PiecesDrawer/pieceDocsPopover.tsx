@@ -1,6 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
 import { Popover, IconButton, Typography } from "@mui/material";
+import theme from "providers/theme.config";
 import React from "react";
 import Draggable from "react-draggable";
 
@@ -84,7 +85,7 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
           paddingBottom: "2rem",
           overflow: "hidden",
           "& .popover-handle": {
-            backgroundColor: "#323C3D",
+            backgroundColor: theme.palette.primary.main,
             padding: "0.5rem",
             "& .drag-handle": {
               cursor: "move",

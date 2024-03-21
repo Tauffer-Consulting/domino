@@ -70,6 +70,7 @@ class GetWorkflowsResponseData(BaseModel):
     name: str
     created_at: datetime
     start_date: datetime
+    end_date: Optional[datetime]
     last_changed_at: datetime
     last_changed_by: int
     created_by: int
@@ -153,6 +154,7 @@ class GetWorkflowRunsResponseData(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     execution_date: Optional[datetime] = None
+    duration_in_seconds: Optional[float] = None
     state: Optional[WorkflowRunState] = None
 
     @field_validator('state')

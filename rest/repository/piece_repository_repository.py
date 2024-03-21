@@ -48,7 +48,7 @@ class PieceRepositoryRepository(object):
 
     def find_by_path(self, path: str):
         with session_scope() as session:
-            result = session.query(PieceRepository).filter(PieceRepository.path == path).first()
+            result = session.query(PieceRepository).filter(func.lower(PieceRepository.path) == path.lower()).first()
             session.flush()
             if result:
                 session.expunge_all()
@@ -56,7 +56,7 @@ class PieceRepositoryRepository(object):
 
     def find_by_path_and_version(self, path: str, version: str):
         with session_scope() as session:
-            result = session.query(PieceRepository).filter(PieceRepository.path == path, PieceRepository.version == version).first()
+            result = session.query(PieceRepository).filter(func.lower(PieceRepository.path) == path.lower(), PieceRepository.version == version).first()
             session.flush()
             if result:
                 session.expunge_all()
@@ -64,7 +64,7 @@ class PieceRepositoryRepository(object):
 
     def find_by_path_and_workspace_id(self, path: str, workspace_id: int):
         with session_scope() as session:
-            result = session.query(PieceRepository).filter(PieceRepository.path == path, PieceRepository.workspace_id == workspace_id).first()
+            result = session.query(PieceRepository).filter(func.lower(PieceRepository.path) == path.lower(), PieceRepository.workspace_id == workspace_id).first()
             session.flush()
             session.expunge_all()
         return result

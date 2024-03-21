@@ -39,6 +39,7 @@ from repository.piece_repository_repository import PieceRepositoryRepository
 from repository.workflow_repository import WorkflowRepository
 from repository.secret_repository import SecretRepository
 from services.secret_service import SecretService
+from database.models.enums import WorkflowScheduleInterval
 
 
 class WorkflowService(object):
@@ -78,11 +79,11 @@ class WorkflowService(object):
         new_workflow = Workflow(
             name=body.workflow.name,
             uuid_name=workflow_id,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(tz=timezone.utc),
             schema=body.forageSchema,
             ui_schema=body.ui_schema.model_dump(),
             created_by=auth_context.user_id,
-            last_changed_at=datetime.utcnow(),
+            last_changed_at=datetime.now(tz=timezone.utc),
             start_date=body.workflow.start_date,
             end_date=body.workflow.end_date,
             schedule=body.workflow.schedule,
@@ -204,14 +205,15 @@ class WorkflowService(object):
                 is_paused = False
 
             if response and not is_dag_broken:
-                schedule = response.get("schedule_interval")
-                if isinstance(schedule, dict):
-                    schedule = schedule.get("value")
+                schedule = dag_data.schedule.value
+                if schedule != WorkflowScheduleInterval.none.value:
+                    schedule = f'@{schedule}'
+
                 status = WorkflowStatus.active.value
 
                 is_paused = response.get("is_paused")
                 is_active = response.get("is_active")
-                next_dagrun = response.get("next_dagrun")
+                next_dagrun = response.get("next_dagrun_data_interval_end")
 
             data.append(
                 GetWorkflowsResponseData(
@@ -219,6 +221,7 @@ class WorkflowService(object):
                     name=dag_data.name,
                     created_at=dag_data.created_at,
                     start_date=dag_data.start_date,
+                    end_date=dag_data.end_date,
                     last_changed_at=dag_data.last_changed_at,
                     last_changed_by=dag_data.last_changed_by,
                     created_by=dag_data.created_by,
@@ -381,6 +384,25 @@ class WorkflowService(object):
         workspace_storage_repository = workspace_storage_repository[0][0]
         return workspace_storage_repository
 
+
+    def _get_cron_from_start_date_and_schedule(self, start_date: datetime, schedule: WorkflowScheduleInterval):
+        if schedule == WorkflowScheduleInterval.none.value:
+            return None
+        elif schedule == WorkflowScheduleInterval.once.value:
+            return f"@{WorkflowScheduleInterval.once.value}"
+        elif schedule == WorkflowScheduleInterval.hourly.value:
+            return f"{start_date.minute} * * * *"
+        elif schedule == WorkflowScheduleInterval.daily.value:
+            return f"{start_date.minute} {start_date.hour} * * *"
+        elif schedule == WorkflowScheduleInterval.weekly.value:
+            return f"{start_date.minute} {start_date.hour} * * {start_date.strftime('%a').lower()}"
+        elif schedule == WorkflowScheduleInterval.monthly.value:
+            return f"{start_date.minute} {start_date.hour} {start_date.day} * *"
+        elif schedule == WorkflowScheduleInterval.annually.value:
+            return f"{start_date.minute} {start_date.hour} {start_date.day} {start_date.month} *"
+        else:
+            raise BadRequestException("Invalid schedule")
+
     def _create_dag_code_from_raw_json(self, data: dict, workspace_id: int):
         """
         Creates dag code from workflow request json
@@ -404,7 +426,11 @@ class WorkflowService(object):
         workflow_kwargs['dag_id'] = workflow_kwargs.pop('id')
         select_end_date = workflow_kwargs.pop('select_end_date') # TODO define how to use select end date
         workflow_kwargs.pop('select_start_date')
-        workflow_kwargs['schedule'] = None if workflow_kwargs['schedule'] == 'none' else f"@{workflow_kwargs['schedule']}"
+
+        start_date = datetime.fromisoformat(workflow_kwargs.get('start_date'))
+        schedule_cron = self._get_cron_from_start_date_and_schedule(start_date=start_date, schedule=workflow_kwargs.get('schedule'))
+
+        workflow_kwargs['schedule'] = schedule_cron
 
         workflow_processed_schema = {
             'workflow': deepcopy(workflow_kwargs),
@@ -520,8 +546,11 @@ class WorkflowService(object):
             raise ResourceNotFoundException("Workflow not found")
 
         # Check if start date is in the past
-        if workflow.start_date and workflow.start_date > datetime.utcnow().replace(tzinfo=timezone.utc):
+        if workflow.start_date and workflow.start_date > datetime.now(tz=timezone.utc):
             raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
+
+        if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
+            raise ForbiddenException('You cannot run workflows that have ended.')
 
         airflow_workflow_id = workflow.uuid_name
 
@@ -574,6 +603,7 @@ class WorkflowService(object):
             raise ForbiddenException("Workflow does not belong to workspace!")
         try:
             await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
+            self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
             self.workflow_repository.delete(id=workflow_id)
         except Exception as e: # TODO improve exception handling
             self.logger.exception(e)
@@ -640,9 +670,17 @@ class WorkflowService(object):
         else:
             dag_runs = response_data['dag_runs']
 
-        data = [
-            GetWorkflowRunsResponseData(**run) for run in dag_runs
-        ]
+        data = []
+        for run in dag_runs:
+            #duration = run.get('end_date') - run.get('start_date')
+            end_date_dt = datetime.fromisoformat(run.get('end_date'))
+            start_date_dt = datetime.fromisoformat(run.get('start_date'))
+            duration = end_date_dt - start_date_dt
+            run['duration_in_seconds'] = duration.total_seconds()
+            data.append(
+                GetWorkflowRunsResponseData(**run)
+            )
+
         response = GetWorkflowRunsResponse(
             data=data,
             metadata=dict(

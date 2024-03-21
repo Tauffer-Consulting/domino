@@ -21,15 +21,15 @@ class WorkflowRepository(object):
         return result
 
     def find_by_workspace_id(
-        self, 
-        workspace_id: int, 
-        page: int = 0, 
-        page_size: int = 100, 
-        filters: dict = None, 
-        paginate=True, 
+        self,
+        workspace_id: int,
+        page: int = 0,
+        page_size: int = 100,
+        filters: dict = None,
+        paginate=True,
         count=True,
         descending=False
-    ):
+    ) -> Workflow:
         if filters is None:
             filters = {}
         with session_scope() as session:
@@ -39,7 +39,7 @@ class WorkflowRepository(object):
 
             if filters:
                 query = query.magic_filters(filters)
-            
+
             if paginate:
                 results = query.paginate(page, page_size)
             else:
@@ -65,7 +65,7 @@ class WorkflowRepository(object):
             session.refresh(workflow)
             session.expunge(workflow)
         return workflow
-    
+
 
     def get_workflows_summary(self):
         with session_scope() as session:
@@ -81,7 +81,7 @@ class WorkflowRepository(object):
             session.flush()
             session.expunge_all()
         return result
-    
+
     def delete_by_workspace_id(self, workspace_id: int):
         with session_scope() as session:
             result = session.query(Workflow).filter(Workflow.workspace_id==workspace_id).delete(synchronize_session=False)
@@ -90,7 +90,7 @@ class WorkflowRepository(object):
         return result
 
     def create_workflow_piece_repositories_associations(
-        self, 
+        self,
         workflow_piece_repository_associative: list[WorkflowPieceRepositoryAssociative]
     ):
         with session_scope() as session:
