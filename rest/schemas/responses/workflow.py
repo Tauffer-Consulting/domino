@@ -154,6 +154,7 @@ class GetWorkflowRunsResponseData(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     execution_date: Optional[datetime] = None
+    duration_in_seconds: Optional[float] = None
     state: Optional[WorkflowRunState] = None
 
     @field_validator('state')

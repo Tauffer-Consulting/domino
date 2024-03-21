@@ -113,9 +113,9 @@ export const WorkflowList: React.FC = () => {
       {
         field: "end_date",
         headerName: (
-          <Tooltip title="End Date is the date when your workflow stop to be scheduled.">
+          <Tooltip title="End Date is the date when your workflow stop to be scheduled. You cannot run workflows after end date.">
             <span style={{ display: "flex", alignItems: "center" }}>
-              Start Date{" "}
+              End Date{" "}
               <InfoOutlined style={{ marginLeft: "5px" }} fontSize="small" />
             </span>
           </Tooltip>

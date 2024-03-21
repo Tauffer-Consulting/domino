@@ -645,9 +645,17 @@ class WorkflowService(object):
         else:
             dag_runs = response_data['dag_runs']
 
-        data = [
-            GetWorkflowRunsResponseData(**run) for run in dag_runs
-        ]
+        data = []
+        for run in dag_runs:
+            #duration = run.get('end_date') - run.get('start_date')
+            end_date_dt = datetime.fromisoformat(run.get('end_date'))
+            start_date_dt = datetime.fromisoformat(run.get('start_date'))
+            duration = end_date_dt - start_date_dt
+            run['duration_in_seconds'] = duration.total_seconds()
+            data.append(
+                GetWorkflowRunsResponseData(**run)
+            )
+
         response = GetWorkflowRunsResponse(
             data=data,
             metadata=dict(
