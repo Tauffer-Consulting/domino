@@ -204,14 +204,14 @@ class WorkflowService(object):
                 is_paused = False
 
             if response and not is_dag_broken:
-                schedule = response.get("schedule_interval")
-                if isinstance(schedule, dict):
-                    schedule = schedule.get("value")
+                schedule = dag_data.schedule.value
+                if schedule != 'none':
+                    schedule = f"@{schedule}"
                 status = WorkflowStatus.active.value
 
                 is_paused = response.get("is_paused")
                 is_active = response.get("is_active")
-                next_dagrun = response.get("next_dagrun")
+                next_dagrun = response.get("next_dagrun_data_interval_end")
 
             data.append(
                 GetWorkflowsResponseData(
