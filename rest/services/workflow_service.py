@@ -219,6 +219,7 @@ class WorkflowService(object):
                     name=dag_data.name,
                     created_at=dag_data.created_at,
                     start_date=dag_data.start_date,
+                    end_date=dag_data.end_date,
                     last_changed_at=dag_data.last_changed_at,
                     last_changed_by=dag_data.last_changed_by,
                     created_by=dag_data.created_by,
@@ -520,8 +521,11 @@ class WorkflowService(object):
             raise ResourceNotFoundException("Workflow not found")
 
         # Check if start date is in the past
-        if workflow.start_date and workflow.start_date > datetime.utcnow().replace(tzinfo=timezone.utc):
+        if workflow.start_date and workflow.start_date > datetime.now(tz=timezone.utc):
             raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
+
+        if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
+            raise ForbiddenException('You cannot run workflows that have ended.')
 
         airflow_workflow_id = workflow.uuid_name
 
@@ -641,9 +645,17 @@ class WorkflowService(object):
         else:
             dag_runs = response_data['dag_runs']
 
-        data = [
-            GetWorkflowRunsResponseData(**run) for run in dag_runs
-        ]
+        data = []
+        for run in dag_runs:
+            #duration = run.get('end_date') - run.get('start_date')
+            end_date_dt = datetime.fromisoformat(run.get('end_date'))
+            start_date_dt = datetime.fromisoformat(run.get('start_date'))
+            duration = end_date_dt - start_date_dt
+            run['duration_in_seconds'] = duration.total_seconds()
+            data.append(
+                GetWorkflowRunsResponseData(**run)
+            )
+
         response = GetWorkflowRunsResponse(
             data=data,
             metadata=dict(
