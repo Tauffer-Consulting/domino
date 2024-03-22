@@ -15,13 +15,13 @@ from schemas.exceptions.base import BaseException, ConflictException, ResourceNo
 from schemas.errors.base import ConflictError, ForbiddenError, SomethingWrongError, ResourceNotFoundError, UnauthorizedError
 from database.models.enums import UserWorkspaceStatus
 from typing import List
-from auth import WorkspaceOwnerAuthorizer, WorkspaceAdminAuthorizer
-
+from auth.workspace_authorizer import WorkspaceAuthorizer
 
 router = APIRouter(prefix="/workspaces")
 auth_service = AuthService()
-workspace_owner_authorizer = WorkspaceOwnerAuthorizer()
-workspace_admin_authorizer = WorkspaceAdminAuthorizer()
+
+workspace_owner_authorizer = WorkspaceAuthorizer(permission_level='owner')
+workspace_admin_authorizer = WorkspaceAuthorizer(permission_level='admin')
 
 workspace_service = WorkspaceService()
 

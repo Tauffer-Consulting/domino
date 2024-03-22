@@ -18,10 +18,20 @@ from auth.base_authorizer import BaseAuthorizer
 
 
 
-class WorkspaceOwnerAuthorizer(BaseAuthorizer):
+class WorkspaceAuthorizer(BaseAuthorizer):
     security = HTTPBearer()
-    def __init__(self):
+    # Permission level map is used to determine what permission can access each level
+    # Ex: owners can access everything, admin can access everything except owner
+    permission_level_map = {
+        Permission.owner.value: [Permission.owner],
+        Permission.admin.value: [Permission.admin, Permission.owner],
+        Permission.write.value: [Permission.write, Permission.admin, Permission.owner],
+        Permission.read.value: [Permission.read, Permission.write, Permission.admin, Permission.owner]
+    }
+    def __init__(self, permission_level: Permission = Permission.owner.value):
         super().__init__()
+        self.permission = permission_level
+        self.permission_level = self.permission_level_map[permission_level]
 
     def authorize(
         self,
@@ -44,7 +54,7 @@ class WorkspaceOwnerAuthorizer(BaseAuthorizer):
         if workspace_associative_data and workspace_associative_data.status != UserWorkspaceStatus.accepted.value:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
 
-        if workspace_associative_data.permission != Permission.owner.value:
+        if workspace_associative_data.permission not in self.permission_level:
             raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
 
         decoded_github_token = None if not workspace_associative_data.github_access_token else self.github_token_fernet.decrypt(workspace_associative_data.github_access_token.encode('utf-8')).decode('utf-8')
