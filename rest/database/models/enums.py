@@ -11,6 +11,8 @@ class RepositorySource(str, enum.Enum):
 
 class Permission(str, enum.Enum):
     owner = 'owner'
+    admin = 'admin'
+    write = 'write'
     read = 'read'
 
     class Config:
