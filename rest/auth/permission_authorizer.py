@@ -1,24 +1,15 @@
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from datetime import datetime, timedelta
-from passlib.context import CryptContext
 import jwt
 from schemas.errors.base import ForbiddenError, ResourceNotFoundError
-from core.settings import settings
 from schemas.context.auth_context import AuthorizationContextData, WorkspaceAuthorizerData
-from repository.user_repository import UserRepository
-from repository.workspace_repository import WorkspaceRepository
-from repository.piece_repository_repository import PieceRepositoryRepository
 from database.models.enums import Permission, UserWorkspaceStatus
-import functools
 from typing import Optional, Dict
-from cryptography.fernet import Fernet
-from math import floor
 from auth.base_authorizer import BaseAuthorizer
 
 
 
-class WorkspaceAuthorizer(BaseAuthorizer):
+class Authorizer(BaseAuthorizer):
     security = HTTPBearer()
     # Permission level map is used to determine what permission can access each level
     # Ex: owners can access everything, admin can access everything except owner
@@ -28,7 +19,7 @@ class WorkspaceAuthorizer(BaseAuthorizer):
         Permission.write.value: [Permission.write, Permission.admin, Permission.owner],
         Permission.read.value: [Permission.read, Permission.write, Permission.admin, Permission.owner]
     }
-    def __init__(self, permission_level: Permission = Permission.owner.value):
+    def __init__(self, permission_level: Permission = Permission.read.value):
         super().__init__()
         self.permission = permission_level
         self.permission_level = self.permission_level_map[permission_level]
@@ -73,3 +64,36 @@ class WorkspaceAuthorizer(BaseAuthorizer):
     ):
         workspace_id = body.get('workspace_id')
         return self.authorize(workspace_id=workspace_id, auth=auth)
+
+    def authorize_piece_repository(
+        self,
+        piece_repository_id: Optional[int],
+        body: Optional[Dict] = None,
+        auth: HTTPAuthorizationCredentials = Security(security),
+    ):
+        if body is None:
+            body = {}
+        auth_context = self.auth_wrapper(auth)
+        repository = self.piece_repository_repository.find_by_id(id=piece_repository_id)
+        if not repository:
+            raise HTTPException(status_code=ResourceNotFoundError().status_code, detail=ResourceNotFoundError().message)
+        workspace_associative_data = self.workspace_repository.find_by_id_and_user_id(id=repository.workspace_id, user_id=auth_context.user_id)
+
+        if not workspace_associative_data:
+            raise HTTPException(status_code=ResourceNotFoundError().status_code, detail=ResourceNotFoundError().message)
+
+        if workspace_associative_data and not workspace_associative_data.permission:
+            raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
+
+        if workspace_associative_data and workspace_associative_data.status != UserWorkspaceStatus.accepted.value:
+            raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
+
+        if workspace_associative_data.permission not in self.permission_level:
+            raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
+
+        if not body or not getattr(body, "workspace_id", None):
+            return auth_context
+
+        if body.workspace_id != repository.workspace_id:
+            raise HTTPException(status_code=ForbiddenError().status_code, detail=ForbiddenError().message)
+        return auth_context

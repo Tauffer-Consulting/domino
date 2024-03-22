@@ -13,15 +13,14 @@ from schemas.exceptions.base import BaseException, ConflictException, ResourceNo
 from schemas.errors.base import ConflictError, ForbiddenError, SomethingWrongError, ResourceNotFoundError, UnauthorizedError
 from database.models.enums import UserWorkspaceStatus
 from typing import List
-from auth.workspace_authorizer import WorkspaceAuthorizer
-from auth.base_authorizer import BaseAuthorizer
+from auth.permission_authorizer import Authorizer
+
 
 router = APIRouter(prefix="/workspaces")
 
-base_authorizer = BaseAuthorizer()
-workspace_owner_authorizer = WorkspaceAuthorizer(permission_level='owner')
-workspace_admin_authorizer = WorkspaceAuthorizer(permission_level='admin')
-workspace_read_authorizer = WorkspaceAuthorizer(permission_level='read')
+owner_authorizer = Authorizer(permission_level='owner')
+admin_authorizer = Authorizer(permission_level='admin')
+read_authorizer = Authorizer(permission_level='read')
 
 workspace_service = WorkspaceService()
 
@@ -39,7 +38,7 @@ workspace_service = WorkspaceService()
 )
 def create_workspace(
     body: CreateWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.auth_wrapper)
 ) -> CreateWorkspaceResponse:
     """Create workspace"""
     try:
@@ -64,7 +63,7 @@ def create_workspace(
 def list_user_workspaces(
     page: int = 0,
     page_size: int = 10,
-    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.auth_wrapper)
 ) -> List[ListUserWorkspacesResponse]:
     """List user workspaces summary"""
     try:
@@ -87,7 +86,7 @@ def list_user_workspaces(
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError}
     },
 )
-def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = Depends(workspace_read_authorizer.authorize)) -> GetWorkspaceResponse:
+def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)) -> GetWorkspaceResponse:
     """Get specific workspace data. Includes users, workflows and repositories"""
     try:
         response = workspace_service.get_workspace_data(workspace_id=workspace_id, auth_context=auth_context)
@@ -110,7 +109,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
 def add_user_to_workspace(
     workspace_id: int,
     body: AssignWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(workspace_admin_authorizer.authorize)
+    auth_context: AuthorizationContextData = Depends(admin_authorizer.authorize)
 ):
     """Assign workspace to user with permission"""
     try:
@@ -135,7 +134,7 @@ def add_user_to_workspace(
 )
 def accept_workspace_invite(
     workspace_id: int,
-    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.auth_wrapper)
 ) -> GetWorkspaceResponse:
     """
     Accept workspace invite.
@@ -164,7 +163,7 @@ def accept_workspace_invite(
 )
 def reject_workspace_invite(
     workspace_id: int,
-    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.auth_wrapper)
 ) -> GetWorkspaceResponse:
     """
     Reject workspace invite.
@@ -192,7 +191,7 @@ def reject_workspace_invite(
         status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
         status.HTTP_409_CONFLICT: {'model': ConflictError}
     },
-    dependencies=[Depends(workspace_owner_authorizer.authorize)]
+    dependencies=[Depends(owner_authorizer.authorize)]
 )
 async def delete_workspace(
     workspace_id: int,
@@ -219,7 +218,7 @@ async def delete_workspace(
 def patch_workspace(
     workspace_id: int,
     body: PatchWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(workspace_owner_authorizer.authorize)
+    auth_context: AuthorizationContextData = Depends(owner_authorizer.authorize)
 ):
     try:
         response = workspace_service.patch_workspace(
@@ -245,7 +244,7 @@ def patch_workspace(
 async def remove_user_from_workspace(
     workspace_id: int,
     user_id: int,
-    auth_context: AuthorizationContextData = Depends(workspace_admin_authorizer.authorize)
+    auth_context: AuthorizationContextData = Depends(admin_authorizer.authorize)
 ):
     try:
         await workspace_service.remove_user_from_workspace(
@@ -270,7 +269,7 @@ def list_workspace_users(
     workspace_id: int,
     page: int = 0,
     page_size: int = 10,
-    auth_context: AuthorizationContextData = Depends(workspace_read_authorizer.authorize)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> ListWorkspaceUsersResponse:
     try:
         return workspace_service.list_workspace_users(
