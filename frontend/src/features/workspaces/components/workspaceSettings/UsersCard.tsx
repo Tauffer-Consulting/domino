@@ -89,8 +89,8 @@ export const UsersCard: FC = () => {
               }}
             >
               <MenuItem value={"admin"}>Admin</MenuItem>
-              <MenuItem value={"read"}>Read</MenuItem>
               <MenuItem value={"write"}>Write</MenuItem>
+              <MenuItem value={"read"}>Read</MenuItem>
             </Select>
           </FormControl>
         </Grid>

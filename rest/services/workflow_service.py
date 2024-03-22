@@ -647,7 +647,12 @@ class WorkflowService(object):
 
         data = []
         for run in dag_runs:
-            #duration = run.get('end_date') - run.get('start_date')
+            if run.get('end_date') is None or run.get('start_date') is None:
+                run['duration_in_seconds'] = None
+                data.append(
+                    GetWorkflowRunsResponseData(**run)
+                )
+                continue
             end_date_dt = datetime.fromisoformat(run.get('end_date'))
             start_date_dt = datetime.fromisoformat(run.get('start_date'))
             duration = end_date_dt - start_date_dt
