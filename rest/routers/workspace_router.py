@@ -5,20 +5,23 @@ from services.workspace_service import WorkspaceService
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.workspace import CreateWorkspaceRequest, AssignWorkspaceRequest, PatchWorkspaceRequest
 from schemas.responses.workspace import (
-    CreateWorkspaceResponse, 
-    ListUserWorkspacesResponse, 
-    GetWorkspaceResponse, 
-    PatchWorkspaceResponse, 
+    CreateWorkspaceResponse,
+    ListUserWorkspacesResponse,
+    GetWorkspaceResponse,
+    PatchWorkspaceResponse,
     ListWorkspaceUsersResponse
 )
 from schemas.exceptions.base import BaseException, ConflictException, ResourceNotFoundException, ForbiddenException, UnauthorizedException
 from schemas.errors.base import ConflictError, ForbiddenError, SomethingWrongError, ResourceNotFoundError, UnauthorizedError
 from database.models.enums import UserWorkspaceStatus
 from typing import List
+from auth import WorkspaceOwnerAuthorizer, WorkspaceAdminAuthorizer
 
 
 router = APIRouter(prefix="/workspaces")
 auth_service = AuthService()
+workspace_owner_authorizer = WorkspaceOwnerAuthorizer()
+workspace_admin_authorizer = WorkspaceAdminAuthorizer()
 
 workspace_service = WorkspaceService()
 
@@ -107,7 +110,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
 def add_user_to_workspace(
     workspace_id: int,
     body: AssignWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_owner_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(workspace_owner_authorizer.authorize)
 ):
     """Assign workspace to user with permission"""
     try:
@@ -117,7 +120,7 @@ def add_user_to_workspace(
         )
     except (BaseException, ResourceNotFoundException, ConflictException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-    
+
 
 @router.post(
     '/{workspace_id}/invites/accept',
@@ -189,7 +192,7 @@ def reject_workspace_invite(
         status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
         status.HTTP_409_CONFLICT: {'model': ConflictError}
     },
-    dependencies=[Depends(auth_service.workspace_owner_access_authorizer)]
+    dependencies=[Depends(workspace_owner_authorizer.authorize)]
 )
 async def delete_workspace(
     workspace_id: int,
@@ -201,7 +204,7 @@ async def delete_workspace(
         return response
     except (BaseException, ResourceNotFoundException, ConflictException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-    
+
 
 @router.patch(
     path="/{workspace_id}",
@@ -216,7 +219,7 @@ async def delete_workspace(
 def patch_workspace(
     workspace_id: int,
     body: PatchWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_owner_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(workspace_owner_authorizer.authorize)
 ):
     try:
         response = workspace_service.patch_workspace(
@@ -227,7 +230,7 @@ def patch_workspace(
         return response
     except (BaseException, ResourceNotFoundException, ForbiddenException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
-    
+
 
 @router.delete(
     path="/{workspace_id}/users/{user_id}",
@@ -242,7 +245,7 @@ def patch_workspace(
 async def remove_user_from_workspace(
     workspace_id: int,
     user_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(workspace_admin_authorizer.authorize)
 ):
     try:
         await workspace_service.remove_user_from_workspace(
