@@ -1,6 +1,4 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Response
-from services.auth_service import AuthService
-
 from services.workspace_service import WorkspaceService
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.workspace import CreateWorkspaceRequest, AssignWorkspaceRequest, PatchWorkspaceRequest
@@ -16,12 +14,14 @@ from schemas.errors.base import ConflictError, ForbiddenError, SomethingWrongErr
 from database.models.enums import UserWorkspaceStatus
 from typing import List
 from auth.workspace_authorizer import WorkspaceAuthorizer
+from auth.base_authorizer import BaseAuthorizer
 
 router = APIRouter(prefix="/workspaces")
-auth_service = AuthService()
 
+base_authorizer = BaseAuthorizer()
 workspace_owner_authorizer = WorkspaceAuthorizer(permission_level='owner')
 workspace_admin_authorizer = WorkspaceAuthorizer(permission_level='admin')
+workspace_read_authorizer = WorkspaceAuthorizer(permission_level='read')
 
 workspace_service = WorkspaceService()
 
@@ -39,7 +39,7 @@ workspace_service = WorkspaceService()
 )
 def create_workspace(
     body: CreateWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
 ) -> CreateWorkspaceResponse:
     """Create workspace"""
     try:
@@ -64,7 +64,7 @@ def create_workspace(
 def list_user_workspaces(
     page: int = 0,
     page_size: int = 10,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
 ) -> List[ListUserWorkspacesResponse]:
     """List user workspaces summary"""
     try:
@@ -87,7 +87,7 @@ def list_user_workspaces(
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError}
     },
 )
-def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)) -> GetWorkspaceResponse:
+def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = Depends(workspace_read_authorizer.authorize)) -> GetWorkspaceResponse:
     """Get specific workspace data. Includes users, workflows and repositories"""
     try:
         response = workspace_service.get_workspace_data(workspace_id=workspace_id, auth_context=auth_context)
@@ -110,7 +110,7 @@ def get_workspace(workspace_id: int, auth_context: AuthorizationContextData = De
 def add_user_to_workspace(
     workspace_id: int,
     body: AssignWorkspaceRequest,
-    auth_context: AuthorizationContextData = Depends(workspace_owner_authorizer.authorize)
+    auth_context: AuthorizationContextData = Depends(workspace_admin_authorizer.authorize)
 ):
     """Assign workspace to user with permission"""
     try:
@@ -135,7 +135,7 @@ def add_user_to_workspace(
 )
 def accept_workspace_invite(
     workspace_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
 ) -> GetWorkspaceResponse:
     """
     Accept workspace invite.
@@ -164,7 +164,7 @@ def accept_workspace_invite(
 )
 def reject_workspace_invite(
     workspace_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(base_authorizer.auth_wrapper)
 ) -> GetWorkspaceResponse:
     """
     Reject workspace invite.
@@ -270,7 +270,7 @@ def list_workspace_users(
     workspace_id: int,
     page: int = 0,
     page_size: int = 10,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(workspace_read_authorizer.authorize)
 ) -> ListWorkspaceUsersResponse:
     try:
         return workspace_service.list_workspace_users(
