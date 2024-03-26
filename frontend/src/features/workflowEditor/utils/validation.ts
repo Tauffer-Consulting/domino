@@ -224,20 +224,13 @@ export function createInputsSchemaValidation(schema: Schema) {
           const subItemSchemaName = subSchema.items.$ref.split("/").pop();
           subItemSchema = schema.$defs?.[subItemSchemaName];
         }
+
         const required = true; // for arrays, we always require the value
         inputSchema = yup.object({
           ...defaultValidation,
-          value: yup.array().when("fromUpstream", (fromUpstream) => {
-            if (fromUpstream) {
-              return yup.mixed().notRequired();
-            }
-
-            return yup
-              .array()
-              .of(
-                getValidationValueBySchemaType(subItemSchema, required) as any,
-              );
-          }),
+          value: yup
+            .array()
+            .of(getValidationValueBySchemaType(subItemSchema, required) as any),
         });
       } else {
         const required = requiredFields.includes(key);
