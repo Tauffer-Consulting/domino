@@ -64,10 +64,13 @@ const validationObject = () => {
   });
 };
 
-function getValidationValueBySchemaType(schema: any, required: boolean) {
+function getValidationValueBySchemaType(
+  schema: Property | ObjectDefinition,
+  required: boolean,
+) {
   let inputSchema;
 
-  if (schema.type === "number" && !schema.format) {
+  if ("type" in schema && schema.type === "number") {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.number().when("fromUpstream", ([fromUpstream]) => {
@@ -80,7 +83,7 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
           .required(); // number is always required
       }),
     });
-  } else if (schema.type === "integer" && !schema.format) {
+  } else if ("type" in schema && schema.type === "integer") {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.number().when("fromUpstream", ([fromUpstream]) => {
@@ -94,7 +97,7 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
           .required(); // number is always required
       }),
     });
-  } else if (schema.type === "boolean" && !schema.format) {
+  } else if ("type" in schema && schema.type === "boolean") {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.boolean().when("fromUpstream", ([fromUpstream]) => {
@@ -104,7 +107,11 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
         return yup.boolean().required(); // boolean is always required
       }),
     });
-  } else if (schema.type === "string" && schema.format === "date") {
+  } else if (
+    "type" in schema &&
+    schema.type === "string" &&
+    schema?.format === "date"
+  ) {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.string().when("fromUpstream", ([fromUpstream]) => {
@@ -117,7 +124,11 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
           .required(); // date is always required
       }),
     });
-  } else if (schema.type === "string" && schema?.format === "time") {
+  } else if (
+    "type" in schema &&
+    schema.type === "string" &&
+    schema?.format === "time"
+  ) {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.string().when("fromUpstream", ([fromUpstream]) => {
@@ -133,7 +144,11 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
           }); // Time is always required
       }),
     });
-  } else if (schema.type === "string" && schema?.format === "date-time") {
+  } else if (
+    "type" in schema &&
+    schema.type === "string" &&
+    schema?.format === "date-time"
+  ) {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.string().when("fromUpstream", ([fromUpstream]) => {
@@ -150,7 +165,11 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
           }); // Datetime is always required
       }),
     });
-  } else if (schema.type === "string" && schema?.widget === "codeeditor") {
+  } else if (
+    "type" in schema &&
+    schema.type === "string" &&
+    schema?.widget === "codeeditor"
+  ) {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.string().when("fromUpstream", ([fromUpstream]) => {
@@ -160,7 +179,7 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
         return required ? yup.string().required() : yup.string();
       }),
     });
-  } else if (schema.type === "string" && !schema.format) {
+  } else if ("type" in schema && schema.type === "string" && !schema.format) {
     inputSchema = yup.object({
       ...defaultValidation,
       value: yup.string().when("fromUpstream", ([fromUpstream]) => {
@@ -170,21 +189,29 @@ function getValidationValueBySchemaType(schema: any, required: boolean) {
         return required ? yup.string().required() : yup.string().nullable();
       }),
     });
-  } else if (schema.type === "object") {
+  } else if ("type" in schema && schema.type === "object") {
     inputSchema = validationObject();
   } else {
-    inputSchema = yup.mixed().notRequired();
+    inputSchema = yup.object({
+      ...defaultValidation,
+      value: yup.string().when("fromUpstream", ([fromUpstream]) => {
+        if (fromUpstream) {
+          return yup.mixed().notRequired();
+        }
+        return required ? yup.string().required() : yup.string().nullable();
+      }),
+    });
   }
 
   return inputSchema;
 }
 
-export function createInputsSchemaValidation(schema: any) {
+export function createInputsSchemaValidation(schema: Schema) {
   if (!schema?.properties) {
     return yup.mixed().notRequired();
   }
 
-  const requiredFields = schema?.required || [];
+  const requiredFields = schema?.required ?? [];
 
   const validationSchema = Object.entries(schema.properties).reduce(
     (acc, cur: [string, any]) => {
