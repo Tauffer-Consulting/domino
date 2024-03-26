@@ -24,7 +24,6 @@ export const EnumInput: React.FC<EnumInputProps> = ({
   return (
     <SelectInput<WorkflowPieceData>
       label={definition?.title ?? itemKey.split(".").pop() ?? ""}
-      emptyValue
       name={itemKey}
       options={enumOptions}
     />

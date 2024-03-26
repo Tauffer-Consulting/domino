@@ -9,30 +9,33 @@ import {
 import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { type Option } from "features/workflowEditor/utils";
 import React, { useCallback } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, type FieldValues, useFormContext } from "react-hook-form";
 import { fetchFromObject } from "utils";
 
 type ObjectName = `inputs.${string}.value.${number}.upstreamValue.${string}`;
 type Name = `inputs.${string}`;
-type Props =
-  | {
-      label: string;
-      name: Name;
-      options: Option[];
-      object?: false;
-    }
-  | {
-      label: string;
-      name: ObjectName;
-      options: Option[];
-      object: true;
-    };
+type Props = FieldValues &
+  (
+    | {
+        label: string;
+        name: Name;
+        options: Option[];
+        object?: false;
+      }
+    | {
+        label: string;
+        name: ObjectName;
+        options: Option[];
+        object: true;
+      }
+  );
 
 const SelectUpstreamInput: React.FC<Props> = ({
   options,
   label,
   name,
   object,
+  ...rest
 }) => {
   const {
     setValue,
@@ -48,8 +51,8 @@ const SelectUpstreamInput: React.FC<Props> = ({
       let nameId = "";
 
       if (object) {
-        nameArgument = name.replace(`.upstreamValue.`, ".upstreamArgument.");
-        nameId = name.replace(`.upstreamValue.`, ".upstreamId.");
+        nameArgument = name.replace(`upstreamValue`, ".upstreamArgument");
+        nameId = name.replace(`upstreamValue`, ".upstreamId");
       } else {
         nameArgument = `${name}.upstreamArgument`;
         nameId = `${name}.upstreamId`;
@@ -72,19 +75,18 @@ const SelectUpstreamInput: React.FC<Props> = ({
 
   return (
     <FormControl fullWidth>
-      <InputLabel error={!!error} id={name}>
+      <InputLabel id={name} error={!!error}>
         {label}
       </InputLabel>
       <Controller
-        control={control}
         name={object ? name : `${name}.upstreamValue`}
+        control={control}
         render={({ field }) => (
           <Select
-            fullWidth
-            defaultValue={""}
             labelId={name}
             label={label}
             error={!!error}
+            {...rest}
             {...field}
             onChange={(event) => {
               handleSelectChange(event, field.onChange);

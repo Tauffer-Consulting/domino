@@ -47,7 +47,7 @@ const InputElement: React.FC<Props> = React.memo(
     checkedFromUpstream,
     definitions,
     isItemArray,
-    isItemObject,
+    isItemObject = false,
   }) => {
     const optionalType = getOptionalType(schema);
 
@@ -64,7 +64,7 @@ const InputElement: React.FC<Props> = React.memo(
     if (checkedFromUpstream === true) {
       const options = upstreamOptions[upstreamKey];
       const checkboxKey = isItemObject
-        ? itemKey.replace(/(\.value)(?!.*\.value)/, "fromUpstream")
+        ? itemKey.replace(/(\.value)(?!.*\.value)/, ".upstreamValue")
         : itemKey.replace(/\.value$/, "");
 
       return (
@@ -72,6 +72,7 @@ const InputElement: React.FC<Props> = React.memo(
           name={checkboxKey as any}
           label={schema?.title}
           options={options ?? []}
+          object={isItemObject}
         />
       );
     } else if (isEnumType(schema, definitions)) {
@@ -158,8 +159,6 @@ const InputElement: React.FC<Props> = React.memo(
         />
       );
     } else {
-      console.log("optionalType", optionalType);
-
       return (
         <div style={{ color: "red", fontWeight: "bold" }}>
           Unknown widget type for {schema.title}
