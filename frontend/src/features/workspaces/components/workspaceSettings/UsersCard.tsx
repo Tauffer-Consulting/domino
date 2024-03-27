@@ -88,8 +88,9 @@ export const UsersCard: FC = () => {
                 setPermission(e.target.value);
               }}
             >
+              <MenuItem value={"admin"}>Admin</MenuItem>
+              <MenuItem value={"write"}>Write</MenuItem>
               <MenuItem value={"read"}>Read</MenuItem>
-              <MenuItem value={"owner"}>Owner</MenuItem>
             </Select>
           </FormControl>
         </Grid>

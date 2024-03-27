@@ -1,5 +1,5 @@
 from database.interface import session_scope
-from database.models import Workspace, UserWorkspaceAssociative, User
+from database.models import Workspace, UserWorkspaceAssociative, User, Workflow
 from database.models.enums import UserWorkspaceStatus, Permission
 from typing import Tuple, List
 from sqlalchemy import and_, func
@@ -44,7 +44,7 @@ class WorkspaceRepository(object):
             if result:
                 session.expunge_all()
         return result
-    
+
     def find_workspace_users(self, workspace_id: int, page: int, page_size: int):
         """
         SELECT user_workspace_associative.*, "user".*, total_count.count AS count
@@ -75,7 +75,7 @@ class WorkspaceRepository(object):
                 session.expunge_all()
         return results
 
-    
+
     def find_pending_workspace_invite(self, user_id: int, workspace_id: int):
         with session_scope() as session:
             result = session.query(Workspace, UserWorkspaceAssociative)\
@@ -85,7 +85,7 @@ class WorkspaceRepository(object):
             if result:
                 session.expunge_all()
         return result
-    
+
     def update_user_workspace_associative_by_ids(self, associative: UserWorkspaceAssociative):
         with session_scope() as session:
             saved_associative = session.query(UserWorkspaceAssociative)\
@@ -105,14 +105,14 @@ class WorkspaceRepository(object):
             """
             SELECT workspace.id, workspace.name, workspace.github_access_token, user_workspace_associative.permission
             FROM workspace
-            INNER JOIN user_workspace_associative 
+            INNER JOIN user_workspace_associative
             ON  user_workspace_associative.workspace_id = workspace.id and user_id=1
             WHERE workspace_id=9;
             """
             query = session.query(
-                Workspace.id.label('id'), 
-                Workspace.name, 
-                Workspace.github_access_token, 
+                Workspace.id.label('id'),
+                Workspace.name,
+                Workspace.github_access_token,
                 UserWorkspaceAssociative.permission.label('permission'),
                 UserWorkspaceAssociative.status.label('status')
             )\
@@ -157,52 +157,74 @@ class WorkspaceRepository(object):
             session.query(UserWorkspaceAssociative)\
                 .filter(and_(UserWorkspaceAssociative.user_id==user_id, UserWorkspaceAssociative.workspace_id.in_(workspaces_ids)))\
                     .delete(synchronize_session=False)
-            
+
     def find_user_workspaces_members_owners_count(self, user_id: int, workspaces_ids: List[int]) -> List:
         """
-        SELECT * from user_workspace_associative as t1
+        SELECT t1.*, t2.members_count, t3.owners_count, COUNT(wf.id) AS total_workflows
+        FROM user_workspace_associative AS t1
         INNER JOIN (
-            SELECT workspace_id, COUNT(*) as user_count from user_workspace_associative 
-            	WHERE user_workspace_associative.workspace_id in (1) GROUP BY workspace_id
-            ) as t2
-            INNER JOIN (
-              	SELECT workspace_id, COUNT(*) as owners_count from user_workspace_associative 
-                WHERE user_workspace_associative.workspace_id in (ids) and user_workspace_associative.permission = 'owner'
-              	GROUP BY workspace_id
-            ) as t3
-            ON t2.workspace_id=t2.workspace_id
-        ON t1.workspace_id=t2.workspace_id
-        WHERE t1.user_id=2;
+            SELECT workspace_id, COUNT(*) AS members_count
+            FROM user_workspace_associative
+            WHERE user_workspace_associative.workspace_id IN (2)
+            GROUP BY workspace_id
+        ) AS t2 ON t1.workspace_id = t2.workspace_id
+        INNER JOIN (
+            SELECT workspace_id, COUNT(*) AS owners_count
+            FROM user_workspace_associative
+            WHERE user_workspace_associative.workspace_id IN (2)
+            AND user_workspace_associative.permission = 'owner'
+            GROUP BY workspace_id
+        ) AS t3 ON t1.workspace_id = t3.workspace_id
+        LEFT JOIN workflow AS wf ON t1.workspace_id = wf.workspace_id
+        WHERE t1.user_id = 2
+        AND wf.workspace_id = 2
+        GROUP BY t1.user_id, t1.workspace_id, t2.members_count, t3.owners_count;
         """
         with session_scope() as session:
-            # create a subquery
-            subquery_owners = session.query(
-                UserWorkspaceAssociative.workspace_id, 
-                func.count(UserWorkspaceAssociative.workspace_id).label('owners_count')
-            ).filter(UserWorkspaceAssociative.workspace_id.in_(workspaces_ids))\
-                .filter(UserWorkspaceAssociative.permission == Permission.owner.value)\
-                    .group_by(UserWorkspaceAssociative.workspace_id).subquery()
-
-            subquery = (
+            subquery_users = (
                 session.query(
                     UserWorkspaceAssociative.workspace_id,
-                    func.count(UserWorkspaceAssociative.workspace_id).label('members_count'),
-                    subquery_owners.c.owners_count
+                    func.count('*').label('members_count')
                 )
                 .filter(UserWorkspaceAssociative.workspace_id.in_(workspaces_ids))
-                .group_by(UserWorkspaceAssociative.workspace_id, subquery_owners.c.owners_count)
-                .join(subquery_owners, UserWorkspaceAssociative.workspace_id == subquery_owners.c.workspace_id)
+                .group_by(UserWorkspaceAssociative.workspace_id)
                 .subquery()
             )
 
-            query = session.query(
-                UserWorkspaceAssociative.user_id,
-                UserWorkspaceAssociative.workspace_id, 
-                UserWorkspaceAssociative.permission,
-                subquery.c.members_count,
-                subquery.c.owners_count
-            ).join(subquery, UserWorkspaceAssociative.workspace_id == subquery.c.workspace_id)\
+            # Subquery for counting owners in each workspace
+            subquery_owners = (
+                session.query(
+                    UserWorkspaceAssociative.workspace_id,
+                    func.count('*').label('owners_count')
+                )
+                .filter(UserWorkspaceAssociative.workspace_id.in_(workspaces_ids))
+                .filter(UserWorkspaceAssociative.permission == 'owner')
+                .group_by(UserWorkspaceAssociative.workspace_id)
+                .subquery()
+            )
+
+            # Main query
+            query = (
+                session.query(
+                    UserWorkspaceAssociative.user_id,
+                    UserWorkspaceAssociative.workspace_id,
+                    UserWorkspaceAssociative.permission,
+                    UserWorkspaceAssociative.status,
+                    subquery_users.c.members_count,
+                    subquery_owners.c.owners_count,
+                    func.count(Workflow.id).label('total_workflows')
+                )
+                .join(subquery_users, UserWorkspaceAssociative.workspace_id == subquery_users.c.workspace_id)
+                .join(subquery_owners, UserWorkspaceAssociative.workspace_id == subquery_owners.c.workspace_id)
+                .outerjoin(Workflow, UserWorkspaceAssociative.workspace_id == Workflow.workspace_id)
                 .filter(UserWorkspaceAssociative.user_id == user_id)
+                .group_by(
+                    UserWorkspaceAssociative.user_id,
+                    UserWorkspaceAssociative.workspace_id,
+                    subquery_users.c.members_count,
+                    subquery_owners.c.owners_count
+                )
+            )
             result = query.all()
             if result:
                 session.expunge_all()
@@ -213,7 +235,7 @@ class WorkspaceRepository(object):
         SQL Query:
         SELECT * from user_workspace_associative as t1
         INNER JOIN (
-            SELECT workspace_id, COUNT(*) as user_count from user_workspace_associative 
+            SELECT workspace_id, COUNT(*) as members_count from user_workspace_associative
             WHERE user_workspace_associative.workspace_id in (ids) GROUP BY workspace_id
             ) as t2
         ON t1.workspace_id=t2.workspace_id
@@ -222,14 +244,14 @@ class WorkspaceRepository(object):
         with session_scope() as session:
             # create a subquery
             subquery = session.query(
-                UserWorkspaceAssociative.workspace_id, 
+                UserWorkspaceAssociative.workspace_id,
                 func.count(UserWorkspaceAssociative.workspace_id).label('members_count')
             ).filter(UserWorkspaceAssociative.workspace_id.in_(workspaces_ids))\
                 .group_by(UserWorkspaceAssociative.workspace_id).subquery()
 
             query = session.query(
                 UserWorkspaceAssociative.user_id,
-                UserWorkspaceAssociative.workspace_id, 
+                UserWorkspaceAssociative.workspace_id,
                 UserWorkspaceAssociative.permission,
                 subquery.c.members_count
             ).join(subquery, UserWorkspaceAssociative.workspace_id == subquery.c.workspace_id)\
@@ -238,7 +260,7 @@ class WorkspaceRepository(object):
             if result:
                 session.expunge_all()
         return result
-    
+
     def find_by_name_and_user_id(self, name: str, user_id: int):
         with session_scope() as session:
             result = session.query(Workspace)\

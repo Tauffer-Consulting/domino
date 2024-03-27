@@ -4,12 +4,12 @@ from services.user_service import UserService
 from schemas.exceptions.base import BaseException, ForbiddenException, UnauthorizedException
 from schemas.errors.base import SomethingWrongError, UnauthorizedError, ForbiddenError
 from schemas.context.auth_context import AuthorizationContextData
-from services.auth_service import AuthService
+from auth.permission_authorizer import Authorizer
 
 router = APIRouter(prefix="/users")
 
 user_service = UserService()
-auth_service = AuthService()
+authorizer = Authorizer()
 
 @router.delete(
     "/{user_id}",
@@ -21,8 +21,8 @@ auth_service = AuthService()
     }
 )
 async def delete_user(
-    user_id: int, 
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    user_id: int,
+    auth_context: AuthorizationContextData = Depends(authorizer.auth_wrapper)
 ):
     """
         Delete user by id.

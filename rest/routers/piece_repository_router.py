@@ -1,11 +1,9 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Response
-from services.auth_service import AuthService
 from services.piece_repository_service import PieceRepositoryService
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.piece_repository import CreateRepositoryRequest, PatchRepositoryRequest, ListRepositoryFilters
 from schemas.responses.piece_repository import (
     CreateRepositoryReponse,
-    PatchRepositoryResponse,
     GetRepositoryReleasesResponse,
     GetRepositoryReleaseDataResponse,
     GetWorkspaceRepositoriesResponse,
@@ -15,11 +13,17 @@ from database.models.enums import RepositorySource
 from schemas.exceptions.base import BaseException, ConflictException, ForbiddenException, ResourceNotFoundException, UnauthorizedException
 from schemas.errors.base import ConflictError, ForbiddenError, ResourceNotFoundError, SomethingWrongError, UnauthorizedError
 from typing import List, Optional
+from auth.permission_authorizer import Authorizer
+from database.models.enums import Permission
+
 
 router = APIRouter(prefix="/pieces-repositories")
-auth_service = AuthService()
+
 
 piece_repository_service = PieceRepositoryService()
+
+admin_authorizer = Authorizer(permission_level=Permission.admin.value)
+read_authorizer = Authorizer(permission_level=Permission.read.value)
 
 
 @router.post(
@@ -36,7 +40,7 @@ piece_repository_service = PieceRepositoryService()
 )
 def create_piece_repository(
     body: CreateRepositoryRequest,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_owner_access_authorizer_body)
+    auth_context: AuthorizationContextData = Depends(admin_authorizer.authorize_with_body)
 ) -> CreateRepositoryReponse:
     """
     Create piece repository for workspace.
@@ -67,7 +71,7 @@ def get_piece_repository_releases(
     source: RepositorySource,
     path: str,
     workspace_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> List[GetRepositoryReleasesResponse]:
     """Get piece repository releases"""
     try:
@@ -97,7 +101,7 @@ def get_piece_repository_release_data(
     source: RepositorySource,
     path: str,
     workspace_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> GetRepositoryReleaseDataResponse:
     """Get piece repository release data"""
     try:
@@ -120,7 +124,7 @@ def get_piece_repository_release_data(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError},
         status.HTTP_403_FORBIDDEN: {'model': ForbiddenError},
     },
-    dependencies=[Depends(auth_service.workspace_access_authorizer)]
+    dependencies=[Depends(read_authorizer.authorize)]
 )
 def get_pieces_repositories(
     workspace_id: int,
@@ -188,7 +192,7 @@ def get_pieces_repositories_worker(
 )
 def delete_repository(
     piece_repository_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.piece_repository_workspace_owner_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(admin_authorizer.authorize_piece_repository)
 ):
     try:
         response =  piece_repository_service.delete_repository(
@@ -209,10 +213,9 @@ def delete_repository(
     },
 
 )
-@auth_service.authorize_repository_workspace_access
 def get_piece_repository(
     piece_repository_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize_piece_repository)
 ) -> GetRepositoryResponse:
     """Get piece repository info by id"""
     try:
