@@ -1,18 +1,18 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from services.auth_service import AuthService
 from services.piece_service import PieceService
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.piece import ListPiecesFilters
 from schemas.responses.piece import GetPiecesResponse
-from schemas.exceptions.base import BaseException, ForbiddenException, ResourceNotFoundException
+from schemas.exceptions.base import BaseException, ForbiddenException
 from schemas.errors.base import SomethingWrongError, ForbiddenError
 from typing import List
-
+from auth.permission_authorizer import Authorizer
+from database.models.enums import Permission
 
 router = APIRouter(prefix="/pieces-repositories/{piece_repository_id}/pieces")
 
 piece_service = PieceService()
-auth_service = AuthService()
+read_authorizer = Authorizer(permission_level=Permission.read.value)
 
 
 @router.get(
@@ -24,13 +24,12 @@ auth_service = AuthService()
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError}
     }
 )
-@auth_service.authorize_repository_workspace_access
 def get_pieces(
     piece_repository_id: int,
     page: int = 0,
     page_size: int = 100,
     filters: ListPiecesFilters = Depends(),
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize_piece_repository)
 ):
     """List pieces from a piece repository"""
     try:

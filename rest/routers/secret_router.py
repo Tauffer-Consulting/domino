@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from services.auth_service import AuthService
 from services.secret_service import SecretService
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.secret import PatchSecretValueRequest
@@ -7,12 +6,18 @@ from schemas.responses.secret import ListRepositorySecretsResponse, GetSecretsBy
 from schemas.exceptions.base import BaseException, ForbiddenException, ResourceNotFoundException
 from schemas.errors.base import ResourceNotFoundError, SomethingWrongError, ForbiddenError
 from typing import List
+from auth.permission_authorizer import Authorizer
+from database.models.enums import Permission
 
 
 router = APIRouter(prefix="/pieces-repositories/{piece_repository_id}/secrets")
 
-auth_service = AuthService()
 secret_service = SecretService()
+
+read_authorizer = Authorizer(permission_level=Permission.read.value)
+admin_authorizer = Authorizer(permission_level=Permission.admin.value)
+
+
 
 @router.get(
     '',
@@ -23,10 +28,9 @@ secret_service = SecretService()
         status.HTTP_500_INTERNAL_SERVER_ERROR: {'model': SomethingWrongError}
     }
 )
-@auth_service.authorize_repository_workspace_access
 def get_repository_secrets(
     piece_repository_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize_piece_repository)
 ) -> List[ListRepositorySecretsResponse]:
     """
         Get the list of piece repository secrets.
@@ -49,12 +53,11 @@ def get_repository_secrets(
         status.HTTP_404_NOT_FOUND: {'model': ResourceNotFoundError}
     }
 )
-@auth_service.authorize_repository_workspace_owner_access # To update a secret user must have owner access to workspace
 def update_repository_secret(
     piece_repository_id: int,
     secret_id: int,
     body: PatchSecretValueRequest,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(admin_authorizer.authorize_piece_repository)
 ):
     """
         Update an piece repository secret value.

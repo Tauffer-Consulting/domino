@@ -33,7 +33,7 @@ class WorkspaceService(object):
         self.logger = get_configured_logger(self.__class__.__name__)
         self.workflow_service = WorkflowService()
         self.github_token_fernet = Fernet(settings.GITHUB_TOKEN_SECRET_KEY)
-        
+
 
     def create_workspace(
         self,
@@ -94,7 +94,7 @@ class WorkspaceService(object):
                 )
                 thread.start()
                 threads.append(thread)
-            
+
             for thread in threads:
                 thread.join()
 
@@ -189,6 +189,9 @@ class WorkspaceService(object):
         if not user:
             raise ResourceNotFoundException('User email not found.')
 
+        if body.permission.value == Permission.owner.value:
+            raise ConflictException('Cannot assign owner permission to user.')
+
         for workspace_assoc in user.workspaces:
             if workspace_assoc.workspace.id == workspace_id and workspace_assoc.status == UserWorkspaceStatus.pending.value:
                 raise ConflictException('User already invited to this workspace.')
@@ -255,31 +258,36 @@ class WorkspaceService(object):
         return response
 
     async def remove_user_from_workspace(self, workspace_id: int, user_id: int, auth_context: AuthorizationContextData):
-        # Can't remove other users if not owner
-        if auth_context.user_id != user_id and auth_context.workspace.user_permission != Permission.owner.value:
-            raise ForbiddenException()
 
         workspace_infos = self.workspace_repository.find_user_workspaces_members_owners_count(
             user_id=user_id,
             workspaces_ids=[workspace_id]
         )
+
         if not workspace_infos:
             raise ResourceNotFoundException('User not found in workspace.')
 
         workspace_info = workspace_infos[0]
+        workflows_count = workspace_info.total_workflows
+
+        if workspace_info.permission == Permission.owner.value:
+            raise ForbiddenException('Cannot remove owner from workspace.')
+
+        if workspace_info.members_count == 1 and workflows_count > 0:
+            raise ForbiddenException('Cannot remove last user from workspace with workflows.')
+
         # If the workspace has only one member (the user) delete the workspace (even the user not being the owner).
         if workspace_info.members_count == 1:
             await self.delete_workspace(workspace_id=workspace_id)
             return
 
         # If the user is owner and the workspace has only one owner (the user) but has more than one member, delete the workspace.
-        if workspace_info.owners_count == 1 and auth_context.user_id == user_id and auth_context.workspace.user_permission == Permission.owner.value:
-            await self.delete_workspace(workspace_id=workspace_id)
+        # DEPRECATED now we cant remove owners from workspace, owners can only delete workspaces (would be the same action as this one)
+        # if workspace_info.owners_count == 1 and auth_context.user_id == user_id and auth_context.workspace.user_permission == Permission.owner.value:
+        #     await self.delete_workspace(workspace_id=workspace_id)
 
-
-        # If the user is owner but is deleting another user, just remove the user from workspace
-        # If user is read only and workspace has more than one member, just remove the user from workspace
-        # Or if workspace has more than one owner just remove the user from workspace
+        # If the user is admin/owner but is deleting another user, just remove the user from workspace
+        # If user is read/write and workspace has more than one member, just remove the user from workspace
         self.workspace_repository.remove_user_from_workspaces(
             workspaces_ids=[workspace_id],
             user_id=user_id

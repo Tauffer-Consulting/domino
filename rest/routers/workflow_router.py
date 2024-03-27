@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, status, Depends, Response
 from schemas.context.auth_context import AuthorizationContextData
 from typing import List
 from services.workflow_service import WorkflowService
-from services.auth_service import AuthService
 from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters
 from schemas.responses.workflow import (
     GetWorkflowsResponse,
@@ -28,11 +27,16 @@ from schemas.errors.base import (
     ResourceNotFoundError,
     SomethingWrongError,
 )
+from auth.permission_authorizer import Authorizer
+from database.models.enums import Permission
 
 
 router = APIRouter(prefix="/workspaces/{workspace_id}/workflows")
-auth_service = AuthService()
+
 workflow_service = WorkflowService()
+read_authorizer = Authorizer(permission_level=Permission.read.value)
+write_authorizer = Authorizer(permission_level=Permission.write.value)
+
 
 
 @router.post(
@@ -48,7 +52,7 @@ workflow_service = WorkflowService()
 def create_workflow(
     workspace_id: int,
     body: CreateWorkflowRequest,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(write_authorizer.authorize)
 ) -> CreateWorkflowResponse:
     """Create a new workflow"""
     try:
@@ -69,7 +73,7 @@ def create_workflow(
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
         status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
     },
-    dependencies=[Depends(auth_service.workspace_access_authorizer)]
+    dependencies=[Depends(read_authorizer.authorize)]
 )
 async def list_workflows(
     workspace_id: int,
@@ -99,11 +103,10 @@ async def list_workflows(
     },
     status_code=200,
 )
-@auth_service.authorize_workspace_access
 def get_workflow(
     workspace_id: int,
     workflow_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.auth_wrapper)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> GetWorkflowResponse:
     """Get a workflow information"""
     try:
@@ -125,7 +128,7 @@ def get_workflow(
         status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
         status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError}
     },
-    dependencies=[Depends(auth_service.workspace_owner_access_authorizer)]
+    dependencies=[Depends(write_authorizer.authorize)]
 )
 async def delete_workflow(
     workspace_id: int,
@@ -154,7 +157,7 @@ async def delete_workflow(
 def run_workflow(
     workspace_id: int,
     workflow_id: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(write_authorizer.authorize)
 ):
     try:
         return workflow_service.run_workflow(
@@ -178,7 +181,7 @@ def list_workflow_runs(
     workflow_id: int,
     page: int = 0,
     page_size: int = 5,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> GetWorkflowRunsResponse:
     try:
         return workflow_service.list_workflow_runs(
@@ -205,7 +208,7 @@ def list_run_tasks(
     workflow_run_id: str,
     page: int = 0,
     page_size: int = 5,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> GetWorkflowRunTasksResponse:
     try:
         return workflow_service.list_run_tasks(
@@ -231,7 +234,7 @@ def generate_report(
     workspace_id: int,
     workflow_id: int,
     workflow_run_id: str,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> GetWorkflowResultReportResponse:
     try:
         return workflow_service.generate_report(
@@ -257,7 +260,7 @@ def get_task_logs(
     workflow_run_id: str,
     task_id: str,
     task_try_number: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> GetWorkflowRunTaskLogsResponse:
 
     """
@@ -290,7 +293,7 @@ def get_task_result(
     workflow_run_id: str,
     task_id: str,
     task_try_number: int,
-    auth_context: AuthorizationContextData = Depends(auth_service.workspace_access_authorizer)
+    auth_context: AuthorizationContextData = Depends(read_authorizer.authorize)
 ) -> GetWorkflowRunTaskResultResponse:
 
     """
