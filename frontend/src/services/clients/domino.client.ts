@@ -47,3 +47,12 @@ dominoApiClient.interceptors.request.use(
     return await Promise.reject(error);
   },
 );
+
+dominoApiClient.interceptors.response.use(
+  (response) => {
+    return response.data;
+  },
+  async (error) => {
+    return await Promise.reject(error);
+  },
+);

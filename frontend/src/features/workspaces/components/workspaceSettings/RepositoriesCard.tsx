@@ -28,9 +28,9 @@ import {
   Tooltip,
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import { usesPieces } from "context/workspaces";
+import { useWorkspaces, usesPieces } from "context/workspaces";
 import { repositorySource } from "context/workspaces/types";
-import { type IPieceRepositoryMetadata } from "features/myWorkflows/api";
+import { type PieceRepositoryReleases } from "features/myWorkflows/api";
 import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -47,8 +47,12 @@ export const RepositoriesCard: FC = () => {
   const [version, setVersion] = useState("");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [availableVersions, setAvailableVersions] = useState<
-    IPieceRepositoryMetadata[]
+    PieceRepositoryReleases[]
   >([]);
+
+  const { workspace } = useWorkspaces();
+
+  const workspaceId = workspace?.id;
 
   const {
     repositories,
@@ -118,8 +122,11 @@ export const RepositoriesCard: FC = () => {
         handleFetchRepoReleases({
           path,
           source: source as repositorySource,
+          workspaceId,
         })
           .then((data) => {
+            console.log(data);
+
             if (data && data.length > 0) {
               const devVersion = data.find(
                 (item) =>

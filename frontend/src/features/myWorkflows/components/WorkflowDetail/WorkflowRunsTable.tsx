@@ -105,16 +105,18 @@ export const WorkflowRunsTable = forwardRef<WorkflowRunsTableRef, Props>(
           maxWidth: 10,
           renderCell: ({ row }) => (
             <Tooltip title="Visualize workflow results">
-              <IconButton
-                onClick={() => {
-                  navigation(
-                    `/my-workflows/${workflowId}/report/${row.workflow_run_id}`,
-                  );
-                }}
-                disabled={row.state !== "success" && row.state !== "failed"}
-              >
-                <AssessmentIcon />
-              </IconButton>
+              <span>
+                <IconButton
+                  onClick={() => {
+                    navigation(
+                      `/my-workflows/${workflowId}/report/${row.workflow_run_id}`,
+                    );
+                  }}
+                  disabled={row.state !== "success" && row.state !== "failed"}
+                >
+                  <AssessmentIcon />
+                </IconButton>
+              </span>
             </Tooltip>
           ),
           headerAlign: "center",

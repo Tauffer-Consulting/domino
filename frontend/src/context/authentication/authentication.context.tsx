@@ -1,3 +1,4 @@
+import { postAuthLogin, postAuthRegister } from "@features/auth/api";
 import React, {
   type ReactNode,
   useCallback,
@@ -10,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { createCustomContext } from "utils";
 
-import { postAuthLogin, postAuthRegister } from "./api";
 import {
   type IAuthenticationContext,
   type IAuthenticationStore,
@@ -45,6 +45,9 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
         userId,
         tokenExpiresIn,
       }));
+
+      console.log("here");
+
       const currentDate = new Date();
       const tokenExpirationDate = new Date(
         currentDate.getTime() + tokenExpiresIn * 1000,
@@ -73,16 +76,14 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const authenticate = useCallback(
     async (email: string, password: string) => {
       setAuthLoading(true);
-      void postAuthLogin({ email, password })
+      await postAuthLogin({ email, password })
         .then((res) => {
-          if (res.status === 200) {
-            login(
-              res.data.access_token,
-              res.data.user_id,
-              res.data.token_expires_in,
-              "/workspaces",
-            );
-          }
+          login(
+            res.access_token,
+            res.user_id,
+            res.token_expires_in,
+            "/workspaces",
+          );
         })
         .finally(() => {
           setAuthLoading(false);

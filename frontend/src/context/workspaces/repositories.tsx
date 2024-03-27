@@ -1,17 +1,20 @@
+import {
+  type QueryObserverResult,
+  type RefetchOptions,
+} from "@tanstack/react-query";
 import { useStorage } from "context/storage/useStorage";
 import {
   type IGetRepoPiecesResponseInterface,
-  useAuthenticatedGetPieceRepositories,
-  useFetchAuthenticatedGetRepoIdPieces,
+  useRepositories,
+  usePieces,
   type IGetPiecesRepositoriesResponseInterface,
-  type IGetPiecesRepositoriesReleasesParams,
-  type IGetPiecesRepositoriesReleasesResponseInterface,
-  useAuthenticatedGetPieceRepositoriesReleases,
+  type RepositoriesReleasesParams,
+  type RepositoriesReleasesResponse,
+  useRepositoriesReleases,
   useAuthenticatedDeleteRepository,
 } from "features/myWorkflows/api";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { type KeyedMutator } from "swr";
 import { createCustomContext } from "utils";
 
 import { useAuthenticatedPostPiecesRepository } from "./api";
@@ -30,16 +33,21 @@ export interface IPiecesContext {
   selectedRepositoryId: null | number;
   setSelectedRepositoryId: React.Dispatch<React.SetStateAction<number | null>>;
 
-  handleRefreshRepositories: KeyedMutator<
-    IGetPiecesRepositoriesResponseInterface | undefined
+  handleRefreshRepositories: (
+    options?: RefetchOptions | undefined,
+  ) => Promise<
+    QueryObserverResult<
+      IGetPiecesRepositoriesResponseInterface | undefined,
+      Error
+    >
   >;
   handleAddRepository: (
     params: Omit<IPostWorkspaceRepositoryPayload, "workspace_id">,
   ) => Promise<IPostWorkspaceRepositoryResponseInterface | unknown>;
 
   handleFetchRepoReleases: (
-    params: IGetPiecesRepositoriesReleasesParams,
-  ) => Promise<IGetPiecesRepositoriesReleasesResponseInterface | undefined>;
+    params: RepositoriesReleasesParams,
+  ) => Promise<RepositoriesReleasesResponse | undefined>;
 
   handleDeleteRepository: (id: string) => Promise<any>;
 
@@ -60,22 +68,22 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
   const localStorage = useStorage();
 
   const [selectedRepositoryId, setSelectedRepositoryId] = useState<
-    number | null
-  >(null);
+    number | undefined
+  >();
   const [repositoryPieces, setRepositoryPieces] = useState<PiecesRepository>(
     {},
   );
 
   const { workspace, handleRefreshWorkspaces } = useWorkspaces();
 
-  const fetchRepoById = useFetchAuthenticatedGetRepoIdPieces();
+  const fetchRepoById = usePieces({ repositoryId: selectedRepositoryId });
 
   const {
     data: repositories,
     error: repositoriesError,
-    isValidating: repositoriesLoading,
-    mutate: handleRefreshRepositories,
-  } = useAuthenticatedGetPieceRepositories({});
+    isLoading: repositoriesLoading,
+    refetch: handleRefreshRepositories,
+  } = useRepositories();
 
   useEffect(() => {
     let active = true;
@@ -113,7 +121,7 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [repositories, fetchRepoById]);
 
-  const { data: defaultRepositories } = useAuthenticatedGetPieceRepositories({
+  const { data: defaultRepositories } = useRepositories({
     source: "default",
   });
 
@@ -142,8 +150,8 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     [postRepository, handleRefreshWorkspaces, workspace?.id],
   );
 
-  const handleFetchRepoReleases =
-    useAuthenticatedGetPieceRepositoriesReleases();
+  const { mutateAsync: handleFetchRepoReleases, data } =
+    useRepositoriesReleases();
 
   const handleDeleteRepository = useAuthenticatedDeleteRepository();
 

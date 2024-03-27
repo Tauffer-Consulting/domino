@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { usesPieces } from "context/workspaces";
 import {
-  useAuthenticatedGetRepositorySecrets,
+  useRepositorySecrets,
   useAuthenticatedPatchRepositorySecret,
 } from "features/myWorkflows/api";
 import { useState, useCallback, useMemo, useEffect } from "react";
@@ -48,7 +48,7 @@ const StorageSecretsCard = () => {
   }, [storageRepository]);
 
   const { data: secrets, mutate: refreshSecrets } =
-    useAuthenticatedGetRepositorySecrets({
+    useRepositorySecrets({
       repositoryId: storageRepository?.id.toString() ?? "",
     });
 

@@ -1,8 +1,8 @@
 import { Container, Paper, Typography } from "@mui/material";
 import { NoDataOverlay } from "components/NoDataOverlay";
 import {
-  useAuthenticatedGetWorkflowRunTaskLogs,
-  useAuthenticatedGetWorkflowRunTaskResult,
+  useRunTaskLogs,
+  useRunTaskResult,
 } from "features/myWorkflows/api";
 import React, {
   forwardRef,
@@ -58,7 +58,7 @@ export const WorkflowRunDetail = forwardRef<WorkflowRunDetailRef, Props>(
     }, [runId, nodeId, tasks]);
 
     const { data: taskLogs, mutate: refreshTaskLogs } =
-      useAuthenticatedGetWorkflowRunTaskLogs({
+      useRunTaskLogs({
         runId: runId ?? "",
         taskId: taskData?.task_id ?? "",
         taskTryNumber: String(taskData?.try_number) ?? "",
@@ -69,7 +69,7 @@ export const WorkflowRunDetail = forwardRef<WorkflowRunDetailRef, Props>(
       data: taskResult,
       isLoading,
       mutate: refreshTaskResults,
-    } = useAuthenticatedGetWorkflowRunTaskResult({
+    } = useRunTaskResult({
       runId,
       taskId: taskData?.state === "success" ? taskData?.task_id : undefined,
       taskTryNumber: String(taskData?.try_number),
