@@ -77,6 +77,7 @@ class TestWorkflowRouter:
         assert content.keys() == mock_response.dict(by_alias=True).keys()
 
     @staticmethod
+    @pytest.mark.skip(reason="Requires a airflow to be running")
     def test_delete_workflow(patch_piece_secret: Response, create_workflow: Response, delete_workflow: Response):
         response = delete_workflow
         assert response.status_code == 204

@@ -16,32 +16,22 @@ import {
 } from "react-hook-form";
 import { fetchFromObject } from "utils";
 
-type Props<T> =
-  | (SelectProps & {
-      name: Path<T>;
-      label: string;
-      options: string[] | Array<{ label: string; value: string }>;
+type Props<T> = SelectProps & {
+  name: Path<T>;
+  label: string;
+  options: string[] | Array<{ label: string; value: string }>;
 
-      emptyValue: true;
-      defaultValue?: string;
-      registerOptions?:
-        | RegisterOptions<FieldValues, (string | undefined) & Path<T>>
-        | undefined;
-    })
-  | (SelectProps & {
-      name: Path<T>;
-      label: string;
-      options: string[] | Array<{ label: string; value: string }>;
-
-      emptyValue?: boolean;
-      registerOptions?: RegisterOptions<FieldValues>;
-    });
+  defaultValue?: string;
+  registerOptions?: RegisterOptions<
+    FieldValues,
+    (string | undefined) & Path<T>
+  >;
+};
 
 function SelectInput<T extends FieldValues>({
   options,
   label,
   name,
-  emptyValue,
   ...rest
 }: Props<T>) {
   const {
@@ -70,11 +60,9 @@ function SelectInput<T extends FieldValues>({
               field.onChange(e.target.value as any);
             }}
           >
-            {emptyValue && (
-              <MenuItem value="" disabled>
-                <em>None</em>
-              </MenuItem>
-            )}
+            <MenuItem value="" disabled>
+              <em>None</em>
+            </MenuItem>
             {options.map((option) => {
               if (typeof option === "object") {
                 return (

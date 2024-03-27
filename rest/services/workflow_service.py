@@ -204,14 +204,14 @@ class WorkflowService(object):
                 is_paused = False
 
             if response and not is_dag_broken:
-                schedule = response.get("schedule_interval")
-                if isinstance(schedule, dict):
-                    schedule = schedule.get("value")
+                schedule = dag_data.schedule.value
+                if schedule != 'none':
+                    schedule = f"@{schedule}"
                 status = WorkflowStatus.active.value
 
                 is_paused = response.get("is_paused")
                 is_active = response.get("is_active")
-                next_dagrun = response.get("next_dagrun")
+                next_dagrun = response.get("next_dagrun_data_interval_end")
 
             data.append(
                 GetWorkflowsResponseData(
@@ -219,6 +219,7 @@ class WorkflowService(object):
                     name=dag_data.name,
                     created_at=dag_data.created_at,
                     start_date=dag_data.start_date,
+                    end_date=dag_data.end_date,
                     last_changed_at=dag_data.last_changed_at,
                     last_changed_by=dag_data.last_changed_by,
                     created_by=dag_data.created_by,
@@ -520,8 +521,11 @@ class WorkflowService(object):
             raise ResourceNotFoundException("Workflow not found")
 
         # Check if start date is in the past
-        if workflow.start_date and workflow.start_date > datetime.utcnow().replace(tzinfo=timezone.utc):
+        if workflow.start_date and workflow.start_date > datetime.now(tz=timezone.utc):
             raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
+
+        if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
+            raise ForbiddenException('You cannot run workflows that have ended.')
 
         airflow_workflow_id = workflow.uuid_name
 
@@ -574,6 +578,7 @@ class WorkflowService(object):
             raise ForbiddenException("Workflow does not belong to workspace!")
         try:
             await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
+            self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
             self.workflow_repository.delete(id=workflow_id)
         except Exception as e: # TODO improve exception handling
             self.logger.exception(e)
@@ -640,9 +645,22 @@ class WorkflowService(object):
         else:
             dag_runs = response_data['dag_runs']
 
-        data = [
-            GetWorkflowRunsResponseData(**run) for run in dag_runs
-        ]
+        data = []
+        for run in dag_runs:
+            if run.get('end_date') is None or run.get('start_date') is None:
+                run['duration_in_seconds'] = None
+                data.append(
+                    GetWorkflowRunsResponseData(**run)
+                )
+                continue
+            end_date_dt = datetime.fromisoformat(run.get('end_date'))
+            start_date_dt = datetime.fromisoformat(run.get('start_date'))
+            duration = end_date_dt - start_date_dt
+            run['duration_in_seconds'] = duration.total_seconds()
+            data.append(
+                GetWorkflowRunsResponseData(**run)
+            )
+
         response = GetWorkflowRunsResponse(
             data=data,
             metadata=dict(
