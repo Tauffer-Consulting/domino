@@ -1,8 +1,8 @@
 import { Grid, Paper } from "@mui/material";
 import { Breadcrumbs } from "components/Breadcrumbs";
 import {
-  useAuthenticatedGetWorkflowId,
-  useAuthenticatedGetWorkflowRunTasks,
+  useWorkflow,
+  useRunTasks,
   useAuthenticatedPostWorkflowRunId,
 } from "features/myWorkflows/api";
 import {
@@ -52,11 +52,11 @@ export const WorkflowDetail: React.FC = () => {
   const workflowRunsTableRef = useRef<WorkflowRunsTableRef>(null);
   const workflowRunDetailRef = useRef<WorkflowRunDetailRef>(null);
 
-  const { data: workflow } = useAuthenticatedGetWorkflowId({
+  const { data: workflow } = useWorkflow({
     id: id as string,
   });
 
-  const fetchWorkflowTasks = useAuthenticatedGetWorkflowRunTasks();
+  const fetchWorkflowTasks = useRunTasks();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
   const triggerRun = () => {

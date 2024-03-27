@@ -20,6 +20,4 @@ FROM base
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY . .
-RUN chmod -R 777 node_modules/
-USER node
 CMD ["pnpm", "run", "debug"]

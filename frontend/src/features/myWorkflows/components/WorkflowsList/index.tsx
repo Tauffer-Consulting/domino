@@ -8,8 +8,8 @@ import {
 } from "@mui/x-data-grid";
 import { NoDataOverlay } from "components/NoDataOverlay";
 import {
-  useAuthenticatedDeleteWorkflowId,
-  useAuthenticatedGetWorkflows,
+  useDeleteWorkflow,
+  useGetWorkflows,
   useAuthenticatedPostWorkflowRunId,
 } from "features/myWorkflows/api";
 import { type IWorkflow } from "features/myWorkflows/types";
@@ -38,12 +38,12 @@ export const WorkflowList: React.FC = () => {
     data: workflows,
     isLoading,
     mutate: handleRefreshWorkflows,
-  } = useAuthenticatedGetWorkflows(
+  } = useGetWorkflows(
     paginationModel.page,
     paginationModel.pageSize,
   );
 
-  const handleDeleteWorkflow = useAuthenticatedDeleteWorkflowId();
+  const handleDeleteWorkflow = useDeleteWorkflow();
   const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
 
   const deleteWorkflow = useCallback(async (id: IWorkflow["id"]) => {

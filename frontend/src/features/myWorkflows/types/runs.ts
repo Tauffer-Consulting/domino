@@ -1,10 +1,3 @@
-interface IPaginationMetadata {
-  page: number;
-  last_page: number;
-  records: number;
-  total: number;
-}
-
 enum runState {
   success = "success",
   failed = "failed",
@@ -52,10 +45,5 @@ export interface IWorkflowRunTasks {
 
 export interface IGetWorkflowRunsResponseInterface {
   data?: IWorkflowRuns[];
-  metadata?: IPaginationMetadata;
-}
-
-export interface IGetWorkflowRunTasksResponseInterface {
-  data?: IWorkflowRunTasks[];
-  metadata?: IPaginationMetadata;
+  metadata?: PaginationMetadata;
 }

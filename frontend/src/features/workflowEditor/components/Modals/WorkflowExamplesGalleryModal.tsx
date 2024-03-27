@@ -10,7 +10,7 @@ import {
 import { Modal, type ModalRef } from "components/Modal";
 import {
   type WorkflowsGalleryExamples,
-  useAuthenticatedGetWorkflowsExamples,
+  useWorkflowsExamples,
 } from "features/workflowEditor/api/workflowsExample";
 import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState, useMemo } from "react";
@@ -88,7 +88,7 @@ const WorkflowExamplesGalleryModal = forwardRef(
   ) => {
     const [selected, setSelected] = useState<number | null>(null);
     // only make requests if USE_LOCAL_CARDS=false
-    const { data } = useAuthenticatedGetWorkflowsExamples(!USE_LOCAL_CARDS);
+    const { data } = useWorkflowsExamples(!USE_LOCAL_CARDS);
 
     const cardsContents = useMemo<WorkflowsGalleryExamples>(() => {
       if (USE_LOCAL_CARDS) {

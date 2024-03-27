@@ -16,13 +16,13 @@ import {
   Tooltip,
   Chip,
 } from "@mui/material";
-import { type IWorkspaceSummary } from "context/workspaces/types";
+import { type WorkspaceSummary } from "context/workspaces/types";
 import theme from "providers/theme.config";
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const WorkspaceListItem: FC<{
-  workspace: IWorkspaceSummary;
+  workspace: WorkspaceSummary;
   handleSelect: () => void;
   handleDelete: () => void;
   handleLeave: () => void;
@@ -145,7 +145,7 @@ export const WorkspaceListItem: FC<{
             sx={{ minWidth: "auto" }}
             onClick={() => {
               handleSelect();
-              navigate("/workspace-settings");
+              navigate("/workspaces/settings");
             }}
           >
             <Tooltip title="Configure workspace">
