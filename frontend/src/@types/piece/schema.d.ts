@@ -18,6 +18,7 @@ export interface Schema {
   type: "object";
 
   properties: Properties;
+  required?: string[];
   $defs: Definitions;
 }
 
@@ -139,7 +140,7 @@ export interface ObjectDefinition {
   description: string;
   type: "object";
   properties: Record<string, EnumDefinition | SimpleProperty | AnyOfProperty>;
-  required: string[];
+  required?: string[];
 }
 
 export {};
