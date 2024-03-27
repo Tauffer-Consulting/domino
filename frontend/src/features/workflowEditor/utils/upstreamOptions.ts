@@ -26,8 +26,6 @@ export const getUpstreamOptions = (
     }
   }
 
-  console.log("upstreamPieces", upstreamPieces);
-
   if (!schema.properties || isEmpty(schema.properties)) {
     return {};
   }

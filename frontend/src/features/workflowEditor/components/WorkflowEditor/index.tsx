@@ -84,6 +84,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
         }, {}),
       ) as any;
 
+      console.log("validationSchema", validationSchema);
+
       const resolver = yupResolver(validationSchema);
 
       const validatedData = await resolver(payload.workflowPiecesData);
