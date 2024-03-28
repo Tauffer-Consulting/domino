@@ -30,7 +30,6 @@ const WorkspaceMembersCard = () => {
     workspaceUsersTablePageSize,
     setWorkspaceUsersTablePageSize,
     workspaceUsers,
-    workspaceUsersRefresh,
   } = useWorkspaces();
 
   const [removeUserId, setRemoveUserId] = useState<any>("");
@@ -123,13 +122,7 @@ const WorkspaceMembersCard = () => {
     }
     setIsOpenRemoveDialog(false);
     setRemoveUserId(null);
-    workspaceUsersRefresh();
-  }, [
-    workspace,
-    removeUserId,
-    handleRemoveUserWorkspace,
-    workspaceUsersRefresh,
-  ]);
+  }, [workspace, removeUserId, handleRemoveUserWorkspace]);
 
   return (
     <Grid container>

@@ -1,3 +1,4 @@
+import { useWorkspaces } from "@context/workspaces";
 import LogoutIcon from "@mui/icons-material/Logout";
 import {
   Button,
@@ -17,10 +18,7 @@ import {
 import { DownloadAsPDF } from "components/DownloadPDF";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import {
-  useAuthenticatedGetWorkflowId,
-  useAuthenticatedGetWorkflowRunResultReport,
-} from "features/myWorkflows/api";
+import { useWorkflow, useRunReport } from "features/myWorkflows/api";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -32,9 +30,9 @@ dayjs.extend(duration);
 
 export const ResultsReport: React.FC = () => {
   const { id, runId } = useParams<{ id: string; runId: string }>();
-
+  const { workspace } = useWorkspaces();
   const navigate = useNavigate();
-  const { data } = useAuthenticatedGetWorkflowRunResultReport({
+  const { data } = useRunReport({
     workflowId: id,
     runId,
   });
@@ -48,8 +46,9 @@ export const ResultsReport: React.FC = () => {
     }
   }, []);
 
-  const { data: workflow } = useAuthenticatedGetWorkflowId({
-    id: id as string,
+  const { data: workflow } = useWorkflow({
+    workflowId: id,
+    workspaceId: workspace?.id,
   });
 
   const { startDate, endDate, duration } = useMemo(() => {
@@ -113,7 +112,7 @@ export const ResultsReport: React.FC = () => {
             </Typography>
             <List>
               {data?.data.map((task, idx) => (
-                <>
+                <div key={idx}>
                   <ListItem
                     key={task.task_id}
                     disablePadding
@@ -143,7 +142,7 @@ export const ResultsReport: React.FC = () => {
                     </ListItemButton>
                   </ListItem>
                   {idx !== data?.data.length - 1 ? <Divider /> : null}
-                </>
+                </div>
               ))}
             </List>
             <Grid

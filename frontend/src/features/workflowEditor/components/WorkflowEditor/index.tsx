@@ -129,7 +129,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
       const data = generateWorkflowsEditorBodyParams(payload);
 
-      await handleCreateWorkflow({ workspace_id: workspace?.id, ...data });
+      await handleCreateWorkflow({ ...data });
 
       toast.success("Workflow created successfully.");
       setBackdropIsOpen(false);

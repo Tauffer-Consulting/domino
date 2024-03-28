@@ -30,7 +30,7 @@ import {
 import TextField from "@mui/material/TextField";
 import { usesPieces } from "context/workspaces";
 import { repositorySource } from "context/workspaces/types";
-import { type IPieceRepositoryMetadata } from "features/myWorkflows/api";
+import { type RepositoriesReleasesResponse } from "features/workspaces";
 import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -47,14 +47,13 @@ export const RepositoriesCard: FC = () => {
   const [version, setVersion] = useState("");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [availableVersions, setAvailableVersions] = useState<
-    IPieceRepositoryMetadata[]
+    RepositoriesReleasesResponse[]
   >([]);
 
   const {
     repositories,
     handleAddRepository,
     handleFetchRepoReleases,
-    handleRefreshRepositories,
     setSelectedRepositoryId,
     selectedRepositoryId,
     handleDeleteRepository,
@@ -98,18 +97,10 @@ export const RepositoriesCard: FC = () => {
     }).finally(() => {
       setStep("FETCH_METADATA");
       setAvailableVersions([]);
-      void handleRefreshRepositories();
       setUrl("");
       setIsStepLoading(false);
     });
-  }, [
-    handleAddRepository,
-    handleRefreshRepositories,
-    path,
-    source,
-    version,
-    url,
-  ]);
+  }, [handleAddRepository, path, source, version, url]);
 
   const handleNextStep = useCallback(() => {
     switch (step) {
@@ -185,7 +176,7 @@ export const RepositoriesCard: FC = () => {
     (e: any) => {
       const repositoryId = e.currentTarget.value;
       if (repositoryId === selectedRepositoryId) {
-        setSelectedRepositoryId(null);
+        setSelectedRepositoryId(undefined);
         setSelectedIndex(null);
       } else {
         setSelectedRepositoryId(repositoryId || null);
@@ -196,17 +187,11 @@ export const RepositoriesCard: FC = () => {
   );
 
   const handleDeletePieceRepository = useCallback(
-    (e: React.SyntheticEvent<HTMLButtonElement>) => {
+    async (e: React.SyntheticEvent<HTMLButtonElement>) => {
       const repositoryId = e.currentTarget.value;
-      handleDeleteRepository(repositoryId)
-        .then(() => {
-          void handleRefreshRepositories();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      await handleDeleteRepository({ id: repositoryId });
     },
-    [handleDeleteRepository, handleRefreshRepositories],
+    [handleDeleteRepository],
   );
 
   return (

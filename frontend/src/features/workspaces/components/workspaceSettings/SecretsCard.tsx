@@ -1,4 +1,8 @@
 /* eslint-disable react/prop-types */
+import {
+  useRepositorySecrets,
+  useUpdateRepositorySecret,
+} from "@features/workspaces/api";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -15,10 +19,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import {
-  useAuthenticatedGetRepositorySecrets,
-  useAuthenticatedPatchRepositorySecret,
-} from "features/myWorkflows/api";
-import {
   useState,
   useImperativeHandle,
   useCallback,
@@ -30,7 +30,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 interface SecretsCardProps {
-  repositoryId: number | null;
+  repositoryId?: number;
 }
 
 /* eslint-disable react/prop-types */
@@ -46,12 +46,11 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
     ...ref,
   }));
 
-  const { data: secrets, mutate: refreshSecrets } =
-    useAuthenticatedGetRepositorySecrets({
-      repositoryId: repositoryId?.toString() ?? "",
-    });
+  const { data: secrets, refetch: refreshSecrets } = useRepositorySecrets({
+    repositoryId: repositoryId?.toString() ?? "",
+  });
 
-  const patchRepository = useAuthenticatedPatchRepositorySecret();
+  const { mutateAsync: patchRepository } = useUpdateRepositorySecret();
 
   const handleEditSecret = useCallback((e: any) => {
     e.preventDefault();
@@ -124,7 +123,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
   const listItems = useMemo(() => {
     const auxListItems =
       secrets && secrets?.length > 0 ? (
-        secrets?.map((secret, index) => (
+        secrets.map((secret, index) => (
           <Grid item xs={12} key={index} container spacing={2}>
             <Grid item xs={7} sm={8} md={10}>
               <TextField

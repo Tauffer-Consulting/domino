@@ -1,30 +1,30 @@
+import {
+  useGetWorkspaces,
+  useCreateWorkspace,
+  useDeleteWorkspace,
+  useAcceptWorkspaceInvite,
+  useRejectWorkspaceInvite,
+  useInviteWorkspace,
+  useRemoveUserFomWorkspace,
+  useWorkspaceUsers,
+} from "@features/workspaces";
 import { type FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { createCustomContext } from "utils";
 
-import {
-  useAuthenticatedGetWorkspaces,
-  useAuthenticatedPostWorkspaces,
-  useAuthenticatedDeleteWorkspaces,
-  useAuthenticatedAcceptWorkspaceInvite,
-  useAuthenticatedRejectWorkspaceInvite,
-  useAuthenticatedWorkspaceInvite,
-  useAuthenticatedRemoveUserWorkspace,
-  useAuthenticatedGetWorkspaceUsers,
-} from "./api";
-import { type IWorkspaceSummary } from "./types/workspaces";
+import { type WorkspaceSummary } from "./types/workspaces";
 
 interface IWorkspacesContext {
-  workspaces: IWorkspaceSummary[];
+  workspaces: WorkspaceSummary[];
   workspacesError: boolean;
   workspacesLoading: boolean;
   handleRefreshWorkspaces: () => void;
 
-  workspace: IWorkspaceSummary | null;
+  workspace: WorkspaceSummary | null;
   handleChangeWorkspace: (id: string) => void;
   handleCreateWorkspace: (name: string) => Promise<unknown>;
   handleDeleteWorkspace: (id: string) => void;
-  handleUpdateWorkspace: (workspace: IWorkspaceSummary) => void;
+  handleUpdateWorkspace: (workspace: WorkspaceSummary) => void;
   handleAcceptWorkspaceInvite: (id: string) => void;
   handleRejectWorkspaceInvite: (id: string) => void;
   handleInviteUserWorkspace: (
@@ -34,7 +34,6 @@ interface IWorkspacesContext {
   ) => void;
   handleRemoveUserWorkspace: (workspaceId: string, userId: string) => void;
   workspaceUsers: any;
-  workspaceUsersRefresh: () => void;
   workspaceUsersTablePageSize: number;
   workspaceUsersTablePage: number;
   setWorkspaceUsersTablePageSize: (pageSize: number) => void;
@@ -51,10 +50,10 @@ interface IWorkspacesProviderProps {
 export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
   children,
 }) => {
-  const [workspace, setWorkspace] = useState<IWorkspaceSummary | null>(
+  const [workspace, setWorkspace] = useState<WorkspaceSummary | null>(
     localStorage.getItem("workspace")
       ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (JSON.parse(localStorage.getItem("workspace")!) as IWorkspaceSummary)
+        (JSON.parse(localStorage.getItem("workspace")!) as WorkspaceSummary)
       : null,
   );
 
@@ -67,35 +66,30 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
   const {
     data,
     error: workspacesError,
-    isValidating: workspacesLoading,
-    mutate: workspacesRefresh,
-  } = useAuthenticatedGetWorkspaces();
+    isLoading: workspacesLoading,
+    refetch: workspacesRefresh,
+  } = useGetWorkspaces();
 
-  const { data: workspaceUsers, mutate: workspaceUsersRefresh } =
-    useAuthenticatedGetWorkspaceUsers(
-      workspace
-        ? {
-            workspaceId: workspace.id,
-            page: workspaceUsersTablePage,
-            pageSize: workspaceUsersTablePageSize,
-          }
-        : {
-            workspaceId: "",
-            page: workspaceUsersTablePage,
-            pageSize: workspaceUsersTablePageSize,
-          },
-    );
+  const { data: workspaceUsers } = useWorkspaceUsers({
+    workspaceId: workspace?.id,
+    page: workspaceUsersTablePage,
+    pageSize: workspaceUsersTablePageSize,
+  });
 
-  const postWorkspace = useAuthenticatedPostWorkspaces();
-  const deleteWorkspace = useAuthenticatedDeleteWorkspaces();
+  const { mutateAsync: postWorkspace } = useCreateWorkspace();
+  const { mutateAsync: deleteWorkspace } = useDeleteWorkspace();
 
-  const acceptWorkspaceInvite = useAuthenticatedAcceptWorkspaceInvite();
-  const rejectWorkspaceInvite = useAuthenticatedRejectWorkspaceInvite();
-  const inviteWorkspace = useAuthenticatedWorkspaceInvite();
-  const removeUserWorkspace = useAuthenticatedRemoveUserWorkspace();
+  const { mutateAsync: acceptWorkspaceInvite } = useAcceptWorkspaceInvite();
+  const { mutateAsync: rejectWorkspaceInvite } = useRejectWorkspaceInvite();
+  const { mutateAsync: inviteWorkspace } = useInviteWorkspace({
+    workspaceId: workspace?.id,
+  });
+  const { mutateAsync: removeUserWorkspace } = useRemoveUserFomWorkspace({
+    workspaceId: workspace?.id,
+  });
 
   // Memoized data
-  const workspaces: IWorkspaceSummary[] = useMemo(() => data ?? [], [data]);
+  const workspaces: WorkspaceSummary[] = useMemo(() => data ?? [], [data]);
 
   // Handlers
   const handleRemoveUserWorkspace = useCallback(
@@ -105,7 +99,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
           "Workspace and user must be defined to remove user from workspace.",
         );
       }
-      removeUserWorkspace({ workspaceId, userId })
+      removeUserWorkspace({ userId })
         .then(() => {
           toast.success(`User removed successfully from workspace.`);
           const storageWorkspace = JSON.parse(
@@ -130,19 +124,17 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         return false;
       }
       inviteWorkspace({
-        workspaceId: id,
         userEmail,
         permission,
       })
         .then(() => {
           toast.success(`User invited successfully`);
-          void workspaceUsersRefresh();
         })
         .catch((error) => {
           console.log("Inviting user error:", error.response.data.detail);
         });
     },
-    [inviteWorkspace, workspaceUsersRefresh()],
+    [inviteWorkspace],
   );
 
   const handleAcceptWorkspaceInvite = useCallback(
@@ -190,7 +182,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         }),
     [postWorkspace, workspacesRefresh],
   );
-  const handleUpdateWorkspace = useCallback((workspace: IWorkspaceSummary) => {
+  const handleUpdateWorkspace = useCallback((workspace: WorkspaceSummary) => {
     setWorkspace(workspace);
     localStorage.setItem("workspace", JSON.stringify(workspace));
   }, []);
@@ -208,7 +200,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
 
   const handleDeleteWorkspace = useCallback(
     (id: string) => {
-      deleteWorkspace({ id })
+      deleteWorkspace({ workspaceId: id })
         .then(() => {
           const storageWorkspace = JSON.parse(
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -249,7 +241,6 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         handleInviteUserWorkspace,
         handleRemoveUserWorkspace,
         workspaceUsers,
-        workspaceUsersRefresh,
         workspaceUsersTablePageSize,
         workspaceUsersTablePage,
         setWorkspaceUsersTablePageSize,

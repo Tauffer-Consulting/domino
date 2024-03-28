@@ -1,4 +1,8 @@
 /* eslint-disable react/prop-types */
+import {
+  useRepositorySecrets,
+  useUpdateRepositorySecret,
+} from "@features/workspaces/api";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -16,10 +20,6 @@ import {
   Alert,
 } from "@mui/material";
 import { usesPieces } from "context/workspaces";
-import {
-  useAuthenticatedGetRepositorySecrets,
-  useAuthenticatedPatchRepositorySecret,
-} from "features/myWorkflows/api";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -47,12 +47,11 @@ const StorageSecretsCard = () => {
     }
   }, [storageRepository]);
 
-  const { data: secrets, mutate: refreshSecrets } =
-    useAuthenticatedGetRepositorySecrets({
-      repositoryId: storageRepository?.id.toString() ?? "",
-    });
+  const { data: secrets, refetch: refreshSecrets } = useRepositorySecrets({
+    repositoryId: storageRepository?.id.toString() ?? "",
+  });
 
-  const patchRepositorySecret = useAuthenticatedPatchRepositorySecret();
+  const { mutateAsync: patchRepositorySecret } = useUpdateRepositorySecret();
 
   const handleEditSecret = useCallback((e: any) => {
     e.preventDefault();

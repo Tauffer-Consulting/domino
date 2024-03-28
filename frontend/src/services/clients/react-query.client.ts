@@ -3,6 +3,8 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
   type DefaultOptions,
+  type UseInfiniteQueryOptions,
+  type InfiniteData,
 } from "@tanstack/react-query";
 import { type AxiosError } from "axios";
 
@@ -15,18 +17,23 @@ const queryConfig: DefaultOptions = {
 
 export const queryClient = new QueryClient({ defaultOptions: queryConfig });
 
-export type ExtractFnReturnType<FnType extends (...args: any) => any> = Promise<
-  ReturnType<FnType>
->;
-
-export type QueryConfig<QueryFnType extends (...args: any) => any> = Omit<
-  UseQueryOptions<ExtractFnReturnType<QueryFnType>>,
+export type QueryConfig<T = unknown> = Omit<
+  UseQueryOptions<T, AxiosError>,
   "queryKey" | "queryFn"
 >;
 
-export type MutationConfig<MutationFnType extends (...args: any) => any> =
-  UseMutationOptions<
-    ExtractFnReturnType<MutationFnType>,
+export type InfiniteQueryConfig<T = unknown> = Omit<
+  UseInfiniteQueryOptions<
+    T,
     AxiosError,
-    Parameters<MutationFnType>[0]
-  >;
+    InfiniteData<T, unknown>,
+    T,
+    Array<string | undefined>,
+    number
+  >,
+  "queryKey" | "queryFn" | "getNextPageParam" | "initialPageParam"
+>;
+export type MutationConfig<Variables = unknown, Data = unknown> = Omit<
+  UseMutationOptions<Data, AxiosError, Variables>,
+  "mutationKey" | "mutationFn"
+>;

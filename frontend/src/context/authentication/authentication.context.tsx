@@ -1,3 +1,4 @@
+import { useAuthLogin, useAuthRegister } from "@features/auth";
 import React, {
   type ReactNode,
   useCallback,
@@ -10,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { createCustomContext } from "utils";
 
-import { postAuthLogin, postAuthRegister } from "./api";
 import {
   type IAuthenticationContext,
   type IAuthenticationStore,
@@ -33,6 +33,9 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
     token: localStorage.getItem("auth_token"),
     userId: localStorage.getItem("userId"),
   });
+
+  const { mutateAsync: postAuthLogin } = useAuthLogin();
+  const { mutateAsync: postAuthRegister } = useAuthRegister();
 
   const isLogged = useRef(!!store.token);
 
@@ -73,16 +76,14 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const authenticate = useCallback(
     async (email: string, password: string) => {
       setAuthLoading(true);
-      void postAuthLogin({ email, password })
+      await postAuthLogin({ email, password })
         .then((res) => {
-          if (res.status === 200) {
-            login(
-              res.data.access_token,
-              res.data.user_id,
-              res.data.token_expires_in,
-              "/workspaces",
-            );
-          }
+          login(
+            res.access_token,
+            res.user_id,
+            res.token_expires_in,
+            "/workspaces",
+          );
         })
         .finally(() => {
           setAuthLoading(false);
@@ -96,7 +97,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       setAuthLoading(true);
       postAuthRegister({ email, password })
         .then((res) => {
-          if (res.status === 201) {
+          if (res?.user_id) {
             toast.success("E-mail and password registered successfully!");
             void authenticate(email, password);
           }
