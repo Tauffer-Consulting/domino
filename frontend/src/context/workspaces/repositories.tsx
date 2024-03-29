@@ -118,9 +118,6 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
         foragePieces[piece.id] = piece;
       }
 
-      console.log("foragePieces", foragePieces);
-      console.log("repositoryPiecesAux", repositoryPiecesAux);
-
       localStorage.setItem("pieces", foragePieces);
       return repositoryPiecesAux;
     }

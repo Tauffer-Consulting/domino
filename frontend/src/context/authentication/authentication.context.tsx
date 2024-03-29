@@ -99,12 +99,7 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
           }
         })
         .catch((err) => {
-          console.log(err?.response?.status);
-          if (err?.response?.status === 409) {
-            toast.warning(`This e-mail is already registered`);
-          } else {
-            toast.error(err?.response?.data?.detail ?? `Error while register`);
-          }
+          console.error(err?.response);
         })
         .finally(() => {
           setAuthLoading(false);

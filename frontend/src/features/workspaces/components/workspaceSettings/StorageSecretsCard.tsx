@@ -114,8 +114,7 @@ const StorageSecretsCard = () => {
           setCurrrentEdittingSecretId(null);
         })
         .catch((err) => {
-          console.log(err);
-          toast.error("Error while updating secret.");
+          console.error(err);
         });
     },
     [

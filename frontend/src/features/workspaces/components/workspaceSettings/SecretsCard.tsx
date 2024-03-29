@@ -113,8 +113,7 @@ const SecretsCard = (props: SecretsCardProps, ref: Ref<any>) => {
           setCurrrentEdittingSecretId(null);
         })
         .catch((err) => {
-          console.log(err);
-          toast.error("Error while updating secret.");
+          console.error(err);
         });
     },
     [getValues, repositoryId, patchRepository, refreshSecrets, resetField],

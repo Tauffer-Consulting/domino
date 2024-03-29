@@ -112,7 +112,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
           void workspacesRefresh();
         })
         .catch((error) => {
-          console.log("Removing user error:", error.response.data.detail);
+          console.error("Removing user error:", error.response.data.detail);
         });
     },
     [removeUserWorkspace, workspacesRefresh],
@@ -131,7 +131,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
           toast.success(`User invited successfully`);
         })
         .catch((error) => {
-          console.log("Inviting user error:", error.response.data.detail);
+          console.error("Inviting user error:", error.response.data.detail);
         });
     },
     [inviteWorkspace],
@@ -145,9 +145,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
           void workspacesRefresh();
         })
         .catch((error) => {
-          // todo custom msg
-          console.log("Accepting workspace invitation error:", error);
-          toast.error("Error accepting workspace invitation, try again later");
+          console.error("Accepting workspace invitation error:", error);
         });
     },
     [acceptWorkspaceInvite, workspacesRefresh],
@@ -161,9 +159,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
           void workspacesRefresh();
         })
         .catch((error) => {
-          // todo custom msg
-          console.log("Rejecting workspace invitation error:", error);
-          toast.error("Error rejecting workspace invitation, try again later");
+          console.error("Rejecting workspace invitation error:", error);
         });
     },
     [rejectWorkspaceInvite, workspacesRefresh],
@@ -213,12 +209,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
           void workspacesRefresh();
         })
         .catch((error) => {
-          console.log("Deleting workspace error:", error);
-          if (error.response.status === 403) {
-            toast.error("You don't have permission to delete this workspace.");
-            return;
-          }
-          toast.error("Error deleting workspace, try again later");
+          console.error("Deleting workspace error:", error);
         });
     },
     [deleteWorkspace, workspacesRefresh],
