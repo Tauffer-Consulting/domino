@@ -8,32 +8,6 @@ export const dominoApiClient = axios.create({
   baseURL: endpoint,
 });
 
-/**
- * @todo handle unauthorized and other useful status codes
- */
-dominoApiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response.status === 401) {
-      dispatchLogout();
-    }
-
-    const message =
-      error.response?.data?.detail ||
-      error.response?.data?.message ||
-      error?.message ||
-      "Something went wrong";
-
-    if (Array.isArray(message)) {
-      toast.error(message[0].msg);
-    } else {
-      toast.error(message);
-    }
-
-    return await Promise.reject(error);
-  },
-);
-
 dominoApiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("auth_token");
@@ -49,10 +23,28 @@ dominoApiClient.interceptors.request.use(
 );
 
 dominoApiClient.interceptors.response.use(
-  (response) => {
-    return response.data;
-  },
+  (response) => response.data,
   async (error) => {
+    if (error.response.status === 401) {
+      dispatchLogout();
+    }
+
+    const message =
+      error.response?.data?.detail ||
+      error.response?.data?.message ||
+      error?.message ||
+      "Something went wrong";
+
+    if (Array.isArray(message)) {
+      toast.error(message[0].msg, {
+        toastId: message[0].msg,
+      });
+    } else {
+      toast.error(message, {
+        toastId: message,
+      });
+    }
+
     return await Promise.reject(error);
   },
 );

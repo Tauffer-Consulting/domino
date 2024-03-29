@@ -20,10 +20,6 @@ import { DOMINO_LOGOUT } from "./authentication.logout";
 export const [AuthenticationContext, useAuthentication] =
   createCustomContext<IAuthenticationContext>("Authentication Context");
 
-/**
- * Authentication provider.
- * @todo refactor local storage implementation with Local Forage
- */
 export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {

@@ -10,7 +10,7 @@ import { type AxiosError } from "axios";
 
 const queryConfig: DefaultOptions = {
   queries: {
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     retry: false,
   },
 };
