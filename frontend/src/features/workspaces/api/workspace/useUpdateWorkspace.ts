@@ -18,7 +18,6 @@ export const useUpdateWorkspace = (
   config: MutationConfig<PatchWorkspaceParams, WorkspaceSummary> = {},
 ) => {
   return useMutation({
-    mutationKey: ["WORKSPACE"],
     mutationFn: async (params) => {
       if (!workspaceId) throw new Error("No workspace selected");
 

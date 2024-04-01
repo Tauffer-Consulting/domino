@@ -8,6 +8,7 @@ import {
   useRemoveUserFomWorkspace,
   useWorkspaceUsers,
 } from "@features/workspaces";
+import { useQueryClient } from "@tanstack/react-query";
 import { type FC, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { createCustomContext } from "utils";
@@ -62,6 +63,8 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
   const [workspaceUsersTablePage, setWorkspaceUsersTablePage] =
     useState<number>(0);
 
+  const queryClient = useQueryClient();
+
   // Requests hooks
   const {
     data,
@@ -81,12 +84,30 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
 
   const { mutateAsync: acceptWorkspaceInvite } = useAcceptWorkspaceInvite();
   const { mutateAsync: rejectWorkspaceInvite } = useRejectWorkspaceInvite();
-  const { mutateAsync: inviteWorkspace } = useInviteWorkspace({
-    workspaceId: workspace?.id,
-  });
-  const { mutateAsync: removeUserWorkspace } = useRemoveUserFomWorkspace({
-    workspaceId: workspace?.id,
-  });
+  const { mutateAsync: inviteWorkspace } = useInviteWorkspace(
+    {
+      workspaceId: workspace?.id,
+    },
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["USERS"],
+        });
+      },
+    },
+  );
+  const { mutateAsync: removeUserWorkspace } = useRemoveUserFomWorkspace(
+    {
+      workspaceId: workspace?.id,
+    },
+    {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["USERS"],
+        });
+      },
+    },
+  );
 
   // Memoized data
   const workspaces: WorkspaceSummary[] = useMemo(() => data ?? [], [data]);

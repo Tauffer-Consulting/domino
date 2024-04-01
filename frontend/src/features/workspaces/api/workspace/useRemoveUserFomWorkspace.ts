@@ -15,7 +15,6 @@ export const useRemoveUserFomWorkspace = (
   config: MutationConfig<RemoveUserWorkspaceParams, void> = {},
 ) => {
   return useMutation({
-    mutationKey: ["REMOVE-USER"],
     mutationFn: async ({ userId }) => {
       if (!workspaceId) throw new Error("No workspace selected");
       await removeUserFomWorkspace({ userId, workspaceId });

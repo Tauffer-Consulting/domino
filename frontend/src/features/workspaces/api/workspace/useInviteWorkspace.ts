@@ -16,7 +16,6 @@ export const useInviteWorkspace = (
   config: MutationConfig<InviteWorkspaceParams, void> = {},
 ) => {
   return useMutation({
-    mutationKey: ["SEND-INVITE"],
     mutationFn: async ({ permission, userEmail }) => {
       if (!workspaceId) throw new Error("No workspace selected");
       await inviteWorkspace({ workspaceId, permission, userEmail });

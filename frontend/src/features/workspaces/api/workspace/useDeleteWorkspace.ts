@@ -10,7 +10,6 @@ export const useDeleteWorkspace = (
   config: MutationConfig<DeleteWorkspaceParams, void> = {},
 ) => {
   return useMutation({
-    mutationKey: ["WORKSPACE"],
     mutationFn: async ({ workspaceId }) => {
       await deleteWorkspace({ workspaceId });
     },

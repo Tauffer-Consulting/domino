@@ -10,7 +10,6 @@ export const useAcceptWorkspaceInvite = (
   config: MutationConfig<AcceptWorkspaceInviteParams, void> = {},
 ) => {
   return useMutation({
-    mutationKey: ["ACCEPT-INVITE"],
     mutationFn: async (params) => {
       await acceptWorkspaceInvite(params);
     },
