@@ -1,6 +1,9 @@
 import { type Edge } from "reactflow";
 import { generateTaskName, getUuidSlice, isEmpty } from "utils";
 
+import { isArrayInput } from "../components/Drawers/PieceFormDrawer/PieceForm/PieceFormItem/InputElement";
+import { getOptionalType } from "../components/Drawers/PieceFormDrawer/PieceForm/PieceFormItem/InputElement/utils";
+
 export interface Option {
   id: string;
   argument: string;
@@ -81,23 +84,31 @@ function generateOptions(
       });
     }
 
+    // TALVEZ SEJA SO AQUI ?
     if ("type" in schema && schema.type === "object") {
       if (schema.properties) {
         Object.entries(schema.properties).forEach(([propKey, property]) => {
           if (property) {
-            addOptions(generateOptionsForSchema(property), propKey);
+            const option = generateOptionsForSchema(property);
+            addOptions(option, propKey);
           }
         });
       }
-    } else if ("type" in schema && schema.type === "array") {
-      if (schema.items) {
-        const propSchema =
-          "$ref" in schema.items
-            ? getSchemaByRef(schema.items, definitions)
-            : schema.items;
-        addOptions(generateOptionsForSchema(propSchema), "__items");
-        processUpstreamPieces();
-      }
+    } else if (
+      isArrayInput(schema as Property, getOptionalType(schema as Property))
+    ) {
+      const arraySchema = schema as ArrayProperty | AnyOfArray;
+
+      const items =
+        "items" in arraySchema
+          ? arraySchema.items
+          : (arraySchema.anyOf.find((s) => s.type === "array") as ArrayProperty)
+              ?.items;
+
+      const propSchema =
+        "$ref" in items ? getSchemaByRef(items, definitions) : items;
+      addOptions(generateOptionsForSchema(propSchema), "__items");
+      processUpstreamPieces();
     } else {
       processUpstreamPieces();
     }
