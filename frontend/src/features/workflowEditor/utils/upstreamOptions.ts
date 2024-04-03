@@ -1,8 +1,7 @@
 import { type Edge } from "reactflow";
 import { generateTaskName, getUuidSlice, isEmpty } from "utils";
 
-import { isArrayInput } from "../components/Drawers/PieceFormDrawer/PieceForm/PieceFormItem/InputElement";
-import { getOptionalType } from "../components/Drawers/PieceFormDrawer/PieceForm/PieceFormItem/InputElement/utils";
+import { isArrayType } from "../components/Drawers/PieceFormDrawer/PieceForm/PieceFormItem/InputElement";
 
 export interface Option {
   id: string;
@@ -94,9 +93,7 @@ function generateOptions(
           }
         });
       }
-    } else if (
-      isArrayInput(schema as Property, getOptionalType(schema as Property))
-    ) {
+    } else if (isArrayType(schema as Property)) {
       const arraySchema = schema as ArrayProperty | AnyOfArray;
 
       const items =

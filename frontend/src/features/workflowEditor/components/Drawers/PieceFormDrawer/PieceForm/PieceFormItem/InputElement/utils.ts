@@ -1,7 +1,7 @@
 import { getDefinition, getFromUpstream } from "features/workflowEditor/utils";
 
 export const getOptionalType = (
-  property: Property | EnumDefinition | EnumDefinition,
+  property: Property | EnumDefinition,
 ): TypeName | FormatType | undefined => {
   if (property && "anyOf" in property && property.anyOf.length === 2) {
     const hasNullType = property.anyOf.some((item) => item.type === "null");
@@ -15,12 +15,12 @@ export const getOptionalType = (
   }
 };
 
-export const isStringType = (
-  property: Property | EnumDefinition,
-  anyOfType?: TypeName | WidgetType | FormatType,
-) => {
+export const isStringType = (property: Property | EnumDefinition) => {
+  const optionalType = getOptionalType(property);
+
   return (
-    ("type" in property && property.type === "string") || anyOfType === "string"
+    ("type" in property && property.type === "string") ||
+    optionalType === "string"
   );
 };
 
@@ -31,15 +31,19 @@ export const isEnumType = (
   return "allOf" in property && property.allOf.length > 0 && definitions;
 };
 
-export const isNumberType = (
-  property: Property | EnumDefinition,
-  anyOfType?: TypeName | FormatType,
-) => {
+export const isNumberType = (property: Property | EnumDefinition) => {
+  const optionalType = getOptionalType(property);
   return (
-    ("type" in property && property.type === "number" && !anyOfType) ||
-    anyOfType === "number" ||
-    ("type" in property && property.type === "integer" && !anyOfType) ||
-    anyOfType === "integer"
+    ("type" in property && property.type === "number" && !optionalType) ||
+    optionalType === "number"
+  );
+};
+
+export const isIntegerType = (property: Property | EnumDefinition) => {
+  const optionalType = getOptionalType(property);
+  return (
+    ("type" in property && property.type === "integer" && !optionalType) ||
+    optionalType === "integer"
   );
 };
 
@@ -47,65 +51,77 @@ export const isBooleanType = (property: Property | EnumDefinition) => {
   return "type" in property && property.type === "boolean";
 };
 
-export const isDateOrTimeType = (
-  property: Property | EnumDefinition,
-  anyOfType?: TypeName | WidgetType | FormatType,
-) => {
+export const isDateOrTimeType = (property: Property | EnumDefinition) => {
+  const optionalType = getOptionalType(property);
+
   return (
     ("type" in property &&
       "format" in property &&
       property.type === "string" &&
       property.format === "date" &&
-      !anyOfType) ||
-    anyOfType === "date" ||
+      !optionalType) ||
+    optionalType === "date" ||
     ("type" in property &&
       "format" in property &&
       property.type === "string" &&
       property.format === "time" &&
-      !anyOfType) ||
-    anyOfType === "time" ||
+      !optionalType) ||
+    optionalType === "time" ||
     ("type" in property &&
       "format" in property &&
       property.type === "string" &&
       property.format === "date-time" &&
-      !anyOfType) ||
-    anyOfType === "date-time"
+      !optionalType) ||
+    optionalType === "date-time"
   );
 };
 
-export const isCodeEditorType = (
-  property: Property | EnumDefinition,
-  anyOfType?: TypeName | FormatType,
-) => {
+export const isCodeEditorType = (property: Property | EnumDefinition) => {
+  const optionalType = getOptionalType(property);
+
   return (
     ("type" in property &&
       "widget" in property &&
       property.type === "string" &&
       property.widget?.includes("codeeditor")) ??
-    (anyOfType === "string" &&
+    (optionalType === "string" &&
       (property as StringProperty).widget?.includes("codeeditor"))
   );
 };
 
-export const isTextAreaType = (
-  property: Property | EnumDefinition,
-  anyOfType?: TypeName | FormatType,
-) => {
+export const isTextAreaType = (property: Property | EnumDefinition) => {
+  const optionalType = getOptionalType(property);
+
   return (
     "widget" in property &&
     property.widget === "textarea" &&
-    anyOfType === "string"
+    optionalType === "string"
   );
 };
 
-export const isArrayInput = (
-  property: Property | EnumDefinition,
-  optionalType?: TypeName | FormatType,
-) => {
+export const isArrayType = (property: Property | EnumDefinition) => {
+  const optionalType = getOptionalType(property);
+
   return (
     ("type" in property && property.type === "array") ||
     (optionalType && optionalType === "array")
   );
+};
+
+export const extractArrayItemSchema = (
+  property: ArrayProperty | AnyOfArray,
+  definitions: Definitions,
+) => {
+  let subItemSchema =
+    "items" in property
+      ? property.items
+      : (property.anyOf.find((s) => s.type === "array") as any)?.items;
+  if (subItemSchema && "$ref" in subItemSchema && subItemSchema?.$ref) {
+    const subItemSchemaName = subItemSchema.$ref.split("/").pop() as string;
+    subItemSchema = definitions?.[subItemSchemaName];
+  }
+
+  return subItemSchema as Omit<SimpleProperty, "default"> | ObjectDefinition;
 };
 
 export const isObjectType = (property: ObjectDefinition) => {
@@ -157,8 +173,6 @@ export const extractArrayDefaultValue = (
       upstreamId: emptyObject(subProperty, ""),
       value: emptyObject(subProperty),
     };
-
-    console.log("ta caindo aqui", response);
 
     return response;
   } else if (

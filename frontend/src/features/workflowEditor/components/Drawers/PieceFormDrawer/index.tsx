@@ -40,10 +40,11 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   } = useWorkflowsEditor();
 
   const PieceFormSchema = useMemo(() => {
+    const inputsSchema = createInputsSchemaValidation(schema);
     return yup.object().shape({
       storage: storageFormSchema,
       containerResources: ContainerResourceFormSchema,
-      inputs: createInputsSchemaValidation(schema),
+      inputs: inputsSchema,
     });
   }, [schema]);
 
