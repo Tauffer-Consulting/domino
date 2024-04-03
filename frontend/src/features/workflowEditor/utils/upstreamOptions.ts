@@ -139,12 +139,24 @@ function getSchemaByRef(ref: Reference, definitions: Definitions) {
 }
 
 function compareTypes(schema: Schema | Property | Definition, prop: Property) {
+  function compare(
+    s: Schema | Property | Definition,
+    p: Schema | Property | Definition,
+  ) {
+    if ("format" in s || "format" in p) {
+      return (s as StringProperty)?.format === (p as StringProperty)?.format;
+    } else if ("type" in s && "type" in p) {
+      return s.type === p.type;
+    }
+    return false;
+  }
+
   if ("type" in schema && "type" in prop) {
-    return schema.type === prop.type;
+    return compare(schema, prop);
   } else if ("anyOf" in schema && "type" in prop) {
-    return schema.anyOf.some((s) => s.type === prop.type);
+    return schema.anyOf.some((s) => compare(s as any, prop));
   } else if ("type" in schema && "anyOf" in prop) {
-    return prop.anyOf.some((p) => p.type === schema.type);
+    return prop.anyOf.some((p) => compare(schema, p as any));
   } else if ("anyOf" in schema && "anyOf" in prop) {
     // Verify if there is any type equal in the two arrays
     return schema.anyOf.some((s) =>
@@ -152,11 +164,10 @@ function compareTypes(schema: Schema | Property | Definition, prop: Property) {
         if (p.type === "null" || s.type === "null") {
           return false;
         }
-        return p.type === s.type;
+        return compare(s as any, p as any);
       }),
     );
   } else {
-    // Handle other cases or return a default value if needed
     return false;
   }
 }
