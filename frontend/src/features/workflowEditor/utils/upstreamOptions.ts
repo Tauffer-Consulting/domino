@@ -147,7 +147,14 @@ function compareTypes(schema: Schema | Property | Definition, prop: Property) {
     return prop.anyOf.some((p) => p.type === schema.type);
   } else if ("anyOf" in schema && "anyOf" in prop) {
     // Verify if there is any type equal in the two arrays
-    return schema.anyOf.some((s) => prop.anyOf.some((p) => p.type === s.type));
+    return schema.anyOf.some((s) =>
+      prop.anyOf.some((p) => {
+        if (p.type === "null" || s.type === "null") {
+          return false;
+        }
+        return p.type === s.type;
+      }),
+    );
   } else {
     // Handle other cases or return a default value if needed
     return false;
