@@ -1,6 +1,8 @@
 import { type Edge } from "reactflow";
 import { generateTaskName, getUuidSlice, isEmpty } from "utils";
 
+import { isArrayType } from "../components/Drawers/PieceFormDrawer/PieceForm/PieceFormItem/InputElement";
+
 export interface Option {
   id: string;
   argument: string;
@@ -81,23 +83,29 @@ function generateOptions(
       });
     }
 
+    // TALVEZ SEJA SO AQUI ?
     if ("type" in schema && schema.type === "object") {
       if (schema.properties) {
         Object.entries(schema.properties).forEach(([propKey, property]) => {
           if (property) {
-            addOptions(generateOptionsForSchema(property), propKey);
+            const option = generateOptionsForSchema(property);
+            addOptions(option, propKey);
           }
         });
       }
-    } else if ("type" in schema && schema.type === "array") {
-      if (schema.items) {
-        const propSchema =
-          "$ref" in schema.items
-            ? getSchemaByRef(schema.items, definitions)
-            : schema.items;
-        addOptions(generateOptionsForSchema(propSchema), "__items");
-        processUpstreamPieces();
-      }
+    } else if (isArrayType(schema as Property)) {
+      const arraySchema = schema as ArrayProperty | AnyOfArray;
+
+      const items =
+        "items" in arraySchema
+          ? arraySchema.items
+          : (arraySchema.anyOf.find((s) => s.type === "array") as ArrayProperty)
+              ?.items;
+
+      const propSchema =
+        "$ref" in items ? getSchemaByRef(items, definitions) : items;
+      addOptions(generateOptionsForSchema(propSchema), "__items");
+      processUpstreamPieces();
     } else {
       processUpstreamPieces();
     }
@@ -131,17 +139,35 @@ function getSchemaByRef(ref: Reference, definitions: Definitions) {
 }
 
 function compareTypes(schema: Schema | Property | Definition, prop: Property) {
+  function compare(
+    s: Schema | Property | Definition,
+    p: Schema | Property | Definition,
+  ) {
+    if ("format" in s || "format" in p) {
+      return (s as StringProperty)?.format === (p as StringProperty)?.format;
+    } else if ("type" in s && "type" in p) {
+      return s.type === p.type;
+    }
+    return false;
+  }
+
   if ("type" in schema && "type" in prop) {
-    return schema.type === prop.type;
+    return compare(schema, prop);
   } else if ("anyOf" in schema && "type" in prop) {
-    return schema.anyOf.some((s) => s.type === prop.type);
+    return schema.anyOf.some((s) => compare(s as any, prop));
   } else if ("type" in schema && "anyOf" in prop) {
-    return prop.anyOf.some((p) => p.type === schema.type);
+    return prop.anyOf.some((p) => compare(schema, p as any));
   } else if ("anyOf" in schema && "anyOf" in prop) {
     // Verify if there is any type equal in the two arrays
-    return schema.anyOf.some((s) => prop.anyOf.some((p) => p.type === s.type));
+    return schema.anyOf.some((s) =>
+      prop.anyOf.some((p) => {
+        if (p.type === "null" || s.type === "null") {
+          return false;
+        }
+        return compare(s as any, p as any);
+      }),
+    );
   } else {
-    // Handle other cases or return a default value if needed
     return false;
   }
 }
