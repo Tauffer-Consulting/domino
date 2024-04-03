@@ -18,6 +18,7 @@ import React, {
   useState,
 } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { type NodeMouseHandler } from "reactflow";
 
 import {
@@ -76,6 +77,7 @@ export const WorkflowDetail: React.FC = () => {
           queryKey: ["RUNS", workspace?.id, workflowId],
         });
         setAutoUpdate(true);
+        toast.info("Workflow run started");
       },
     },
   );

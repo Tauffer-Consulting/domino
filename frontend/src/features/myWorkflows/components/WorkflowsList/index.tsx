@@ -53,9 +53,16 @@ export const WorkflowList: React.FC = () => {
     },
   );
 
-  const { mutateAsync: handleDeleteWorkflow } = useDeleteWorkflow({
-    workspaceId: workspace?.id,
-  });
+  const { mutateAsync: handleDeleteWorkflow } = useDeleteWorkflow(
+    {
+      workspaceId: workspace?.id,
+    },
+    {
+      onSuccess: () => {
+        toast.info("Workflow deleted");
+      },
+    },
+  );
 
   const { mutateAsync: handleRunWorkflow } = useStartRun(
     {
@@ -66,6 +73,7 @@ export const WorkflowList: React.FC = () => {
         await queryClient.invalidateQueries({
           queryKey: ["RUNS", workspace?.id, workflowId],
         });
+        toast.info("Workflow run started");
       },
     },
   );

@@ -188,10 +188,9 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
 
   const handleCreateWorkspace = useCallback(
     async (name: string) =>
-      await postWorkspace({ name })
+      postWorkspace({ name })
         .then((data) => {
           toast.success(`Workspace ${name} created successfully`);
-          void workspacesRefresh();
           return data;
         })
         .catch(() => {
@@ -242,7 +241,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         workspaces,
         workspacesError: !!workspacesError,
         workspacesLoading,
-        handleRefreshWorkspaces: async () => await workspacesRefresh(),
+        handleRefreshWorkspaces: async () => workspacesRefresh(),
         workspace,
         handleChangeWorkspace,
         handleCreateWorkspace,
