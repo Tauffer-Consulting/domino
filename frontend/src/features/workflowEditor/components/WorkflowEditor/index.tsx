@@ -30,7 +30,8 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const [sidebarPieceDrawer, setSidebarPieceDrawer] = useState(false);
   const [formId, setFormId] = useState<string>("");
   const [formTitle, setFormTitle] = useState<string>("");
-  const [formSchema, setFormSchema] = useState<any>({});
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const [piece, setPiece] = useState<Piece>({} as Piece);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setBackdropIsOpen] = useState(false);
   const [orientation, setOrientation] = useState<"horizontal" | "vertical">(
@@ -187,12 +188,14 @@ export const WorkflowsEditorComponent: React.FC = () => {
   const onNodeDoubleClick = useCallback(
     (_e: any, node: Node) => {
       const pieceNode = getWorkflowPieceById(node.id);
-      setFormSchema(pieceNode?.input_schema);
-      setFormId(node.id);
-      setFormTitle(() => {
-        return pieceNode?.name ? pieceNode.name : "";
-      });
-      setSidebarPieceDrawer(true);
+      if (pieceNode) {
+        setPiece(pieceNode);
+        setFormId(node.id);
+        setFormTitle(() => {
+          return pieceNode?.name ? pieceNode.name : "";
+        });
+        setSidebarPieceDrawer(true);
+      }
     },
     [getWorkflowPieceById],
   );
@@ -256,7 +259,7 @@ export const WorkflowsEditorComponent: React.FC = () => {
       <PieceFormDrawer
         title={formTitle}
         formId={formId}
-        schema={formSchema}
+        piece={piece}
         open={sidebarPieceDrawer}
         onClose={toggleSidebarPieceDrawer(false)}
       />
