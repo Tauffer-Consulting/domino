@@ -56,7 +56,12 @@ export const WorkflowDetail: React.FC = () => {
     workflowId: id as string,
   });
 
-  const { data: allTasks } = useRunTasks(
+  const {
+    data: allTasks,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useRunTasks(
     {
       workspaceId: workspace?.id,
       workflowId: id as string,
@@ -66,6 +71,12 @@ export const WorkflowDetail: React.FC = () => {
       refetchInterval: () => (autoUpdate ? 1500 : false),
     },
   );
+
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const { mutateAsync: handleRunWorkflow } = useStartRun(
     {
@@ -142,7 +153,9 @@ export const WorkflowDetail: React.FC = () => {
       selectedRun &&
       (selectedRun.state === "success" || selectedRun.state === "failed")
     ) {
-      setAutoUpdate(false);
+      setTimeout(() => {
+        setAutoUpdate(false);
+      }, 3000);
     } else {
       setAutoUpdate(true);
     }
