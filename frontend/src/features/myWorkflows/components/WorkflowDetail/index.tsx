@@ -77,7 +77,7 @@ export const WorkflowDetail: React.FC = () => {
           queryKey: ["RUNS", workspace?.id, workflowId],
         });
         setAutoUpdate(true);
-        toast.info("Workflow run started");
+        toast.success("Workflow run started");
       },
     },
   );

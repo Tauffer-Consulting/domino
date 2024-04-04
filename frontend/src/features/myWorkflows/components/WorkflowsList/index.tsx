@@ -59,7 +59,7 @@ export const WorkflowList: React.FC = () => {
     },
     {
       onSuccess: () => {
-        toast.info("Workflow deleted");
+        toast.success("Workflow deleted");
       },
     },
   );
@@ -73,7 +73,7 @@ export const WorkflowList: React.FC = () => {
         await queryClient.invalidateQueries({
           queryKey: ["RUNS", workspace?.id, workflowId],
         });
-        toast.info("Workflow run started");
+        toast.success("Workflow run started");
       },
     },
   );
