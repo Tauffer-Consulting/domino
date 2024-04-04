@@ -103,7 +103,7 @@ export const ButtonsMenu: React.FC<Props> = ({
       if (e instanceof yup.ValidationError) {
         toast.error("This JSON file is incompatible or corrupted");
       } else {
-        console.log(e);
+        console.error(e);
       }
     }
     if (fileInputRef.current) {

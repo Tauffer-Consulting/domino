@@ -47,7 +47,7 @@ export interface IWorkflowSchema {
 }
 
 export interface IWorkDominoSchema {
-  nodes: Record<string, unknown>;
+  nodes: Record<string, any>;
   edges: any[];
 }
 

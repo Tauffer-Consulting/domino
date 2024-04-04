@@ -3,7 +3,6 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { Box, Grid, Typography } from "@mui/material";
 import Tab from "@mui/material/Tab";
-import PrivateLayout from "components/PrivateLayout";
 import { useWorkspaces, usesPieces } from "context/workspaces";
 import { useState } from "react";
 
@@ -21,7 +20,7 @@ const WorkspaceSettingsComponent = () => {
   const [value, setValue] = useState<string>("1");
 
   return (
-    <PrivateLayout>
+    <>
       <Box sx={{ mt: 2 }} />
       <Grid
         container
@@ -82,7 +81,7 @@ const WorkspaceSettingsComponent = () => {
           </Grid>
         </TabPanel>
       </TabContext>
-    </PrivateLayout>
+    </>
   );
 };
 

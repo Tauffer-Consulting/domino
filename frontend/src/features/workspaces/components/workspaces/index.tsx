@@ -9,7 +9,6 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
-import PrivateLayout from "components/PrivateLayout";
 import { useAuthentication } from "context/authentication";
 import { useWorkspaces } from "context/workspaces";
 import { type FC, useCallback, useState } from "react";
@@ -62,7 +61,7 @@ const WorkspacesComponent: FC = () => {
   }, [leaveWorkspaceId, handleRemoveUserWorkspace, auth.store.userId]);
 
   return (
-    <PrivateLayout>
+    <>
       <Dialog
         open={isOpenDeleteDialog}
         onClose={() => {
@@ -128,7 +127,7 @@ const WorkspacesComponent: FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Typography variant="h6" component="h1" sx={{ mt: 7, mb: 2 }}>
+      <Typography variant="h6" component="h1">
         My workspaces
       </Typography>
       {workspacesError && (
@@ -175,7 +174,7 @@ const WorkspacesComponent: FC = () => {
           ),
         )}
       </Grid>
-    </PrivateLayout>
+    </>
   );
 };
 

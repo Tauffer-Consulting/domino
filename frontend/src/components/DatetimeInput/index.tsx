@@ -67,7 +67,9 @@ function DatetimeInput<T extends FieldValues>({
                     textField: {
                       error: !!error,
                       helperText: (
-                        <FormHelperText error>{error?.message}</FormHelperText>
+                        <FormHelperText component={"span"} error>
+                          {error?.message}
+                        </FormHelperText>
                       ),
                     },
                   }}
@@ -109,7 +111,9 @@ function DatetimeInput<T extends FieldValues>({
                     textField: {
                       error: !!error,
                       helperText: (
-                        <FormHelperText error>{error?.message}</FormHelperText>
+                        <FormHelperText component={"span"} error>
+                          {error?.message}
+                        </FormHelperText>
                       ),
                     },
                   }}
@@ -153,7 +157,9 @@ function DatetimeInput<T extends FieldValues>({
                     textField: {
                       error: !!error,
                       helperText: (
-                        <FormHelperText error>{error?.message}</FormHelperText>
+                        <FormHelperText component={"span"} error>
+                          {error?.message}
+                        </FormHelperText>
                       ),
                     },
                   }}

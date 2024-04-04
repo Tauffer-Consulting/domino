@@ -84,8 +84,6 @@ export const WorkflowsEditorComponent: React.FC = () => {
         }, {}),
       ) as any;
 
-      console.log("validationSchema", validationSchema);
-
       const resolver = yupResolver(validationSchema);
 
       const validatedData = await resolver(payload.workflowPiecesData);
@@ -129,16 +127,16 @@ export const WorkflowsEditorComponent: React.FC = () => {
 
       const data = generateWorkflowsEditorBodyParams(payload);
 
-      await handleCreateWorkflow({ workspace_id: workspace?.id, ...data });
+      await handleCreateWorkflow({ ...data });
 
       toast.success("Workflow created successfully.");
       setBackdropIsOpen(false);
     } catch (err) {
       setBackdropIsOpen(false);
       if (err instanceof AxiosError) {
-        console.log(err);
+        console.error(err);
       } else if (err instanceof Error) {
-        console.log(err);
+        console.error(err);
         toast.error(
           "Error while creating workflow, check your workflow settings and tasks.",
         );

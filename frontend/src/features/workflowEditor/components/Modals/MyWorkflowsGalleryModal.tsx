@@ -1,3 +1,4 @@
+import { useWorkspaces } from "@context/workspaces";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Card,
@@ -11,10 +12,7 @@ import {
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import { Modal, type ModalRef } from "components/Modal";
-import {
-  useAuthenticatedGetWorkflowId,
-  useAuthenticatedGetWorkflows,
-} from "features/myWorkflows";
+import { useWorkflow, useWorkflows } from "features/myWorkflows";
 import { type IWorkflow } from "features/myWorkflows/types";
 import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState, useMemo } from "react";
@@ -32,11 +30,17 @@ const MyWorkflowExamplesGalleryModal = forwardRef(
   ) => {
     const [page, setPage] = useState(0);
     const [selected, setSelected] = useState<number | null>(null);
+    const { workspace } = useWorkspaces();
 
-    const { data: workflows } = useAuthenticatedGetWorkflows(page, 9);
+    const { data: workflows } = useWorkflows({
+      page,
+      pageSize: 9,
+      workspaceId: workspace?.id,
+    });
 
-    const { data: workflow } = useAuthenticatedGetWorkflowId({
-      id: selected !== null ? String(selected) : undefined,
+    const { data: workflow } = useWorkflow({
+      workflowId: selected !== null ? String(selected) : undefined,
+      workspaceId: workspace?.id,
     });
 
     const cardsContents = useMemo<IWorkflow[]>(

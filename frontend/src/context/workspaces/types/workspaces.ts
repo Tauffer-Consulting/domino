@@ -1,3 +1,5 @@
+import { type Roles } from "@utils/roles";
+
 export enum repositorySource {
   github = "github",
 }
@@ -9,35 +11,20 @@ export enum workspaceStatus {
   REJECTED = "rejected",
 }
 
-interface IPaginationMetadata {
-  page: number;
-  records: number;
-  total: number;
-  last_page: number;
-}
-
-export interface IWorkspaceSummary {
+export interface WorkspaceSummary {
   id: string;
   workspace_name: string;
-  user_permission: string;
+  user_permission: Roles;
   status: workspaceStatus;
   github_access_token_filled: boolean;
 }
 
-export interface IWorkspaceDetails {
+export interface WorkspaceDetails {
   id: string;
   workspace_name: string;
   github_access_token_filled: string;
-  // users: { user_id: string, permission: string }[]
-  // Pieces_repositories: {
-  //   repository_id: string
-  //   repository_name: string
-  //   repository_source: ERepositorySource | string
-  // }[]
 }
 
-export type IGetWorkspacesResponseInterface = IWorkspaceSummary[];
-export type IGetWorkspaceIdResponseInterface = IWorkspaceSummary;
 export interface IGetWorkspaceUsersResponse {
   data: [
     {
@@ -47,13 +34,8 @@ export interface IGetWorkspaceUsersResponse {
       status: workspaceStatus;
     },
   ];
-  metadata: IPaginationMetadata;
+  metadata: PaginationMetadata;
 }
-
-/**
- * @todo type properly
- */
-export type IPostWorkspaceRepositoryResponseInterface = Record<string, unknown>;
 
 export interface IPostWorkspaceRepositoryPayload {
   workspace_id: string;

@@ -1,24 +1,20 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useStorage } from "context/storage/useStorage";
 import {
-  type IGetRepoPiecesResponseInterface,
-  useAuthenticatedGetPieceRepositories,
-  useFetchAuthenticatedGetRepoIdPieces,
-  type IGetPiecesRepositoriesResponseInterface,
-  type IGetPiecesRepositoriesReleasesParams,
-  type IGetPiecesRepositoriesReleasesResponseInterface,
-  useAuthenticatedGetPieceRepositoriesReleases,
-  useAuthenticatedDeleteRepository,
-} from "features/myWorkflows/api";
-import React, { useCallback, useEffect, useState } from "react";
+  useRepositories,
+  useRepositoriesReleases,
+  useAddRepository,
+  useDeleteRepository,
+  usePieces,
+  type AddRepositoryParams,
+  type AddRepositoryResponse,
+  type RepositoriesReleasesParams,
+  type RepositoriesReleasesResponse,
+} from "features/workspaces/api";
+import React, { useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { type KeyedMutator } from "swr";
 import { createCustomContext } from "utils";
 
-import { useAuthenticatedPostPiecesRepository } from "./api";
-import {
-  type IPostWorkspaceRepositoryPayload,
-  type IPostWorkspaceRepositoryResponseInterface,
-} from "./types";
 import { useWorkspaces } from "./workspaces";
 
 export interface IPiecesContext {
@@ -27,25 +23,21 @@ export interface IPiecesContext {
   repositoryPieces: PiecesRepository;
   repositoriesLoading: boolean;
 
-  selectedRepositoryId: null | number;
-  setSelectedRepositoryId: React.Dispatch<React.SetStateAction<number | null>>;
-
-  handleRefreshRepositories: KeyedMutator<
-    IGetPiecesRepositoriesResponseInterface | undefined
+  selectedRepositoryId?: number;
+  setSelectedRepositoryId: React.Dispatch<
+    React.SetStateAction<number | undefined>
   >;
+
   handleAddRepository: (
-    params: Omit<IPostWorkspaceRepositoryPayload, "workspace_id">,
-  ) => Promise<IPostWorkspaceRepositoryResponseInterface | unknown>;
+    params: AddRepositoryParams,
+  ) => Promise<AddRepositoryResponse>;
 
   handleFetchRepoReleases: (
-    params: IGetPiecesRepositoriesReleasesParams,
-  ) => Promise<IGetPiecesRepositoriesReleasesResponseInterface | undefined>;
+    params: RepositoriesReleasesParams,
+  ) => Promise<RepositoriesReleasesResponse[]>;
 
-  handleDeleteRepository: (id: string) => Promise<any>;
+  handleDeleteRepository: (params: { id: string }) => Promise<void>;
 
-  fetchRepoById: (params: {
-    id: string;
-  }) => Promise<IGetRepoPiecesResponseInterface>;
   fetchForagePieceById: (id: number) => Piece | undefined;
 }
 
@@ -57,65 +49,79 @@ export const [PiecesContext, usesPieces] =
 const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { workspace } = useWorkspaces();
   const localStorage = useStorage();
 
   const [selectedRepositoryId, setSelectedRepositoryId] = useState<
-    number | null
-  >(null);
-  const [repositoryPieces, setRepositoryPieces] = useState<PiecesRepository>(
-    {},
-  );
+    number | undefined
+  >();
 
-  const { workspace, handleRefreshWorkspaces } = useWorkspaces();
+  const queryClient = useQueryClient();
 
-  const fetchRepoById = useFetchAuthenticatedGetRepoIdPieces();
-
-  const {
-    data: repositories,
-    error: repositoriesError,
-    isValidating: repositoriesLoading,
-    mutate: handleRefreshRepositories,
-  } = useAuthenticatedGetPieceRepositories({});
-
-  useEffect(() => {
-    let active = true;
-    void loadRepositoriesPieces();
-    return () => {
-      active = false;
-    };
-
-    async function loadRepositoriesPieces() {
-      const repositoryPiecesAux: PiecesRepository = {};
-      const foragePieces: PieceForageSchema = {};
-      if (!active) {
-        return;
-      }
-      if (!repositories?.data?.length) {
-        localStorage.setItem("pieces", foragePieces);
-        setRepositoryPieces(repositoryPiecesAux);
-      } else {
-        for (const repo of repositories.data) {
-          await fetchRepoById({ id: repo.id })
-            .then((pieces: any) => {
-              repositoryPiecesAux[repo.id] = [];
-              for (const op of pieces) {
-                repositoryPiecesAux[repo.id].push(op);
-                foragePieces[op.id] = op;
-              }
-              localStorage.setItem("pieces", foragePieces);
-            })
-            .catch((e) => {
-              console.log(e);
-            });
-        }
-        setRepositoryPieces(repositoryPiecesAux);
-      }
-    }
-  }, [repositories, fetchRepoById]);
-
-  const { data: defaultRepositories } = useAuthenticatedGetPieceRepositories({
+  const { data: defaultRepositories } = useRepositories({
     source: "default",
   });
+
+  const { data: repositories, isLoading: repositoriesLoading } =
+    useRepositories({
+      workspaceId: workspace?.id,
+      source: "github",
+    });
+
+  const { data: pieces } = usePieces({
+    repositoryIds: repositories?.data.map(({ id }) => id) ?? [],
+  });
+
+  const { data: _defaultPieces } = usePieces({
+    repositoryIds: defaultRepositories?.data.map(({ id }) => id) ?? [],
+  });
+
+  const { mutateAsync: handleFetchRepoReleases } = useRepositoriesReleases({
+    workspaceId: workspace?.id,
+  });
+
+  const { mutateAsync: handleAddRepository } = useAddRepository(
+    {
+      workspaceId: workspace?.id,
+    },
+    {
+      onSuccess: async () => {
+        toast.success(`Repository added successfully!`);
+        await queryClient.invalidateQueries({
+          queryKey: ["REPOSITORIES", workspace?.id],
+        });
+      },
+    },
+  );
+
+  const { mutateAsync: handleDeleteRepository } = useDeleteRepository({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["REPOSITORIES"] });
+    },
+  });
+
+  const repositoryPieces = useMemo(() => {
+    const repositoryPiecesAux: PiecesRepository = {};
+    const foragePieces: PieceForageSchema = {};
+
+    if (!pieces?.length) {
+      localStorage.setItem("pieces", foragePieces);
+      return repositoryPiecesAux;
+    } else {
+      for (const piece of pieces) {
+        if (repositoryPiecesAux[piece.repository_id]?.length) {
+          repositoryPiecesAux[piece.repository_id].push(piece);
+        } else {
+          repositoryPiecesAux[piece.repository_id] = [];
+          repositoryPiecesAux[piece.repository_id].push(piece);
+        }
+        foragePieces[piece.id] = piece;
+      }
+
+      localStorage.setItem("pieces", foragePieces);
+      return repositoryPiecesAux;
+    }
+  }, [pieces]);
 
   const fetchForagePieceById = useCallback((id: number) => {
     const pieces = localStorage.getItem<PieceForageSchema>("pieces");
@@ -123,35 +129,6 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
       return pieces[id];
     }
   }, []);
-
-  const postRepository = useAuthenticatedPostPiecesRepository({
-    workspace: workspace?.id ?? "",
-  });
-
-  const handleAddRepository = useCallback(
-    async (payload: Omit<IPostWorkspaceRepositoryPayload, "workspace_id">) =>
-      await postRepository({
-        ...payload,
-        workspace_id: workspace?.id ?? "",
-      }).then(async (data) => {
-        toast.success(`Repository added successfully!`);
-        handleRefreshWorkspaces();
-        await handleRefreshRepositories();
-        return data;
-      }),
-    [postRepository, handleRefreshWorkspaces, workspace?.id],
-  );
-
-  const handleFetchRepoReleases =
-    useAuthenticatedGetPieceRepositoriesReleases();
-
-  const handleDeleteRepository = useAuthenticatedDeleteRepository();
-
-  useEffect(() => {
-    if (repositoriesError) {
-      toast.error("Error loading repositories, try again later");
-    }
-  }, [repositoriesError]);
 
   const value: IPiecesContext = {
     repositories: repositories?.data ?? [],
@@ -162,13 +139,11 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     selectedRepositoryId,
     setSelectedRepositoryId,
 
-    handleRefreshRepositories,
     handleAddRepository,
     handleFetchRepoReleases,
     handleDeleteRepository,
 
     fetchForagePieceById,
-    fetchRepoById,
   };
 
   return (

@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { useUpdateWorkspace } from "@features/workspaces/api";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -15,7 +16,6 @@ import {
   IconButton,
 } from "@mui/material";
 import { useWorkspaces } from "context/workspaces";
-import { useAuthenticatedPatchWorkspace } from "context/workspaces/api";
 import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -30,7 +30,9 @@ const WorkspaceSecretsCard = () => {
   const { handleUpdateWorkspace } = useWorkspaces();
   const { workspace } = useWorkspaces();
 
-  const patchWorkspace = useAuthenticatedPatchWorkspace();
+  const { mutateAsync: patchWorkspace } = useUpdateWorkspace({
+    workspaceId: workspace?.id,
+  });
 
   useEffect(() => {
     if (workspace) {
@@ -57,12 +59,11 @@ const WorkspaceSecretsCard = () => {
           github_access_token: null,
         };
         patchWorkspace({
-          workspaceId: workspace?.id,
-          payload,
+          ...payload,
         })
           .then((response) => {
             toast.success("Secret updated.");
-            handleUpdateWorkspace(response?.data);
+            handleUpdateWorkspace(response);
             resetField(`github-token-workspace-${workspace?.id}`, {
               keepTouched: false,
             });
@@ -88,12 +89,11 @@ const WorkspaceSecretsCard = () => {
         github_access_token: formValue,
       };
       patchWorkspace({
-        workspaceId: workspace?.id,
-        payload,
+        ...payload,
       })
         .then((response) => {
           toast.success("Secret updated.");
-          handleUpdateWorkspace(response?.data);
+          handleUpdateWorkspace(response);
         })
         .catch((_err) => {
           toast.error("Error while updating secrets");
