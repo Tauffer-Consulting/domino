@@ -49,7 +49,7 @@ export const WorkflowRunDetail: React.FC<Props> = ({
       taskTryNumber: String(taskData?.try_number),
     },
     {
-      refetchInterval: autoUpdate ? 1500 : undefined,
+      refetchInterval: () => (autoUpdate ? 1500 : false),
     },
   );
 

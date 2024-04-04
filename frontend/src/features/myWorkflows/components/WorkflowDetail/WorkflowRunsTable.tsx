@@ -18,7 +18,6 @@ interface Props {
   selectedRun: IWorkflowRuns | null;
   onSelectedRunChange: (run: IWorkflowRuns | null) => void;
   triggerRun: () => void;
-  refresh: () => void;
 }
 
 export const WorkflowRunsTable: React.FC<Props> = ({
@@ -27,7 +26,6 @@ export const WorkflowRunsTable: React.FC<Props> = ({
   selectedRun,
   onSelectedRunChange: setSelectedRun,
   triggerRun,
-  refresh,
 }) => {
   const navigation = useNavigate();
   const [paginationModel, setPaginationModel] = useState({
@@ -37,7 +35,11 @@ export const WorkflowRunsTable: React.FC<Props> = ({
 
   const { workspace } = useWorkspaces();
 
-  const { data: workflowRuns, isLoading } = useRuns(
+  const {
+    data: workflowRuns,
+    isLoading,
+    refetch,
+  } = useRuns(
     {
       workspaceId: workspace?.id,
       page: paginationModel.page,
@@ -45,7 +47,7 @@ export const WorkflowRunsTable: React.FC<Props> = ({
       workflowId,
     },
     {
-      refetchInterval: autoUpdate ? 1500 : undefined,
+      refetchInterval: () => (autoUpdate ? 1500 : false),
     },
   );
 
@@ -182,7 +184,7 @@ export const WorkflowRunsTable: React.FC<Props> = ({
                 footer: WorkflowRunTableFooter,
               }}
               slotProps={{
-                footer: { triggerRun, refresh },
+                footer: { triggerRun, refresh: refetch },
               }}
               sx={{
                 "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {

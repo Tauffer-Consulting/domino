@@ -63,7 +63,7 @@ export const WorkflowDetail: React.FC = () => {
       runId: selectedRun?.workflow_run_id,
     },
     {
-      refetchInterval: autoUpdate ? 1500 : undefined,
+      refetchInterval: () => (autoUpdate ? 1500 : false),
     },
   );
 
@@ -124,12 +124,12 @@ export const WorkflowDetail: React.FC = () => {
     return { nodes, edges, tasks };
   }, [allTasks, workflow]);
 
-  const triggerRun = async () => {
+  const triggerRun = useCallback(async () => {
     if (workflow?.id) {
       await handleRunWorkflow({ workflowId: String(workflow.id) });
       setSelectedRun(null);
     }
-  };
+  }, [workflow, handleRunWorkflow, setSelectedRun]);
 
   useEffect(() => {
     workflowPanelRef.current?.setNodes(nodes);
@@ -137,7 +137,7 @@ export const WorkflowDetail: React.FC = () => {
     setTasks(tasks);
   }, [nodes, edges, tasks]);
 
-  const refresh = useCallback(async () => {
+  useEffect(() => {
     if (
       selectedRun &&
       (selectedRun.state === "success" || selectedRun.state === "failed")
@@ -173,7 +173,6 @@ export const WorkflowDetail: React.FC = () => {
             <WorkflowRunsTable
               autoUpdate={autoUpdate}
               triggerRun={triggerRun}
-              refresh={refresh}
               selectedRun={selectedRun}
               onSelectedRunChange={handleSelectRun}
               workflowId={id as string}
