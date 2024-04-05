@@ -9,11 +9,11 @@ import {
   Grid,
 } from "@mui/material";
 import { useWorkspaces } from "context/workspaces";
-import { type IWorkspaceSummary } from "context/workspaces/types";
+import { type WorkspaceSummary } from "context/workspaces/types";
 import { type FC } from "react";
 
 export const WorkspacePendingListItem: FC<{
-  workspace: IWorkspaceSummary;
+  workspace: WorkspaceSummary;
   selectedWorkspaceId: string | undefined;
 }> = ({ workspace }) => {
   const { handleAcceptWorkspaceInvite, handleRejectWorkspaceInvite } =

@@ -1,5 +1,10 @@
 import * as yup from "yup";
 
+import {
+  extractArrayItemSchema,
+  isArrayType,
+} from "../components/Drawers/PieceFormDrawer/PieceForm/PieceFormItem/InputElement/utils";
+
 const defaultValidation = {
   fromUpstream: yup.boolean(), // ? allowed | never | always
   upstreamArgument: yup.string().when("fromUpstream", ([fromUpstream]) => {
@@ -22,7 +27,7 @@ const defaultValidation = {
   }),
 };
 
-const validationObject = () => {
+const validationObject = (requiredKeys: string[]) => {
   return yup.lazy((value) => {
     const rawValidationObject = Object.entries(
       value.fromUpstream,
@@ -39,7 +44,9 @@ const validationObject = () => {
           objValidation.upstreamArgument[key] = yup.mixed().notRequired();
           objValidation.upstreamId[key] = yup.mixed().notRequired();
           objValidation.upstreamValue[key] = yup.mixed().notRequired();
-          objValidation.value[key] = yup.string().required();
+          objValidation.value[key] = requiredKeys.some((k) => k === key)
+            ? yup.string().required()
+            : yup.string();
         }
 
         return objValidation;
@@ -190,7 +197,7 @@ function getValidationValueBySchemaType(
       }),
     });
   } else if ("type" in schema && schema.type === "object") {
-    inputSchema = validationObject();
+    inputSchema = validationObject(schema.required ?? []);
   } else {
     inputSchema = yup.object({
       ...defaultValidation,
@@ -218,12 +225,11 @@ export function createInputsSchemaValidation(schema: Schema) {
       const [key, subSchema] = cur;
       let inputSchema;
 
-      if (subSchema.type === "array") {
-        let subItemSchema: any = subSchema?.items;
-        if (subSchema?.items?.$ref) {
-          const subItemSchemaName = subSchema.items.$ref.split("/").pop();
-          subItemSchema = schema.$defs?.[subItemSchemaName];
-        }
+      if (isArrayType(subSchema as unknown as Property)) {
+        const subItemSchema: any = extractArrayItemSchema(
+          subSchema,
+          schema.$defs,
+        );
 
         const required = true; // for arrays, we always require the value
         inputSchema = yup.object({

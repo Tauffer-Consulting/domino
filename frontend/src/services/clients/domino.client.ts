@@ -1,28 +1,29 @@
 import axios from "axios";
-import { environment } from "config/environment.config";
 import { dispatchLogout } from "context/authentication";
 import { toast } from "react-toastify";
 
 import { endpoint } from "../config/endpoints.config";
 
-import { dominoMock } from "./domino.mock";
-
 export const dominoApiClient = axios.create({
   baseURL: endpoint,
 });
 
-if (environment.USE_MOCK) {
-  console.info(
-    "⚠ info: using mock for requests, they may be out of sync with current backend development",
-  );
-  dominoMock();
-}
+dominoApiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  async (error) => {
+    return await Promise.reject(error);
+  },
+);
 
-/**
- * @todo handle unauthorized and other useful status codes
- */
 dominoApiClient.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   async (error) => {
     if (error.response.status === 401) {
       dispatchLogout();
@@ -35,29 +36,15 @@ dominoApiClient.interceptors.response.use(
       "Something went wrong";
 
     if (Array.isArray(message)) {
-      toast.error(message[0].msg);
+      toast.error(message[0].msg, {
+        toastId: message[0].msg,
+      });
     } else {
-      toast.error(message);
+      toast.error(message, {
+        toastId: message,
+      });
     }
 
-    return await Promise.reject(error);
-  },
-);
-
-// Set header from storage on each request using interceptors
-dominoApiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("auth_token");
-    if (token) {
-      config.headers = config.headers ?? {};
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      config.headers = config.headers ?? {};
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  async (error) => {
     return await Promise.reject(error);
   },
 );

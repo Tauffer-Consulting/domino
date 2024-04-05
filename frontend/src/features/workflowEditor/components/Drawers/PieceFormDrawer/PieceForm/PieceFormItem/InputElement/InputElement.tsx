@@ -18,6 +18,7 @@ import {
   isCodeEditorType,
   isDateOrTimeType,
   isEnumType,
+  isIntegerType,
   isNumberType,
   isObjectType,
   isStringType,
@@ -49,8 +50,6 @@ const InputElement: React.FC<Props> = React.memo(
     isItemArray,
     isItemObject = false,
   }) => {
-    const optionalType = getOptionalType(schema);
-
     const upstreamKey = useMemo(() => {
       if (!!isItemArray || !!isItemObject) {
         return itemKey
@@ -83,10 +82,8 @@ const InputElement: React.FC<Props> = React.memo(
           definitions={definitions as Definitions}
         />
       );
-    } else if (isNumberType(schema, optionalType)) {
-      const isInteger =
-        ("type" in schema && schema.type === "integer") ||
-        optionalType === "integer";
+    } else if (isNumberType(schema) || isIntegerType(schema)) {
+      const isInteger = isIntegerType(schema);
 
       return (
         <NumberInput<WorkflowPieceData>
@@ -109,7 +106,8 @@ const InputElement: React.FC<Props> = React.memo(
           label={schema.title}
         />
       );
-    } else if (isDateOrTimeType(schema, optionalType)) {
+    } else if (isDateOrTimeType(schema)) {
+      const optionalType = getOptionalType(schema);
       return (
         <DatetimeInput<WorkflowPieceData>
           name={isItemArray ? `${itemKey}.value` : itemKey}
@@ -120,7 +118,7 @@ const InputElement: React.FC<Props> = React.memo(
           }
         />
       );
-    } else if (isCodeEditorType(schema, optionalType)) {
+    } else if (isCodeEditorType(schema)) {
       const language = extractCodeEditorLanguage(schema as StringProperty);
       return (
         <CodeEditorInput<WorkflowPieceData>
@@ -129,7 +127,7 @@ const InputElement: React.FC<Props> = React.memo(
           placeholder={`Enter your ${language} code here.`}
         />
       );
-    } else if (isTextAreaType(schema, optionalType)) {
+    } else if (isTextAreaType(schema)) {
       return (
         <TextAreaInput<WorkflowPieceData>
           variant="outlined"
@@ -137,7 +135,7 @@ const InputElement: React.FC<Props> = React.memo(
           label={schema.title}
         />
       );
-    } else if (isStringType(schema, optionalType)) {
+    } else if (isStringType(schema)) {
       return (
         <TextInput<WorkflowPieceData>
           variant="outlined"

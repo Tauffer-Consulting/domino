@@ -49,7 +49,7 @@ export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
             {theme.direction === "rtl" ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
           <img
-            src="../../../../../assets/main_logo_white.png"
+            src="/assets/main_logo_white.png"
             alt="logo"
             style={{ width: "190px", marginRight: "8px", marginLeft: "20px" }}
           />
@@ -63,13 +63,11 @@ export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
               alignItems: "center",
               display: { xs: "none", md: "flex" },
             }}
-            onClick={
-              () => {
-                if (workspace) {
-                  navigate("/workspace-settings");
-                }
-              } /* go to selected workspace setting */
-            }
+            onClick={() => {
+              if (workspace) {
+                navigate("/workspaces/settings");
+              }
+            }}
           >
             <BlurCircular
               sx={{
@@ -133,7 +131,7 @@ export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
           <DrawerMenuItem
             selected={pathname === "/profile"}
             onClick={() => {
-              navigate("/profile");
+              // navigate("/profile");
             }}
             icon={<PersonIcon />}
             label={"Profile"}

@@ -1,3 +1,3 @@
 export { ArrayInput } from "./ArrayInput";
-export { isArrayInput } from "./utils";
+export { isArrayType } from "./utils";
 export { InputElement } from "./InputElement";

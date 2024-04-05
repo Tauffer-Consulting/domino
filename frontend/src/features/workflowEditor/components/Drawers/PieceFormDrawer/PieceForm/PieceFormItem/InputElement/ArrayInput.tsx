@@ -10,7 +10,11 @@ import { useWatch, useFieldArray, useFormContext } from "react-hook-form";
 import { disableCheckboxOptions } from "../../../../../../utils/disableCheckboxOptions";
 
 import SelectUpstreamInput from "./SelectUpstreamInput";
-import { extractArrayDefaultValue, isObjectType } from "./utils";
+import {
+  extractArrayDefaultValue,
+  extractArrayItemSchema,
+  isObjectType,
+} from "./utils";
 
 import { InputElement } from ".";
 
@@ -33,16 +37,9 @@ const ArrayInput: React.FC<ArrayInputItemProps> = React.memo(
     const formsData = useWatch({ name });
 
     const subItemSchema = useMemo(() => {
-      let subItemSchema =
-        "items" in schema
-          ? schema.items
-          : (schema.anyOf.find((s) => s.type === "array") as any)?.items;
-      if (subItemSchema && "$ref" in subItemSchema && subItemSchema?.$ref) {
-        const subItemSchemaName = subItemSchema.$ref.split("/").pop() as string;
-        subItemSchema = definitions?.[subItemSchemaName];
-      }
+      const subItemSchema = extractArrayItemSchema(schema, definitions);
 
-      return subItemSchema;
+      return subItemSchema as any;
     }, [definitions, schema]);
 
     const handleAddInput = useCallback(() => {

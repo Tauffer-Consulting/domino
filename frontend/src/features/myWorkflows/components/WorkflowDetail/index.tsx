@@ -1,39 +1,37 @@
-import { Grid, Paper } from "@mui/material";
-import { Breadcrumbs } from "components/Breadcrumbs";
+import { useWorkspaces } from "@context/workspaces";
 import {
-  useAuthenticatedGetWorkflowId,
-  useAuthenticatedGetWorkflowRunTasks,
-  useAuthenticatedPostWorkflowRunId,
-} from "features/myWorkflows/api";
-import {
+  useWorkflow,
   type IWorkflowRuns,
   type IWorkflowRunTasks,
-} from "features/myWorkflows/types";
-import { type DefaultNode } from "features/workflowEditor/components/Panel/WorkflowPanel";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+  useRunTasks,
+  useStartRun,
+} from "@features/myWorkflows";
+import { type DefaultNode } from "@features/workflowEditor/components/Panel/WorkflowPanel";
+import { Grid, Paper } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
+import { Breadcrumbs } from "components/Breadcrumbs";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { type NodeMouseHandler } from "reactflow";
-import { useInterval } from "utils";
 
 import {
   WorkflowPanel,
   type WorkflowPanelRef,
   type RunNode,
 } from "./WorkflowPanel";
-import {
-  WorkflowRunDetail,
-  type WorkflowRunDetailRef,
-} from "./WorkflowRunDetail";
-import {
-  WorkflowRunsTable,
-  type WorkflowRunsTableRef,
-} from "./WorkflowRunsTable";
+import { WorkflowRunDetail } from "./WorkflowRunDetail";
+import { WorkflowRunsTable } from "./WorkflowRunsTable";
 
 /**
  * @todo Cancel run. []
  * @todo Pause run. []
- * @todo Show piece logs [ ]
- * @todo Show result [ ]
  * @todo add break interval when workflow is not running
  */
 
@@ -48,146 +46,125 @@ export const WorkflowDetail: React.FC = () => {
   const [selectedRun, setSelectedRun] = useState<IWorkflowRuns | null>(null);
   const [statusTasks, setTasks] = useState<IWorkflowRunTaskExtended[]>([]);
 
-  const workflowPanelRef = useRef<WorkflowPanelRef>(null);
-  const workflowRunsTableRef = useRef<WorkflowRunsTableRef>(null);
-  const workflowRunDetailRef = useRef<WorkflowRunDetailRef>(null);
+  const { workspace } = useWorkspaces();
+  const queryClient = useQueryClient();
 
-  const { data: workflow } = useAuthenticatedGetWorkflowId({
-    id: id as string,
+  const workflowPanelRef = useRef<WorkflowPanelRef>(null);
+
+  const { data: workflow } = useWorkflow({
+    workspaceId: workspace?.id,
+    workflowId: id as string,
   });
 
-  const fetchWorkflowTasks = useAuthenticatedGetWorkflowRunTasks();
-  const handleRunWorkflow = useAuthenticatedPostWorkflowRunId();
+  const {
+    data: allTasks,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useRunTasks(
+    {
+      workspaceId: workspace?.id,
+      workflowId: id as string,
+      runId: selectedRun?.workflow_run_id,
+    },
+    {
+      refetchInterval: () => (autoUpdate ? 1500 : false),
+    },
+  );
 
-  const triggerRun = () => {
-    if (workflow?.id) {
-      void handleRunWorkflow({ id: String(workflow.id) });
-      setInterval(() => {
-        setAutoUpdate(true);
-      }, 1500);
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
     }
-  };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const refreshDetails = useCallback(() => {
-    void workflowRunDetailRef.current?.refreshTaskLogs();
-    void workflowRunDetailRef.current?.refreshTaskResults();
-  }, [workflowRunDetailRef]);
-
-  const refreshTable = useCallback(() => {
-    void workflowRunsTableRef.current?.refetchWorkflowsRun();
-  }, [workflowRunsTableRef]);
-
-  const refreshTasks = useCallback(async () => {
-    if (selectedRun && workflow) {
-      try {
-        const pageSize = 100;
-        const result = await fetchWorkflowTasks({
-          workflowId: id as string,
-          runId: selectedRun.workflow_run_id,
-          page: 0,
-          pageSize,
+  const { mutateAsync: handleRunWorkflow } = useStartRun(
+    {
+      workspaceId: workspace?.id,
+    },
+    {
+      onSuccess: async (_, { workflowId }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["RUNS", workspace?.id, workflowId],
         });
-        const { metadata } = result;
-        const total = metadata?.total ? metadata.total : 0;
+        setAutoUpdate(true);
+        toast.success("Workflow run started");
+      },
+    },
+  );
 
-        const allTasks = [result];
+  const { nodes, edges, tasks } = useMemo(() => {
+    const edges = workflow?.ui_schema.edges ?? [];
+    const nodes: RunNode[] = [];
+    const tasks: IWorkflowRunTaskExtended[] = [];
+    if (selectedRun && workflow && allTasks?.pages) {
+      for (const result of allTasks.pages ?? []) {
+        const { data } = result;
 
-        if (total > pageSize) {
-          const numberOfPages = Math.ceil(total / pageSize);
-          const pages = Array.from(Array(numberOfPages).keys()).slice(1);
-          const promises = pages.map(
-            async (page) =>
-              await fetchWorkflowTasks({
-                workflowId: id as string,
-                runId: selectedRun.workflow_run_id,
-                page,
-                pageSize,
-              }),
-          );
-          const responses = await Promise.all(promises);
-          allTasks.push(...responses);
+        if (Array.isArray(data)) {
+          const nodesData = data
+            .map((task) => {
+              const defaultNode: DefaultNode | undefined =
+                workflow.ui_schema.nodes[task.task_id];
+              const runNode = { ...defaultNode } as unknown as RunNode;
+
+              if (runNode?.data) {
+                runNode.data.taskId = task.task_id;
+                runNode.data.state = task.state;
+              }
+              return runNode as unknown as RunNode;
+            })
+            .filter((n) => !!n);
+          const tasksData = data
+            .map((task) => {
+              const node: DefaultNode | undefined =
+                workflow.ui_schema.nodes[task.task_id];
+
+              const pieceName = node?.data?.style?.label ?? node?.data?.name;
+              return {
+                ...task,
+                pieceName,
+              } as unknown as IWorkflowRunTaskExtended;
+            })
+            .filter((n) => !!n);
+          tasks.push(...tasksData);
+          nodes.push(...nodesData);
         }
-
-        const nodes: RunNode[] = [];
-        const tasks: IWorkflowRunTaskExtended[] = [];
-        for (const result of allTasks) {
-          const { data } = result;
-
-          if (Array.isArray(data)) {
-            const nodesData = data
-              .map((task) => {
-                const defaultNode: DefaultNode | undefined = workflow.ui_schema
-                  .nodes[task.task_id] as DefaultNode | undefined;
-                const runNode = { ...defaultNode } as unknown as RunNode;
-
-                if (runNode?.data) {
-                  runNode.data.taskId = task.task_id;
-                  runNode.data.state = task.state;
-                }
-                return runNode as unknown as RunNode;
-              })
-              .filter((n) => !!n);
-            const tasksData = data
-              .map((task) => {
-                const node: DefaultNode | undefined = workflow.ui_schema.nodes[
-                  task.task_id
-                ] as DefaultNode | undefined;
-
-                const pieceName = node?.data?.style?.label ?? node?.data?.name;
-                return {
-                  ...task,
-                  pieceName,
-                } as unknown as IWorkflowRunTaskExtended;
-              })
-              .filter((n) => !!n);
-            tasks.push(...tasksData);
-            nodes.push(...nodesData);
-          }
-        }
-        const currentTaks = JSON.stringify(statusTasks);
-        const newTasks = JSON.stringify(tasks);
-
-        if (currentTaks !== newTasks) {
-          setTasks(tasks);
-        }
-
-        const currentNodes = JSON.stringify(
-          workflowPanelRef.current?.nodes ?? {},
-        );
-        const newNodes = JSON.stringify(nodes);
-        if (newNodes !== currentNodes) {
-          // need to create a different object to perform a re-render
-          workflowPanelRef.current?.setNodes(JSON.parse(newNodes));
-          workflowPanelRef.current?.setEdges(workflow.ui_schema.edges);
-        }
-      } catch (e) {
-        console.log(e);
       }
     }
-  }, [workflow, fetchWorkflowTasks, selectedRun]);
+    return { nodes, edges, tasks };
+  }, [allTasks, workflow]);
 
-  const refresh = useCallback(async () => {
-    refreshDetails();
-    refreshTable();
-    await refreshTasks();
+  const triggerRun = useCallback(async () => {
+    if (workflow?.id) {
+      await handleRunWorkflow({ workflowId: String(workflow.id) });
+      setSelectedRun(null);
+    }
+  }, [workflow, handleRunWorkflow, setSelectedRun]);
 
+  useEffect(() => {
+    workflowPanelRef.current?.setNodes(nodes);
+    workflowPanelRef.current?.setEdges(edges);
+    setTasks(tasks);
+  }, [nodes, edges, tasks]);
+
+  useEffect(() => {
     if (
       selectedRun &&
       (selectedRun.state === "success" || selectedRun.state === "failed")
     ) {
-      setAutoUpdate(false);
+      setTimeout(() => {
+        setAutoUpdate(false);
+      }, 3000);
     } else {
       setAutoUpdate(true);
     }
-  }, [refreshDetails, refreshTable, refreshTasks, selectedRun, setAutoUpdate]);
+  }, [selectedRun, setAutoUpdate]);
 
-  const handleSelectRun = useCallback(
-    (run: IWorkflowRuns | null) => {
-      setSelectedRun(run);
-      setAutoUpdate(true);
-    },
-    [refreshDetails, refreshTable, refreshTasks],
-  );
+  const handleSelectRun = useCallback((run: IWorkflowRuns | null) => {
+    setSelectedRun(run);
+    setAutoUpdate(true);
+  }, []);
 
   const onNodeDoubleClick = useCallback<NodeMouseHandler>(
     (_, node: RunNode) => {
@@ -195,16 +172,6 @@ export const WorkflowDetail: React.FC = () => {
     },
     [],
   );
-
-  useEffect(() => {
-    if (selectedRun) {
-      refresh().catch((e) => {
-        console.log(e);
-      });
-    }
-  }, [selectedRun, refresh]);
-
-  useInterval(refresh, 3000, autoUpdate);
 
   return (
     <Grid container spacing={3}>
@@ -217,10 +184,9 @@ export const WorkflowDetail: React.FC = () => {
           {/* WorkflowRunsTable */}
           <Grid item xs={12} sx={{ paddingLeft: "1rem" }}>
             <WorkflowRunsTable
+              autoUpdate={autoUpdate}
               triggerRun={triggerRun}
-              refresh={refresh}
               selectedRun={selectedRun}
-              ref={workflowRunsTableRef}
               onSelectedRunChange={handleSelectRun}
               workflowId={id as string}
             />
@@ -239,7 +205,7 @@ export const WorkflowDetail: React.FC = () => {
         {/* Right Column */}
         <Grid item lg={5} xs={12}>
           <WorkflowRunDetail
-            ref={workflowRunDetailRef}
+            autoUpdate={autoUpdate}
             runId={selectedRun?.workflow_run_id}
             tasks={statusTasks}
             nodeId={selectedNodeId}

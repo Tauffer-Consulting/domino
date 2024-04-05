@@ -1,4 +1,5 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import HelpIcon from "@mui/icons-material/Help";
 import {
   Drawer,
   Grid,
@@ -6,14 +7,18 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  IconButton,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { createInputsSchemaValidation } from "features/workflowEditor/utils/validation";
+import theme from "providers/theme.config";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "utils";
 import * as yup from "yup";
+
+import PieceDocsPopover from "../PiecesDrawer/pieceDocsPopover";
 
 import ContainerResourceForm, {
   ContainerResourceFormSchema,
@@ -23,14 +28,14 @@ import StorageForm, { storageFormSchema } from "./StorageForm";
 
 interface ISidebarPieceFormProps {
   formId: string;
-  schema: Schema;
+  piece: Piece;
   title: string;
   open: boolean;
   onClose: (event: any) => void;
 }
 
 export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
-  const { schema, formId, open, onClose, title } = props;
+  const { piece, formId, open, onClose, title } = props;
 
   const {
     setWorkflowPieceDataById,
@@ -39,13 +44,27 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
     clearDownstreamDataById,
   } = useWorkflowsEditor();
 
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const handlePopoverClose = useCallback(
+    (_: React.MouseEvent<HTMLButtonElement>, reason: any) => {
+      if (reason && reason === "backdropClick") return;
+      setPopoverOpen(false);
+    },
+    [setPopoverOpen],
+  );
+  const handlePopoverOpen = useCallback(() => {
+    setPopoverOpen(true);
+  }, [setPopoverOpen]);
+
   const PieceFormSchema = useMemo(() => {
+    const inputsSchema = createInputsSchemaValidation(piece.input_schema);
     return yup.object().shape({
       storage: storageFormSchema,
       containerResources: ContainerResourceFormSchema,
-      inputs: createInputsSchemaValidation(schema),
+      inputs: inputsSchema,
     });
-  }, [schema]);
+  }, [piece]);
 
   const resolver = yupResolver(PieceFormSchema);
 
@@ -71,17 +90,17 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   }, [formId, getWorkflowPieceDataById, reset, trigger]);
 
   const updateOutputSchema = useCallback(() => {
-    if (schema?.properties) {
-      const outputSchemaProperty = Object.keys(schema.properties).find(
-        (key) => {
-          const inputSchema = schema.properties[key];
-          return (
-            "items" in inputSchema &&
-            "$ref" in inputSchema.items &&
-            inputSchema.items.$ref === "#/$defs/OutputModifierModel"
-          );
-        },
-      );
+    if (piece.input_schema?.properties) {
+      const outputSchemaProperty = Object.keys(
+        piece.input_schema.properties,
+      ).find((key) => {
+        const inputSchema = piece.input_schema.properties[key];
+        return (
+          "items" in inputSchema &&
+          "$ref" in inputSchema.items &&
+          inputSchema.items.$ref === "#/$defs/OutputModifierModel"
+        );
+      });
 
       if (outputSchemaProperty && data?.inputs?.[outputSchemaProperty]?.value) {
         const formsData = data.inputs[outputSchemaProperty].value;
@@ -132,7 +151,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
       }
     }
   }, [
-    schema,
+    piece,
     data.inputs,
     setWorkflowPieceOutputSchema,
     formId,
@@ -166,106 +185,122 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   }
 
   return (
-    <Drawer
-      anchor="left"
-      open={open}
-      onClose={onClose}
-      sx={{
-        "& .MuiDrawer-paper": {
-          marginTop: "4rem",
-          width: "33%",
-          maxWidth: "500px",
-          minWidth: "300px",
-        },
-      }}
-      slotProps={{ backdrop: { style: { backgroundColor: "transparent" } } }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "500px",
-          minWidth: "300px",
-          paddingLeft: "20px",
-          paddingRight: "20px",
+    <>
+      <PieceDocsPopover
+        piece={piece}
+        popoverOpen={popoverOpen}
+        handlePopoverClose={handlePopoverClose}
+      />
+      <Drawer
+        anchor="left"
+        open={open}
+        onClose={onClose}
+        sx={{
+          "& .MuiDrawer-paper": {
+            marginTop: "4rem",
+            width: "33%",
+            maxWidth: "500px",
+            minWidth: "300px",
+          },
         }}
+        slotProps={{ backdrop: { style: { backgroundColor: "transparent" } } }}
       >
-        <Typography
-          variant="h5"
-          component="h5"
-          sx={{ marginTop: "20px", marginBottom: "20px" }}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "500px",
+            minWidth: "300px",
+            paddingLeft: "20px",
+            paddingRight: "20px",
+          }}
         >
-          {title}
-        </Typography>
-
-        <Grid container>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              maxWidth: "100%",
-            }}
+          <Typography
+            variant="h5"
+            component="h5"
+            sx={{ marginTop: "20px", marginBottom: "20px" }}
           >
-            <Grid container spacing={2} sx={{ marginBottom: "20px" }}>
-              <Grid item xs={10}>
-                <Typography
-                  variant="subtitle2"
-                  component="div"
-                  sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
-                >
-                  Input Arguments
-                </Typography>
-              </Grid>
-              <Grid item xs={12 - 10}>
-                <Typography
-                  variant="subtitle2"
-                  component="div"
-                  sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
-                >
-                  Upstream
-                </Typography>
-              </Grid>
-            </Grid>
+            {title}
 
-            <Grid container sx={{ paddingBottom: "25px" }}>
-              {formLoaded && (
-                <FormProvider {...methods}>
-                  <Grid item xs={12} className="sidebar-jsonforms-grid">
-                    <Grid item xs={12}>
-                      <PieceForm formId={formId} schema={schema} />
+            <IconButton sx={{ padding: 0 }} onClick={handlePopoverOpen}>
+              <HelpIcon
+                sx={{ height: "20px", color: theme.palette.primary.main }}
+              />
+            </IconButton>
+          </Typography>
+
+          <Grid container>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                maxWidth: "100%",
+              }}
+            >
+              <Grid container spacing={2} sx={{ marginBottom: "20px" }}>
+                <Grid item xs={10}>
+                  <Typography
+                    variant="subtitle2"
+                    component="div"
+                    sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
+                  >
+                    Input Arguments
+                  </Typography>
+                </Grid>
+                <Grid item xs={12 - 10}>
+                  <Typography
+                    variant="subtitle2"
+                    component="div"
+                    sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
+                  >
+                    Upstream
+                  </Typography>
+                </Grid>
+              </Grid>
+
+              <Grid container sx={{ paddingBottom: "25px" }}>
+                {formLoaded && (
+                  <FormProvider {...methods}>
+                    <Grid item xs={12} className="sidebar-jsonforms-grid">
+                      <Grid item xs={12}>
+                        <PieceForm
+                          formId={formId}
+                          schema={piece.input_schema}
+                        />
+                      </Grid>
+
+                      <div style={{ marginBottom: "50px" }} />
+
+                      <Accordion
+                        sx={{
+                          "&.MuiAccordion-root:before": {
+                            display: "none",
+                          },
+                        }}
+                      >
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Typography
+                            variant="subtitle2"
+                            component="div"
+                            sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
+                          >
+                            Advanced Options
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <StorageForm />
+                          <div style={{ marginBottom: "50px" }} />
+                          <ContainerResourceForm />
+                        </AccordionDetails>
+                      </Accordion>
                     </Grid>
-
-                    <div style={{ marginBottom: "50px" }} />
-
-                    <Accordion
-                      sx={{
-                        "&.MuiAccordion-root:before": {
-                          display: "none",
-                        },
-                      }}
-                    >
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography
-                          variant="subtitle2"
-                          component="div"
-                          sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
-                        >
-                          Advanced Options
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <StorageForm />
-                        <div style={{ marginBottom: "50px" }} />
-                        <ContainerResourceForm />
-                      </AccordionDetails>
-                    </Accordion>
-                  </Grid>
-                </FormProvider>
-              )}
-            </Grid>
-          </div>
-        </Grid>
-        <div style={{ marginBottom: "70px" }} />
-      </div>
-    </Drawer>
+                  </FormProvider>
+                )}
+              </Grid>
+            </div>
+          </Grid>
+          <div style={{ marginBottom: "70px" }} />
+        </div>
+      </Drawer>
+    </>
   );
 };

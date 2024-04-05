@@ -1,3 +1,4 @@
+import { useAuthLogin, useAuthRegister } from "@features/auth";
 import React, {
   type ReactNode,
   useCallback,
@@ -10,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { createCustomContext } from "utils";
 
-import { postAuthLogin, postAuthRegister } from "./api";
 import {
   type IAuthenticationContext,
   type IAuthenticationStore,
@@ -20,10 +20,6 @@ import { DOMINO_LOGOUT } from "./authentication.logout";
 export const [AuthenticationContext, useAuthentication] =
   createCustomContext<IAuthenticationContext>("Authentication Context");
 
-/**
- * Authentication provider.
- * @todo refactor local storage implementation with Local Forage
- */
 export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -33,6 +29,9 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
     token: localStorage.getItem("auth_token"),
     userId: localStorage.getItem("userId"),
   });
+
+  const { mutateAsync: postAuthLogin } = useAuthLogin();
+  const { mutateAsync: postAuthRegister } = useAuthRegister();
 
   const isLogged = useRef(!!store.token);
 
@@ -73,15 +72,14 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
   const authenticate = useCallback(
     async (email: string, password: string) => {
       setAuthLoading(true);
-      void postAuthLogin({ email, password })
+      await postAuthLogin({ email, password })
         .then((res) => {
-          if (res.status === 200) {
-            login(
-              res.data.access_token,
-              res.data.user_id,
-              res.data.token_expires_in,
-            );
-          }
+          login(
+            res.access_token,
+            res.user_id,
+            res.token_expires_in,
+            "/workspaces",
+          );
         })
         .finally(() => {
           setAuthLoading(false);
@@ -95,18 +93,13 @@ export const AuthenticationProvider: React.FC<{ children: ReactNode }> = ({
       setAuthLoading(true);
       postAuthRegister({ email, password })
         .then((res) => {
-          if (res.status === 201) {
+          if (res?.user_id) {
             toast.success("E-mail and password registered successfully!");
             void authenticate(email, password);
           }
         })
         .catch((err) => {
-          console.log(err?.response?.status);
-          if (err?.response?.status === 409) {
-            toast.warning(`This e-mail is already registered`);
-          } else {
-            toast.error(err?.response?.data?.detail ?? `Error while register`);
-          }
+          console.error(err?.response);
         })
         .finally(() => {
           setAuthLoading(false);

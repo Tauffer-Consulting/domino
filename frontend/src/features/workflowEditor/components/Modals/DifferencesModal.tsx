@@ -86,7 +86,7 @@ export const DifferencesModal = forwardRef<ModalRef, Props>(
                 {!!installedPieces.length && (
                   <>
                     Incorrect version pieces need to be manually update on
-                    <Link to="/workspace-settings"> workspace settings</Link>,
+                    <Link to="/workspaces/settings"> workspace settings</Link>,
                   </>
                 )}
               </Typography>
