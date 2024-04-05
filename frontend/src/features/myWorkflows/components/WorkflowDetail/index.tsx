@@ -56,16 +56,27 @@ export const WorkflowDetail: React.FC = () => {
     workflowId: id as string,
   });
 
-  const { data: allTasks } = useRunTasks(
+  const {
+    data: allTasks,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useRunTasks(
     {
       workspaceId: workspace?.id,
       workflowId: id as string,
       runId: selectedRun?.workflow_run_id,
     },
     {
-      refetchInterval: autoUpdate ? 1500 : undefined,
+      refetchInterval: () => (autoUpdate ? 1500 : false),
     },
   );
+
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const { mutateAsync: handleRunWorkflow } = useStartRun(
     {
@@ -124,12 +135,12 @@ export const WorkflowDetail: React.FC = () => {
     return { nodes, edges, tasks };
   }, [allTasks, workflow]);
 
-  const triggerRun = async () => {
+  const triggerRun = useCallback(async () => {
     if (workflow?.id) {
       await handleRunWorkflow({ workflowId: String(workflow.id) });
       setSelectedRun(null);
     }
-  };
+  }, [workflow, handleRunWorkflow, setSelectedRun]);
 
   useEffect(() => {
     workflowPanelRef.current?.setNodes(nodes);
@@ -137,12 +148,14 @@ export const WorkflowDetail: React.FC = () => {
     setTasks(tasks);
   }, [nodes, edges, tasks]);
 
-  const refresh = useCallback(async () => {
+  useEffect(() => {
     if (
       selectedRun &&
       (selectedRun.state === "success" || selectedRun.state === "failed")
     ) {
-      setAutoUpdate(false);
+      setTimeout(() => {
+        setAutoUpdate(false);
+      }, 3000);
     } else {
       setAutoUpdate(true);
     }
@@ -173,7 +186,6 @@ export const WorkflowDetail: React.FC = () => {
             <WorkflowRunsTable
               autoUpdate={autoUpdate}
               triggerRun={triggerRun}
-              refresh={refresh}
               selectedRun={selectedRun}
               onSelectedRunChange={handleSelectRun}
               workflowId={id as string}

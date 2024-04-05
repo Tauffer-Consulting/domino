@@ -38,7 +38,7 @@ export const useRunTasks = (
     },
     enabled: !!(workspaceId && workflowId && runId),
     getNextPageParam: (res, _, page) =>
-      res.metadata?.last_page === page ? page + 1 : page,
+      (res.metadata?.last_page ?? 0) > page ? page + 1 : null,
     ...config,
   });
 };
