@@ -1,6 +1,8 @@
 import { type repositorySource } from "@context/workspaces/types";
 import { type MutationConfig } from "@services/clients/react-query.client";
 import { useMutation } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 export interface RepositoriesReleasesParams {
@@ -34,6 +36,14 @@ export const useRepositoriesReleases = (
         path,
         source,
         workspaceId,
+      });
+    },
+    onError: (e: AxiosError<{ detail: string }>) => {
+      const message =
+        (e.response?.data?.detail ?? e?.message) || "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
       });
     },
     ...config,

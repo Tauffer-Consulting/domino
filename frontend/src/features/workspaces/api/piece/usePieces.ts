@@ -1,5 +1,7 @@
 import { type QueryConfig } from "@services/clients/react-query.client";
 import { useQueries } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface GetRepoPiecesParams {
@@ -23,6 +25,16 @@ export const usePieces = (
           .filter((data) => data !== undefined) as unknown as Piece[],
         pending: results.some((result) => result.isPending),
       };
+    },
+    throwOnError(e: AxiosError<{ detail?: string }>) {
+      const message =
+        (e.response?.data?.detail ?? e?.message) || "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
+      });
+
+      return false;
     },
     ...config,
   });

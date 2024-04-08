@@ -1,6 +1,8 @@
 import { type IWorkflowRuns } from "@features/myWorkflows/types";
 import { type QueryConfig } from "@services/clients/react-query.client";
 import { skipToken, useQuery } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface WorkflowRunParams {
@@ -26,6 +28,18 @@ export const useRuns = (
         ? skipToken
         : async () =>
             await getWorkflowRuns({ workspaceId, workflowId, page, pageSize }),
+    throwOnError(e, _query) {
+      const message =
+        ((e as AxiosError<{ detail?: string }>).response?.data?.detail ??
+          e?.message) ||
+        "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
+      });
+
+      return false;
+    },
     ...config,
   });
 };

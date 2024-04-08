@@ -6,7 +6,7 @@ from aiohttp import BasicAuth
 from urllib.parse import urljoin
 from core.logger import get_configured_logger
 from core.settings import settings
-
+from schemas.exceptions.base import ResourceNotFoundException
 
 class AirflowRestClient(requests.Session):
     def __init__(self, *args, **kwargs):
@@ -150,6 +150,8 @@ class AirflowRestClient(requests.Session):
             method='get',
             resource=resource,
         )
+        if response.status_code == 404:
+            raise ResourceNotFoundException("Task result not found.")
         return response
 
     def get_task_result(self, dag_id: str, dag_run_id: str, task_id: str, task_try_number: int):
@@ -159,6 +161,8 @@ class AirflowRestClient(requests.Session):
             method='get',
             resource=resource,
         )
+        if response.status_code == 404:
+            raise ResourceNotFoundException("Task result not found.")
         if response.status_code != 200:
             raise BaseException("Error while trying to get task result base64_content")
         response_dict =  ast.literal_eval(response.json()["value"])
