@@ -156,7 +156,7 @@ export const ResultsReport: React.FC = () => {
               justifyContent="center"
               alignItems="center"
             >
-              <Grid item xs={12}>
+              <Grid item xs={12} marginBottom={1}>
                 <DownloadAsPDF contentId="DownloadAsPDF" />{" "}
               </Grid>
             </Grid>
