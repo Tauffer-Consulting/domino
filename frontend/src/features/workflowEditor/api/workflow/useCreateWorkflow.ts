@@ -1,7 +1,9 @@
 import { type MutationConfig } from "@services/clients/react-query.client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
 import { type IPostWorkflowResponseInterface } from "features/myWorkflows/types";
 import { type CreateWorkflowRequest } from "features/workflowEditor/context/types";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface UsePostWorkflow {
@@ -25,6 +27,14 @@ export const useCreateWorkflow = (
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["WORKFLOWS", workspaceId],
+      });
+    },
+    onError: (e: AxiosError<{ detail: string }>) => {
+      const message =
+        (e.response?.data?.detail ?? e?.message) || "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
       });
     },
     ...config,

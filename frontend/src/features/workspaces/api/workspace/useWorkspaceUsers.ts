@@ -1,6 +1,8 @@
 import { type workspaceStatus } from "@context/workspaces/types";
 import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 import { type QueryConfig } from "services/clients/react-query.client";
 
@@ -34,6 +36,18 @@ export const useWorkspaceUsers = (
     queryFn: workspaceId
       ? async () => await getWorkspaceMembers({ page, pageSize, workspaceId })
       : skipToken,
+    throwOnError(e, _query) {
+      const message =
+        ((e as AxiosError<{ detail?: string }>).response?.data?.detail ??
+          e?.message) ||
+        "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
+      });
+
+      return false;
+    },
     ...config,
   });
 

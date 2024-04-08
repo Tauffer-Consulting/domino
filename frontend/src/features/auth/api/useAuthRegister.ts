@@ -1,5 +1,7 @@
 import { type MutationConfig } from "@services/clients/react-query.client";
 import { useMutation } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface RegisterParams {
@@ -19,6 +21,14 @@ export const useAuthRegister = (
 ) => {
   return useMutation({
     mutationFn: async (params) => await postAuthRegister(params),
+    onError: (e: AxiosError<{ message: string }>) => {
+      const message =
+        (e.response?.data?.message ?? e?.message) || "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
+      });
+    },
     ...config,
   });
 };
