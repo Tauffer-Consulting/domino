@@ -31,11 +31,8 @@ dayjs.extend(duration);
 export const ResultsReport: React.FC = () => {
   const { id, runId } = useParams<{ id: string; runId: string }>();
   const { workspace } = useWorkspaces();
+
   const navigate = useNavigate();
-  const { data } = useRunReport({
-    workflowId: id,
-    runId,
-  });
 
   const isPrint = useMediaQuery("print");
 
@@ -51,8 +48,14 @@ export const ResultsReport: React.FC = () => {
     workspaceId: workspace?.id,
   });
 
+  const { data: runReport } = useRunReport({
+    workspaceId: workspace?.id,
+    workflowId: id,
+    runId,
+  });
+
   const { startDate, endDate, duration } = useMemo(() => {
-    if (!data?.data) {
+    if (!runReport?.data) {
       return {
         startDate: null,
         endDate: null,
@@ -60,8 +63,10 @@ export const ResultsReport: React.FC = () => {
       };
     }
 
-    const startDate = dayjs(data?.data[0]?.start_date);
-    const endDate = dayjs(data?.data[data?.data.length - 1]?.end_date);
+    const startDate = dayjs(runReport?.data[0]?.start_date);
+    const endDate = dayjs(
+      runReport?.data[runReport?.data.length - 1]?.end_date,
+    );
 
     const durationRaw = dayjs.duration(endDate.diff(startDate));
 
@@ -78,9 +83,9 @@ export const ResultsReport: React.FC = () => {
       endDate: endDate.format("YYYY-MM-DD HH:mm:ss"),
       duration: formattedDuration,
     };
-  }, [data]);
+  }, [runReport]);
 
-  if (!data?.data) {
+  if (!runReport?.data) {
     return <ResultsReportSkeleton />;
   }
 
@@ -111,7 +116,7 @@ export const ResultsReport: React.FC = () => {
               Pieces :
             </Typography>
             <List>
-              {data?.data.map((task, idx) => (
+              {runReport?.data.map((task, idx) => (
                 <div key={idx}>
                   <ListItem
                     key={task.task_id}
@@ -141,7 +146,7 @@ export const ResultsReport: React.FC = () => {
                       />
                     </ListItemButton>
                   </ListItem>
-                  {idx !== data?.data.length - 1 ? <Divider /> : null}
+                  {idx !== runReport?.data.length - 1 ? <Divider /> : null}
                 </div>
               ))}
             </List>
@@ -151,7 +156,7 @@ export const ResultsReport: React.FC = () => {
               justifyContent="center"
               alignItems="center"
             >
-              <Grid item xs={12}>
+              <Grid item xs={12} marginBottom={1}>
                 <DownloadAsPDF contentId="DownloadAsPDF" />{" "}
               </Grid>
             </Grid>
@@ -238,7 +243,7 @@ export const ResultsReport: React.FC = () => {
               </Grid>
             </Grid>
 
-            {data?.data.map((d, i) => (
+            {runReport?.data.map((d, i) => (
               <PieceReport
                 id={d.task_id}
                 key={`piece-report-${i}`}
