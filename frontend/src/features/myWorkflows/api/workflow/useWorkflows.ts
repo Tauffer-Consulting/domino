@@ -1,6 +1,8 @@
 import { type QueryConfig } from "@services/clients/react-query.client";
 import { useQuery, skipToken } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
 import { type IGetWorkflowResponseInterface } from "features/myWorkflows/types/workflow";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface GetWorkflowsParams {
@@ -18,6 +20,18 @@ export const useWorkflows = (
     queryFn: workspaceId
       ? async () => await getWorkflows({ workspaceId, page, pageSize })
       : skipToken,
+    throwOnError(e, _query) {
+      const message =
+        ((e as AxiosError<{ detail?: string }>).response?.data?.detail ??
+          e?.message) ||
+        "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
+      });
+
+      return false;
+    },
     ...config,
   });
 };

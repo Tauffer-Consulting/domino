@@ -1,7 +1,8 @@
 import { type QueryConfig } from "@services/clients/react-query.client";
 import { useQuery, skipToken } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { type WorkflowPieceData } from "features/workflowEditor/context/types";
+import { toast } from "react-toastify";
 import { type Edge, type Node } from "reactflow";
 
 interface JSONFile {
@@ -25,6 +26,18 @@ export const useWorkflowsExamples = (
   return useQuery({
     queryKey: ["WORKFLOWS-EXAMPLES"],
     queryFn: fetch ? async () => await getWorkflowsExample() : skipToken,
+    throwOnError(e, _query) {
+      const message =
+        ((e as AxiosError<{ detail?: string }>).response?.data?.detail ??
+          e?.message) ||
+        "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
+      });
+
+      return false;
+    },
     ...config,
   });
 };

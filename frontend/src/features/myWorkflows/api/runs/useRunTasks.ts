@@ -1,6 +1,8 @@
 import { type IWorkflowRunTasks } from "@features/myWorkflows/types";
 import { type InfiniteQueryConfig } from "@services/clients/react-query.client";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { type AxiosError } from "axios";
+import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface WorkflowRunTasksParams {
@@ -39,6 +41,18 @@ export const useRunTasks = (
     enabled: !!(workspaceId && workflowId && runId),
     getNextPageParam: (res, _, page) =>
       (res.metadata?.last_page ?? 0) > page ? page + 1 : null,
+    throwOnError(e, _query) {
+      const message =
+        ((e as AxiosError<{ detail?: string }>).response?.data?.detail ??
+          e?.message) ||
+        "Something went wrong";
+
+      toast.error(message, {
+        toastId: message,
+      });
+
+      return false;
+    },
     ...config,
   });
 };
