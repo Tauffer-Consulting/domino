@@ -67,7 +67,7 @@ You can think of Domino as Airflow with superpowers:
 
 # Quick start
 
-Check out the quick start guide in the [documentation](https://domino-workflows.io/docs/quickstart).
+Check out the quick start guide in the [documentation](https://docs.domino-workflows.io/quickstart).
 
 The Domino Python package can be installed via pip. We reccommend you install Domino in a separate Python environment.
 
@@ -84,12 +84,12 @@ domino platform run-compose
 After all processes started successfully, navigate to `localhost:3000` to access the Domino frontend service. <br>
 Obs.: the first time you run the platform, it may take a few minutes to download the Docker images.
 
-Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you deploy Domino and Airflow to a Kubernetes cluster. For other deployment modes, check out the instructions in the [documentation](https://domino-workflows.io/docs/category/run-domino).
+Running the Domino platform locally with Docker compose is useful for development and testing purposes. For production environments, we recommend you deploy Domino and Airflow to a Kubernetes cluster. For other deployment modes, check out the instructions in the [documentation](https://docs.domino-workflows.io/category/run-domino).
 
 <br>
 
 # GUI
-The Domino frontend service is a React application that provides the GUI for easily creating, editing and monitoring Workflows. Check out the [GUI documentation](https://domino-workflows.io/docs/domino_components/domino_components_gui) for more details.
+The Domino frontend service is a React application that provides the GUI for easily creating, editing and monitoring Workflows. Check out the [GUI documentation](https://docs.domino-workflows.io/domino_components/domino_components_gui) for more details.
 
 <details>
   <summary>
@@ -182,7 +182,7 @@ It is very easy to create and share your own Pieces:
 
 The [Pieces repository template](https://github.com/Tauffer-Consulting/domino_pieces_repository_template) provides the basic structure, example files and automatic actions for a seamless Pieces creation experience.
 
-Read more in the [Pieces documentation](https://domino-workflows.io/docs/pieces).
+Read more in the [Pieces documentation](https://docs.domino-workflows.io/pieces).
 
 
 <br>
@@ -194,7 +194,7 @@ The Backend service is a REST API that controls a running Apache Airflow instanc
 - interacting with the Airflow instance, including triggering, creating, editing and deleting Workflows (DAGs)
 - interacting with the Domino Database
 
-The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://domino-workflows.io/docs/domino_components/domino_components_rest).
+The REST service is written in Python, using the FastAPI framework. Read more about it in the [REST documentation](https://docs.domino-workflows.io/domino_components/domino_components_rest).
 
 <br>
 
