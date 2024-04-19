@@ -79,11 +79,35 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
     pageSize: workspaceUsersTablePageSize,
   });
 
-  const { mutateAsync: postWorkspace } = useCreateWorkspace();
-  const { mutateAsync: deleteWorkspace } = useDeleteWorkspace();
+  const { mutateAsync: postWorkspace } = useCreateWorkspace({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["WORKSPACES"],
+      });
+    },
+  });
+  const { mutateAsync: deleteWorkspace } = useDeleteWorkspace({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["WORKSPACES"],
+      });
+    },
+  });
 
-  const { mutateAsync: acceptWorkspaceInvite } = useAcceptWorkspaceInvite();
-  const { mutateAsync: rejectWorkspaceInvite } = useRejectWorkspaceInvite();
+  const { mutateAsync: acceptWorkspaceInvite } = useAcceptWorkspaceInvite({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["WORKSPACES"],
+      });
+    },
+  });
+  const { mutateAsync: rejectWorkspaceInvite } = useRejectWorkspaceInvite({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["WORKSPACES"],
+      });
+    },
+  });
   const { mutateAsync: inviteWorkspace } = useInviteWorkspace(
     {
       workspaceId: workspace?.id,
@@ -188,7 +212,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
 
   const handleCreateWorkspace = useCallback(
     async (name: string) =>
-      postWorkspace({ name })
+      await postWorkspace({ name })
         .then((data) => {
           toast.success(`Workspace ${name} created successfully`);
           return data;
@@ -241,7 +265,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
         workspaces,
         workspacesError: !!workspacesError,
         workspacesLoading,
-        handleRefreshWorkspaces: async () => workspacesRefresh(),
+        handleRefreshWorkspaces: async () => await workspacesRefresh(),
         workspace,
         handleChangeWorkspace,
         handleCreateWorkspace,

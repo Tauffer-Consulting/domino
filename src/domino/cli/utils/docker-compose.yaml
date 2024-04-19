@@ -353,7 +353,7 @@ services:
 
   # Domino Docker proxy
   docker-proxy:
-    image: bobrik/socat
+    image: alpine/socat
     container_name: domino-docker-proxy
     command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
     ports:
