@@ -1,3 +1,10 @@
+# v0.9.2
+
+### Fixes
+- [x] Use alpine linux socat image to avoid `[DEPRECATION NOTICE] Docker Image Format v1 and Docker Image manifest version 2...` warning
+
+
+
 # v0.9.1
 
 ### Fixes
