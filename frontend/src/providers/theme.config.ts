@@ -22,6 +22,16 @@ export const theme = createTheme({
       dark: "#008F34",
       contrastText: "#FFFFFF",
     },
+    error: {
+      main: "#E71D1D",
+      light: "#C03335",
+      dark: "#7B0002",
+    },
+    warning: {
+      main: "#F90",
+      light: "#FFAD33",
+      dark: "#B26B00",
+    },
   },
   typography: {
     fontFamily: "Rethink-Sans",
