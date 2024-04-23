@@ -24,7 +24,7 @@ type Props = {
  *  | requireWorkspace | allowedRoles.length | workspace | Result                    |
  *  |------------------|---------------------|-----------|---------------------------|
  *  | false            | 0                   | null      | Render children           |
- *  | false            | 0                   | not null  | Redirect to unauthorized |
+ *  | false            | 0                   | not null  | Redirect to forbidden |
  *  | false            | > 0                 | null      | Redirect to workspaces    |
  *  | false            | > 0                 | not null  | Check permission          |
  *  | true             | 0                   | null      | Redirect to workspaces    |
@@ -68,10 +68,10 @@ export const AuthorizationRoute = ({
     return hasPermission ? (
       <>{children}</>
     ) : (
-      <Navigate to="/unauthorized" replace />
+      <Navigate to="/forbidden" replace />
     );
   }
 
-  // Redirect to unauthorized if no other conditions met
-  return <Navigate to="/unauthorized" replace />;
+  // Redirect to forbidden if no other conditions met
+  return <Navigate to="/forbidden" replace />;
 };
