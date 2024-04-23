@@ -1,3 +1,4 @@
+import { AuthorizationComponent } from "@components/AuthorizationComponent";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Button, Grid } from "@mui/material";
 import {
@@ -38,9 +39,13 @@ export const WorkflowRunTableFooter = React.forwardRef<HTMLDivElement, Props>(
             sx={{ height: "100%" }}
           >
             <Grid item sx={{ paddingLeft: "1rem" }}>
-              <Button variant="contained" onClick={triggerRun}>
-                Run
-              </Button>
+              <AuthorizationComponent
+                allowedRoles={["owner", "admin", "write"]}
+              >
+                <Button variant="contained" onClick={triggerRun}>
+                  Run
+                </Button>
+              </AuthorizationComponent>
             </Grid>
             <Grid item sx={{ paddingLeft: "1rem" }}>
               <Button

@@ -1,4 +1,5 @@
 import PrivateLayout from "@components/PrivateLayout";
+import { ForbiddenPage } from "@components/Routes/ForbiddenPage";
 import { NotFoundRoute } from "@components/Routes/NotFoundRoute";
 import { MyWorkflowsRoutes } from "@features/myWorkflows/routes";
 import { WorkflowEditorRoute } from "@features/workflowEditor/routes";
@@ -54,8 +55,8 @@ export const protectedRoutes = [
       { path: "my-workflows/*", element: <MyWorkflowsRoutes /> },
       { path: "workflows-editor/*", element: <WorkflowEditorRoute /> },
       {
-        path: "unauthorized",
-        element: <div>Unauthorized</div>,
+        path: "forbidden",
+        element: <ForbiddenPage />,
       },
       {
         path: "404",

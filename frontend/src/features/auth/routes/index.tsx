@@ -1,3 +1,4 @@
+import { ForbiddenPage } from "@components/Routes/ForbiddenPage";
 import { NotFoundRoute } from "@components/Routes/NotFoundRoute";
 import { PublicRoute } from "@components/Routes/PublicRoute";
 import React from "react";
@@ -14,6 +15,7 @@ export const AuthRoutes: React.FC = () => {
         <Route path="sign-up" element={<SignUpPage />} />
         <Route path="recover-password" element={<h1>Recover password</h1>} />
         <Route path="404" element={<NotFoundRoute />} />,
+        <Route path="forbidden" element={<ForbiddenPage />} />
         <Route
           path="*"
           element={

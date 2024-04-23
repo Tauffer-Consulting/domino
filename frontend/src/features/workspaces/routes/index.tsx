@@ -12,7 +12,7 @@ export const WorkspaceRoute: React.FC = () => {
         <Route
           path="settings"
           element={
-            <AuthorizationRoute allowedRoles={["owner"]}>
+            <AuthorizationRoute allowedRoles={["owner", "admin"]}>
               <WorkspaceSettingsPage />
             </AuthorizationRoute>
           }

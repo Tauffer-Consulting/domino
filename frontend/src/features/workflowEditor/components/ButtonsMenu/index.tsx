@@ -1,3 +1,4 @@
+import { AuthorizationComponent } from "@components/AuthorizationComponent";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
 import IosShareIcon from "@mui/icons-material/IosShare";
@@ -121,55 +122,63 @@ export const ButtonsMenu: React.FC<Props> = ({
       style={{ marginBottom: 10 }}
     >
       <Grid item>
-        <Button
-          color="primary"
-          variant="contained"
-          startIcon={<SettingsSuggestIcon />}
-          onClick={handleSettings}
-        >
-          Settings
-        </Button>
+        <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
+          <Button
+            color="primary"
+            variant="contained"
+            startIcon={<SettingsSuggestIcon />}
+            onClick={handleSettings}
+          >
+            Settings
+          </Button>
+        </AuthorizationComponent>
       </Grid>
       <Grid item>
-        <Button
-          color="primary"
-          variant="contained"
-          startIcon={<SaveIcon />}
-          onClick={handleSave}
-        >
-          Create
-        </Button>
+        <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
+          <Button
+            color="primary"
+            variant="contained"
+            startIcon={<SaveIcon />}
+            onClick={handleSave}
+          >
+            Create
+          </Button>
+        </AuthorizationComponent>
       </Grid>
       <Grid item>
-        <Button
-          color="primary"
-          variant="contained"
-          startIcon={<IosShareIcon />}
-          onClick={handleExport}
-        >
-          Export
-        </Button>
+        <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
+          <Button
+            color="primary"
+            variant="contained"
+            startIcon={<IosShareIcon />}
+            onClick={handleExport}
+          >
+            Export
+          </Button>
+        </AuthorizationComponent>
       </Grid>
       <Grid item>
-        <Button
-          variant="contained"
-          startIcon={<DownloadIcon />}
-          id="import-button"
-          aria-controls={importMenuOpen ? "import-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={importMenuOpen ? "true" : undefined}
-          onClick={handleClickImportMenu}
-        >
-          <VisuallyHiddenInput
-            type="file"
-            onChange={async (e) => {
-              const json = await importJsonWorkflow(e);
-              handleImportedJson(json);
-            }}
-            ref={fileInputRef}
-          />
-          Import
-        </Button>
+        <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            id="import-button"
+            aria-controls={importMenuOpen ? "import-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={importMenuOpen ? "true" : undefined}
+            onClick={handleClickImportMenu}
+          >
+            <VisuallyHiddenInput
+              type="file"
+              onChange={async (e) => {
+                const json = await importJsonWorkflow(e);
+                handleImportedJson(json);
+              }}
+              ref={fileInputRef}
+            />
+            Import
+          </Button>
+        </AuthorizationComponent>
         <Menu
           id="import-menu"
           anchorEl={menuElement}
@@ -207,14 +216,16 @@ export const ButtonsMenu: React.FC<Props> = ({
         />
       </Grid>
       <Grid item>
-        <Button
-          color="primary"
-          variant="contained"
-          startIcon={<ClearIcon />}
-          onClick={handleClear}
-        >
-          Clear
-        </Button>
+        <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
+          <Button
+            color="primary"
+            variant="contained"
+            startIcon={<ClearIcon />}
+            onClick={handleClear}
+          >
+            Clear
+          </Button>
+        </AuthorizationComponent>
       </Grid>
     </Grid>
   );
