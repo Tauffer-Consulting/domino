@@ -1,0 +1,72 @@
+name: 🐛 Bug report
+description: Create a report to help us improve
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue.
+
+        This issue tracker is for bugs and issues found within Domino Workflows.
+        If you require more general support please ask on discussions session. https://github.com/Tauffer-Consulting/domino/discussions/categories/q-a
+
+        Please fill in as much of the following form as you're able.
+
+  - type: input
+    attributes:
+      label: Version
+      description: Output of `domino --version`
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Platform
+      description: |
+        UNIX: output of `uname -a`
+        Windows: output of `"$([Environment]::OSVersion.VersionString) $(('x86', 'x64')[[Environment]::Is64BitOperatingSystem])"` in PowerShell console
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Docker version
+      description: Output of `docker --version` if applied.
+
+  - type: input
+    attributes:
+      label: Kubernetes version
+      description: Output of `kubectl version` if applied.
+
+  - type: textarea
+    attributes:
+      label: Describe the bug.
+      description: >
+        A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: What steps will reproduce the bug?
+      description: >
+        Steps to reproduce the behavior:
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    
+  - type: textarea
+    attributes:
+      label: What is the expected behavior? Why is that the expected behavior?
+      description: If applicable, add screenshots to help explain your problem.
+
+  - type: textarea
+    attributes:
+      label: What do you see instead?
+      description: If applicable, add screenshots to help explain your problem.
+
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Tell us anything else you think we should know.
