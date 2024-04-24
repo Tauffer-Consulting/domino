@@ -1,4 +1,3 @@
-import { AuthorizationComponent } from "@components/AuthorizationComponent";
 import {
   AccountTree as AccountTreeIcon,
   BlurCircular,
@@ -54,36 +53,31 @@ export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
             alt="logo"
             style={{ width: "190px", marginRight: "8px", marginLeft: "20px" }}
           />
-          <AuthorizationComponent
-            allowedRoles={["owner", "admin"]}
-            sx={{ maxWidth: "200px", ml: "auto" }}
+          <IconButton
+            component="p"
+            sx={{
+              color: "inherit",
+              fontSize: "1.2rem",
+              fontWeight: 100,
+              ml: "auto",
+              alignItems: "center",
+              display: { xs: "none", md: "flex" },
+            }}
+            onClick={() => {
+              if (workspace) {
+                navigate("/workspaces/settings");
+              }
+            }}
           >
-            <IconButton
-              component="p"
+            <BlurCircular
               sx={{
-                color: "inherit",
-                fontSize: "1.2rem",
-                fontWeight: 100,
-                ml: "auto",
-                alignItems: "center",
-                display: { xs: "none", md: "flex" },
+                mr: 1,
               }}
-              onClick={() => {
-                if (workspace) {
-                  navigate("/workspaces/settings");
-                }
-              }}
-            >
-              <BlurCircular
-                sx={{
-                  mr: 1,
-                }}
-              />
-              {workspace?.workspace_name
-                ? workspace?.workspace_name
-                : "No workspace selected"}
-            </IconButton>
-          </AuthorizationComponent>
+            />
+            {workspace?.workspace_name
+              ? workspace?.workspace_name
+              : "No workspace selected"}
+          </IconButton>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={isOpen}>
