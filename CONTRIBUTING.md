@@ -21,7 +21,7 @@
 * [Discussing non-technical topics](https://github.com/Tauffer-Consulting/domino/discussions)
 * [Submitting a Bug Report](https://github.com/Tauffer-Consulting/domino/issues/new/choose)
 
-### Submitting a issue
+### Submitting an issue
 
 When opening a new issue in the Tauffer-Consulting/domino issue tracker, users will be presented with a choice of issue templates. If you believe that you have uncovered a bug in Domino, please fill out the Bug Report template to the best of your ability. Do not worry if you cannot answer every detail; just fill in what you can.
 
@@ -33,7 +33,7 @@ Once an issue has been opened, it is common for there to be discussion around it
 
 A pull request is a proposal to merge a set of changes from one branch into another. In a pull request, collaborators can review and discuss the proposed set of changes before they integrate the changes into the main codebase.
 
-Before open a pull request, be sure you read and agree with our [Developer's Certificate of Origin](#developers-certificate-of-origin).
+Before opening a pull request, be sure you read and agree with our [Developer's Certificate of Origin](#developers-certificate-of-origin).
 
 ### Step 1 - Fork
 
