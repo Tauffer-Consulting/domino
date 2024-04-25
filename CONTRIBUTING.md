@@ -3,7 +3,7 @@
 - [Contributing to Domino](#contributing-to-domino)
   - [Issues](#issues)
     - [Issues guidance links](#issues-guidance-links)
-    - [Submitting a issue](#submitting-a-issue)
+    - [Submitting an issue](#submitting-an-issue)
   - [Pull Requests](#pull-requests)
     - [Step 1 - Fork](#step-1---fork)
     - [Step 2 - Branch](#step-2---branch)
@@ -103,7 +103,7 @@ This ensures that your working branch has the latest changes from `Tauffer-Consu
 
 ### Step 6 - Opening the pull request
 
-From within GitHub, opening a new pull request will present you with a [pull request template][]. Please try to do your best at filling out the details, but feel free to skip parts if you're not sure what to put.
+From within GitHub, opening a new pull request will present you with a [pull request template](https://github.com/Tauffer-Consulting/domino/compare). Please try to do your best at filling out the details, but feel free to skip parts if you're not sure what to put.
 
 Once opened, pull requests are usually reviewed within a few days.
 
