@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🤔 Questions and Help
+    url: https://github.com/Tauffer-Consulting/domino/discussions
+    about: Please ask and answer questions here.
+  - name: 📗 Open an issue regarding the Domino docs
+    url: https://github.com/Tauffer-Consulting/domino-docs/issues/new/choose
+    about: Let us know about any problematic API reference documents.
+
