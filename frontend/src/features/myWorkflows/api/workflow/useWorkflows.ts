@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { dominoApiClient } from "services/clients/domino.client";
 
 interface GetWorkflowsParams {
-  workspaceId: string;
+  workspaceId: string | null;
   page: number;
   pageSize: number;
 }
