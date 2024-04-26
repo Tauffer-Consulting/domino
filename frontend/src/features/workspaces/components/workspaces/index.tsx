@@ -1,3 +1,4 @@
+import { useWorkflows } from "@features/myWorkflows";
 import {
   Alert,
   Grid,
@@ -11,7 +12,7 @@ import {
 } from "@mui/material";
 import { useAuthentication } from "context/authentication";
 import { useWorkspaces } from "context/workspaces";
-import { type FC, useCallback, useState } from "react";
+import { type FC, useCallback, useState, useMemo } from "react";
 
 import { AddWorkspace } from "./AddWorkspace";
 import { WorkspaceListItem } from "./WorkspaceListItem";
@@ -43,6 +44,15 @@ const WorkspacesComponent: FC = () => {
 
   const [isOpenLeaveDialog, setIsOpenLeaveDialog] = useState<boolean>(false);
   const [leaveWorkspaceId, setLeaveWorkspaceId] = useState<string | null>(null);
+
+  const { data: workflowsRes } = useWorkflows({
+    workspaceId: deleteWorkspaceId,
+  });
+
+  const totalWorkflows = useMemo(
+    () => workflowsRes?.metadata?.total,
+    [workflowsRes],
+  );
 
   const deleteWorkspace = useCallback(() => {
     if (deleteWorkspaceId) {
@@ -76,8 +86,21 @@ const WorkspacesComponent: FC = () => {
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Are you sure you want to delete this workspace and all its contents?
-            This action{" "}
-            <span style={{ fontWeight: "bold" }}>cannot be undone</span>.
+            <br />
+            {totalWorkflows ? (
+              <>
+                {totalWorkflows === 1
+                  ? `Your workflow "${workflowsRes?.data?.[0].name}"`
+                  : `All yours ${totalWorkflows}`}{" "}
+                will be deleted. This action{" "}
+                <span style={{ fontWeight: "bold" }}>cannot be undone</span>.
+              </>
+            ) : (
+              <>
+                This action{" "}
+                <span style={{ fontWeight: "bold" }}>cannot be undone</span>.
+              </>
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
