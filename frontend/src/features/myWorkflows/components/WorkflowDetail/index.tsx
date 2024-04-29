@@ -53,7 +53,7 @@ export const WorkflowDetail: React.FC = () => {
 
   const { data: workflow } = useWorkflow({
     workspaceId: workspace?.id,
-    workflowId: id as string,
+    workflowId: id!,
   });
 
   const {
@@ -64,7 +64,7 @@ export const WorkflowDetail: React.FC = () => {
   } = useRunTasks(
     {
       workspaceId: workspace?.id,
-      workflowId: id as string,
+      workflowId: id!,
       runId: selectedRun?.workflow_run_id,
     },
     {
@@ -188,7 +188,7 @@ export const WorkflowDetail: React.FC = () => {
               triggerRun={triggerRun}
               selectedRun={selectedRun}
               onSelectedRunChange={handleSelectRun}
-              workflowId={id as string}
+              workflowId={id!}
             />
           </Grid>
           {/* WorkflowPanel */}
@@ -209,7 +209,7 @@ export const WorkflowDetail: React.FC = () => {
             runId={selectedRun?.workflow_run_id}
             tasks={statusTasks}
             nodeId={selectedNodeId}
-            workflowId={id as string}
+            workflowId={id}
           />
         </Grid>
       </Grid>

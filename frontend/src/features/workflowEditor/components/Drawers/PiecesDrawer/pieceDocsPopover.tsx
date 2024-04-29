@@ -18,7 +18,7 @@ function renderPieceProperties(
 
     if ("allOf" in argument && argument.allOf.length > 0) {
       typeName = "enum";
-      const typeClass = argument.allOf[0].$ref.split("/").pop() as string;
+      const typeClass = argument.allOf[0].$ref.split("/").pop()!;
       valuesOptions = (schema?.$defs?.[typeClass] as EnumDefinition).enum;
     }
 

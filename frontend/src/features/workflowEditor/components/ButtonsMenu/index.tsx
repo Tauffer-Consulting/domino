@@ -86,10 +86,7 @@ export const ButtonsMenu: React.FC<Props> = ({
     try {
       validateJsonImported(json);
       const pieces = localStorage.getItem<Piece[]>("pieces");
-      const differences = findDifferencesInJsonImported(
-        json,
-        pieces as Piece[],
-      );
+      const differences = findDifferencesInJsonImported(json, pieces!);
 
       if (differences.length) {
         toast.error("Some repositories are missing or incompatible version");
