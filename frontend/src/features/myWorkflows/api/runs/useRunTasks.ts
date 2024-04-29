@@ -31,9 +31,9 @@ export const useRunTasks = (
     queryKey: ["RUN-TASKS", workspaceId, workflowId, runId],
     queryFn: async ({ pageParam }) => {
       return await getWorkflowRunTasks({
-        workspaceId: workspaceId as string,
-        workflowId: workflowId as string,
-        runId: runId as string,
+        workspaceId: workspaceId!,
+        workflowId: workflowId!,
+        runId: runId!,
         page: pageParam,
         pageSize: 100,
       });

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { dispatchLogout } from "context/authentication";
 
 import { endpoint } from "../config/endpoints.config";
@@ -16,14 +16,14 @@ dominoApiClient.interceptors.request.use(
     }
     return config;
   },
-  async (error) => {
+  async (error: AxiosError) => {
     return await Promise.reject(error);
   },
 );
 
 dominoApiClient.interceptors.response.use(
   (response) => response.data,
-  async (error) => {
+  async (error: AxiosError) => {
     if (error?.response?.status === 401) {
       dispatchLogout();
     }

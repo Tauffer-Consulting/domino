@@ -53,8 +53,7 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
 }) => {
   const [workspace, setWorkspace] = useState<WorkspaceSummary | null>(
     localStorage.getItem("workspace")
-      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (JSON.parse(localStorage.getItem("workspace")!) as WorkspaceSummary)
+      ? (JSON.parse(localStorage.getItem("workspace")!) as WorkspaceSummary)
       : null,
   );
 
@@ -243,7 +242,6 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
       deleteWorkspace({ workspaceId: id })
         .then(() => {
           const storageWorkspace = JSON.parse(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             localStorage.getItem("workspace")!,
           );
           if (storageWorkspace && storageWorkspace.id === id) {

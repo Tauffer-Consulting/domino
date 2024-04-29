@@ -20,7 +20,7 @@ export const importJsonWorkflow = (
 
           resolve(jsonData); // Resolve the promise with the JSON data
         } catch (error) {
-          reject(error); // Reject the promise with an error if JSON parsing fails
+          reject(error as Error); // Reject the promise with an error if JSON parsing fails
         }
       };
 

@@ -135,7 +135,7 @@ function generateOption({
 }
 
 function getSchemaByRef(ref: Reference, definitions: Definitions) {
-  return definitions[ref.$ref.split("/").pop() as string];
+  return definitions[ref.$ref.split("/").pop()!];
 }
 
 function compareTypes(schema: Schema | Property | Definition, prop: Property) {

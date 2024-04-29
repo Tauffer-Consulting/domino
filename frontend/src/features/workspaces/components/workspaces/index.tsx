@@ -64,7 +64,7 @@ const WorkspacesComponent: FC = () => {
 
   const leaveWorkspace = useCallback(() => {
     if (leaveWorkspaceId) {
-      handleRemoveUserWorkspace(leaveWorkspaceId, auth.store.userId as string);
+      handleRemoveUserWorkspace(leaveWorkspaceId, auth.store.userId!);
     }
     setLeaveWorkspaceId(null);
     setIsOpenLeaveDialog(false);
