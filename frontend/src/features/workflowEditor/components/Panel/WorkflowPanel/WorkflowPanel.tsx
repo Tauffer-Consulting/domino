@@ -1,6 +1,7 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import { Paper } from "@mui/material";
-import { usesPieces } from "context/workspaces";
+import { type Roles } from "@utils/roles";
+import { useWorkspaces, usesPieces } from "context/workspaces";
 import Elk from "elkjs";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import {
@@ -74,6 +75,12 @@ export interface WorkflowPanelRef {
 
 const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
   ({ onNodeDoubleClick }, ref) => {
+    const { workspace } = useWorkspaces();
+
+    const authorized = (["owner", "admin", "write"] as Roles[]).some(
+      (item) => workspace?.user_permission === item,
+    );
+
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
     const [instance, setInstance] = useState<ReactFlowInstance | null>(null);
     const [rawNodes, setNodes, onNodesChange] = useNodesState([]);
@@ -160,6 +167,12 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
     const onDrop = useCallback(
       async (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
+
+        if (!authorized) {
+          toast.error("You don't have write permissions");
+          return;
+        }
+
         if (reactFlowWrapper?.current === null || instance === null) {
           return;
         }
