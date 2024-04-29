@@ -42,8 +42,8 @@ function set(object: FieldValues, path: string, value?: unknown) {
         isObject(objValue) || Array.isArray(objValue)
           ? objValue
           : !isNaN(+tempPath[index + 1])
-          ? []
-          : {};
+            ? []
+            : {};
     }
     object[key] = newValue;
     object = object[key];

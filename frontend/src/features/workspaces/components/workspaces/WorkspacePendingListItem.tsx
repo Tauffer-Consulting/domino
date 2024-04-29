@@ -1,12 +1,17 @@
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import {
   Card,
-  CardActionArea,
   CardHeader,
   CardContent,
   Typography,
   CardActions,
   Button,
   Grid,
+  Divider,
+  Tooltip,
+  Chip,
 } from "@mui/material";
 import { useWorkspaces } from "context/workspaces";
 import { type WorkspaceSummary } from "context/workspaces/types";
@@ -33,57 +38,86 @@ export const WorkspacePendingListItem: FC<{
         sx={{
           display: "flex",
           flexDirection: "column",
-          borderColor: "#f90",
+          borderColor: "warning.main",
         }}
       >
-        <CardActionArea
+        <CardHeader
+          title={
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              {workspace.workspace_name}
+              <Tooltip title="You've been invited to a workspace.">
+                <MailOutlineIcon color="warning" fontSize="medium" />
+              </Tooltip>
+            </div>
+          }
+          titleTypographyProps={{ variant: "body1" }}
+          color="primary"
+          sx={{ py: 1, width: "100%" }}
+        />
+        <CardContent
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-            flexGrow: 1,
+            width: "100%",
+            borderTop: 1,
+            borderBottom: 1,
+            borderColor: "grey.300",
           }}
         >
-          <CardHeader
-            title={workspace.workspace_name}
-            titleTypographyProps={{ variant: "body1" }}
-          />
-          <CardContent sx={{ width: "100%" }}>
-            <Grid container>
-              <Grid item xs={12} md={3}>
-                <Typography sx={{ fontSize: 14, my: 0 }} color="text.secondary">
-                  Permission:
-                </Typography>
-                <Typography>{workspace.user_permission}</Typography>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <Typography sx={{ fontSize: 14, my: 0 }} color="text.secondary">
-                  Status:
-                </Typography>
-                <Typography color="#f90">Pending</Typography>
-              </Grid>
+          <Grid container columns={13}>
+            <Grid item xs={6} md={3} sx={{ mr: "auto" }}>
+              <Typography sx={{ fontSize: 16, my: 0 }} color="text.secondary">
+                Permission:
+              </Typography>
+              <Chip
+                label={workspace.user_permission}
+                variant="outlined"
+                color="primary"
+                size="small"
+              />
             </Grid>
-          </CardContent>
-        </CardActionArea>
+            <Grid item xs={1}>
+              <Divider orientation="vertical" sx={{ mr: "16px" }} />
+            </Grid>
+            <Grid item xs={6} md={3} sx={{ mr: "auto" }}>
+              <Typography sx={{ fontSize: 16, my: 0 }} color="text.secondary">
+                Status:
+              </Typography>
+              <Chip
+                label="Pending"
+                variant="outlined"
+                color="primary"
+                size="small"
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
         <CardActions sx={{ width: "100%" }}>
           <Button
             size="small"
             color="success"
+            sx={{ minWidth: "auto" }}
             onClick={() => {
               handleAcceptWorkspaceInvite(workspace.id);
             }}
           >
-            Accept
+            <CheckIcon fontSize="medium" />
+            <Typography>Accept</Typography>
           </Button>
           <Button
             size="small"
             color="error"
+            sx={{ minWidth: "auto" }}
             onClick={() => {
               handleRejectWorkspaceInvite(workspace.id);
             }}
           >
-            Refuse
+            <CloseIcon fontSize="medium" />
+            <Typography>Refuse</Typography>
           </Button>
         </CardActions>
       </Card>
