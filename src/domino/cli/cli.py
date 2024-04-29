@@ -6,6 +6,7 @@ import uuid
 import tomli
 from domino.cli.utils import pieces_repository, platform
 import ast
+import domino
 
 console = Console()
 
@@ -407,6 +408,7 @@ def cli_run_piece_docker():
 ###############################################################################
 
 @click.group()
+@click.version_option(domino.__version__)
 @click.pass_context
 def cli(ctx):
     # console.print(msg, style="rgb(109,125,176)", highlight=False)
