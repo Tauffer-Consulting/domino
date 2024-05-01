@@ -1,9 +1,15 @@
-import { Chip, Container, Divider, Grid, Typography } from "@mui/material";
-import { RenderB64 } from "components/RenderB64";
+import Loading from "@components/Loading";
+import { type IWorkflowRunTasks } from "@features/myWorkflows/types";
+import { Box, Chip, Container, Divider, Grid, Typography } from "@mui/material";
+import { lazyImport } from "@utils/lazyImports";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { type IWorkflowRunTasks } from "features/myWorkflows/types";
-import React, { useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
+
+const { RenderB64 } = lazyImport(
+  async () => await import("@components/RenderB64"),
+  "RenderB64",
+);
 
 dayjs.extend(duration);
 interface Props {
@@ -61,10 +67,26 @@ export const PieceReport: React.FC<Props> = ({ taskData, id }) => {
       <Grid item xs={12}>
         {/* This is the result (if exists) */}
         <Container>
-          <RenderB64
-            base64_content={taskData.base64_content}
-            file_type={taskData.file_type}
-          />
+          <Suspense
+            fallback={
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Loading />
+              </Box>
+            }
+          >
+            <RenderB64
+              base64_content={taskData.base64_content}
+              file_type={taskData.file_type}
+            />
+          </Suspense>
         </Container>
       </Grid>
 

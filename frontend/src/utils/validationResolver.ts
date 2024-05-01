@@ -77,9 +77,8 @@ export const yupResolver =
     } catch (e) {
       if (e instanceof ValidationError) {
         const errors = e.inner.reduce((allErrors, currentError) => {
-          const path = currentError.path
-            ?.replaceAll("[", ".")
-            .replaceAll("]", "");
+          const path =
+            currentError.path?.replaceAll("[", ".").replaceAll("]", "") ?? "";
           return {
             ...allErrors,
             [path]: {
