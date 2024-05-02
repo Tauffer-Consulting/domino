@@ -95,6 +95,7 @@ export const WorkflowDetail: React.FC = () => {
 
   const { nodes, edges, tasks } = useMemo(() => {
     const edges = workflow?.ui_schema.edges ?? [];
+    console.log(workflow?.ui_schema.nodes);
     const nodes: RunNode[] = [];
     const tasks: IWorkflowRunTaskExtended[] = [];
     if (selectedRun && workflow && allTasks?.pages) {
@@ -131,6 +132,10 @@ export const WorkflowDetail: React.FC = () => {
           nodes.push(...nodesData);
         }
       }
+    } else if (workflow) {
+      const uiNodes = Object.values(workflow.ui_schema.nodes);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      uiNodes.forEach((n) => nodes.push(n));
     }
     return { nodes, edges, tasks };
   }, [allTasks, workflow]);
