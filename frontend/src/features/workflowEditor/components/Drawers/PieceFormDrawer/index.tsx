@@ -1,3 +1,4 @@
+import { environment } from "@config/environment.config";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpIcon from "@mui/icons-material/Help";
 import {
@@ -269,29 +270,30 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
                       </Grid>
 
                       <div style={{ marginBottom: "50px" }} />
-
-                      <Accordion
-                        sx={{
-                          "&.MuiAccordion-root:before": {
-                            display: "none",
-                          },
-                        }}
-                      >
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography
-                            variant="subtitle2"
-                            component="div"
-                            sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
-                          >
-                            Advanced Options
-                          </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <StorageForm />
-                          <div style={{ marginBottom: "50px" }} />
-                          <ContainerResourceForm />
-                        </AccordionDetails>
-                      </Accordion>
+                      {environment.DOMINO_DEPLOY_MODE !== "local-compose" && (
+                        <Accordion
+                          sx={{
+                            "&.MuiAccordion-root:before": {
+                              display: "none",
+                            },
+                          }}
+                        >
+                          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography
+                              variant="subtitle2"
+                              component="div"
+                              sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
+                            >
+                              Advanced Options
+                            </Typography>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <StorageForm />
+                            <div style={{ marginBottom: "50px" }} />
+                            <ContainerResourceForm />
+                          </AccordionDetails>
+                        </Accordion>
+                      )}
                     </Grid>
                   </FormProvider>
                 )}
