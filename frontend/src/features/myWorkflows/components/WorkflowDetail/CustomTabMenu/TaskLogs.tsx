@@ -14,7 +14,7 @@ interface ITaskLogsProps {
 export const TaskLogs = ({ logs }: ITaskLogsProps) => {
   const [renderOverflowX, setRenderOverflowX] = useState<boolean>(true);
 
-  /* @todo
+  /* TODO
    * const logsTypeColorMap = {
    *     'INFO': '#64df46',
    *     'ERROR': '#f00',

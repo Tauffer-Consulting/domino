@@ -24,8 +24,8 @@ import { Status } from "./Status";
 import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
 /**
- * @todo Cancel run. []
- * @todo Pause run. []
+ * TODO Cancel run. []
+ * TODO Pause run. []
  */
 
 export const WorkflowList: React.FC = () => {

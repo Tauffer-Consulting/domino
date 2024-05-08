@@ -37,7 +37,7 @@ interface IDrawerMenuProps {
 
 /**
  * Drawer menu.
- * @todo move AppBar into its own component (or to header.component)
+ * TODO move AppBar into its own component (or to header.component)
  */
 export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
   const theme = useTheme();
