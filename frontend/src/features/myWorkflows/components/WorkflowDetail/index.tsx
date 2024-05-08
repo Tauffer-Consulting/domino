@@ -30,9 +30,9 @@ import { WorkflowRunDetail } from "./WorkflowRunDetail";
 import { WorkflowRunsTable } from "./WorkflowRunsTable";
 
 /**
- * @todo Cancel run. []
- * @todo Pause run. []
- * @todo add break interval when workflow is not running
+ * TODO Cancel run. []
+ * TODO Pause run. []
+ * TODO add break interval when workflow is not running
  */
 
 export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {

@@ -4,7 +4,8 @@ export interface IContainerResourceFormData {
   memory: number;
 }
 
-// @deprecated - TODO - remove this in future releases
+// TODO - remove this in future releases
+// @deprecated
 export interface IContainerResourceFormDataOld {
   useGpu: boolean;
   cpu: {

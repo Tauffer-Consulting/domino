@@ -235,7 +235,6 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
       (edges: Edge[]) => {
         for (const edge of edges) {
           clearDownstreamDataById(edge.source);
-          // TODO remover a edge no localStorage
         }
       },
       [clearDownstreamDataById],

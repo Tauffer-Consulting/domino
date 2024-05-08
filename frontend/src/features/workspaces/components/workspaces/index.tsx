@@ -20,8 +20,8 @@ import { WorkspacePendingListItem } from "./WorkspacePendingListItem";
 
 /**
  * Workspace list page
- * @todo handle error/loading/empty
- * @todo handle add new workspace
+ * TODO handle error/loading/empty
+ * TODO handle add new workspace
  */
 const WorkspacesComponent: FC = () => {
   const {
@@ -154,7 +154,7 @@ const WorkspacesComponent: FC = () => {
         My workspaces
       </Typography>
       {workspacesError && (
-        /* @TODO: cange alert to toast.error('Error loading workspaces') and add button ('click here to try again') */
+        /* TODO - change alert to toast.error('Error loading workspaces') and add button ('click here to try again') */
         <Alert
           severity="warning"
           onClick={() => {

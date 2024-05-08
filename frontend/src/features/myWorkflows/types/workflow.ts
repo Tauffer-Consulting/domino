@@ -16,8 +16,8 @@ export interface IWorkflow {
   schema: IWorkflowSchema;
   ui_schema: IWorkDominoSchema;
   last_changed_at: string;
-  last_changed_by: number; // todo will change to username probably
-  created_by: number; // todo will change to username probably
+  last_changed_by: number; // TODO will change to username probably
+  created_by: number; // TODO will change to username probably
   workspace_id: number;
   is_paused: boolean;
   is_active: boolean;
@@ -86,12 +86,12 @@ export interface IPostWorkflowResponseInterface {
 
 /**
  * Delete Workflow by id response interface
- * @todo type properly
+ * TODO type properly
  */
 export type IDeleteWorkflowIdResponseInterface = Record<string, any>;
 
 /**
  * Post Workflow run by id response interface
- * @todo type properly
+ * TODO type properly
  */
 export type IPostWorkflowRunIdResponseInterface = Record<string, any>;

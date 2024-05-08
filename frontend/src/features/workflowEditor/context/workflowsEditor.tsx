@@ -110,7 +110,8 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
     async (dominoWorkflow: GenerateWorkflowsParams) => {
       setWorkflowPieces(dominoWorkflow.workflowPieces);
 
-      // @deprecated - TODO - remove this in future releases
+      // TODO - remove this in future releases
+      // @deprecated
       Object.values(dominoWorkflow.workflowPiecesData).forEach((wpd) => {
         if (typeof wpd.containerResources.cpu === "object") {
           wpd.containerResources.cpu = wpd.containerResources.cpu.max;
