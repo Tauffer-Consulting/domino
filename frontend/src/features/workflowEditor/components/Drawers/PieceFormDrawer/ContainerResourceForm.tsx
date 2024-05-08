@@ -13,51 +13,26 @@ const maxAcceptedCpu = 10000;
 
 export const defaultContainerResources: IContainerResourceFormData = {
   useGpu: false,
-  memory: {
-    min: 128,
-    max: 128,
-  },
-  cpu: {
-    min: 100,
-    max: 100,
-  },
+  memory: 128,
+  cpu: 100,
 };
 
-export const ContainerResourceFormSchema: yup.ObjectSchema<IContainerResourceFormData> =
-  yup.object().shape({
-    cpu: yup.object().shape({
-      min: yup
-        .number()
-        .integer()
-        .transform((value) => (isNaN(value) ? undefined : value))
-        .max(maxAcceptedCpu)
-        .min(minAcceptedCpu)
-        .required(),
-      max: yup
-        .number()
-        .integer()
-        .transform((value) => (isNaN(value) ? undefined : value))
-        .max(maxAcceptedCpu)
-        .when("min", ([min], schema) => schema.min(min))
-        .required(),
-    }),
-    memory: yup.object().shape({
-      min: yup
-        .number()
-        .integer()
-        .max(maxAcceptedMemory)
-        .min(minAcceptedMemory)
-        .required(),
-      max: yup
-        .number()
-        .integer()
-        .typeError("Must be a number")
-        .max(maxAcceptedMemory)
-        .when("min", ([min], schema) => schema.min(min))
-        .required(),
-    }),
-    useGpu: yup.boolean().required(),
-  });
+export const ContainerResourceFormSchema = yup.object().shape({
+  cpu: yup
+    .number()
+    .integer()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .max(maxAcceptedCpu)
+    .min(minAcceptedCpu)
+    .required(),
+  memory: yup
+    .number()
+    .integer()
+    .max(maxAcceptedMemory)
+    .min(minAcceptedMemory)
+    .required(),
+  useGpu: yup.boolean().required(),
+});
 
 const ContainerResourceForm: React.FC = () => {
   return (
@@ -73,20 +48,8 @@ const ContainerResourceForm: React.FC = () => {
       </Grid>
       <Grid item xs={6}>
         <NumberInput
-          label="CPU Min (m)"
-          name="containerResources.cpu.min"
-          required
-          type="int"
-          inputProps={{
-            min: minAcceptedCpu,
-            max: maxAcceptedCpu,
-          }}
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <NumberInput
-          label="CPU Max (m)"
-          name="containerResources.cpu.max"
+          label="Available CPU"
+          name="containerResources.cpu"
           type="int"
           required
           inputProps={{
@@ -97,8 +60,8 @@ const ContainerResourceForm: React.FC = () => {
       </Grid>
       <Grid item xs={6}>
         <NumberInput
-          label="Memory Min"
-          name="containerResources.memory.min"
+          label="Available Memory"
+          name="containerResources.memory"
           type="int"
           required
           inputProps={{
@@ -107,18 +70,7 @@ const ContainerResourceForm: React.FC = () => {
           }}
         />
       </Grid>
-      <Grid item xs={6}>
-        <NumberInput
-          label="Memory Max"
-          name="containerResources.memory.max"
-          type="int"
-          required
-          inputProps={{
-            min: minAcceptedMemory,
-            max: maxAcceptedMemory,
-          }}
-        />
-      </Grid>
+
       <Grid item xs={12}>
         <CheckboxInput name="containerResources.useGpu" label="Use GPU" />
       </Grid>
