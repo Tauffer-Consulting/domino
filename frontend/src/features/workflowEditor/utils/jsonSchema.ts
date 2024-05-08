@@ -112,14 +112,8 @@ export const extractDefaultContainerResources = (
 ): IContainerResourceFormData => {
   if (cr && !isEmpty(cr) && "limits" in cr && "requests" in cr) {
     return {
-      cpu: {
-        max: Number(cr.limits.cpu),
-        min: Number(cr.requests.cpu),
-      },
-      memory: {
-        max: Number(cr.limits.memory),
-        min: Number(cr.requests.memory),
-      },
+      cpu: cr.limits.cpu,
+      memory: cr.limits.memory,
       useGpu: cr?.use_gpu ?? false,
     };
   } else {

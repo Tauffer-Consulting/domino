@@ -109,6 +109,16 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
   const importWorkflowToStorage = useCallback(
     async (dominoWorkflow: GenerateWorkflowsParams) => {
       setWorkflowPieces(dominoWorkflow.workflowPieces);
+
+      // @deprecated - TODO - remove this in future releases
+      Object.values(dominoWorkflow.workflowPiecesData).forEach((wpd) => {
+        if (typeof wpd.containerResources.cpu === "object") {
+          wpd.containerResources.cpu = wpd.containerResources.cpu.max;
+        }
+        if (typeof wpd.containerResources.memory === "object") {
+          wpd.containerResources.memory = wpd.containerResources.memory.max;
+        }
+      });
       setWorkflowPiecesData(dominoWorkflow.workflowPiecesData);
       setWorkflowSettingsData(dominoWorkflow.workflowSettingsData);
       setWorkflowNodes(dominoWorkflow.workflowNodes);
@@ -255,12 +265,24 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
           workflow_shared_storage: workflowSharedStorage,
           container_resources: {
             requests: {
-              cpu: elementData.containerResources.cpu.min,
-              memory: elementData.containerResources.memory.min,
+              cpu:
+                typeof elementData.containerResources.cpu === "number"
+                  ? elementData.containerResources.cpu
+                  : elementData.containerResources.cpu.max,
+              memory:
+                typeof elementData.containerResources.memory === "number"
+                  ? elementData.containerResources.memory
+                  : elementData.containerResources.memory.max,
             },
             limits: {
-              cpu: elementData.containerResources.cpu.max,
-              memory: elementData.containerResources.memory.max,
+              cpu:
+                typeof elementData.containerResources.cpu === "number"
+                  ? elementData.containerResources.cpu
+                  : elementData.containerResources.cpu.max,
+              memory:
+                typeof elementData.containerResources.memory === "number"
+                  ? elementData.containerResources.memory
+                  : elementData.containerResources.memory.max,
             },
             use_gpu: elementData.containerResources.useGpu,
           },
