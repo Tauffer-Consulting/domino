@@ -1,6 +1,5 @@
 import HelpIcon from "@mui/icons-material/Help";
-import { Box, Typography, IconButton } from "@mui/material";
-import theme from "providers/theme.config";
+import { Box, Typography, IconButton, useTheme } from "@mui/material";
 import React, { type FC, useState } from "react";
 
 import PieceDocsPopover from "./pieceDocsPopover";
@@ -9,6 +8,7 @@ const PiecesSidebarNode: FC<{
   piece: Piece;
   orientation: "horizontal" | "vertical";
 }> = ({ piece, orientation }) => {
+  const theme = useTheme();
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   // Drag and drop from sidebar to Workflow area
@@ -62,7 +62,13 @@ const PiecesSidebarNode: FC<{
 
         <IconButton sx={{ padding: 0 }} onClick={handlePopoverOpen}>
           <HelpIcon
-            sx={{ height: "20px", color: theme.palette.primary.main }}
+            sx={{
+              height: "20px",
+              color:
+                theme.palette.mode === "light"
+                  ? theme.palette.primary.main
+                  : theme.palette.secondary.main,
+            }}
           />
         </IconButton>
       </div>

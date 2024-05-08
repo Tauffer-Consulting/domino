@@ -8,11 +8,11 @@ import {
   AccordionSummary,
   AccordionDetails,
   IconButton,
+  useTheme,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { createInputsSchemaValidation } from "features/workflowEditor/utils/validation";
-import theme from "providers/theme.config";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "utils";
@@ -36,7 +36,7 @@ interface ISidebarPieceFormProps {
 
 export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   const { piece, formId, open, onClose, title } = props;
-
+  const theme = useTheme();
   const {
     setWorkflowPieceDataById,
     getWorkflowPieceDataById,
@@ -146,7 +146,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
           {},
         );
 
-        setWorkflowPieceOutputSchema(formId, newProperties);
+        setWorkflowPieceOutputSchema(formId, newProperties as Properties);
         clearDownstreamDataById(formId);
       }
     }

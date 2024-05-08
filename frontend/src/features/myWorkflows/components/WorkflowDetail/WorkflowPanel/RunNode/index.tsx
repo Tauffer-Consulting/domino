@@ -1,8 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { Icon } from "@iconify/react";
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography, useTheme } from "@mui/material";
 import { taskState } from "features/myWorkflows/types";
-import theme from "providers/theme.config";
 import React, { type CSSProperties, memo, useCallback, useMemo } from "react";
 import { Position, Handle } from "reactflow";
 import { getUuidSlice } from "utils";
@@ -10,6 +9,8 @@ import { getUuidSlice } from "utils";
 import { type RunNodeProps } from "../types";
 
 const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
+  const theme = useTheme();
+
   const extendedClassExt = useMemo(() => {
     const dominoReactflowClassTypeMap: any = {
       source: "input",

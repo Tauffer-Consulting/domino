@@ -1,13 +1,13 @@
 import { Icon } from "@iconify/react";
-import { Paper, Typography } from "@mui/material";
-import theme from "providers/theme.config";
-import React, { type CSSProperties, memo, useMemo } from "react";
+import { Paper, Typography, useTheme } from "@mui/material";
+import { type CSSProperties, memo, useMemo } from "react";
 import { Handle, Position } from "reactflow";
 import { getUuidSlice, useMouseProximity } from "utils";
 
 import { type DefaultNodeProps } from "../types";
 
 export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
+  const theme = useTheme();
   const [isNear, ElementRef] = useMouseProximity(150);
 
   const handleStyle = useMemo<CSSProperties>(
@@ -80,10 +80,20 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
       width: 150,
       height: 70,
       lineHeight: "60px",
-      border: selected ? "2px" : "",
-      borderStyle: selected ? "solid" : "",
+      border: "2px",
+      borderStyle: "solid",
       borderColor: selected ? theme.palette.info.dark : "",
-      borderRadius: selected ? "3px" : "",
+      color: data.style.nodeStyle.color
+        ? data.style.nodeStyle.color
+        : theme.palette.getContrastText(
+            data.style.nodeStyle.backgroundColor
+              ? data.style.nodeStyle.backgroundColor
+              : theme.palette.background.paper,
+          ),
+      backgroundColor: data.style.nodeStyle.backgroundColor
+        ? data.style.nodeStyle.backgroundColor
+        : theme.palette.background.paper,
+      borderRadius: "3px",
       ...(data.validationError && {
         backgroundColor: theme.palette.error.light,
         color: theme.palette.error.contrastText,
@@ -157,11 +167,7 @@ export const CustomNode = memo<DefaultNodeProps>(({ id, data, selected }) => {
           >
             {data?.style?.label ? data?.style?.label : data?.name}
           </Typography>
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            style={{ fontSize: 10 }}
-          >
+          <Typography variant="subtitle1" style={{ fontSize: 10 }}>
             {getUuidSlice(id)}
           </Typography>
         </div>
