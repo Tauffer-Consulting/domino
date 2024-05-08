@@ -15,9 +15,9 @@ import {
   Divider,
   Tooltip,
   Chip,
+  useTheme,
 } from "@mui/material";
 import { type WorkspaceSummary } from "context/workspaces/types";
-import theme from "providers/theme.config";
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -34,6 +34,7 @@ export const WorkspaceListItem: FC<{
   handleLeave,
   selectedWorkspaceId,
 }) => {
+  const theme = useTheme();
   const isSelected = workspace.id === selectedWorkspaceId;
 
   const navigate = useNavigate();

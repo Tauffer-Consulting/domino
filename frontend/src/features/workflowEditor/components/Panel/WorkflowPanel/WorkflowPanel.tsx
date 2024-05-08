@@ -1,5 +1,5 @@
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
-import { Paper } from "@mui/material";
+import { Paper, useTheme } from "@mui/material";
 import { type Roles } from "@utils/roles";
 import { useWorkspaces, usesPieces } from "context/workspaces";
 import Elk from "elkjs";
@@ -8,7 +8,6 @@ import {
   storageAccessModes,
   type WorkflowPieceData,
 } from "features/workflowEditor/context/types";
-import theme from "providers/theme.config";
 import React, {
   useCallback,
   type DragEvent,
@@ -75,6 +74,7 @@ export interface WorkflowPanelRef {
 
 const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
   ({ onNodeDoubleClick }, ref) => {
+    const theme = useTheme();
     const { workspace } = useWorkspaces();
 
     const authorized = (["owner", "admin", "write"] as Roles[]).some(
@@ -352,6 +352,10 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           onEdgesDelete={onEdgesDelete}
           onDrop={onDrop}
           onDragOver={onDragOver}
+          style={{
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.primary.contrastText,
+          }}
         >
           <Controls
             position="bottom-center"

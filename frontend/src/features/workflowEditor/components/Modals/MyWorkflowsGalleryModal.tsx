@@ -8,13 +8,13 @@ import {
   Divider,
   Grid,
   Typography,
+  useTheme,
 } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import { Modal, type ModalRef } from "components/Modal";
 import { useWorkflow, useWorkflows } from "features/myWorkflows";
 import { type IWorkflow } from "features/myWorkflows/types";
-import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState, useMemo } from "react";
 
 interface MyWorkflowGalleryModalRef extends ModalRef {}
@@ -28,6 +28,7 @@ const MyWorkflowExamplesGalleryModal = forwardRef(
     props: MyWorkflowGalleryModalProps,
     ref: ForwardedRef<MyWorkflowGalleryModalRef>,
   ) => {
+    const theme = useTheme();
     const [page, setPage] = useState(0);
     const [selected, setSelected] = useState<number | null>(null);
     const { workspace } = useWorkspaces();

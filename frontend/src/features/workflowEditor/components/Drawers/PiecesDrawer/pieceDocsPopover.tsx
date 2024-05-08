@@ -1,7 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
-import { Popover, IconButton, Typography } from "@mui/material";
-import theme from "providers/theme.config";
+import { Popover, IconButton, Typography, useTheme } from "@mui/material";
 import React from "react";
 import Draggable from "react-draggable";
 
@@ -54,132 +53,114 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
   piece,
   popoverOpen,
   handlePopoverClose,
-}) => (
-  <Draggable handle=".popover-handle" cancel=".popover-content">
-    <Popover
-      disableEnforceFocus
-      disableAutoFocus
-      disableScrollLock
-      open={popoverOpen}
-      anchorPosition={{
-        top: window.innerHeight / 2,
-        left: window.innerWidth / 2,
-      }}
-      anchorReference="anchorPosition"
-      onClose={handlePopoverClose}
-      anchorOrigin={{
-        vertical: "center",
-        horizontal: "center",
-      }}
-      transformOrigin={{
-        vertical: "center",
-        horizontal: "center",
-      }}
-      sx={{
-        "& .MuiPopover-paper": {
-          width: "600px",
-          borderRadius: "5px",
-          boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
-          backgroundColor: "#fff",
-          color: "#000",
-          paddingBottom: "2rem",
-          overflow: "hidden",
-          "& .popover-handle": {
-            backgroundColor: theme.palette.primary.main,
-            padding: "0.5rem",
-            "& .drag-handle": {
-              cursor: "move",
-              "& svg": {
-                color: "#f5f5f5",
+}) => {
+  const theme = useTheme();
+
+  return (
+    <Draggable handle=".popover-handle" cancel=".popover-content">
+      <Popover
+        disableEnforceFocus
+        disableAutoFocus
+        disableScrollLock
+        open={popoverOpen}
+        anchorPosition={{
+          top: window.innerHeight / 2,
+          left: window.innerWidth / 2,
+        }}
+        anchorReference="anchorPosition"
+        onClose={handlePopoverClose}
+        anchorOrigin={{
+          vertical: "center",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "center",
+          horizontal: "center",
+        }}
+        sx={{
+          "& .MuiPopover-paper": {
+            width: "600px",
+            borderRadius: "5px",
+            boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
+            backgroundColor: "#fff",
+            color: "#000",
+            paddingBottom: "2rem",
+            overflow: "hidden",
+            "& .popover-handle": {
+              backgroundColor: theme.palette.primary.main,
+              padding: "0.5rem",
+              "& .drag-handle": {
+                cursor: "move",
+                "& svg": {
+                  color: "#f5f5f5",
+                },
+              },
+              "& .close-button": {
+                "& svg": {
+                  color: "#f5f5f5",
+                },
               },
             },
-            "& .close-button": {
-              "& svg": {
-                color: "#f5f5f5",
+            "& .popover-content": {
+              maxHeight: "500px",
+              overflowY: "auto",
+              "& .MuiTypography-root": {
+                "& strong": { fontWeight: 450 },
               },
             },
           },
-          "& .popover-content": {
-            maxHeight: "500px",
-            overflowY: "auto",
-            "& .MuiTypography-root": {
-              "& strong": { fontWeight: 450 },
-            },
-          },
-        },
-      }}
-    >
-      <div
-        className="popover-handle"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
         }}
       >
-        <div className="drag-handle">
-          <DragHandleIcon />
-        </div>
-        <Typography
-          sx={{
-            padding: "0rem",
-            fontWeight: 500,
-            fontSize: "1.4rem",
-            color: "#f5f5f5",
-            textAlign: "center",
+        <div
+          className="popover-handle"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          {piece.name}
-        </Typography>
-        <div className="close-button">
-          <IconButton
-            size="small"
-            onClick={(event) => {
-              handlePopoverClose(event, "closeButtonClick");
+          <div className="drag-handle">
+            <DragHandleIcon />
+          </div>
+          <Typography
+            sx={{
+              padding: "0rem",
+              fontWeight: 500,
+              fontSize: "1.4rem",
+              color: "#f5f5f5",
+              textAlign: "center",
             }}
           >
-            <CloseIcon />
-          </IconButton>
-        </div>
-      </div>
-      <div className="popover-content">
-        <Typography sx={{ padding: "1rem 1rem 0rem 1rem" }}>
-          {piece.description}
-        </Typography>
-        <Typography sx={{ padding: "0rem 1rem 0rem 1rem" }}>
-          {piece.source_url ? (
-            <a
-              href={piece.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
+            {piece.name}
+          </Typography>
+          <div className="close-button">
+            <IconButton
+              size="small"
+              onClick={(event) => {
+                handlePopoverClose(event, "closeButtonClick");
+              }}
             >
-              source code
-            </a>
-          ) : (
-            <span>No source code available</span>
-          )}
-        </Typography>
-        <Typography
-          sx={{
-            padding: "1rem 1rem 0rem 1rem",
-            fontWeight: 500,
-            fontSize: "1.3rem",
-          }}
-        >
-          Input
-        </Typography>
-        {renderPieceProperties(piece, "input_schema")}
-        <Typography
-          sx={{
-            padding: "1rem 1rem 0rem 1rem",
-            fontWeight: 500,
-            fontSize: "1.3rem",
-          }}
-        >
-          Output
-        </Typography>
-        {renderPieceProperties(piece, "output_schema")}
-        {piece.secrets_schema && (
+              <CloseIcon />
+            </IconButton>
+          </div>
+        </div>
+        <div className="popover-content">
+          <Typography sx={{ padding: "1rem 1rem 0rem 1rem" }}>
+            {piece.description}
+          </Typography>
+          <Typography sx={{ padding: "0rem 1rem 0rem 1rem" }}>
+            {piece.source_url ? (
+              <a
+                href={piece.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                source code
+              </a>
+            ) : (
+              <span>No source code available</span>
+            )}
+          </Typography>
           <Typography
             sx={{
               padding: "1rem 1rem 0rem 1rem",
@@ -187,13 +168,36 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
               fontSize: "1.3rem",
             }}
           >
-            Secrets
+            Input
           </Typography>
-        )}
-        {piece.secrets_schema && renderPieceProperties(piece, "secrets_schema")}
-      </div>
-    </Popover>
-  </Draggable>
-);
+          {renderPieceProperties(piece, "input_schema")}
+          <Typography
+            sx={{
+              padding: "1rem 1rem 0rem 1rem",
+              fontWeight: 500,
+              fontSize: "1.3rem",
+            }}
+          >
+            Output
+          </Typography>
+          {renderPieceProperties(piece, "output_schema")}
+          {piece.secrets_schema && (
+            <Typography
+              sx={{
+                padding: "1rem 1rem 0rem 1rem",
+                fontWeight: 500,
+                fontSize: "1.3rem",
+              }}
+            >
+              Secrets
+            </Typography>
+          )}
+          {piece.secrets_schema &&
+            renderPieceProperties(piece, "secrets_schema")}
+        </div>
+      </Popover>
+    </Draggable>
+  );
+};
 
 export default PieceDocsPopover;

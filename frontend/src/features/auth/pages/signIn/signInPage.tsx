@@ -1,4 +1,11 @@
-import { Box, Button, Grid, Typography, Link as LinkMui } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  Link as LinkMui,
+  useTheme,
+} from "@mui/material";
 import PublicLayout from "components/PublicLayout";
 import TextInput from "components/TextInput";
 import { useAuthentication } from "context/authentication";
@@ -23,6 +30,8 @@ const validationSignIn: yup.ObjectSchema<ISignIn> = yup.object().shape({
 });
 
 export const SignInPage: FC = () => {
+  const theme = useTheme();
+
   const { authenticate, authLoading } = useAuthentication();
 
   const resolver = yupResolver(validationSignIn);
@@ -59,7 +68,11 @@ export const SignInPage: FC = () => {
           }}
         >
           <img
-            src="/assets/main_logo_black.png"
+            src={
+              theme.palette.mode === "light"
+                ? "/assets/main_logo_black.png"
+                : "/assets/main_logo_white.png"
+            }
             alt="logo"
             style={{ width: "360px" }}
           />
