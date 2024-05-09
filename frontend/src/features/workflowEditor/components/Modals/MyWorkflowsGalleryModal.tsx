@@ -63,7 +63,10 @@ const MyWorkflowExamplesGalleryModal = forwardRef(
                     elevation={4}
                     sx={{
                       height: "60px",
-                      backgroundColor: theme.palette.grey[100],
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? theme.palette.background.default
+                          : theme.palette.grey[100],
                     }}
                   >
                     <CardActionArea
