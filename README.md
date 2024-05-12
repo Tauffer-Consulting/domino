@@ -165,7 +165,7 @@ The Domino frontend service is a React application that provides the GUI for eas
 
 # Pieces
 
-![Pieces](./media/distribution_gif.gif)
+![Pieces](https://github.com/Tauffer-Consulting/domino/blob/gif/media/pieces_distribution.gif)
 
 Pieces are the secret sauce of Domino, they are functional units that can be distributed and reused in multiple Workflows. Domino Pieces are special because they:
 
