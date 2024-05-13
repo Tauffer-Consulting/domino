@@ -83,13 +83,13 @@ export const lightTheme = createTheme({
 export const darkTheme = createTheme({
   palette: {
     mode: "dark",
-    primary: {
+    secondary: {
       main: "#283D52",
       light: "#6088B0",
       dark: "#1B2937",
       contrastText: "#FFFFFF",
     },
-    secondary: {
+    primary: {
       main: "#00B140",
       light: "#00E052",
       dark: "#008F34",
@@ -133,27 +133,7 @@ export const darkTheme = createTheme({
     },
   },
   components: {
-    MuiCheckbox: {
-      defaultProps: {
-        color: "secondary",
-      },
-    },
-    MuiTextField: {
-      defaultProps: {
-        color: "secondary",
-      },
-    },
-    MuiSelect: {
-      defaultProps: {
-        color: "secondary",
-      },
-      styleOverrides: {
-        root: {
-          "&.MuiDisabled": "secondary.dark",
-        },
-      },
-    },
-    MuiInputLabel: {
+    MuiButton: {
       defaultProps: {
         color: "secondary",
       },
