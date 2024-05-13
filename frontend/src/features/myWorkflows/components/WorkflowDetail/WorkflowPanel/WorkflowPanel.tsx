@@ -1,4 +1,4 @@
-import theme from "providers/theme.config";
+import { useTheme } from "@mui/material";
 import React, {
   useCallback,
   useState,
@@ -57,6 +57,8 @@ export interface WorkflowPanelRef {
 }
 const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
   (props: Props, ref: ForwardedRef<WorkflowPanelRef>) => {
+    const theme = useTheme();
+
     const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
     const [instance, setInstance] = useState<ReactFlowInstance | null>(null);
     const [rawNodes, setNodes] = useNodesState([]);

@@ -18,7 +18,7 @@ import { type FC, useCallback, useState } from "react";
 import { toast } from "react-toastify";
 
 /**
- * @todo integrate with backend
+ * TODO integrate with backend
  * @returns Users card component
  */
 export const UsersCard: FC = () => {

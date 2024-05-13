@@ -1,11 +1,10 @@
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, Tooltip, useTheme } from "@mui/material";
 import { type CommonProps } from "@mui/material/OverridableComponent";
 import { Modal, type ModalRef } from "components/Modal";
 import { type IWorkflow } from "features/myWorkflows/types";
-import theme from "providers/theme.config";
 import React, { useRef, useState } from "react";
 
 import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
@@ -24,6 +23,8 @@ export const Actions: React.FC<Props> = ({
   className,
   disabled = false,
 }) => {
+  const theme = useTheme();
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const newFeatureModal = useRef<ModalRef>(null);
 

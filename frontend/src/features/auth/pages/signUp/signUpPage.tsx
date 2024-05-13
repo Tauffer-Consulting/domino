@@ -5,6 +5,7 @@ import {
   Typography,
   CircularProgress,
   Link as LinkMui,
+  useTheme,
 } from "@mui/material";
 import PublicLayout from "components/PublicLayout";
 import TextInput from "components/TextInput";
@@ -26,6 +27,7 @@ const validationSignUp: yup.ObjectSchema<ISignUp> = yup.object().shape({
 });
 
 export const SignUpPage: FC = () => {
+  const theme = useTheme();
   const { register, authLoading } = useAuthentication();
 
   const resolver = yupResolver(validationSignUp);
@@ -62,7 +64,11 @@ export const SignUpPage: FC = () => {
           }}
         >
           <img
-            src="/assets/main_logo_black.png"
+            src={
+              theme.palette.mode === "light"
+                ? "/assets/main_logo_black.png"
+                : "/assets/main_logo_white.png"
+            }
             alt="logo"
             style={{ width: "360px" }}
           />

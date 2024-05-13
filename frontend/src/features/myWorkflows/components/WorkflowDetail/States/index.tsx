@@ -1,6 +1,5 @@
-import { Chip } from "@mui/material";
+import { Chip, useTheme } from "@mui/material";
 import { type IWorkflowRuns } from "features/myWorkflows/types";
-import theme from "providers/theme.config";
 import React from "react";
 
 interface Props {
@@ -8,6 +7,8 @@ interface Props {
 }
 
 export const States: React.FC<Props> = ({ state }) => {
+  const theme = useTheme();
+
   if (state === "success") {
     return (
       <Chip

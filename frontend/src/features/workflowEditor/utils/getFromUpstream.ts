@@ -31,7 +31,7 @@ function getFromUpstream(
     if (definition && isEnum(definition)) {
       return false;
     } else if (definition && definition.type === "object") {
-      const schema = definition.properties[key as string];
+      const schema = definition.properties[key!];
 
       if ("allOf" in schema || "enum" in schema) {
         return false;

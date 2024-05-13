@@ -1,8 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import { Icon } from "@iconify/react";
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography, useTheme } from "@mui/material";
 import { taskState } from "features/myWorkflows/types";
-import theme from "providers/theme.config";
 import React, { type CSSProperties, memo, useCallback, useMemo } from "react";
 import { Position, Handle } from "reactflow";
 import { getUuidSlice } from "utils";
@@ -10,6 +9,8 @@ import { getUuidSlice } from "utils";
 import { type RunNodeProps } from "../types";
 
 const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
+  const theme = useTheme();
+
   const extendedClassExt = useMemo(() => {
     const dominoReactflowClassTypeMap: any = {
       source: "input",
@@ -56,13 +57,21 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
     [],
   );
 
-  const getTaskStatusColor = useCallback((state: taskState) => {
+  const getTaskColor = useCallback((data: RunNodeProps["data"]) => {
     const colors = {
-      backgroundColor: theme.palette.background.default,
-      color: theme.palette.getContrastText(theme.palette.background.default),
+      color: data.style.nodeStyle.color
+        ? data.style.nodeStyle.color
+        : theme.palette.getContrastText(
+            data.style.nodeStyle.backgroundColor
+              ? data.style.nodeStyle.backgroundColor
+              : theme.palette.background.paper,
+          ),
+      backgroundColor: data.style.nodeStyle.backgroundColor
+        ? data.style.nodeStyle.backgroundColor
+        : theme.palette.background.paper,
     };
 
-    switch (state) {
+    switch (data.state) {
       case taskState.success:
         colors.backgroundColor = theme.palette.success.main;
         colors.color = theme.palette.getContrastText(
@@ -96,11 +105,11 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
       width: 150,
       height: 70,
       lineHeight: "60px",
-      border: selected ? "2px" : "",
-      borderStyle: selected ? "solid" : "",
+      border: "2px",
+      borderStyle: "solid",
+      borderRadius: "3px",
       borderColor: selected ? theme.palette.info.dark : "",
-      borderRadius: selected ? "3px" : "",
-      ...(data.state && getTaskStatusColor(data.state)),
+      ...getTaskColor(data),
     };
   }, [data, selected]);
 
@@ -170,11 +179,7 @@ const RunNode = memo<RunNodeProps>(({ id, data, selected }) => {
           >
             {data?.style?.label ? data?.style?.label : data?.name}
           </Typography>
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            style={{ fontSize: 10 }}
-          >
+          <Typography variant="subtitle1" style={{ fontSize: 10 }}>
             {getUuidSlice(id)}
           </Typography>
         </div>

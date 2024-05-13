@@ -6,13 +6,13 @@ import {
   CardContent,
   CardActionArea,
   Chip,
+  useTheme,
 } from "@mui/material";
 import { Modal, type ModalRef } from "components/Modal";
 import {
   type WorkflowsGalleryExamples,
   useWorkflowsExamples,
 } from "features/workflowEditor/api/workflowsExample";
-import theme from "providers/theme.config";
 import { forwardRef, type ForwardedRef, useState, useMemo } from "react";
 
 import CloudSegmentationWorkflow from "../../utils/workflows/cloud_segmentation_workflow.json";
@@ -86,6 +86,7 @@ const WorkflowExamplesGalleryModal = forwardRef(
     props: WorkflowGalleryModalProps,
     ref: ForwardedRef<WorkflowGalleryModalRef>,
   ) => {
+    const theme = useTheme();
     const [selected, setSelected] = useState<number | null>(null);
     // only make requests if USE_LOCAL_CARDS=false
     const { data } = useWorkflowsExamples(!USE_LOCAL_CARDS);
@@ -136,7 +137,10 @@ const WorkflowExamplesGalleryModal = forwardRef(
                   elevation={4}
                   sx={{
                     height: "250px",
-                    backgroundColor: theme.palette.grey[100],
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.background.default
+                        : theme.palette.grey[100],
                   }}
                 >
                   <CardActionArea

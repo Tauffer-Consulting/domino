@@ -30,9 +30,9 @@ import { WorkflowRunDetail } from "./WorkflowRunDetail";
 import { WorkflowRunsTable } from "./WorkflowRunsTable";
 
 /**
- * @todo Cancel run. []
- * @todo Pause run. []
- * @todo add break interval when workflow is not running
+ * TODO Cancel run. []
+ * TODO Pause run. []
+ * TODO add break interval when workflow is not running
  */
 
 export interface IWorkflowRunTaskExtended extends IWorkflowRunTasks {
@@ -53,7 +53,7 @@ export const WorkflowDetail: React.FC = () => {
 
   const { data: workflow } = useWorkflow({
     workspaceId: workspace?.id,
-    workflowId: id as string,
+    workflowId: id!,
   });
 
   const {
@@ -64,7 +64,7 @@ export const WorkflowDetail: React.FC = () => {
   } = useRunTasks(
     {
       workspaceId: workspace?.id,
-      workflowId: id as string,
+      workflowId: id!,
       runId: selectedRun?.workflow_run_id,
     },
     {
@@ -95,6 +95,7 @@ export const WorkflowDetail: React.FC = () => {
 
   const { nodes, edges, tasks } = useMemo(() => {
     const edges = workflow?.ui_schema.edges ?? [];
+    console.log(workflow?.ui_schema.nodes);
     const nodes: RunNode[] = [];
     const tasks: IWorkflowRunTaskExtended[] = [];
     if (selectedRun && workflow && allTasks?.pages) {
@@ -131,6 +132,10 @@ export const WorkflowDetail: React.FC = () => {
           nodes.push(...nodesData);
         }
       }
+    } else if (workflow) {
+      const uiNodes = Object.values(workflow.ui_schema.nodes);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      uiNodes.forEach((n) => nodes.push(n));
     }
     return { nodes, edges, tasks };
   }, [allTasks, workflow]);
@@ -188,7 +193,7 @@ export const WorkflowDetail: React.FC = () => {
               triggerRun={triggerRun}
               selectedRun={selectedRun}
               onSelectedRunChange={handleSelectRun}
-              workflowId={id as string}
+              workflowId={id!}
             />
           </Grid>
           {/* WorkflowPanel */}
@@ -209,7 +214,7 @@ export const WorkflowDetail: React.FC = () => {
             runId={selectedRun?.workflow_run_id}
             tasks={statusTasks}
             nodeId={selectedNodeId}
-            workflowId={id as string}
+            workflowId={id}
           />
         </Grid>
       </Grid>

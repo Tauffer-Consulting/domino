@@ -86,10 +86,7 @@ export const ButtonsMenu: React.FC<Props> = ({
     try {
       validateJsonImported(json);
       const pieces = localStorage.getItem<Piece[]>("pieces");
-      const differences = findDifferencesInJsonImported(
-        json,
-        pieces as Piece[],
-      );
+      const differences = findDifferencesInJsonImported(json, pieces!);
 
       if (differences.length) {
         toast.error("Some repositories are missing or incompatible version");
@@ -98,7 +95,6 @@ export const ButtonsMenu: React.FC<Props> = ({
         incompatiblePiecesModalRef.current?.open();
         return;
       }
-
       handleImported(json);
     } catch (e: any) {
       if (e instanceof yup.ValidationError) {
@@ -124,7 +120,6 @@ export const ButtonsMenu: React.FC<Props> = ({
       <Grid item>
         <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
           <Button
-            color="primary"
             variant="contained"
             startIcon={<SettingsSuggestIcon />}
             onClick={handleSettings}
@@ -136,7 +131,6 @@ export const ButtonsMenu: React.FC<Props> = ({
       <Grid item>
         <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
           <Button
-            color="primary"
             variant="contained"
             startIcon={<SaveIcon />}
             onClick={handleSave}
@@ -148,7 +142,6 @@ export const ButtonsMenu: React.FC<Props> = ({
       <Grid item>
         <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
           <Button
-            color="primary"
             variant="contained"
             startIcon={<IosShareIcon />}
             onClick={handleExport}
@@ -218,7 +211,6 @@ export const ButtonsMenu: React.FC<Props> = ({
       <Grid item>
         <AuthorizationComponent allowedRoles={["admin", "owner", "write"]}>
           <Button
-            color="primary"
             variant="contained"
             startIcon={<ClearIcon />}
             onClick={handleClear}

@@ -79,7 +79,7 @@ const InputElement: React.FC<Props> = React.memo(
         <EnumInput
           schema={schema as EnumProperty}
           itemKey={isItemArray ? `${itemKey}.value` : itemKey}
-          definitions={definitions as Definitions}
+          definitions={definitions!}
         />
       );
     } else if (isNumberType(schema) || isIntegerType(schema)) {

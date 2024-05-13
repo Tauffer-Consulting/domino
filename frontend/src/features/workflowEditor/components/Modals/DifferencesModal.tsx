@@ -10,11 +10,11 @@ import {
   ListItemText,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { Modal, type ModalRef } from "components/Modal";
 import { useWorkspaces, usesPieces } from "context/workspaces";
 import { type Differences } from "features/workflowEditor/utils/importWorkflow";
-import theme from "providers/theme.config";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -32,6 +32,7 @@ enum installStateEnum {
 
 export const DifferencesModal = forwardRef<ModalRef, Props>(
   ({ incompatiblesPieces }, ref) => {
+    const theme = useTheme();
     const { workspace } = useWorkspaces();
     const { handleAddRepository } = usesPieces();
     const [installState, setInstallState] = useState<installStateEnum>(0);
