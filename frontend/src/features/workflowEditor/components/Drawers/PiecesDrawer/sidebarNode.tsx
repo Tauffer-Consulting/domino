@@ -64,10 +64,7 @@ const PiecesSidebarNode: FC<{
           <HelpIcon
             sx={{
               height: "20px",
-              color:
-                theme.palette.mode === "light"
-                  ? theme.palette.primary.main
-                  : theme.palette.secondary.main,
+              color: theme.palette.primary.main,
             }}
           />
         </IconButton>

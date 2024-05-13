@@ -87,7 +87,10 @@ const PieceDocsPopover: React.FC<PieceDocsPopoverProps> = ({
             paddingBottom: "2rem",
             overflow: "hidden",
             "& .popover-handle": {
-              backgroundColor: theme.palette.primary.main,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.secondary.main
+                  : theme.palette.primary.main,
               padding: "0.5rem",
               "& .drag-handle": {
                 cursor: "move",
