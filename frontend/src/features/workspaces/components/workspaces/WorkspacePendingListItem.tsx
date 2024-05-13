@@ -9,7 +9,6 @@ import {
   CardActions,
   Button,
   Grid,
-  Divider,
   Tooltip,
   Chip,
 } from "@mui/material";
@@ -75,20 +74,6 @@ export const WorkspacePendingListItem: FC<{
               </Typography>
               <Chip
                 label={workspace.user_permission}
-                variant="outlined"
-                color="primary"
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={1}>
-              <Divider orientation="vertical" sx={{ mr: "16px" }} />
-            </Grid>
-            <Grid item xs={6} md={3} sx={{ mr: "auto" }}>
-              <Typography sx={{ fontSize: 16, my: 0 }} color="text.secondary">
-                Status:
-              </Typography>
-              <Chip
-                label="Pending"
                 variant="outlined"
                 color="primary"
                 size="small"
