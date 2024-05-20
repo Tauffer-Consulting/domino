@@ -12,19 +12,22 @@ import "react-toastify/dist/ReactToastify.css";
 import { AppRoutes } from "../routes";
 
 export const App: FC = () => (
-  <ColorModeProvider>
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
-      <BrowserRouter>
-        <StorageProvider>
+  <StorageProvider>
+    <ColorModeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-right"
+        />
+        <BrowserRouter>
           <AuthenticationProvider>
             <AppRoutes />
           </AuthenticationProvider>
-        </StorageProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
-    <ToastContainer />
-  </ColorModeProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+      <ToastContainer />
+    </ColorModeProvider>
+  </StorageProvider>
 );
 
 export default App;

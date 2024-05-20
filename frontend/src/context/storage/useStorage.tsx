@@ -1,9 +1,5 @@
-import React, {
-  type ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-} from "react";
+import { createCustomContext } from "@utils/createCustomContext.function";
+import React, { type ReactNode, useCallback } from "react";
 
 import { stringifyOrKepOriginal, tryParseJSON } from "./utils/parseJson";
 
@@ -14,20 +10,8 @@ interface IStorageContext {
   clear: () => void;
 }
 
-const defaultStorageState = {
-  getItem: (_k: string) => null,
-  setItem: (_k: string, _v: string | object) => {},
-  removeItem: (_k: string) => {},
-  clear: () => {},
-};
-
-const StorageContext = createContext<IStorageContext>(defaultStorageState);
-
-export function useStorage(): IStorageContext {
-  const context = useContext(StorageContext);
-
-  return context;
-}
+export const [StorageContext, useStorage] =
+  createCustomContext<IStorageContext>("Storage Context");
 
 export const StorageProvider: React.FC<{ children?: ReactNode }> = ({
   children,
