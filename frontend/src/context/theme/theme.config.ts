@@ -137,6 +137,20 @@ export const darkTheme = createTheme({
       defaultProps: {
         color: "secondary",
       },
+      styleOverrides: {
+        root: ({ ownerState }) => ({
+          ...(ownerState.variant === "outlined" &&
+            ownerState.color === "secondary" && {
+              color: "#00B140",
+              borderColor: "#00B140",
+            }),
+          ...(ownerState.variant === "outlined" &&
+            ownerState.color === "primary" && {
+              color: "#283D52",
+              borderColor: "#283D52",
+            }),
+        }),
+      },
     },
   },
 });

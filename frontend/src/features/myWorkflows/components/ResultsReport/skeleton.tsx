@@ -37,6 +37,7 @@ export const ResultsReportSkeleton: React.FC = () => {
             navigate(-1);
           }}
           variant="text"
+          color="primary"
         >
           <Typography component="span">{`< Go back to Detail`}</Typography>
         </Button>
