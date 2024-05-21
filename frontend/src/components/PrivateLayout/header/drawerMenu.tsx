@@ -1,3 +1,4 @@
+import { useColorMode } from "@context/theme";
 import {
   AccountTree as AccountTreeIcon,
   BlurCircular,
@@ -7,6 +8,9 @@ import {
   Person as PersonIcon,
   Toc,
   Workspaces,
+  Brightness4,
+  Brightness7,
+  BrightnessAuto,
 } from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
@@ -15,6 +19,7 @@ import {
   IconButton,
   List,
   Toolbar,
+  Tooltip,
   useTheme,
 } from "@mui/material";
 import { useAuthentication } from "context/authentication";
@@ -32,10 +37,11 @@ interface IDrawerMenuProps {
 
 /**
  * Drawer menu.
- * @todo move AppBar into its own component (or to header.component)
+ * TODO move AppBar into its own component (or to header.component)
  */
 export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
   const theme = useTheme();
+  const { mode, toggleColorMode } = useColorMode();
   const { logout } = useAuthentication();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -78,6 +84,29 @@ export const DrawerMenu: FC<IDrawerMenuProps> = ({ isOpen, handleClose }) => {
               ? workspace?.workspace_name
               : "No workspace selected"}
           </IconButton>
+          <Tooltip
+            title={
+              mode === "auto"
+                ? "Auto"
+                : mode === "light"
+                  ? " Light mode"
+                  : "Dark mode"
+            }
+          >
+            <IconButton
+              sx={{ ml: 1 }}
+              onClick={toggleColorMode}
+              color="inherit"
+            >
+              {mode === "dark" ? (
+                <Brightness4 />
+              ) : mode === "light" ? (
+                <Brightness7 />
+              ) : (
+                <BrightnessAuto />
+              )}
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={isOpen}>

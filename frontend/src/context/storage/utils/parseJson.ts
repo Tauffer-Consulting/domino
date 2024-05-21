@@ -1,9 +1,9 @@
-export function tryParseJSON<T = any>(jsonString: any) {
+export function tryParseJSON<T = unknown>(jsonString: unknown) {
   try {
-    const value = JSON.parse(jsonString);
+    const value = JSON.parse(jsonString as string);
     return value as T;
   } catch (e) {
-    return jsonString;
+    return jsonString as string;
   }
 }
 

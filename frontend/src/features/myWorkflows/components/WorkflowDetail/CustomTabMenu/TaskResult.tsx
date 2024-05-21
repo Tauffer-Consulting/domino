@@ -1,8 +1,14 @@
-import { CircularProgress, Container, Typography } from "@mui/material";
-import { DownloadB64Button } from "components/DownloadB64Button";
-import { RenderB64 } from "components/RenderB64";
-import { type CSSProperties } from "react";
+import { DownloadB64Button } from "@components/DownloadB64Button";
+import Loading from "@components/Loading";
+import { Box, CircularProgress, Container, Typography } from "@mui/material";
+import { lazyImport } from "@utils/lazyImports";
+import { Suspense, type CSSProperties } from "react";
 import "./styles.css";
+
+const { RenderB64 } = lazyImport(
+  async () => await import("@components/RenderB64"),
+  "RenderB64",
+);
 
 interface ITaskResultProps {
   isLoading: boolean;
@@ -54,11 +60,27 @@ export const TaskResult = ({
       }}
     >
       {!!base64_content && !!file_type ? (
-        <RenderB64
-          base64_content={base64_content}
-          file_type={file_type}
-          style={style}
-        />
+        <Suspense
+          fallback={
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Loading />
+            </Box>
+          }
+        >
+          <RenderB64
+            base64_content={base64_content}
+            file_type={file_type}
+            style={style}
+          />
+        </Suspense>
       ) : (
         <Typography variant="h2">No content</Typography>
       )}

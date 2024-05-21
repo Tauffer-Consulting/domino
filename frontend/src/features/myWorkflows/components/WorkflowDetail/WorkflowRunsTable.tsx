@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { useWorkspaces } from "@context/workspaces";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import { Card, Grid, IconButton, Skeleton, Tooltip } from "@mui/material";

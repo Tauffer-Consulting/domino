@@ -1,8 +1,7 @@
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import { CircularProgress, Tooltip } from "@mui/material";
-import theme from "providers/theme.config";
+import { CircularProgress, Tooltip, useTheme } from "@mui/material";
 import React from "react";
 // import { Container } from './styles';
 
@@ -11,6 +10,8 @@ interface Props {
 }
 
 export const Status: React.FC<Props> = ({ status }) => {
+  const theme = useTheme();
+
   if (status === "creating") {
     return (
       <Tooltip title="Creating">

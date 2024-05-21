@@ -9,7 +9,7 @@ export const AppRoutes = () => {
 
   const routes = isLogged ? protectedRoutes : publicRoutes;
 
-  const element = useRoutes([...routes]);
+  const element = useRoutes(routes);
 
   return <>{element}</>;
 };

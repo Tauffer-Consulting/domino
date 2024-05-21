@@ -1,3 +1,4 @@
+import { environment } from "@config/environment.config";
 import { Drawer, Grid, Typography } from "@mui/material";
 import DatetimeInput from "components/DatetimeInput";
 import SelectInput from "components/SelectInput";
@@ -49,7 +50,7 @@ const defaultSettingsData: IWorkflowSettings = {
 };
 
 const storageSourceOptions =
-  import.meta.env.DOMINO_DEPLOY_MODE === "local-compose"
+  environment.DOMINO_DEPLOY_MODE === "local-compose"
     ? [
         {
           label: "None",

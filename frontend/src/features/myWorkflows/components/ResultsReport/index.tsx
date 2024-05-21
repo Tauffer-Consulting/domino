@@ -105,6 +105,7 @@ export const ResultsReport: React.FC = () => {
             navigate(-1);
           }}
           variant="text"
+          color="primary"
         >
           <Typography component="span">{`< Go back to ${workflow?.name} Detail`}</Typography>
         </Button>

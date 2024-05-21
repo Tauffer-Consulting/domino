@@ -33,7 +33,7 @@
   },
   "include": [
     "src",
-    "./vite.config.js"
+    "./vite.config.ts"
   ],
   "exclude": [
     "node_modules"

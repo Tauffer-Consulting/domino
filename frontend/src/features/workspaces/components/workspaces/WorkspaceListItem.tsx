@@ -12,12 +12,11 @@ import {
   CardActions,
   Button,
   Grid,
-  Divider,
   Tooltip,
   Chip,
+  useTheme,
 } from "@mui/material";
 import { type WorkspaceSummary } from "context/workspaces/types";
-import theme from "providers/theme.config";
 import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -34,6 +33,7 @@ export const WorkspaceListItem: FC<{
   handleLeave,
   selectedWorkspaceId,
 }) => {
+  const theme = useTheme();
   const isSelected = workspace.id === selectedWorkspaceId;
 
   const navigate = useNavigate();
@@ -112,24 +112,6 @@ export const WorkspaceListItem: FC<{
                 </Typography>
                 <Chip
                   label={workspace.user_permission}
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={1}>
-                <Divider orientation="vertical" sx={{ mr: "16px" }} />
-              </Grid>
-              <Grid item xs={6} md={3} sx={{ mr: "auto" }}>
-                <Typography sx={{ fontSize: 16, my: 0 }} color="text.secondary">
-                  Status:
-                </Typography>
-                <Chip
-                  label={
-                    workspace.status === "accepted"
-                      ? "Collaborating"
-                      : "Refused"
-                  }
                   variant="outlined"
                   color="primary"
                   size="small"

@@ -1,7 +1,10 @@
 import { type IWorkflowElement } from "features/myWorkflows/types";
 import { type Edge } from "reactflow";
 
-import { type IContainerResourceFormData } from "./containerResources";
+import {
+  type IContainerResourceFormDataOld,
+  type IContainerResourceFormData,
+} from "./containerResources";
 import { type InputArray, type Input } from "./input";
 import {
   type EndDateTypes,
@@ -14,7 +17,9 @@ import { type IStorageFormData, type StorageAccessModes } from "./storage";
 
 export interface WorkflowPieceData {
   storage: IStorageFormData;
-  containerResources: IContainerResourceFormData;
+  containerResources:
+    | IContainerResourceFormData
+    | IContainerResourceFormDataOld;
   inputs: Record<string, Input | InputArray>;
 }
 

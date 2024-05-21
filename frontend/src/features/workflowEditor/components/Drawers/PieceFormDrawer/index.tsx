@@ -1,3 +1,4 @@
+import { environment } from "@config/environment.config";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpIcon from "@mui/icons-material/Help";
 import {
@@ -8,11 +9,11 @@ import {
   AccordionSummary,
   AccordionDetails,
   IconButton,
+  useTheme,
 } from "@mui/material";
 import { useWorkflowsEditor } from "features/workflowEditor/context";
 import { type WorkflowPieceData } from "features/workflowEditor/context/types";
 import { createInputsSchemaValidation } from "features/workflowEditor/utils/validation";
-import theme from "providers/theme.config";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "utils";
@@ -36,7 +37,7 @@ interface ISidebarPieceFormProps {
 
 export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
   const { piece, formId, open, onClose, title } = props;
-
+  const theme = useTheme();
   const {
     setWorkflowPieceDataById,
     getWorkflowPieceDataById,
@@ -146,7 +147,7 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
           {},
         );
 
-        setWorkflowPieceOutputSchema(formId, newProperties);
+        setWorkflowPieceOutputSchema(formId, newProperties as Properties);
         clearDownstreamDataById(formId);
       }
     }
@@ -269,29 +270,30 @@ export const PieceFormDrawer: React.FC<ISidebarPieceFormProps> = (props) => {
                       </Grid>
 
                       <div style={{ marginBottom: "50px" }} />
-
-                      <Accordion
-                        sx={{
-                          "&.MuiAccordion-root:before": {
-                            display: "none",
-                          },
-                        }}
-                      >
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography
-                            variant="subtitle2"
-                            component="div"
-                            sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
-                          >
-                            Advanced Options
-                          </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <StorageForm />
-                          <div style={{ marginBottom: "50px" }} />
-                          <ContainerResourceForm />
-                        </AccordionDetails>
-                      </Accordion>
+                      {environment.DOMINO_DEPLOY_MODE !== "local-compose" && (
+                        <Accordion
+                          sx={{
+                            "&.MuiAccordion-root:before": {
+                              display: "none",
+                            },
+                          }}
+                        >
+                          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Typography
+                              variant="subtitle2"
+                              component="div"
+                              sx={{ flexGrow: 1, borderBottom: "1px solid;" }}
+                            >
+                              Advanced Options
+                            </Typography>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <StorageForm />
+                            <div style={{ marginBottom: "50px" }} />
+                            <ContainerResourceForm />
+                          </AccordionDetails>
+                        </Accordion>
+                      )}
                     </Grid>
                   </FormProvider>
                 )}

@@ -35,8 +35,8 @@ import { type FC, type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 /**
- * @todo this file is growing too much, maybe it's time to split into smaller components
- * @todo add more repo options (sync this info with backend)
+ * TODO this file is growing too much, maybe it's time to split into smaller components
+ * TODO add more repo options (sync this info with backend)
  * @returns Repositories card component
  */
 export const RepositoriesCard: FC = () => {
@@ -65,7 +65,7 @@ export const RepositoriesCard: FC = () => {
    */
   type StepType = "FETCH_METADATA" | "SELECT_VERSION";
 
-  /** @todo improve when more sources become available */
+  /** TODO improve when more sources become available */
   const { source, path } = useMemo(() => {
     if (url.length > 5) {
       const [source, path] = url

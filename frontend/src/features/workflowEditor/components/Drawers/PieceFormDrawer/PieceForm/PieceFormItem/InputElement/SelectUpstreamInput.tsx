@@ -46,7 +46,7 @@ const SelectUpstreamInput: React.FC<Props> = ({
   const handleSelectChange = useCallback(
     (event: SelectChangeEvent<string | null>, onChange: (e: any) => void) => {
       const value = event.target.value;
-      const upstream = options.find((op) => op?.value === value) as Option;
+      const upstream = options.find((op) => op?.value === value)!;
       let nameArgument = "";
       let nameId = "";
 
