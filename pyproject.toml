@@ -66,9 +66,10 @@ cli = [
     "cryptography==39.0.1",
     "pyOpenSSL==23.1.1",
     "PyGithub==1.55",
-    "docker>=6.0.1",
+    "docker>=7.0.0",
     "kubernetes==23.6.0",
-    "bottle==0.12.25"
+    "bottle==0.12.25",
+    "requests==2.31.0"
 ]
 airflow = [
     "apache-airflow==2.7.2",
