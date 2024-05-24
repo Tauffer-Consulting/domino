@@ -1,3 +1,25 @@
+# v0.9.4
+
+### Fixes
+- [x] Fix error with `requests` and `docker-py` version .
+
+### Frontend Features
+- [x] Add a warning modal when deleting workspace.
+- [x] Improve loading time with lazy loading.
+- [x] Add dark mode
+- [x] Simplify the Piece Advanced Options form.
+- [x] Show workflow when selecting it.
+
+
+
+
+# v0.9.3
+
+### Feature
+- [x] Add `domino --version` command to CLI
+
+
+
 # v0.9.2
 
 ### Fixes
