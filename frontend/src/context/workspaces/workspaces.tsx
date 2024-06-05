@@ -233,6 +233,11 @@ export const WorkspacesProvider: FC<IWorkspacesProviderProps> = ({
       // setWorkspace(next)
       // localStorage.setItem('workspace', JSON.stringify(next))
       handleUpdateWorkspace(next);
+      localStorage.removeItem("workflowEdges");
+      localStorage.removeItem("workflowNodes");
+      localStorage.removeItem("workflowPieces");
+      localStorage.removeItem("workflowPiecesData");
+      localStorage.removeItem("workflowSettingsData");
     },
     [workspaces, handleUpdateWorkspace],
   );
