@@ -330,6 +330,14 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
     )
     airflow_ssh_config_parsed = AsLiteral(yaml.dump(airflow_ssh_config))
 
+    extra_env = [
+        dict(
+            name='AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL',
+            value="10"
+        )
+    ]
+    extra_env_parsed = AsLiteral(yaml.dump(extra_env))
+
     workers_extra_volumes = []
     workers_extra_volumes_mounts = []
     workers = {}
@@ -382,6 +390,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
                 "data": airflow_ssh_config_parsed
             }
         },
+        "extraEnv": extra_env_parsed,
         "config": {
             "api": {
                 "auth_backends": "airflow.api.auth.backend.basic_auth"
@@ -390,7 +399,7 @@ def create_platform(install_airflow: bool = True, use_gpu: bool = False) -> None
         "dags": {
             "gitSync": {
                 "enabled": True,
-                "wait": 60,
+                "wait": 10,
                 "repo": f"ssh://git@github.com/{platform_config['github']['DOMINO_GITHUB_WORKFLOWS_REPOSITORY']}.git",
                 "branch": "main",
                 "subPath": "workflows",
