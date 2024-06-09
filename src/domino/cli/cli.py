@@ -282,22 +282,22 @@ def cli_create_piece(name: str, repository_path: str = None):
     """Create piece."""
     try:
         if repository_path is not None:
-            pieces_repository.create_piece(f"{repository_path}/pieces", name)
+            pieces_repository.create_piece(name, f"{repository_path}/pieces")
         elif not (Path.cwd() / "pieces").is_dir():
             # might be called inside the pieces directory
             if Path.cwd().name == "pieces":
-                pieces_repository.create_piece(str(Path.cwd()), name)
+                pieces_repository.create_piece(name, str(Path.cwd()))
             else:
                 raise FileNotFoundError("No pieces directory found.")
         else:
-            pieces_repository.create_piece(f"{Path.cwd()}/pieces", name)
+            pieces_repository.create_piece(name, f"{Path.cwd()}/pieces")
     except FileNotFoundError as err:
         console.print(err, style=f"bold {COLOR_PALETTE.get('error')}")
 
 @click.group()
 def cli_pieces():
     """Manage pieces in a repository."""
-    console.print("Manage piece folders.")
+    pass
 
 cli_pieces.add_command(cli_create_piece, name="create")
 
@@ -455,6 +455,7 @@ def cli(ctx):
 
 cli.add_command(cli_platform, name="platform")
 cli.add_command(cli_piece_repository, name="piece-repository")
+cli.add_command(cli_pieces, name="pieces")
 cli.add_command(cli_run_piece_k8s, name="run-piece-k8s")
 cli.add_command(cli_run_piece_docker, name='run-piece-docker')
 

@@ -218,6 +218,9 @@ def validate_pieces_folders() -> None:
         raise Exception("\n" + "\n".join(missing_dependencies_errors))
 
 def _validate_piece_name(name: str):
+    """
+    Validate given piece name.
+    """
     if len(name) == 0:
         raise ValidationError(f"Piece name must have at least one character.")
     regex = r'^[A-Za-z_][A-Za-z0-9_]*Piece$'
@@ -225,13 +228,13 @@ def _validate_piece_name(name: str):
     if not pattern.match(name):
         raise ValidationError(f"{name} is not a valid piece name. Piece name must be valid Python class name and must end with 'Piece'.")
 
-def create_piece(pieces_path: str, name: str):
+def create_piece(name: str, piece_repository: str):
     """
-    Create a new piece.
+    Create a new piece directory with necessary files.
     """
     try:
         _validate_piece_name(name)
-        piece_dir = os.path.join(pieces_path, name)
+        piece_dir = os.path.join(piece_repository, name)
         os.mkdir(piece_dir)
 
         with open(f"{piece_dir}/piece.py", "x") as f:
@@ -250,14 +253,14 @@ def create_piece(pieces_path: str, name: str):
             metadata = templates.piece_metadata(name)
             json.dump(metadata, f, indent = 4)
 
-        console.print(f"{name} is created in {pieces_path}.", style=f"bold {COLOR_PALETTE.get('success')}")
+        console.print(f"{name} is created in {piece_repository}.", style=f"bold {COLOR_PALETTE.get('success')}")
     except ValidationError as err:
         console.print(f"{err}", style=f"bold {COLOR_PALETTE.get('error')}")
     except OSError as err: # todo: create a wrapper for this
         if err.errno == 17:
-            console.print(f"{name} is already exists in {pieces_path}.", style=f"bold {COLOR_PALETTE.get('error')}")
+            console.print(f"{name} is already exists in {piece_repository}.", style=f"bold {COLOR_PALETTE.get('error')}")
         elif err.errno == 2:
-            console.print(f"{pieces_path} is not a valid repository path.", style=f"bold {COLOR_PALETTE.get('error')}")
+            console.print(f"{piece_repository} is not a valid repository path.", style=f"bold {COLOR_PALETTE.get('error')}")
         else:
             console.print(f"{err}", style=f"bold {COLOR_PALETTE.get('error')}")
 

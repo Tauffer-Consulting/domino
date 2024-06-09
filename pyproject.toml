@@ -69,7 +69,8 @@ cli = [
     "docker>=7.0.0",
     "kubernetes==23.6.0",
     "bottle==0.12.25",
-    "requests==2.31.0"
+    "requests==2.31.0",
+    "pytest==8.2.2"
 ]
 airflow = [
     "apache-airflow==2.7.2",
