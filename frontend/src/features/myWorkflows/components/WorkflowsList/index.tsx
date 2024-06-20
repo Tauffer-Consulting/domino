@@ -1,11 +1,17 @@
 import { useWorkspaces } from "@context/workspaces";
-import { InfoOutlined } from "@mui/icons-material";
-import { Paper, Tooltip } from "@mui/material";
+import {
+  InfoOutlined,
+  DeleteOutlined,
+  PlayCircleOutlined,
+  StopCircleOutlined,
+} from "@mui/icons-material";
+import { Box, Button, Divider, Paper, Tooltip } from "@mui/material";
 import {
   DataGrid,
   type GridRowParams,
   type GridColDef,
   type GridEventListener,
+  GridToolbarContainer,
 } from "@mui/x-data-grid";
 import { useQueryClient } from "@tanstack/react-query";
 import { NoDataOverlay } from "components/NoDataOverlay";
@@ -19,7 +25,6 @@ import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { Actions } from "./Actions";
 import { Status } from "./Status";
 import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
@@ -27,6 +32,24 @@ import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
  * TODO Cancel run. []
  * TODO Pause run. []
  */
+
+const WorkflowsToolbar: React.FC = () => {
+  return (
+    <GridToolbarContainer sx={{ borderBottom: 1 }}>
+      <Button color="primary" startIcon={<PlayCircleOutlined />}>
+        Start
+      </Button>
+      <Divider orientation="vertical" variant="middle" flexItem />
+      <Button color="primary" startIcon={<StopCircleOutlined />}>
+        Stop
+      </Button>
+      <Divider orientation="vertical" variant="middle" flexItem />
+      <Button color="error" startIcon={<DeleteOutlined />}>
+        Delete
+      </Button>
+    </GridToolbarContainer>
+  );
+};
 
 export const WorkflowList: React.FC = () => {
   const navigate = useNavigate();
@@ -199,33 +222,6 @@ export const WorkflowList: React.FC = () => {
         valueFormatter: ({ value }) =>
           value ? new Date(value).toLocaleString() : "none",
       },
-      {
-        field: "actions",
-        headerName: "Actions",
-        flex: 1,
-        renderCell: ({ row }) => {
-          return (
-            <Actions
-              id={row.id}
-              className=".action-button"
-              deleteFn={() => {
-                void deleteWorkflow(row.id);
-              }}
-              runFn={() => {
-                void runWorkflow(row.id);
-              }}
-              pauseFn={() => {
-                pauseWorkflow(row.id);
-              }}
-              disabled={new Date(row.start_date) > new Date()}
-            />
-          );
-        },
-        headerAlign: "center",
-        align: "center",
-        sortable: false,
-        minWidth: 150,
-      },
     ],
     [],
   );
@@ -259,6 +255,7 @@ export const WorkflowList: React.FC = () => {
         <DataGrid
           density="comfortable"
           columns={columns}
+          checkboxSelection
           rows={rows}
           isRowSelectable={(params) =>
             params.row.status !== "failed" && params.row.status !== "creating"
@@ -279,7 +276,7 @@ export const WorkflowList: React.FC = () => {
           hideFooterSelectedRowCount
           disableColumnMenu
           disableColumnSelector
-          slots={{ noRowsOverlay: NoDataOverlay }}
+          slots={{ noRowsOverlay: NoDataOverlay, toolbar: WorkflowsToolbar }}
           sx={{
             // disable cell selection style
             "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
