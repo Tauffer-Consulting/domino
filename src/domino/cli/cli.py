@@ -271,7 +271,7 @@ def generate_random_repo_name():
 @click.option(
     '--name',
     default="ExamplePiece",
-    help='Piece name'   
+    help='Piece name'
 )
 @click.option(
     '--repository-path',
@@ -413,7 +413,6 @@ def cli_piece_repository(ctx):
 
 
 cli_piece_repository.add_command(cli_organize_pieces_repository, name="organize")
-cli_piece_repository.add_command(cli_pieces, name="pieces")
 cli_piece_repository.add_command(cli_create_release, name="release")
 cli_piece_repository.add_command(cli_delete_release, name="delete-release")
 cli_piece_repository.add_command(cli_publish_images, name="publish-images")
