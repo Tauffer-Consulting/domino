@@ -16,6 +16,8 @@ from typing import Union
 from domino.cli.utils.constants import COLOR_PALETTE
 from domino.client.github_rest_client import GithubRestClient
 from domino.utils import dict_deep_update
+from domino.exceptions.exceptions import ValidationError
+from domino.cli.utils import templates
 
 
 console = Console()
@@ -215,6 +217,52 @@ def validate_pieces_folders() -> None:
     if len(missing_dependencies_errors) > 0:
         raise Exception("\n" + "\n".join(missing_dependencies_errors))
 
+def _validate_piece_name(name: str):
+    """
+    Validate given piece name.
+    """
+    if len(name) == 0:
+        raise ValidationError(f"Piece name must have at least one character.")
+    regex = r'^[A-Za-z_][A-Za-z0-9_]*Piece$'
+    pattern = re.compile(regex)
+    if not pattern.match(name):
+        raise ValidationError(f"{name} is not a valid piece name. Piece name must be valid Python class name and must end with 'Piece'.")
+
+def create_piece(name: str, piece_repository: str):
+    """
+    Create a new piece directory with necessary files.
+    """
+    try:
+        _validate_piece_name(name)
+        piece_dir = os.path.join(piece_repository, name)
+        os.mkdir(piece_dir)
+
+        with open(f"{piece_dir}/piece.py", "x") as f:
+            piece = templates.piece_function(name)
+            f.write(piece)
+
+        with open(f"{piece_dir}/models.py", "x") as f:
+            models = templates.piece_models(name)
+            f.write(models)
+
+        with open(f"{piece_dir}/test_{name}.py", "x") as f:
+            test = templates.piece_test(name)
+            f.write(test)
+        
+        with open(f"{piece_dir}/metadata.json", "x") as f:
+            metadata = templates.piece_metadata(name)
+            json.dump(metadata, f, indent = 4)
+
+        console.print(f"{name} is created in {piece_repository}.", style=f"bold {COLOR_PALETTE.get('success')}")
+    except ValidationError as err:
+        console.print(f"{err}", style=f"bold {COLOR_PALETTE.get('error')}")
+    except OSError as err: # todo: create a wrapper for this
+        if err.errno == 17:
+            console.print(f"{name} is already exists in {piece_repository}.", style=f"bold {COLOR_PALETTE.get('error')}")
+        elif err.errno == 2:
+            console.print(f"{piece_repository} is not a valid repository path.", style=f"bold {COLOR_PALETTE.get('error')}")
+        else:
+            console.print(f"{err}", style=f"bold {COLOR_PALETTE.get('error')}")
 
 def create_pieces_repository(repository_name: str, container_registry: str) -> None:
     """
