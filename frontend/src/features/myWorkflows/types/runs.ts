@@ -1,4 +1,4 @@
-enum runState {
+export enum runState {
   success = "success",
   failed = "failed",
   running = "running",

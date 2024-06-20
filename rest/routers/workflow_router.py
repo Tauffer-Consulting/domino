@@ -1,9 +1,11 @@
+import json
 from fastapi import APIRouter, HTTPException, status, Depends, Response
 from schemas.context.auth_context import AuthorizationContextData
 from typing import List
 from services.workflow_service import WorkflowService
-from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters
+from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, RunWorkflowsRequest
 from schemas.responses.workflow import (
+    BatchWorkflowResponse,
     GetWorkflowsResponse,
     GetWorkflowResponse,
     CreateWorkflowResponse,
@@ -32,11 +34,35 @@ from database.models.enums import Permission
 
 
 router = APIRouter(prefix="/workspaces/{workspace_id}/workflows")
+batch_router = APIRouter(prefix="/batch/workspaces/{workspace_id}/workflows")
 
 workflow_service = WorkflowService()
 read_authorizer = Authorizer(permission_level=Permission.read.value)
 write_authorizer = Authorizer(permission_level=Permission.write.value)
 
+@batch_router.post(
+    path="/runs",
+    status_code=207,
+    response_model=BatchWorkflowResponse,
+    responses={
+        status.HTTP_207_MULTI_STATUS: {"model": BatchWorkflowResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
+        status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError}
+    },
+    dependencies=[Depends(write_authorizer.authorize)]
+)
+def run_workflows(
+    workspace_id,
+    workflow_ids: List[int],
+):
+    """Run workflows"""
+    try:
+        return workflow_service.run_workflows(
+            workflow_ids=workflow_ids
+        )
+    except (BaseException, ResourceNotFoundException, ConflictException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
 
 
 @router.post(
@@ -142,6 +168,28 @@ async def delete_workflow(
     except (BaseException, ForbiddenException, ResourceNotFoundException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
+@batch_router.delete(
+    path="",
+    status_code=207,
+    response_model=BatchWorkflowResponse,
+    responses={
+        status.HTTP_207_MULTI_STATUS: {"model": BatchWorkflowResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
+        status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError},
+    },
+    dependencies=[Depends(write_authorizer.authorize)],
+)
+async def delete_workflows(
+    workflow_ids: List[int],
+    workspace_id: int,
+):
+    try:
+        return await workflow_service.delete_workflows(
+            workflow_ids=workflow_ids, workspace_id=workspace_id
+        )
+    except (BaseException, ForbiddenException, ResourceNotFoundException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
 
 
 @router.post(
@@ -165,6 +213,53 @@ def run_workflow(
         )
     except (BaseException, ForbiddenException, ResourceNotFoundException, ConflictException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
+
+
+@router.patch(
+    "/{workflow_id}/runs",
+    status_code=204,
+    responses={
+        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
+        status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError}
+    },
+    dependencies=[Depends(write_authorizer.authorize)]
+)
+def stop_workflow_run(
+    workspace_id: int,
+    workflow_id: int,
+):
+    try:
+        return workflow_service.stop_workflow_run(
+            workflow_id=workflow_id
+        )
+    except (BaseException, ResourceNotFoundException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+
+
+@batch_router.patch(
+    "/runs",
+    status_code=207,
+    responses={
+        status.HTTP_207_MULTI_STATUS: {"model": BatchWorkflowResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
+        status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError}
+    },
+    dependencies=[Depends(write_authorizer.authorize)]
+)
+def stop_workflow_runs(
+    workspace_id: int,
+    workflow_ids: List[int],
+):
+    try:
+        return workflow_service.stop_workflow_runs(
+            workflow_ids=workflow_ids
+        )
+    except BaseException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+
 
 @router.get(
     "/{workflow_id}/runs",

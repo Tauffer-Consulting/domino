@@ -70,6 +70,20 @@ class AirflowRestClient(requests.Session):
         )
         return response
 
+
+    def stop_dag(self, dag_id, dag_run_id):
+        resource = f"api/v1/dags/{dag_id}/dagRuns/{dag_run_id}"
+        payload = {
+            "state": "failed"
+        }
+        response = self.request(
+            method="patch",
+            resource=resource,
+            json=payload
+        )
+        return response
+  
+
     def delete_dag(self, dag_id):
         resource = f"api/v1/dags/{dag_id}"
         response = self.request(

@@ -20,6 +20,13 @@ class WorkflowRepository(object):
             session.expunge_all()
         return result
 
+    def find_by_ids(self, ids: list[int]):
+        with session_scope() as session:
+            result = session.query(Workflow).filter(Workflow.id.in_(ids)).all()
+            session.flush()
+            session.expunge_all()
+        return result
+
     def find_by_workspace_id(
         self,
         workspace_id: int,
@@ -75,9 +82,16 @@ class WorkflowRepository(object):
             session.expunge_all()
         return result
 
-    def delete(self, id):
+    def delete_by_id(self, id: int):
         with session_scope() as session:
             result = session.query(Workflow).filter(Workflow.id==id).delete()
+            session.flush()
+            session.expunge_all()
+        return result
+
+    def delete_by_ids(self, ids: list[int]):
+        with session_scope() as session:
+            result = session.query(Workflow).filter(Workflow.id.in_(ids)).delete(synchronize_session=False)
             session.flush()
             session.expunge_all()
         return result
