@@ -36,3 +36,11 @@ class NoMatchingDependencyForPieceError(Exception):
     def __init__(self, piece_name: str, repo_name: str):
         message = f"There's no matching dependency group for {piece_name} from repository {repo_name}. Please make sure to run 'domino organize' in the target repository."
         super().__init__(message)
+
+
+class ValidationError(Exception):
+    """
+    Raised when a generic validation failed.
+    """
+    def __init__(self, message: str):
+        super().__init__(f"Validation Error: {message}")

@@ -232,7 +232,7 @@ const WorkflowsEditorProvider: FC<{ children?: React.ReactNode }> = ({
             return acc;
           }
 
-          if (!value.fromUpstream && !value.value) {
+          if (!value.fromUpstream && typeof value.value === 'string' && !value.value) {
             return acc;
           }
           if (
