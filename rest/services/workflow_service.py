@@ -26,6 +26,7 @@ from schemas.responses.workflow import (
     GetWorkflowResultReportResponse,
     GetWorkflowRunTaskLogsResponse,
     GetWorkflowRunTaskResultResponse,
+    WorkflowRunState,
     WorkflowStatus
 )
 from schemas.responses.base import PaginationSet
@@ -197,6 +198,14 @@ class WorkflowService(object):
             is_paused = False
             next_dagrun = None
             status = WorkflowStatus.creating.value
+            runs = self.airflow_client.get_all_workflow_runs(
+                dag_id=dag_info['dag_id'],
+                page=page,
+                page_size=page_size,
+                descending=True
+            )
+            runs_data = runs.json()
+
             if is_dag_broken:
                 status = WorkflowStatus.failed.value
                 schedule = 'failed'
@@ -227,6 +236,7 @@ class WorkflowService(object):
                     is_paused=is_paused,
                     is_active=is_active,
                     status=status,
+                    last_run_status=(runs_data["dag_runs"][0]["state"] if len(runs_data["dag_runs"]) > 0 else WorkflowRunState.none.value),
                     schedule=schedule,
                     next_dagrun=next_dagrun
                 )
