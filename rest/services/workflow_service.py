@@ -13,7 +13,7 @@ from core.logger import get_configured_logger
 from core.settings import settings
 from pathlib import Path
 from utils.workflow_template import workflow_template
-from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, WorkflowSharedStorageSourceEnum, storage_default_piece_model_map
+from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, RunWorkflowsRequest, WorkflowSharedStorageSourceEnum, storage_default_piece_model_map
 from schemas.responses.workflow import (
     CreateWorkflowResponse,
     GetWorkflowsResponse,
@@ -514,6 +514,44 @@ class WorkflowService(object):
         for k, v in tasks_dict.items():
             all_pieces.append(v["piece"])
         return list(dict.fromkeys(all_pieces))
+
+    def run_workflows(self, body: RunWorkflowsRequest):
+        for id in body.workflow_ids:
+            workflow = self.workflow_repository.find_by_id(id=id)
+            if not workflow:
+                raise ResourceNotFoundException("workflow not found")
+
+            # Check if start date is in the past
+            if workflow.start_date and workflow.start_date > datetime.now(tz=timezone.utc):
+                raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
+
+            if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
+                raise ForbiddenException('You cannot run workflows that have ended.')
+
+            airflow_workflow_id = workflow.uuid_name
+
+            # Force unpause workflow
+            payload = {
+                "is_paused": False
+            }
+            update_response = self.airflow_client.update_dag(
+                dag_id=airflow_workflow_id,
+                payload=payload
+            )
+            if update_response.status_code == 404:
+                raise ConflictException("Workflow still in creation process.")
+
+            if update_response.status_code != 200:
+                self.logger.error(f"Error while trying to unpause workflow {id}")
+                self.logger.error(update_response.json())
+                raise BaseException("Error while trying to run workflow")
+
+            run_dag_response = self.airflow_client.run_dag(dag_id=airflow_workflow_id)
+            if run_dag_response.status_code != 200:
+                self.logger.error(f"Error while trying to run workflow {id}")
+                self.logger.error(run_dag_response.json())
+                raise BaseException("Error while trying to run workflow")
+
 
     def run_workflow(self, workflow_id: int):
         workflow = self.workflow_repository.find_by_id(id=workflow_id)

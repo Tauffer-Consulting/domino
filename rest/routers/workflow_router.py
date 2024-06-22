@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, Response
 from schemas.context.auth_context import AuthorizationContextData
 from typing import List
 from services.workflow_service import WorkflowService
-from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters
+from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, RunWorkflowsRequest
 from schemas.responses.workflow import (
     GetWorkflowsResponse,
     GetWorkflowResponse,
@@ -37,6 +37,27 @@ workflow_service = WorkflowService()
 read_authorizer = Authorizer(permission_level=Permission.read.value)
 write_authorizer = Authorizer(permission_level=Permission.write.value)
 
+@router.post(
+    path="/runs",
+    status_code=204,
+    responses={
+        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
+        status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError}
+    }
+)
+def run_workflows(
+    body: RunWorkflowsRequest,
+    auth_context: AuthorizationContextData = Depends(write_authorizer.authorize)
+):
+    """Run workflows"""
+    try:
+        return workflow_service.run_workflows(
+            body=body
+        )
+    except (BaseException, ForbiddenException, ResourceNotFoundException, ConflictException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
 
 
 @router.post(
