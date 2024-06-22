@@ -11,7 +11,7 @@ import {
   type GridRowParams,
   type GridColDef,
   type GridEventListener,
-  GridToolbarContainer,
+  type GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import { useQueryClient } from "@tanstack/react-query";
 import { NoDataOverlay } from "components/NoDataOverlay";
@@ -25,6 +25,7 @@ import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import { Actions } from "./Actions";
 import { Status } from "./Status";
 import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
@@ -33,30 +34,16 @@ import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
  * TODO Pause run. []
  */
 
-const WorkflowsToolbar: React.FC = () => {
-  return (
-    <GridToolbarContainer sx={{ borderBottom: 1 }}>
-      <Button color="primary" startIcon={<PlayCircleOutlined />}>
-        Start
-      </Button>
-      <Divider orientation="vertical" variant="middle" flexItem />
-      <Button color="primary" startIcon={<StopCircleOutlined />}>
-        Stop
-      </Button>
-      <Divider orientation="vertical" variant="middle" flexItem />
-      <Button color="error" startIcon={<DeleteOutlined />}>
-        Delete
-      </Button>
-    </GridToolbarContainer>
-  );
-};
-
 export const WorkflowList: React.FC = () => {
   const navigate = useNavigate();
   const [paginationModel, setPaginationModel] = React.useState({
     pageSize: 10,
     page: 0,
   });
+
+  const [selectedWorkflowIds, setSelectedWorkflowIds] = React.useState<
+    Array<IWorkflow["id"]>
+  >([]);
 
   const { workspace } = useWorkspaces();
   const queryClient = useQueryClient();
@@ -109,9 +96,20 @@ export const WorkflowList: React.FC = () => {
       console.error(e);
     }
   }, []);
+
   const runWorkflow = useCallback(async (id: IWorkflow["id"]) => {
     try {
       await handleRunWorkflow({ workflowId: String(id) });
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const runWorkflows = useCallback(async (ids: Array<IWorkflow["id"]>) => {
+    try {
+      for (const id of ids) {
+        await handleRunWorkflow({ workflowId: String(id) });
+      }
     } catch (e) {
       console.error(e);
     }
@@ -245,6 +243,10 @@ export const WorkflowList: React.FC = () => {
     [navigate],
   );
 
+  const handleSelectionModelChange = (newSelection: GridRowSelectionModel) => {
+    setSelectedWorkflowIds(newSelection as number[]);
+  };
+
   if (isLoading) {
     return <WorkflowsListSkeleton />;
   }
@@ -271,12 +273,26 @@ export const WorkflowList: React.FC = () => {
           }}
           rowCount={totalRows}
           onPaginationModelChange={setPaginationModel}
+          onRowSelectionModelChange={handleSelectionModelChange}
           disableDensitySelector
           disableRowSelectionOnClick
           hideFooterSelectedRowCount
           disableColumnMenu
           disableColumnSelector
-          slots={{ noRowsOverlay: NoDataOverlay, toolbar: WorkflowsToolbar }}
+          slots={{
+            noRowsOverlay: NoDataOverlay,
+            toolbar: () => {
+              return (
+                <Actions
+                  ids={selectedWorkflowIds}
+                  runFn={() => {
+                    void runWorkflows(selectedWorkflowIds);
+                  }}
+                  disabled={selectedWorkflowIds.length === 0}
+                />
+              );
+            },
+          }}
           sx={{
             // disable cell selection style
             "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {

@@ -1,8 +1,11 @@
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import { IconButton, Tooltip, useTheme } from "@mui/material";
+import {
+  DeleteOutlined,
+  PlayCircleOutlined,
+  StopCircleOutlined,
+} from "@mui/icons-material";
+import { Button, Divider, IconButton, Tooltip, useTheme } from "@mui/material";
 import { type CommonProps } from "@mui/material/OverridableComponent";
+import { GridToolbarContainer } from "@mui/x-data-grid";
 import { Modal, type ModalRef } from "components/Modal";
 import { type IWorkflow } from "features/myWorkflows/types";
 import React, { useRef, useState } from "react";
@@ -10,97 +13,34 @@ import React, { useRef, useState } from "react";
 import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 
 interface Props extends CommonProps {
-  id: IWorkflow["id"];
-  deleteFn: () => void;
+  ids: Array<IWorkflow["id"]>;
   runFn: () => void;
-  pauseFn: () => void;
   disabled: boolean;
 }
 
-export const Actions: React.FC<Props> = ({
-  runFn,
-  deleteFn,
-  className,
-  disabled = false,
-}) => {
-  const theme = useTheme();
-
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const newFeatureModal = useRef<ModalRef>(null);
-
+export const Actions: React.FC<Props> = ({ runFn, disabled }) => {
   return (
-    <>
-      {disabled ? (
-        <Tooltip title="Can't run future workflows." arrow>
-          <span>
-            <IconButton
-              className={className}
-              onClick={runFn}
-              disabled={disabled}
-            >
-              <PlayCircleOutlineIcon
-                style={{
-                  pointerEvents: "none",
-                  color: theme.palette.grey[500],
-                }}
-              />
-            </IconButton>
-          </span>
-        </Tooltip>
-      ) : (
-        <IconButton className={className} onClick={runFn}>
-          <PlayCircleOutlineIcon
-            style={{
-              pointerEvents: "none",
-              color: theme.palette.success.main,
-            }}
-          />
-        </IconButton>
-      )}
-      <IconButton
-        className={className}
-        onClick={() => {
-          newFeatureModal.current?.open();
-        }}
+    <GridToolbarContainer sx={{ borderBottom: 1 }}>
+      <Button
+        color="primary"
+        startIcon={<PlayCircleOutlined />}
+        onClick={runFn}
+        disabled={disabled}
       >
-        <PauseCircleOutlineIcon
-          style={{ pointerEvents: "none", color: theme.palette.info.main }}
-        />
-      </IconButton>
-      <IconButton
-        className={className}
-        onClick={() => {
-          setDeleteModalOpen(true);
-        }}
+        Start
+      </Button>
+      <Divider orientation="vertical" variant="middle" flexItem />
+      <Button
+        color="primary"
+        startIcon={<StopCircleOutlined />}
+        disabled={disabled}
       >
-        <DeleteOutlineIcon
-          style={{ pointerEvents: "none", color: theme.palette.error.main }}
-        />
-      </IconButton>
-      <Modal
-        title="New Feature"
-        content="This feature is not ready yet! We launch new versions every time,
-          check out our changelog for more information !"
-        ref={newFeatureModal}
-      />
-      <ConfirmDeleteModal
-        isOpen={deleteModalOpen}
-        title="Confirm Workflow Deletion"
-        content={
-          <span>
-            Are you sure you want to delete this workflow? This action{" "}
-            <span style={{ fontWeight: "bold" }}>cannot be undone</span>.
-          </span>
-        }
-        confirmCb={() => {
-          deleteFn();
-          setDeleteModalOpen(false);
-        }}
-        cancelCb={() => {
-          setDeleteModalOpen(false);
-        }}
-        confirmText="Delete"
-      />
-    </>
+        Stop
+      </Button>
+      <Divider orientation="vertical" variant="middle" flexItem />
+      <Button color="error" startIcon={<DeleteOutlined />} disabled={disabled}>
+        Delete
+      </Button>
+    </GridToolbarContainer>
   );
 };
