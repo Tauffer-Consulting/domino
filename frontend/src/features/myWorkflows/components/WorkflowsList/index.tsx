@@ -84,9 +84,11 @@ export const WorkflowList: React.FC = () => {
     },
   );
 
-  const deleteWorkflow = useCallback(async (id: IWorkflow["id"]) => {
+  const deleteWorkflows = useCallback(async (ids: Array<IWorkflow["id"]>) => {
     try {
-      await handleDeleteWorkflow({ workflowId: String(id) });
+      for (const id of ids) {
+        await handleDeleteWorkflow({ workflowId: String(id) });
+      }
       await handleRefreshWorkflows();
     } catch (e) {
       console.error(e);
@@ -296,6 +298,9 @@ export const WorkflowList: React.FC = () => {
                   ids={selectedWorkflowIds}
                   runFn={() => {
                     void runWorkflows(selectedWorkflowIds);
+                  }}
+                  deleteFn={() => {
+                    void deleteWorkflows(selectedWorkflowIds);
                   }}
                   disabled={selectedWorkflowIds.length === 0}
                 />

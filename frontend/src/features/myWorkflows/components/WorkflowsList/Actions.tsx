@@ -15,10 +15,11 @@ import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 interface Props extends CommonProps {
   ids: Array<IWorkflow["id"]>;
   runFn: () => void;
+  deleteFn: () => void;
   disabled: boolean;
 }
 
-export const Actions: React.FC<Props> = ({ runFn, disabled }) => {
+export const Actions: React.FC<Props> = ({ runFn, deleteFn, disabled }) => {
   return (
     <GridToolbarContainer sx={{ borderBottom: 1 }}>
       <Button
@@ -38,7 +39,12 @@ export const Actions: React.FC<Props> = ({ runFn, disabled }) => {
         Stop
       </Button>
       <Divider orientation="vertical" variant="middle" flexItem />
-      <Button color="error" startIcon={<DeleteOutlined />} disabled={disabled}>
+      <Button
+        color="error"
+        startIcon={<DeleteOutlined />}
+        onClick={deleteFn}
+        disabled={disabled}
+      >
         Delete
       </Button>
     </GridToolbarContainer>
