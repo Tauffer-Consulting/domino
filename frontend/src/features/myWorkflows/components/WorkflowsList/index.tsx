@@ -15,7 +15,6 @@ import {
   useWorkflows,
   useStartRun,
 } from "features/myWorkflows/api";
-import { States } from "features/myWorkflows/components/WorkflowDetail/States";
 import { type IWorkflow } from "features/myWorkflows/types";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -130,16 +129,16 @@ export const WorkflowList: React.FC = () => {
         field: "id",
         headerName: "ID",
         width: 80,
-        headerAlign: "center",
-        align: "center",
+        headerAlign: "left",
+        align: "left",
         sortable: false,
         minWidth: 100,
       },
       {
         field: "state",
-        headerName: "State",
-        headerAlign: "center",
-        align: "center",
+        headerName: "Last Run State",
+        headerAlign: "left",
+        align: "left",
         type: "string",
         minWidth: 150,
         // flex: 1,
@@ -152,8 +151,8 @@ export const WorkflowList: React.FC = () => {
         headerName: "Status",
         renderCell: (params) => <Status status={params.row.status} />,
         flex: 0.5,
-        align: "center",
-        headerAlign: "center",
+        align: "left",
+        headerAlign: "left",
         sortable: false,
         minWidth: 100,
       },
@@ -169,11 +168,11 @@ export const WorkflowList: React.FC = () => {
           </Tooltip>
         ),
         flex: 1,
-        align: "center",
+        align: "left",
         minWidth: 220,
 
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
-        headerAlign: "center",
+        headerAlign: "left",
       },
       {
         field: "end_date",
@@ -185,8 +184,8 @@ export const WorkflowList: React.FC = () => {
             </span>
           </Tooltip>
         ),
-        headerAlign: "center",
-        align: "center",
+        headerAlign: "left",
+        align: "left",
         type: "string",
         flex: 1,
         minWidth: 220,
@@ -197,27 +196,26 @@ export const WorkflowList: React.FC = () => {
         field: "created_at",
         headerName: "Created At",
         flex: 1,
-        align: "center",
+        align: "left",
         minWidth: 220,
-
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
-        headerAlign: "center",
+        headerAlign: "left",
       },
       {
         field: "last_changed_at",
         headerName: "Last Modified",
         flex: 1,
-        align: "center",
+        align: "left",
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
-        headerAlign: "center",
+        headerAlign: "left",
         minWidth: 220,
       },
       {
         field: "schedule",
         headerName: "Schedule",
         flex: 1,
-        align: "center",
-        headerAlign: "center",
+        align: "left",
+        headerAlign: "left",
         sortable: false,
         minWidth: 100,
       },
@@ -225,8 +223,8 @@ export const WorkflowList: React.FC = () => {
         field: "next_dagrun",
         headerName: "Next Run",
         flex: 1,
-        align: "center",
-        headerAlign: "center",
+        align: "left",
+        headerAlign: "left",
         minWidth: 220,
         sortable: false,
         valueFormatter: ({ value }) =>
@@ -267,7 +265,7 @@ export const WorkflowList: React.FC = () => {
     <>
       <Paper sx={{ height: "80vh" }}>
         <DataGrid
-          density="comfortable"
+          density="compact"
           columns={columns}
           checkboxSelection
           rows={rows}
