@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { Actions } from "./Actions";
+import { RunState } from "./RunState";
 import { Status } from "./Status";
 import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
@@ -143,7 +144,7 @@ export const WorkflowList: React.FC = () => {
         minWidth: 150,
         // flex: 1,
         renderCell: (params) => {
-          return <States state={params.row.last_run_status} />;
+          return <RunState state={params.row.last_run_status} />;
         },
       },
       {
