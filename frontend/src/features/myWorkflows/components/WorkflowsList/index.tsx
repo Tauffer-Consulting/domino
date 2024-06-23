@@ -1,11 +1,6 @@
 import { useWorkspaces } from "@context/workspaces";
-import {
-  InfoOutlined,
-  DeleteOutlined,
-  PlayCircleOutlined,
-  StopCircleOutlined,
-} from "@mui/icons-material";
-import { Box, Button, Divider, Paper, Tooltip } from "@mui/material";
+import { InfoOutlined } from "@mui/icons-material";
+import { Paper, Tooltip } from "@mui/material";
 import {
   DataGrid,
   type GridRowParams,
@@ -20,6 +15,7 @@ import {
   useWorkflows,
   useStartRun,
 } from "features/myWorkflows/api";
+import { States } from "features/myWorkflows/components/WorkflowDetail/States";
 import { type IWorkflow } from "features/myWorkflows/types";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -134,6 +130,19 @@ export const WorkflowList: React.FC = () => {
         headerAlign: "center",
         align: "center",
         sortable: false,
+        minWidth: 100,
+      },
+      {
+        field: "state",
+        headerName: "State",
+        headerAlign: "center",
+        align: "center",
+        type: "string",
+        minWidth: 150,
+        // flex: 1,
+        renderCell: (params) => {
+          return <States state={params.row.last_run_status} />;
+        },
       },
       {
         field: "status",
