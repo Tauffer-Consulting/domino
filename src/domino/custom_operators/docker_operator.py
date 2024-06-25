@@ -2,11 +2,11 @@ from airflow.providers.docker.operators.docker import DockerOperator, Mount
 from airflow.utils.context import Context
 from typing import Dict, Optional, Any
 import os
-
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas import WorkflowSharedStorage, StorageSource
-from docker.types import Mount
 import docker
+
+
 class DominoDockerOperator(DockerOperator):
 
     def __init__(
@@ -21,6 +21,7 @@ class DominoDockerOperator(DockerOperator):
         piece_input_kwargs: Optional[Dict] = None,
         workflow_shared_storage: WorkflowSharedStorage = None,
         container_resources: Optional[Dict] = None,
+        test_test: Optional[Dict] = None,
         **docker_operator_kwargs
     ) -> None:
         self.task_id = task_id
