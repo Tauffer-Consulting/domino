@@ -237,3 +237,21 @@ class CreateWorkflowResponse(BaseModel):
 
 class DeleteWorkflowResponse(BaseModel):
     workflow_id: int
+
+
+class DeleteWorkflowFailureDetail(BaseModel):
+    id: int
+    message: str
+
+
+class DeleteWorkflowsFailureDetails(BaseModel):
+    details: List[DeleteWorkflowFailureDetail]
+
+
+class DeleteWorkflowsSuccessDetails(BaseModel):
+    details: str
+
+
+class DeleteWorkflowsResponse(BaseModel):
+    result: str
+    details: DeleteWorkflowsFailureDetails | DeleteWorkflowsSuccessDetails

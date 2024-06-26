@@ -1,5 +1,6 @@
 import re
 from math import ceil
+from typing import List
 from aiohttp import ClientSession
 import asyncio
 from copy import deepcopy
@@ -16,6 +17,10 @@ from utils.workflow_template import workflow_template
 from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, RunWorkflowsRequest, WorkflowSharedStorageSourceEnum, storage_default_piece_model_map
 from schemas.responses.workflow import (
     CreateWorkflowResponse,
+    DeleteWorkflowFailureDetail,
+    DeleteWorkflowsFailureDetails,
+    DeleteWorkflowsResponse,
+    DeleteWorkflowsSuccessDetails,
     GetWorkflowsResponse,
     GetWorkflowResponse,
     GetWorkflowsResponseData,
@@ -627,11 +632,52 @@ class WorkflowService(object):
         try:
             await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
             self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
-            self.workflow_repository.delete(id=workflow_id)
-        except Exception as e: # TODO improve exception handling
+            self.workflow_repository.delete_by_id(id=workflow_id)
+        except Exception as e:  # TODO improve exception handling
             self.logger.exception(e)
-            self.workflow_repository.delete(id=workflow_id)
+            self.workflow_repository.delete_by_id(id=workflow_id)
             raise e
+
+
+    async def delete_workflows(self, workflow_ids: List[int], workspace_id: int):
+        try:
+            failure_details = []
+            workflows = self.workflow_repository.find_by_ids(ids=workflow_ids)
+            if not workflows:
+                raise ResourceNotFoundException("No workflows found.")
+            found_ids = [workflow.id for workflow in workflows]
+            not_found_ids = list(set(workflow_ids) - set(found_ids))
+            if not_found_ids:
+                not_found_details = [
+                    DeleteWorkflowFailureDetail(id=id, message="Workflow not found.")
+                    for id in not_found_ids
+                ]
+                failure_details += not_found_details
+            self.workflow_repository.delete_by_ids(ids=workflow_ids)
+            for workflow in workflows:
+                if workflow.workspace_id != workspace_id:
+                    failure_details.append(
+                        DeleteWorkflowFailureDetail(
+                            id=id, message="Workflow does not belong to workspace."
+                        )
+                    )
+                await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
+                self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
+            if failure_details:
+                return DeleteWorkflowsResponse(
+                    result="failure",
+                    details=DeleteWorkflowsFailureDetails(details=failure_details),
+                )
+            return DeleteWorkflowsResponse(
+                result="success",
+                details=DeleteWorkflowsSuccessDetails(
+                    details="Workflows successfully deleted."
+                ),
+            )
+        except Exception as e:
+            self.logger.exception(e)
+            raise e
+
 
     def workflow_details(self, workflow_id: str):
         try:

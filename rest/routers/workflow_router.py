@@ -1,9 +1,11 @@
+import json
 from fastapi import APIRouter, HTTPException, status, Depends, Response
 from schemas.context.auth_context import AuthorizationContextData
 from typing import List
 from services.workflow_service import WorkflowService
 from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, RunWorkflowsRequest
 from schemas.responses.workflow import (
+    DeleteWorkflowsResponse,
     GetWorkflowsResponse,
     GetWorkflowResponse,
     CreateWorkflowResponse,
@@ -163,6 +165,28 @@ async def delete_workflow(
     except (BaseException, ForbiddenException, ResourceNotFoundException) as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
+@router.delete(
+    path="",
+    status_code=207,
+    response_model=DeleteWorkflowsResponse,
+    responses={
+        status.HTTP_207_MULTI_STATUS: {"model": DeleteWorkflowsResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": SomethingWrongError},
+        status.HTTP_403_FORBIDDEN: {"model": ForbiddenError},
+        status.HTTP_404_NOT_FOUND: {"model": ResourceNotFoundError},
+    },
+    dependencies=[Depends(write_authorizer.authorize)],
+)
+async def delete_workflows(
+    workflow_ids: List[int],
+    workspace_id: int,
+):
+    try:
+        return await workflow_service.delete_workflows(
+            workflow_ids=workflow_ids, workspace_id=workspace_id
+        )
+    except (BaseException, ForbiddenException, ResourceNotFoundException) as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
 
 
 @router.post(
