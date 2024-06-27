@@ -1,5 +1,6 @@
 import re
 from math import ceil
+from typing import List
 from aiohttp import ClientSession
 import asyncio
 from copy import deepcopy
@@ -13,9 +14,13 @@ from core.logger import get_configured_logger
 from core.settings import settings
 from pathlib import Path
 from utils.workflow_template import workflow_template
-from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, WorkflowSharedStorageSourceEnum, storage_default_piece_model_map
+from schemas.requests.workflow import CreateWorkflowRequest, ListWorkflowsFilters, RunWorkflowsRequest, WorkflowSharedStorageSourceEnum, storage_default_piece_model_map
 from schemas.responses.workflow import (
     CreateWorkflowResponse,
+    DeleteWorkflowFailureDetail,
+    DeleteWorkflowsFailureDetails,
+    DeleteWorkflowsResponse,
+    DeleteWorkflowsSuccessDetails,
     GetWorkflowsResponse,
     GetWorkflowResponse,
     GetWorkflowsResponseData,
@@ -26,6 +31,7 @@ from schemas.responses.workflow import (
     GetWorkflowResultReportResponse,
     GetWorkflowRunTaskLogsResponse,
     GetWorkflowRunTaskResultResponse,
+    WorkflowRunState,
     WorkflowStatus
 )
 from schemas.responses.base import PaginationSet
@@ -197,6 +203,14 @@ class WorkflowService(object):
             is_paused = False
             next_dagrun = None
             status = WorkflowStatus.creating.value
+            runs = self.airflow_client.get_all_workflow_runs(
+                dag_id=dag_info['dag_id'],
+                page=page,
+                page_size=page_size,
+                descending=True
+            )
+            runs_data = runs.json()
+
             if is_dag_broken:
                 status = WorkflowStatus.failed.value
                 schedule = 'failed'
@@ -227,6 +241,7 @@ class WorkflowService(object):
                     is_paused=is_paused,
                     is_active=is_active,
                     status=status,
+                    last_run_status=(runs_data["dag_runs"][0]["state"] if len(runs_data["dag_runs"]) > 0 else WorkflowRunState.none.value),
                     schedule=schedule,
                     next_dagrun=next_dagrun
                 )
@@ -515,6 +530,44 @@ class WorkflowService(object):
             all_pieces.append(v["piece"])
         return list(dict.fromkeys(all_pieces))
 
+    def run_workflows(self, body: RunWorkflowsRequest):
+        for id in body.workflow_ids:
+            workflow = self.workflow_repository.find_by_id(id=id)
+            if not workflow:
+                raise ResourceNotFoundException("workflow not found")
+
+            # Check if start date is in the past
+            if workflow.start_date and workflow.start_date > datetime.now(tz=timezone.utc):
+                raise ForbiddenException('Workflow start date is in the future. Can not run it now.')
+
+            if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
+                raise ForbiddenException('You cannot run workflows that have ended.')
+
+            airflow_workflow_id = workflow.uuid_name
+
+            # Force unpause workflow
+            payload = {
+                "is_paused": False
+            }
+            update_response = self.airflow_client.update_dag(
+                dag_id=airflow_workflow_id,
+                payload=payload
+            )
+            if update_response.status_code == 404:
+                raise ConflictException("Workflow still in creation process.")
+
+            if update_response.status_code != 200:
+                self.logger.error(f"Error while trying to unpause workflow {id}")
+                self.logger.error(update_response.json())
+                raise BaseException("Error while trying to run workflow")
+
+            run_dag_response = self.airflow_client.run_dag(dag_id=airflow_workflow_id)
+            if run_dag_response.status_code != 200:
+                self.logger.error(f"Error while trying to run workflow {id}")
+                self.logger.error(run_dag_response.json())
+                raise BaseException("Error while trying to run workflow")
+
+
     def run_workflow(self, workflow_id: int):
         workflow = self.workflow_repository.find_by_id(id=workflow_id)
         if not workflow:
@@ -579,11 +632,52 @@ class WorkflowService(object):
         try:
             await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
             self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
-            self.workflow_repository.delete(id=workflow_id)
-        except Exception as e: # TODO improve exception handling
+            self.workflow_repository.delete_by_id(id=workflow_id)
+        except Exception as e:  # TODO improve exception handling
             self.logger.exception(e)
-            self.workflow_repository.delete(id=workflow_id)
+            self.workflow_repository.delete_by_id(id=workflow_id)
             raise e
+
+
+    async def delete_workflows(self, workflow_ids: List[int], workspace_id: int):
+        try:
+            failure_details = []
+            workflows = self.workflow_repository.find_by_ids(ids=workflow_ids)
+            if not workflows:
+                raise ResourceNotFoundException("No workflows found.")
+            found_ids = [workflow.id for workflow in workflows]
+            not_found_ids = list(set(workflow_ids) - set(found_ids))
+            if not_found_ids:
+                not_found_details = [
+                    DeleteWorkflowFailureDetail(id=id, message="Workflow not found.")
+                    for id in not_found_ids
+                ]
+                failure_details += not_found_details
+            self.workflow_repository.delete_by_ids(ids=workflow_ids)
+            for workflow in workflows:
+                if workflow.workspace_id != workspace_id:
+                    failure_details.append(
+                        DeleteWorkflowFailureDetail(
+                            id=id, message="Workflow does not belong to workspace."
+                        )
+                    )
+                await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
+                self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
+            if failure_details:
+                return DeleteWorkflowsResponse(
+                    result="failure",
+                    details=DeleteWorkflowsFailureDetails(details=failure_details),
+                )
+            return DeleteWorkflowsResponse(
+                result="success",
+                details=DeleteWorkflowsSuccessDetails(
+                    details="Workflows successfully deleted."
+                ),
+            )
+        except Exception as e:
+            self.logger.exception(e)
+            raise e
+
 
     def workflow_details(self, workflow_id: str):
         try:

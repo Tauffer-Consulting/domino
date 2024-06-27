@@ -16,6 +16,7 @@ class WorkflowRunState(str, Enum):
     queued = "queued"
     success = "success"
     failed = "failed"
+    none = "none"
 
 class WorkflowRunTaskState(str, Enum):
     success = "success"
@@ -78,6 +79,7 @@ class GetWorkflowsResponseData(BaseModel):
     is_paused: bool
     is_active: bool
     status: WorkflowStatus
+    last_run_status: WorkflowRunState = None
     schedule: Optional[ScheduleIntervalTypeResponse] = None
     next_dagrun: Optional[datetime] = None
 
@@ -235,3 +237,21 @@ class CreateWorkflowResponse(BaseModel):
 
 class DeleteWorkflowResponse(BaseModel):
     workflow_id: int
+
+
+class DeleteWorkflowFailureDetail(BaseModel):
+    id: int
+    message: str
+
+
+class DeleteWorkflowsFailureDetails(BaseModel):
+    details: List[DeleteWorkflowFailureDetail]
+
+
+class DeleteWorkflowsSuccessDetails(BaseModel):
+    details: str
+
+
+class DeleteWorkflowsResponse(BaseModel):
+    result: str
+    details: DeleteWorkflowsFailureDetails | DeleteWorkflowsSuccessDetails
