@@ -21,6 +21,15 @@ class DominoBaseOperator:
         container_resources: Optional[Dict] = None,
     ):
         if deploy_mode == "local-compose":
+            cls.operator_kwargs = dict(
+                entrypoint=["domino", "run-piece-docker"],
+                do_xcom_push=True,
+                mount_tmp_dir=False,
+                tty=True,
+                xcom_all=False,
+                retrieve_output=True,
+                retrieve_output_path="/airflow/xcom/return.out"
+            )
             return DominoDockerOperator(
                 dag_id=dag_id,
                 task_id=task_id,
@@ -32,32 +41,14 @@ class DominoBaseOperator:
                 piece_input_kwargs=piece_input_kwargs,
                 workflow_shared_storage=workflow_shared_storage,
                 container_resources=container_resources or {},
+                image=piece_source_image,
                 # ----------------- Docker -----------------
                 # TODO uncoment
-                image=piece_source_image,
-                entrypoint=["domino", "run-piece-docker"],
-                do_xcom_push=True,
-                mount_tmp_dir=False,
-                tty=True,
-                xcom_all=False,
-                retrieve_output=True,
-                retrieve_output_path="/airflow/xcom/return.out",
+                **cls.operator_kwargs
             )
         elif deploy_mode in ["local-k8s", "local-k8s-dev", "prod", "k8s"]:
-            return DominoKubernetesPodOperator(
-                dag_id=dag_id,
-                task_id=task_id,
-                piece_name=piece_name,
-                deploy_mode=deploy_mode,
-                repository_url=repository_url,
-                repository_version=repository_version,
-                workspace_id=workspace_id,
-                piece_input_kwargs=piece_input_kwargs,
-                workflow_shared_storage=workflow_shared_storage,
-                container_resources=container_resources or {},
-                # ----------------- Kubernetes -----------------
+            cls.operator_kwargs = dict(
                 namespace="default",
-                image=piece_source_image,
                 image_pull_policy="IfNotPresent",
                 name=f"airflow-worker-pod-{task_id}",
                 startup_timeout_seconds=600,
@@ -69,7 +60,22 @@ class DominoBaseOperator:
                 cmds=["domino"],
                 arguments=["run-piece-k8s"],
                 do_xcom_push=True,
-                in_cluster=True,
+                in_cluster=True
+            )
+            return DominoKubernetesPodOperator(
+                dag_id=dag_id,
+                task_id=task_id,
+                piece_name=piece_name,
+                deploy_mode=deploy_mode,
+                repository_url=repository_url,
+                repository_version=repository_version,
+                workspace_id=workspace_id,
+                piece_input_kwargs=piece_input_kwargs,
+                workflow_shared_storage=workflow_shared_storage,
+                container_resources=container_resources or {},
+                image=piece_source_image,
+                # ----------------- Kubernetes -----------------
+                **cls.operator_kwargs
             )
         else:
             raise Exception(f"Invalid deploy mode: {deploy_mode}")
@@ -78,8 +84,8 @@ class DominoBaseOperator:
     def partial(cls, **kwargs):
         deploy_mode = os.environ.get("DOMINO_DEPLOY_MODE")
         if deploy_mode == "local-compose":
-            return DominoDockerOperator.partial(**kwargs)
+            return DominoDockerOperator.partial(**kwargs, **cls.operator_kwargs)
         elif deploy_mode in ["local-k8s", "local-k8s-dev", "prod", "k8s"]:
-            return DominoKubernetesPodOperator.partial(**kwargs)
+            return DominoKubernetesPodOperator.partial(**kwargs, **cls.operator_kwargs)
         else:
             raise Exception(f"Invalid deploy mode: {deploy_mode}")
