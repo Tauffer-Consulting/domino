@@ -20,6 +20,7 @@ class Task(object):
         piece_input_kwargs: dict,
         workflow_shared_storage: dict = None,
         container_resources: dict = None,
+        init_operator: bool = True,
         #**kwargs
     ) -> None:
         # Task configuration and attributes
@@ -51,19 +52,22 @@ class Task(object):
         self.deploy_mode = os.environ.get('DOMINO_DEPLOY_MODE')
 
         # Set up task operator
-        self._task_operator = DominoBaseOperator(
-            dag_id=self.dag_id,
-            task_id=self.task_id,
-            piece_name=self.piece.get("name"),
-            deploy_mode=self.deploy_mode,
-            repository_url=self.repository_url,
-            repository_version=self.repository_version,
-            workspace_id=self.workspace_id,
-            piece_input_kwargs=self.piece_input_kwargs,
-            workflow_shared_storage=self.workflow_shared_storage,
-            container_resources=self.container_resources,
-            piece_source_image=self.piece.get("source_image"),
-        )
+        if not init_operator:
+            self._task_operator = None
+        else:
+            self._task_operator = DominoBaseOperator(
+                dag_id=self.dag_id,
+                task_id=self.task_id,
+                piece_name=self.piece.get("name"),
+                deploy_mode=self.deploy_mode,
+                repository_url=self.repository_url,
+                repository_version=self.repository_version,
+                workspace_id=self.workspace_id,
+                piece_input_kwargs=self.piece_input_kwargs,
+                workflow_shared_storage=self.workflow_shared_storage,
+                container_resources=self.container_resources,
+                piece_source_image=self.piece.get("source_image"),
+            )
 
     def __call__(self) -> Callable:
         return self._task_operator
