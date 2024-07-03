@@ -12,6 +12,7 @@ from repository.piece_repository import PieceRepository
 from schemas.responses.piece import GetPiecesResponse
 from utils.base_node_style import get_frontend_node_style
 from constants.default_pieces.storage import DEFAULT_STORAGE_PIECES
+from constants.default_pieces.control import DEFAULT_CONTROL_PIECES
 
 
 class PieceService(object):
@@ -127,6 +128,25 @@ class PieceService(object):
             return
         self.piece_repository.update(new_piece, piece_id=db_piece.id)
 
+    def create_default_control_pieces(self, piece_repository_id: int = 1) -> None:
+        """Create default control pieces in database
+        """
+        self.logger.info("Creating default control pieces")
+
+        pieces = []
+        for piece_model in DEFAULT_CONTROL_PIECES:
+            model = piece_model()
+            piece = Piece(
+                name=model.name,
+                description=model.description,
+                secrets_schema=model.secrets_schema,
+                input_schema=model.input_schema,
+                repository_id=piece_repository_id,
+                style=model.style
+            )
+            pieces.append(piece)
+        pieces = self.piece_repository.create_many(pieces)
+        return pieces
 
     def create_default_storage_pieces(self, piece_repository_id: int = 1) -> None:
         """Create default storage pieces in database

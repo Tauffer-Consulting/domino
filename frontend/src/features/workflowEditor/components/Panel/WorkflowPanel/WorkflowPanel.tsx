@@ -47,6 +47,7 @@ import {
 import { CustomConnectionLine } from "./ConnectionLine";
 import DefaultEdge from "./DefaultEdge";
 import { CustomNode } from "./DefaultNode";
+import BatchNode from "./BatchNode"; // Import the BatchNode
 import { type DefaultNode } from "./types";
 
 const getId = (module_name: string) => {
@@ -55,6 +56,7 @@ const getId = (module_name: string) => {
 
 const DEFAULT_NODE_TYPES: NodeTypes = {
   CustomNode,
+  BatchNode,
 };
 
 const EDGE_TYPES: EdgeTypes = {
@@ -106,7 +108,8 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
         setInstance(instance);
         const edges = getWorkflowEdges();
         const nodes = getWorkflowNodes();
-        setNodes(nodes);
+
+        setNodes([...nodes, defaultBatchNode]);
         setEdges(edges);
         window.requestAnimationFrame(() => instance.fitView());
       },
@@ -126,9 +129,14 @@ const WorkflowPanel = forwardRef<WorkflowPanelRef, Props>(
           orientation: data?.orientation ?? "horizontal",
         };
 
+        let nodeType = "CustomNode";
+        if (data.repository_url === 'domino-default/default_control_repository') {
+          nodeType = "BatchNode";
+        }
+
         const newNode = {
           id: getId(data.id),
-          type: "CustomNode",
+          type: nodeType,
           position,
           data: newNodeData,
         };

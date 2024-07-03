@@ -68,6 +68,9 @@ class WorkspaceService(object):
             self.piece_repository_service.create_default_storage_repository(
                 workspace_id=workspace.id
             )
+            self.piece_repository_service.create_default_control_repository(
+                workspace_id=workspace.id
+            )
             auth_context.workspace = WorkspaceAuthorizerData(
                 id=workspace.id,
                 name=workspace.name,

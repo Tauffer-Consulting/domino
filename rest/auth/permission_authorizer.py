@@ -1,8 +1,7 @@
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-import jwt
 from schemas.errors.base import ForbiddenError, ResourceNotFoundError
-from schemas.context.auth_context import AuthorizationContextData, WorkspaceAuthorizerData
+from schemas.context.auth_context import WorkspaceAuthorizerData
 from database.models.enums import Permission, UserWorkspaceStatus
 from typing import Optional, Dict
 from auth.base_authorizer import BaseAuthorizer

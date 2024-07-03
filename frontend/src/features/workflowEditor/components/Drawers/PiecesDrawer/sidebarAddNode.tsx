@@ -23,7 +23,20 @@ interface Props {
 }
 
 const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
-  const { repositories, repositoriesLoading, repositoryPieces } = usesPieces();
+  const {
+    repositories,
+    repositoriesLoading,
+    repositoryPieces,
+    defaultRepositories,
+    defaultRepositoriesIsLoading
+  } = usesPieces();
+
+  const controlRepository = useMemo(() => {
+    return defaultRepositories.find((repository) => {
+      return repository.name.includes("control");
+    });
+  }, [defaultRepositories]);
+
 
   const [filter, setFilter] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -71,12 +84,18 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
     }
   }, [filter]);
 
+  const isLoading = useMemo(() =>{
+    return repositoriesLoading || defaultRepositoriesIsLoading;
+  }, [repositoriesLoading, defaultRepositoriesIsLoading])
+
+  const allRepos = controlRepository ? [...repositories, controlRepository] : repositories;
+
   return (
     <Box sx={{ padding: 2 }}>
-      {repositoriesLoading && (
+      {isLoading && (
         <Alert severity="info">Loading repositories...</Alert>
       )}
-      {!repositoriesLoading && (
+      {!isLoading && (
         <ToggleButtonGroup
           sx={{ display: "flex" }}
           value={orientation}
@@ -103,8 +122,8 @@ const SidebarAddNode: FC<Props> = ({ setOrientation, orientation }) => {
         variant="filled"
         label="search"
       />
-      {!repositoriesLoading &&
-        repositories.map((repo) => {
+      {!isLoading &&
+        allRepos.map((repo) => {
           if (!filteredRepositoryPieces[repo.id]?.length) {
             return null;
           }

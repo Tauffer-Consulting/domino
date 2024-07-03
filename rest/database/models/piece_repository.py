@@ -2,14 +2,14 @@ from database.models.base import Base, BaseDatabaseModel
 from sqlalchemy import Column, String, Integer, DateTime, Enum, JSON, ForeignKey
 from database.models.enums import RepositorySource
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class PieceRepository(Base, BaseDatabaseModel):
     __tablename__ = "piece_repository"
 
     id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now(tz=timezone.utc))
     name = Column(String(50), unique=False)
     label = Column(String(50), unique=False)
     source = Column(Enum(RepositorySource), nullable=True, default=RepositorySource.github.value)

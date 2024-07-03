@@ -2,7 +2,7 @@ from typing import List
 import json
 import tomli
 from math import ceil
-from datetime import datetime
+from datetime import datetime, timezone
 from core.logger import get_configured_logger
 from schemas.context.auth_context import AuthorizationContextData
 from schemas.requests.piece_repository import CreateRepositoryRequest, PatchRepositoryRequest, ListRepositoryFilters
@@ -27,6 +27,7 @@ from database.models.enums import RepositorySource
 from database.models import PieceRepository
 from clients.github_rest_client import GithubRestClient
 from core.settings import settings
+
 
 
 class PieceRepositoryService(object):
@@ -132,7 +133,7 @@ class PieceRepositoryService(object):
             version=piece_repository_data.version
         )
         new_repo = PieceRepository(
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(tz=timezone.utc),
             name=repository_files_metadata['config_toml'].get('repository').get('REPOSITORY_NAME'),
             source=repository.source,
             path=repository.path,
@@ -176,6 +177,25 @@ class PieceRepositoryService(object):
 
         return PatchRepositoryResponse(**repository.to_dict())
 
+    def create_default_control_repository(self, workspace_id: int):
+        self.logger.info(f"Creating default control repository")
+        new_repo = PieceRepository(
+            name=settings.DEFAULT_CONTROL_REPOSITORY['name'],
+            created_at=datetime.now(tz=timezone.utc),
+            workspace_id=workspace_id,
+            label=settings.DEFAULT_CONTROL_REPOSITORY['label'],
+            path=settings.DEFAULT_CONTROL_REPOSITORY['path'],
+            source=settings.DEFAULT_CONTROL_REPOSITORY['source'],
+            version=settings.DEFAULT_CONTROL_REPOSITORY['version'],
+            url=settings.DEFAULT_CONTROL_REPOSITORY['url']
+        )
+        default_control_repository = self.piece_repository_repository.create(piece_repository=new_repo)
+
+        self.piece_service.create_default_control_pieces(
+            piece_repository_id=default_control_repository.id,
+        )
+        return default_control_repository
+
     def create_default_storage_repository(self, workspace_id: int):
         """
         Create default storage repository for workspace.
@@ -185,7 +205,7 @@ class PieceRepositoryService(object):
 
         new_repo = PieceRepository(
             name=settings.DEFAULT_STORAGE_REPOSITORY['name'],
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(tz=timezone.utc),
             workspace_id=workspace_id,
             path=settings.DEFAULT_STORAGE_REPOSITORY['path'],
             source=settings.DEFAULT_STORAGE_REPOSITORY['source'],
@@ -228,7 +248,7 @@ class PieceRepositoryService(object):
             github_access_token=token
         )
         new_repo = PieceRepository(
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(tz=timezone.utc),
             name=repository_files_metadata['config_toml'].get('repository').get('REPOSITORY_NAME'),
             source=piece_repository_data.source,
             path=piece_repository_data.path,

@@ -2,11 +2,11 @@ from airflow.providers.docker.operators.docker import DockerOperator, Mount
 from airflow.utils.context import Context
 from typing import Dict, Optional, Any
 import os
-
 from domino.client.domino_backend_client import DominoBackendRestClient
 from domino.schemas import WorkflowSharedStorage, StorageSource
-from docker.types import Mount
 import docker
+
+
 class DominoDockerOperator(DockerOperator):
 
     def __init__(
@@ -21,6 +21,7 @@ class DominoDockerOperator(DockerOperator):
         piece_input_kwargs: Optional[Dict] = None,
         workflow_shared_storage: WorkflowSharedStorage = None,
         container_resources: Optional[Dict] = None,
+        test_test: Optional[Dict] = None,
         **docker_operator_kwargs
     ) -> None:
         self.task_id = task_id
@@ -55,7 +56,7 @@ class DominoDockerOperator(DockerOperator):
         mounts = []
 
         # TODO remove - used in DEV only #######################
-        dev_pieces = False
+        dev_pieces = True
         if dev_pieces:
             piece_repo_name = repository_url.split("/")[-1]
             #local_repos_path = f"/mnt/shared_storage/Github/{piece_repo_name}"
@@ -130,12 +131,29 @@ class DominoDockerOperator(DockerOperator):
         self,
         value: Any
     ):
-        if isinstance(value, dict) and value.get("type") == "fromUpstream":
+        if (
+            isinstance(value, dict)
+            and value.get("type") == "fromUpstream"
+            and "batch_task_group" not in value.get("upstream_task_id")
+        ):
             upstream_task_id = value["upstream_task_id"]
-            output_arg = value["output_arg"]
+            upstream_output_arg = value["output_arg"] # upstream output arg
             if upstream_task_id not in self.shared_storage_upstream_ids_list:
                 self.shared_storage_upstream_ids_list.append(upstream_task_id)
-            return self.upstream_xcoms_data[upstream_task_id][output_arg]
+            return self.upstream_xcoms_data[upstream_task_id][upstream_output_arg]
+
+        if (
+            isinstance(value, dict)
+            and value.get("type") == "fromUpstream"
+            and "batch_task_group" in value.get("upstream_task_id")
+        ):
+            upstream_task_id: str = value["upstream_task_id"]
+            upstream_output_arg: str = value["output_arg"] # upstream output arg
+            dynamic_mapped_upstream_xcom_data: list = self.upstream_xcoms_data[upstream_task_id]
+            value = []
+            for e in dynamic_mapped_upstream_xcom_data:
+                value.append(e[upstream_output_arg])
+            return value
         elif isinstance(value, list):
             return [self._get_piece_kwargs_value_from_upstream_xcom(item) for item in value]
         elif isinstance(value, dict):

@@ -16,12 +16,14 @@ import { toast } from "react-toastify";
 import { createCustomContext } from "utils";
 
 import { useWorkspaces } from "./workspaces";
+import _default from "vite-tsconfig-paths";
 
 export interface IPiecesContext {
   repositories: Repository[];
   defaultRepositories: Repository[];
   repositoryPieces: PiecesRepository;
   repositoriesLoading: boolean;
+  defaultRepositoriesIsLoading: boolean;
 
   selectedRepositoryId?: number;
   setSelectedRepositoryId: React.Dispatch<
@@ -58,7 +60,8 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const queryClient = useQueryClient();
 
-  const { data: defaultRepositories } = useRepositories({
+  const { data: defaultRepositories, isLoading: defaultRepositoriesIsLoading } = useRepositories({
+    workspaceId: workspace?.id,
     source: "default",
   });
 
@@ -104,11 +107,11 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     const repositoryPiecesAux: PiecesRepository = {};
     const foragePieces: PieceForageSchema = {};
 
-    if (!pieces?.length) {
+    if (!pieces?.length && !_defaultPieces?.length) {
       localStorage.setItem("pieces", foragePieces);
       return repositoryPiecesAux;
     } else {
-      for (const piece of pieces) {
+      for (const piece of [...pieces, ..._defaultPieces]) {
         if (repositoryPiecesAux[piece.repository_id]?.length) {
           repositoryPiecesAux[piece.repository_id].push(piece);
         } else {
@@ -121,7 +124,7 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("pieces", foragePieces);
       return repositoryPiecesAux;
     }
-  }, [pieces]);
+  }, [pieces, _defaultPieces]);
 
   const fetchForagePieceById = useCallback((id: number) => {
     const pieces = localStorage.getItem<PieceForageSchema>("pieces");
@@ -135,6 +138,7 @@ const PiecesProvider: React.FC<{ children: React.ReactNode }> = ({
     defaultRepositories: defaultRepositories?.data ?? [],
     repositoryPieces,
     repositoriesLoading,
+    defaultRepositoriesIsLoading,
 
     selectedRepositoryId,
     setSelectedRepositoryId,

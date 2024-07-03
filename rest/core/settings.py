@@ -93,6 +93,14 @@ class Settings(BaseSettings):
         version="0.0.1",
         url="domino-default/default_storage_repository"
     )
+    DEFAULT_CONTROL_REPOSITORY: dict = dict(
+        name="default_control_repository",
+        path="default_control_repository",
+        source=getattr(RepositorySource, 'default').value,
+        version="0.0.1",
+        label="Default Control Repository",
+        url="domino-default/default_control_repository"
+    )
 
     DEPLOY_MODE: str = os.environ.get('DOMINO_DEPLOY_MODE', 'local-k8s')
 
