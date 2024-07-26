@@ -178,3 +178,7 @@ class ListWorkflowsFilters(BaseModel):
     end_date__gt: Optional[str] = None
     schedule: Optional[ScheduleIntervalType] = None
 
+
+class RunWorkflowsRequest(BaseModel):
+    workflow_ids: List[int] 
+    

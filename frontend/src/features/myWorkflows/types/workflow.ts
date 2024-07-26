@@ -1,3 +1,4 @@
+import { type runState } from "features/myWorkflows/types/runs";
 import { type DefaultNode } from "features/workflowEditor/components/Panel/WorkflowPanel";
 
 export type IWorkflowElement = DefaultNode;
@@ -22,6 +23,7 @@ export interface IWorkflow {
   is_paused: boolean;
   is_active: boolean;
   status: workflowStatus;
+  last_run_status: runState;
   is_subdag: boolean;
   last_pickled: string;
   schedule: string;
@@ -95,3 +97,13 @@ export type IDeleteWorkflowIdResponseInterface = Record<string, any>;
  * TODO type properly
  */
 export type IPostWorkflowRunIdResponseInterface = Record<string, any>;
+
+export interface IBatchWorkflowActionDetail {
+  id: number;
+  message: string;
+}
+
+export interface IBatchWorkflowActionResponse {
+  result: string;
+  details: IBatchWorkflowActionDetail[];
+}

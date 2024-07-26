@@ -1,25 +1,30 @@
 import { useWorkspaces } from "@context/workspaces";
-import { InfoOutlined } from "@mui/icons-material";
-import { Paper, Tooltip } from "@mui/material";
+import { useStartRuns } from "@features/myWorkflows/api/runs/useStartRuns";
+import { useStopRuns } from "@features/myWorkflows/api/runs/useStopRuns";
+import { useDeleteWorkflows } from "@features/myWorkflows/api/workflow/useDeleteWorkflows";
+import { InfoOutlined, PlayCircleOutlined } from "@mui/icons-material";
+import { IconButton, Paper, Tooltip, useTheme } from "@mui/material";
 import {
   DataGrid,
   type GridRowParams,
   type GridColDef,
   type GridEventListener,
+  type GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import { useQueryClient } from "@tanstack/react-query";
 import { NoDataOverlay } from "components/NoDataOverlay";
+import { useWorkflows, useStartRun } from "features/myWorkflows/api";
 import {
-  useDeleteWorkflow,
-  useWorkflows,
-  useStartRun,
-} from "features/myWorkflows/api";
-import { type IWorkflow } from "features/myWorkflows/types";
+  type IBatchWorkflowActionDetail,
+  type IWorkflow,
+} from "features/myWorkflows/types";
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { Actions } from "./Actions";
+import { FailureDetailsModal } from "./FailureDetailsModal";
+import { RunState } from "./RunState";
 import { Status } from "./Status";
 import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
 
@@ -29,11 +34,21 @@ import { WorkflowsListSkeleton } from "./WorkflowsListSkeleton";
  */
 
 export const WorkflowList: React.FC = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const [paginationModel, setPaginationModel] = React.useState({
     pageSize: 10,
     page: 0,
   });
+
+  const [failureDetails, setFailureDetails] = React.useState<
+    IBatchWorkflowActionDetail[]
+  >([]);
+
+  const [failureModalOpen, setFailureModalOpen] = React.useState(false);
+  const [selectedWorkflowIds, setSelectedWorkflowIds] = React.useState<
+    Array<IWorkflow["id"]>
+  >([]);
 
   const { workspace } = useWorkspaces();
   const queryClient = useQueryClient();
@@ -49,17 +64,90 @@ export const WorkflowList: React.FC = () => {
       pageSize: paginationModel.pageSize,
     },
     {
-      refetchInterval: 5000,
+      refetchInterval: 1500,
     },
   );
 
-  const { mutateAsync: handleDeleteWorkflow } = useDeleteWorkflow(
+  const { mutateAsync: handleDeleteWorkflows } = useDeleteWorkflows(
     {
       workspaceId: workspace?.id,
     },
     {
-      onSuccess: () => {
-        toast.success("Workflow deleted");
+      onSuccess: async (response, { workflowIds }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["WORKFLOWS", workspace?.id, workflowIds],
+        });
+        if (response.result === "success") {
+          toast.success("Workflows deleted");
+        } else {
+          setFailureDetails(response.details);
+          toast.warning(
+            <div
+              onClick={() => {
+                setFailureModalOpen(true);
+              }}
+              style={{ textDecoration: "underline" }}
+            >
+              Some workflows couldn't be deleted.
+            </div>,
+          );
+        }
+      },
+    },
+  );
+
+  const { mutateAsync: handleRunWorkflows } = useStartRuns(
+    {
+      workspaceId: workspace?.id,
+    },
+    {
+      onSuccess: async (response, { workflowIds }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["RUNS", workspace?.id, workflowIds],
+        });
+        if (response.result === "success") {
+          toast.success("Workflows started to run");
+        } else {
+          setFailureDetails(response.details);
+          toast.warning(
+            <div
+              onClick={() => {
+                setFailureModalOpen(true);
+              }}
+              style={{ textDecoration: "underline" }}
+            >
+              Some workflows couldn't be started.
+            </div>,
+          );
+        }
+      },
+    },
+  );
+
+  const { mutateAsync: handleStopWorkflows } = useStopRuns(
+    {
+      workspaceId: workspace?.id,
+    },
+    {
+      onSuccess: async (response, { workflowIds }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["RUNS", workspace?.id, workflowIds],
+        });
+        if (response.result === "success") {
+          toast.success("Workflows stopped");
+        } else {
+          setFailureDetails(response.details);
+          toast.warning(
+            <div
+              onClick={() => {
+                setFailureModalOpen(true);
+              }}
+              style={{ textDecoration: "underline" }}
+            >
+              Some workflows couldn't be stopped.
+            </div>,
+          );
+        }
       },
     },
   );
@@ -78,14 +166,6 @@ export const WorkflowList: React.FC = () => {
     },
   );
 
-  const deleteWorkflow = useCallback(async (id: IWorkflow["id"]) => {
-    try {
-      await handleDeleteWorkflow({ workflowId: String(id) });
-      await handleRefreshWorkflows();
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
   const runWorkflow = useCallback(async (id: IWorkflow["id"]) => {
     try {
       await handleRunWorkflow({ workflowId: String(id) });
@@ -94,7 +174,29 @@ export const WorkflowList: React.FC = () => {
     }
   }, []);
 
-  const pauseWorkflow = useCallback((_id: IWorkflow["id"]) => {}, []);
+  const runWorkflows = useCallback(async (ids: Array<IWorkflow["id"]>) => {
+    try {
+      await handleRunWorkflows({ workflowIds: ids });
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const deleteWorkflows = useCallback(async (ids: Array<IWorkflow["id"]>) => {
+    try {
+      await handleDeleteWorkflows({ workflowIds: ids });
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const stopWorkflows = useCallback(async (ids: Array<IWorkflow["id"]>) => {
+    try {
+      await handleStopWorkflows({ workflowIds: ids });
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   const { rows, totalRows } = useMemo(
     () => ({
@@ -109,22 +211,35 @@ export const WorkflowList: React.FC = () => {
       {
         field: "id",
         headerName: "ID",
-        width: 80,
-        headerAlign: "center",
-        align: "center",
+        width: 60,
+        headerAlign: "left",
+        align: "left",
         sortable: false,
+        minWidth: 50,
+      },
+      {
+        field: "state",
+        headerName: "Last Run State",
+        headerAlign: "left",
+        align: "left",
+        type: "string",
+        minWidth: 150,
+        // flex: 1,
+        renderCell: (params) => {
+          return <RunState state={params.row.last_run_status} />;
+        },
       },
       {
         field: "status",
         headerName: "Status",
         renderCell: (params) => <Status status={params.row.status} />,
         flex: 0.5,
-        align: "center",
-        headerAlign: "center",
+        align: "left",
+        headerAlign: "left",
         sortable: false,
         minWidth: 100,
       },
-      { field: "name", headerName: "Workflow Name", flex: 2, minWidth: 220 },
+      { field: "name", headerName: "Workflow Name", flex: 2, minWidth: 180 },
       {
         field: "start_date",
         renderHeader: () => (
@@ -136,11 +251,11 @@ export const WorkflowList: React.FC = () => {
           </Tooltip>
         ),
         flex: 1,
-        align: "center",
-        minWidth: 220,
+        align: "left",
+        minWidth: 180,
 
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
-        headerAlign: "center",
+        headerAlign: "left",
       },
       {
         field: "end_date",
@@ -152,11 +267,11 @@ export const WorkflowList: React.FC = () => {
             </span>
           </Tooltip>
         ),
-        headerAlign: "center",
-        align: "center",
+        headerAlign: "left",
+        align: "left",
         type: "string",
         flex: 1,
-        minWidth: 220,
+        minWidth: 180,
         valueFormatter: ({ value }) =>
           value ? new Date(value).toLocaleString() : "None",
       },
@@ -164,27 +279,26 @@ export const WorkflowList: React.FC = () => {
         field: "created_at",
         headerName: "Created At",
         flex: 1,
-        align: "center",
-        minWidth: 220,
-
+        align: "left",
+        minWidth: 180,
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
-        headerAlign: "center",
+        headerAlign: "left",
       },
       {
         field: "last_changed_at",
         headerName: "Last Modified",
         flex: 1,
-        align: "center",
+        align: "left",
         valueFormatter: ({ value }) => new Date(value).toLocaleString(),
-        headerAlign: "center",
-        minWidth: 220,
+        headerAlign: "left",
+        minWidth: 180,
       },
       {
         field: "schedule",
         headerName: "Schedule",
         flex: 1,
-        align: "center",
-        headerAlign: "center",
+        align: "left",
+        headerAlign: "left",
         sortable: false,
         minWidth: 100,
       },
@@ -192,39 +306,59 @@ export const WorkflowList: React.FC = () => {
         field: "next_dagrun",
         headerName: "Next Run",
         flex: 1,
-        align: "center",
-        headerAlign: "center",
-        minWidth: 220,
+        align: "left",
+        headerAlign: "left",
+        minWidth: 180,
         sortable: false,
         valueFormatter: ({ value }) =>
           value ? new Date(value).toLocaleString() : "none",
       },
       {
-        field: "actions",
-        headerName: "Actions",
-        flex: 1,
+        field: "run",
+        headerName: "Run",
         renderCell: ({ row }) => {
           return (
-            <Actions
-              id={row.id}
-              className=".action-button"
-              deleteFn={() => {
-                void deleteWorkflow(row.id);
-              }}
-              runFn={() => {
-                void runWorkflow(row.id);
-              }}
-              pauseFn={() => {
-                pauseWorkflow(row.id);
-              }}
-              disabled={new Date(row.start_date) > new Date()}
-            />
+            <>
+              {new Date(row.start_date) > new Date() ? (
+                <Tooltip title="Can't run future workflows." arrow>
+                  <span>
+                    <IconButton
+                      className=".action-button"
+                      onClick={() => {
+                        void runWorkflow(row.id);
+                      }}
+                    >
+                      <PlayCircleOutlined
+                        style={{
+                          pointerEvents: "none",
+                          color: theme.palette.grey[500],
+                        }}
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              ) : (
+                <IconButton
+                  className=".action-button"
+                  onClick={() => {
+                    void runWorkflow(row.id);
+                  }}
+                >
+                  <PlayCircleOutlined
+                    style={{
+                      pointerEvents: "none",
+                      color: theme.palette.success.main,
+                    }}
+                  />
+                </IconButton>
+              )}
+            </>
           );
         },
-        headerAlign: "center",
-        align: "center",
+        headerAlign: "left",
+        align: "left",
         sortable: false,
-        minWidth: 150,
+        minWidth: 50,
       },
     ],
     [],
@@ -249,6 +383,10 @@ export const WorkflowList: React.FC = () => {
     [navigate],
   );
 
+  const handleSelectionModelChange = (newSelection: GridRowSelectionModel) => {
+    setSelectedWorkflowIds(newSelection as number[]);
+  };
+
   if (isLoading) {
     return <WorkflowsListSkeleton />;
   }
@@ -257,8 +395,9 @@ export const WorkflowList: React.FC = () => {
     <>
       <Paper sx={{ height: "80vh" }}>
         <DataGrid
-          density="comfortable"
+          density="compact"
           columns={columns}
+          checkboxSelection
           rows={rows}
           isRowSelectable={(params) =>
             params.row.status !== "failed" && params.row.status !== "creating"
@@ -274,12 +413,32 @@ export const WorkflowList: React.FC = () => {
           }}
           rowCount={totalRows}
           onPaginationModelChange={setPaginationModel}
+          onRowSelectionModelChange={handleSelectionModelChange}
           disableDensitySelector
           disableRowSelectionOnClick
           hideFooterSelectedRowCount
           disableColumnMenu
           disableColumnSelector
-          slots={{ noRowsOverlay: NoDataOverlay }}
+          slots={{
+            noRowsOverlay: NoDataOverlay,
+            toolbar: () => {
+              return (
+                <Actions
+                  ids={selectedWorkflowIds}
+                  runFn={() => {
+                    void runWorkflows(selectedWorkflowIds);
+                  }}
+                  stopFn={() => {
+                    void stopWorkflows(selectedWorkflowIds);
+                  }}
+                  deleteFn={() => {
+                    void deleteWorkflows(selectedWorkflowIds);
+                  }}
+                  disabled={selectedWorkflowIds.length === 0}
+                />
+              );
+            },
+          }}
           sx={{
             // disable cell selection style
             "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
@@ -292,6 +451,14 @@ export const WorkflowList: React.FC = () => {
           }}
         />
       </Paper>
+      <FailureDetailsModal
+        isOpen={failureModalOpen}
+        title={"Workflow Runs Failure Details"}
+        data={failureDetails}
+        cancelCb={() => {
+          setFailureModalOpen(false);
+        }}
+      />
     </>
   );
 };

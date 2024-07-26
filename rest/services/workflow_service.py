@@ -1,5 +1,6 @@
 import re
 from math import ceil
+from typing import List
 from aiohttp import ClientSession
 import asyncio
 from copy import deepcopy
@@ -26,7 +27,11 @@ from schemas.responses.workflow import (
     GetWorkflowResultReportResponse,
     GetWorkflowRunTaskLogsResponse,
     GetWorkflowRunTaskResultResponse,
-    WorkflowStatus
+    WorkflowRunState,
+    WorkflowStatus,
+    BatchWorkflowFailureDetail,
+    BatchWorkflowSuccessDetail,
+    BatchWorkflowResponse
 )
 from schemas.responses.base import PaginationSet
 from schemas.exceptions.base import ConflictException, ForbiddenException, ResourceNotFoundException, BadRequestException
@@ -197,6 +202,14 @@ class WorkflowService(object):
             is_paused = False
             next_dagrun = None
             status = WorkflowStatus.creating.value
+            dag_runs = self.airflow_client.get_all_workflow_runs(
+                dag_id=dag_info['dag_id'],
+                page=0,
+                page_size=1,
+                descending=True
+            )
+            dag_runs_data = dag_runs.json()
+
             if is_dag_broken:
                 status = WorkflowStatus.failed.value
                 schedule = 'failed'
@@ -227,6 +240,7 @@ class WorkflowService(object):
                     is_paused=is_paused,
                     is_active=is_active,
                     status=status,
+                    last_run_status=(dag_runs_data["dag_runs"][0]["state"] if len(dag_runs_data["dag_runs"]) > 0 else WorkflowRunState.none.value),
                     schedule=schedule,
                     next_dagrun=next_dagrun
                 )
@@ -255,10 +269,10 @@ class WorkflowService(object):
         if workflow.workspace_id != workspace_id:
             raise ForbiddenException()
 
-        airflow_dag_info = self.airflow_client.get_dag_by_id(dag_id=workflow.uuid_name)
+        dag_info = self.airflow_client.get_dag_by_id(dag_id=workflow.uuid_name)
 
-        if airflow_dag_info.status_code == 404:
-            airflow_dag_info = {
+        if dag_info.status_code == 404:
+            dag_info = {
                 'is_paused': 'creating',
                 'is_active': 'creating',
                 'is_subdag': 'creating',
@@ -274,10 +288,10 @@ class WorkflowService(object):
                 'next_dagrun_data_interval_end': 'creating',
             }
         else:
-            airflow_dag_info = airflow_dag_info.json()
+            dag_info = dag_info.json()
 
         # Airflow 2.4.0 deprecated schedule_interval in dag but the API (2.7.2) still using it
-        schedule = airflow_dag_info.pop("schedule_interval")
+        schedule = dag_info.pop("schedule_interval")
         if isinstance(schedule, dict):
             schedule = schedule.get("value")
 
@@ -292,7 +306,7 @@ class WorkflowService(object):
             created_by=workflow.created_by,
             workspace_id=workflow.workspace_id,
             schedule=schedule,
-            **airflow_dag_info
+            **dag_info
         )
 
         return response
@@ -515,6 +529,94 @@ class WorkflowService(object):
             all_pieces.append(v["piece"])
         return list(dict.fromkeys(all_pieces))
 
+
+    def run_workflows(self, workflow_ids: List[int]):
+        try:
+            failure_details = []  
+            workflows = self.workflow_repository.find_by_ids(ids=workflow_ids)
+            if not workflows:
+                raise ResourceNotFoundException("No workflows found.")
+            found_ids = [workflow.id for workflow in workflows]
+            not_found_ids = list(set(workflow_ids) - set(found_ids))
+            if not_found_ids:
+                not_found_details = [
+                    BatchWorkflowFailureDetail(id=id, message="Workflow not found.")
+                    for id in not_found_ids
+                ]
+                failure_details += not_found_details
+            for workflow in workflows:
+                # Check if start date is in the past
+                if workflow.start_date and workflow.start_date > datetime.now(tz=timezone.utc):
+                    failure_details.append(BatchWorkflowFailureDetail(
+                        id=workflow.id,
+                        message="Workflow start date is in the future. Can not run it now."))
+                    continue
+
+                if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
+                    failure_details.append(BatchWorkflowFailureDetail(
+                        id=workflow.id,
+                        message="You cannot run workflows that have ended."))
+                    continue
+                dag_id = workflow.uuid_name
+                dag_runs = self.airflow_client.get_all_workflow_runs(
+                    dag_id=dag_id,
+                    page=0,
+                    page_size=1,
+                    descending=True
+                )
+                dag_runs_data = dag_runs.json()
+                if dag_runs_data["dag_runs"]:
+                    run_state = dag_runs_data["dag_runs"][0]["state"]
+                    if run_state == "running":
+                        failure_details.append(BatchWorkflowFailureDetail(id=workflow.id, message="Workflow has already started to run."))
+                        continue
+                    if run_state == "queued":
+                        failure_details.append(BatchWorkflowFailureDetail(id=workflow.id, message="Workflow is waiting to run."))
+                        continue
+                payload = {
+                    "is_paused": False
+                }
+                update_dag_response = self.airflow_client.update_dag(
+                    dag_id=dag_id,
+                    payload=payload
+                )
+                if update_dag_response.status_code == 404:
+                    failure_details.append(
+                        BatchWorkflowFailureDetail(
+                            id=workflow.id, message="Workflow still in creation process."))
+                    continue
+                if update_dag_response.status_code != 200:
+                    # we can make this single log message 
+                    self.logger.error(f"Error while trying to unpause workflow {id}")
+                    self.logger.error(update_dag_response.json())
+                    failure_details.append(BatchWorkflowFailureDetail(
+                        id=workflow.id, message=update_dag_response.json()
+                    ))
+                    continue
+                run_dag_response = self.airflow_client.run_dag(dag_id=dag_id)
+
+                if run_dag_response.status_code != 200:
+                    self.logger.error(f"Error while trying to run workflow {id}")
+                    self.logger.error(run_dag_response.json())
+                    failure_details.append(BatchWorkflowFailureDetail(
+                        id=workflow.id, message=run_dag_response.json()
+                    ))
+                    continue
+            if failure_details:
+                return BatchWorkflowResponse (
+                    result="Some workflows couldn't started.",
+                    details=failure_details)
+            return BatchWorkflowResponse(
+                result="success",
+                details=BatchWorkflowSuccessDetail(
+                    message="Workflows successfully started to run."
+                )
+            )
+        except Exception as e:
+            self.logger.error(e)
+            raise e
+
+
     def run_workflow(self, workflow_id: int):
         workflow = self.workflow_repository.find_by_id(id=workflow_id)
         if not workflow:
@@ -526,7 +628,21 @@ class WorkflowService(object):
 
         if workflow.end_date and workflow.end_date < datetime.now(tz=timezone.utc):
             raise ForbiddenException('You cannot run workflows that have ended.')
-
+ 
+        dag_runs = self.airflow_client.get_all_workflow_runs(
+                dag_id=workflow.uuid_name,
+                page=0,
+                page_size=1,
+                descending=True
+            )
+        dag_runs_data = dag_runs.json()
+        if dag_runs_data["dag_runs"]:
+            run_state = dag_runs_data["dag_runs"][0]["state"]
+            if run_state == "running":
+                raise ForbiddenException("Workflow has already started to run.")
+            if run_state == "queued":
+                raise ForbiddenException("Workflow is waiting to run.")
+        
         airflow_workflow_id = workflow.uuid_name
 
         # Force unpause workflow
@@ -550,6 +666,87 @@ class WorkflowService(object):
             self.logger.error(f"Error while trying to run workflow {workflow_id}")
             self.logger.error(run_dag_response.json())
             raise BaseException("Error while trying to run workflow")
+
+
+    def stop_workflow_run(self, workflow_id: int):
+        workflow = self.workflow_repository.find_by_id(id=workflow_id)
+        if not workflow:
+            raise ResourceNotFoundException("Workflow not found.")
+        dag_id = workflow.uuid_name
+        dag_run = self.airflow_client.get_all_workflow_runs(
+                dag_id=dag_id,
+                page=0,
+                page_size=1,
+                descending=True
+            )
+        dag_run_data = dag_run.json()
+        if dag_run_data["dag_runs"][0]["state"] not in ["running", "queued"]:
+           raise ForbiddenException("Worflow must be running or in queue to stop.") 
+        response = self.airflow_client.stop_dag(
+            dag_id=dag_id,
+            dag_run_id=dag_run_data["dag_runs"][0]["dag_run_id"]
+        )
+        if response.status_code == 404:
+            raise ResourceNotFoundException("No workflow run found for given workflow id.")
+        if response.status_code != 200:
+            self.logger.error(f"Error while trying to stop workflow runs. Workflow ID: {workflow_id}") 
+            self.logger.error(response.json())
+            raise BaseException("Error while trying to stop workflow runs.")
+
+
+    def stop_workflow_runs(self, workflow_ids: List[int]):
+        try:
+            failure_details = []
+            workflows = self.workflow_repository.find_by_ids(ids=workflow_ids)
+            if not workflows:
+                raise ResourceNotFoundException("No workflows found.")
+            found_ids = [workflow.id for workflow in workflows]    
+            not_found_ids = list(set(workflow_ids) - set(found_ids))
+            if not_found_ids:
+                not_found_details = [
+                    BatchWorkflowFailureDetail(id=id, message="Workflow not found.")
+                    for id in not_found_ids
+                ]
+                failure_details += not_found_details
+            for workflow in workflows:
+                dag_id = workflow.uuid_name
+                dag_runs = self.airflow_client.get_all_workflow_runs(
+                    dag_id=dag_id,
+                    page=0,
+                    page_size=1,
+                    descending=True
+                )
+                dag_runs_data = dag_runs.json()
+                if dag_runs_data["dag_runs"]:
+                    if dag_runs_data["dag_runs"][0]["state"] not in ["running", "queued"]:
+                        failure_details.append(BatchWorkflowFailureDetail(id=workflow.id, message="Worflow must be running or in queue to stop.")) 
+                        continue
+                    response = self.airflow_client.stop_dag(
+                        dag_id=dag_id,
+                        dag_run_id=dag_runs_data["dag_runs"][0]["dag_run_id"]
+                    )
+                    if response.status_code == 404:
+                        failure_details.append(BatchWorkflowFailureDetail(id=workflow.id, message="No workflow run found for given workflow id."))
+                    if response.status_code != 200:
+                        self.logger.error(f"Error while trying to stop workflow runs. Workflow ID: {workflow.id}") 
+                        self.logger.error(response.json())
+                        failure_details.append(BatchWorkflowFailureDetail(
+                            id=workflow.id, message=response.json()
+                        ))
+            if failure_details:
+                return BatchWorkflowResponse(
+                    result="Some workflow runs couldn't be stopped.",
+                    details=failure_details)
+            return BatchWorkflowResponse(
+                result="success",
+                details=BatchWorkflowSuccessDetail(
+                    message="Workflow runs successfully stopped."
+                )
+            )
+        except Exception as e:
+            self.logger.error(e)    
+            raise e
+
 
     async def delete_workspace_workflows(self, workspace_id: int):
         # TODO: improve this? Maybe running in a worker and not in the main thread? Pagination may take a while if there are a lot of workflows.
@@ -579,11 +776,53 @@ class WorkflowService(object):
         try:
             await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
             self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
-            self.workflow_repository.delete(id=workflow_id)
-        except Exception as e: # TODO improve exception handling
+            self.workflow_repository.delete_by_id(id=workflow_id)
+        except Exception as e:  # TODO improve exception handling
             self.logger.exception(e)
-            self.workflow_repository.delete(id=workflow_id)
+            self.workflow_repository.delete_by_id(id=workflow_id)
             raise e
+
+
+    async def delete_workflows(self, workflow_ids: List[int], workspace_id: int):
+        try:
+            failure_details = []
+            workflows = self.workflow_repository.find_by_ids(ids=workflow_ids)
+            if not workflows:
+                raise ResourceNotFoundException("No workflows found.")
+            found_ids = [workflow.id for workflow in workflows]
+            not_found_ids = list(set(workflow_ids) - set(found_ids))
+            if not_found_ids:
+                not_found_details = [
+                    BatchWorkflowFailureDetail(id=id, message="Workflow not found.")
+                    for id in not_found_ids
+                ]
+                failure_details += not_found_details
+            self.workflow_repository.delete_by_ids(ids=workflow_ids)
+            for workflow in workflows:
+                if workflow.workspace_id != workspace_id:
+                    failure_details.append(
+                        BatchWorkflowFailureDetail(
+                            id=id, message="Workflow does not belong to workspace."
+                        )
+                    )
+                    continue
+                await self.delete_workflow_files(workflow_uuid=workflow.uuid_name)
+                self.airflow_client.delete_dag(dag_id=workflow.uuid_name)
+            if failure_details:
+                return BatchWorkflowResponse(
+                    result="Some workflows couldn't be deleted.",
+                    details=failure_details
+                )
+            return BatchWorkflowResponse(
+                result="success",
+                details=BatchWorkflowSuccessDetail(
+                    message="Workflows successfully deleted."
+                ),
+            )
+        except Exception as e:
+            self.logger.exception(e)
+            raise e
+
 
     def workflow_details(self, workflow_id: str):
         try:
