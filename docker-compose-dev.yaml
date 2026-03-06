@@ -1,7 +1,6 @@
 # Basic Airflow cluster configuration for CeleryExecutor with Redis and PostgreSQL.
 # WARNING: This configuration is for local development. Do not use it in a production deployment.
 ---
-version: '3.8'
 x-airflow-common:
   &airflow-common
   build: 
